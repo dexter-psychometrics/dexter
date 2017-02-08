@@ -1,0 +1,22 @@
+Package: dexter
+Type: Package
+Title: Data Management and Basic Analysis of Tests
+Version: 0.1.7
+Author: Gunter Maris, Timo Bechger, Ivailo Partchev
+Maintainer: Ivailo Partchev <Ivailo.Partchev@cito.nl>
+Description: Data handling, Rasch model and Haberman's interaction model for
+    educational and psychological tests that may involve multiple test forms or
+    stages.
+License: GPL (>= 2)
+Encoding: UTF-8
+LazyLoad: yes
+LazyData: yes
+Depends: R (>= 2.10), RSQLite, plyr, reshape2, colorspace
+Imports: graphics, utils
+RoxygenNote: 5.0.1
+Suggests: knitr, rmarkdown, latticeExtra
+VignetteBuilder: knitr
+NeedsCompilation: yes
+Packaged: 2017-02-07 20:49:40 UTC; ivailo
+Repository: CRAN
+Date/Publication: 2017-02-08 12:46:22
