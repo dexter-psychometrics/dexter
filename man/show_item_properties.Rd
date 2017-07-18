@@ -11,12 +11,8 @@ show_item_properties(db)
 or \code{open_project}}
 }
 \value{
-Nothing but messages printed to the screen
+A data.frame of item properties, values and counts
 }
 \description{
 Show a list of the item properties defined in the project (if any)
 }
-\author{
-Ivailo Partchev
-}
-

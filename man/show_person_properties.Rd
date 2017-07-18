@@ -11,12 +11,8 @@ show_person_properties(db)
 or \code{open_project}}
 }
 \value{
-Nothing but messages printed to the screen
+A data.frame of person properties, values and counts
 }
 \description{
-Show a list of the person properties defined in the project (if any)
+Show all person properties defined in the project (if any)
 }
-\author{
-Ivailo Partchev
-}
-

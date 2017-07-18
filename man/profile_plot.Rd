@@ -4,23 +4,25 @@
 \alias{profile_plot}
 \title{Profile plot}
 \usage{
-profile_plot(db, booklets, domains, grpVar, group = NULL, model = "IM")
+profile_plot(dataSrc, item_property, covariate, predicate = NULL,
+  model = "IM", x = NULL, ...)
 }
 \arguments{
-\item{db}{A handle to the database, i.e. the output of \code{start_new_project}
-or \code{open_project}}
+\item{dataSrc}{Data source: a dexter project db handle or a data.frame}
 
-\item{booklets}{A vector with the numbers of the test forms (booklets)
-to be included in the analysis. See Details.}
+\item{item_property}{The item property defining the domains}
 
-\item{domains}{The item property defining the domains}
+\item{covariate}{Person covariate name for subsetting}
 
-\item{grpVar}{Variable name for subsetting}
+\item{predicate}{An optional expression to subset data, if NULL all data is used}
 
-\item{group}{Value(s) for subsetting; if NULL, all distinct values
-will be used.}
+\item{model}{"IM" (default) or "RM" where "IM" is the interaction model and 
+"RM" the Rasch model. The interaction model is the default as it fits 
+the data better at least as good as the Rasch model.}
 
-\item{model}{"IM" (default) or "RM"}
+\item{x}{Which value of the item_property to draw on the x axis, if NULL, one is chosen automatically}
+
+\item{...}{further arguments to plot, many have useful defaults}
 }
 \value{
 Nothing interesting
@@ -28,7 +30,27 @@ Nothing interesting
 \description{
 Profile plot
 }
-\author{
-Timo Bechger, Gunter Maris, Ivailo Partchev
+\details{
+The profile plots can be used to investigate whether two (or more) groups of respondents 
+attain the same test score in the same way. The user must provide a  
+(meaningfull) classification of the items in two non-overlapping subsets such that 
+the test score is the sum of the scores on the subsets. 
+The plot shows the probabilities to obtain 
+any combinations of subset scores with thin gray lines indicating the combinations 
+that give the same test score. The thick lines connect the most likely 
+combination for each test score in each group.
+When applied to educational test data, the plots can be used to detect differences in the 
+relative difficulty of (sets of) items for respondents that belong to different 
+groups and are matched on the test score. This provides a content-driven way to 
+investigate differential item functioning.
+}
+\examples{
+\dontrun{
+db = start_new_project(verbAggrRules, "verbAggression.db", 
+   covariates=list(gender="<unknown>"))
+add_booklet(db, verbAggrData, "agg")
+add_item_properties(db, verbAggrProperties)
+profile_plot(db, item_property='mode', covariate='gender')
 }
 
+}

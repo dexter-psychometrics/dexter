@@ -30,7 +30,7 @@ blues=function (n, h = 221, c. = c(80, 0), l = c(30, 90), power = 1.5,
   l <- rep(l, length.out = 2L)
   power <- rep(power, length.out = 2L)
   rval <- seq(1, 0, length = n)
-  rval <- hex(polarLUV(L = l[2L] - diff(l) * rval^power[2L], 
+  rval <- colorspace::hex(colorspace::polarLUV(L = l[2L] - diff(l) * rval^power[2L], 
                        C = c[2L] - diff(c) * rval^power[1L], H = h[1L]), fixup = fixup, 
               ...)
   if (!missing(alpha)) {
@@ -54,7 +54,7 @@ function (n, h = 11, c. = c(80, 5), l = c(35, 95), power = 0.6,
   l <- rep(l, length.out = 2L)
   power <- rep(power, length.out = 2L)
   rval <- seq(1, 0, length = n)
-  rval <- hex(polarLUV(L = l[2L] - diff(l) * rval^power[2L], 
+  rval <- colorspace::hex(colorspace::polarLUV(L = l[2L] - diff(l) * rval^power[2L], 
                        C = c[2L] - diff(c) * rval^power[1L], H = h[1L]), fixup = fixup, 
               ...)
   if (!missing(alpha)) {
@@ -70,8 +70,10 @@ function (n, h = 11, c. = c(80, 5), l = c(35, 95), power = 0.6,
 Function `profile_plot` in package dexter produces plots like the following one based on the verbal agression dataset:
 
 ```{r, figProf, echo=FALSE, results="hide"}
-db = open_project("verbalAggression.db")
-profile_plot(db, 1, 'mode', 'Gender')
+db = start_new_project(verbAggrRules, ":memory:", covariates=list(gender="<unknown>"))
+add_booklet(db, verbAggrData, "agg")
+add_item_properties(db, verbAggrProperties)
+profile_plot(db, booklet_id=='agg', item_property='mode', covariate='gender')
 ```
 
 The plot is, as we will try to show, quite informative. However, it is not very easy to understand as it is very condensed and contains some less familiar elements. Furthermore, experience shows that persons who are at ease with complicated formulae or tables may be challenged by a relatively simple graph, or vice versa. May this serve as an excuse for the very elementary level of this vignette.
@@ -174,5 +176,9 @@ Back to the original profile plot: what does it mean? There are two paths, one f
 Speaking in general, the profile plots can be used to investigate whether two (or more) groups of respondents attain the same test score in the same way. When applied to educational test data, the plots can be used to detect differences in the relative difficulty of (sets of) items for respondents that belong to different groups and are matched on the test score. This is different from regular procedures to detect *Differential Item Functioning (or DIF)*; and better. First of all, the procedure is not exploratory but requires its user to provide a meaningful classification of the items which should improve the odds that the results make sense to content-experts. Second, it looks explicitly at relations between items and avoids the erroneous conception of DIF as an item property [@BechgerMarisDIF]. 
 
 Note that the profile plots got their name from their similarity to *profile analysis* which was proposed by Norman Verhelst [@VerhelstPA] and suggested by him and his co-workers as a method to test for DIF [@Yildirim14]. 
+
+```{r, show=FALSE}
+dbDisconnect(db)
+```
 
 #References

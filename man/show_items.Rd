@@ -11,15 +11,9 @@ show_items(db)
 or \code{open_project}}
 }
 \value{
-A data frame (in string format) showing the booklet design: rows are items,
-columns are booklets, and the numbers in the cells show the position of the item in the
-booklet (blank it the booklet does not include the item)
+A data frame with items and item properties
 }
 \description{
-Show a list of all items that have been entered in the db
-so far by booklet and position in the booklet
+Show all items that have been entered in the db
+so far together with the item properties
 }
-\author{
-Ivailo Partchev
-}
-

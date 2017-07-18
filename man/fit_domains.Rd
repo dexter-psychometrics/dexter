@@ -4,17 +4,15 @@
 \alias{fit_domains}
 \title{Estimate the Rasch and the Interaction model per domain}
 \usage{
-fit_domains(db, booklets, domains)
+fit_domains(dataSrc, item_property, predicate = NULL)
 }
 \arguments{
-\item{db}{A handle to the database, i.e. the output of \code{start_new_project}
-or \code{open_project}}
+\item{dataSrc}{Data source: a dexter project db handle or a data.frame}
 
-\item{booklets}{A vector with the numbers of the test forms (booklets)
-to be included in the analysis. See Details.}
-
-\item{domains}{The variable name for the item property defining the 
+\item{item_property}{The item property defining the 
 domains (subtests)}
+
+\item{predicate}{An optional expression to subset data, if NULL all data is used}
 }
 \value{
 An object of class \code{imp} holding results
@@ -26,17 +24,22 @@ Estimate the parameters of the Rasch model and the Interaction model
 \details{
 Unlike the Rasch model, the interaction model cannot be computed
 concurrently for a whole design of test forms. This function fits the
-Rasch model and the interaction model on a complete rectagular array of
+Rasch model and the interaction model on a complete rectangular array of
 responses, with comparison between the two models playing an important role.
-The rectangular array may be either one booklet or the intersection (common items)
-of two or more booklets. If the intersection is empty (no common items), the
-function will exit with an error message.
-
-Please notice that the booklets are specified with their internal numbers
-in the data base, not with their names. The names and numbers of the booklets
-can be inspected with functopn \code{show_booklets}.
+The rectangular array is typically one booklet but can also consist of 
+the intersection (common items) of two or more booklets. If the intersection is empty 
+(no common items for all persons), the function will exit with an error message.
 }
-\author{
-Gunter Maris, Timo Bechger, Ivailo Partchev
+\examples{
+\dontrun{
+db = start_new_project(verbAggrRules, "verbAggression.db")
+add_booklet(db, verbAggrData, "agg")
+add_item_properties(db, verbAggrProperties)
+mSit = fit_domains(db, item_property= "situation")
+plot(mSit)
 }
 
+}
+\seealso{
+\code{\link{plot.rim}}, \code{\link{fit_inter}}, \code{\link{add_item_properties}}
+}

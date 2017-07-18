@@ -4,16 +4,17 @@
 \alias{distractor_plot}
 \title{Distractor plot}
 \usage{
-distractor_plot(db, item, nc = 1, nr = 1)
+distractor_plot(dataSrc, item, predicate = NULL, nc = 1, nr = 1)
 }
 \arguments{
-\item{db}{A handle to the database, i.e. the output of \code{start_new_project}
-or \code{open_project}}
+\item{dataSrc}{Data source: a dexter project db handle or a data.frame}
 
 \item{item}{The ID of the item to plot. A separate plot will be produced
 for each booklet that contains the item, or an error message if the item ID
 is not known. Each plot contains a non-parametric regression of each possible
 response on the total score.}
+
+\item{predicate}{An optional expression to subset data, if NULL all data is used}
 
 \item{nc}{An integer between 1 and 3. Number of columns when putting mutiple plots
 on the same page. Default is 1. May be ignored or adjusted if it does not make sense.}
@@ -22,9 +23,5 @@ on the same page. Default is 1. May be ignored or adjusted if it does not make s
 on the same page. Default is 1. May be ignored or adjusted if it does not make sense.}
 }
 \description{
-Produce a diagnostic distractor plor for an item
+Produce a diagnostic distractor plot for an item
 }
-\author{
-Ivailo Partchev
-}
-

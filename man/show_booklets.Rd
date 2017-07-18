@@ -11,14 +11,9 @@ show_booklets(db)
 or \code{open_project}}
 }
 \value{
-A data frame showing the internal booklet number, the booklet name,
-the number persons and the number of items
+A data frame showing the booklet_id, the number of persons and the number of items.
 }
 \description{
 Show a list of the test forms (booklets) that have been entered in the db
 so far
 }
-\author{
-Ivailo Partchev
-}
-

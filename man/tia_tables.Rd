@@ -2,26 +2,27 @@
 % Please edit documentation in R/dexter.R
 \name{tia_tables}
 \alias{tia_tables}
-\title{Simple Test-Item Analysis}
+\title{Simple test-item analysis}
 \usage{
-tia_tables(db)
+tia_tables(dataSrc, predicate = NULL, type = c("raw", "averaged",
+  "compared"))
 }
 \arguments{
-\item{db}{A handle to the database, i.e. the output of \code{start_new_project}
-or \code{open_project}}
+\item{dataSrc}{Data source: a dexter project db handle or a data.frame}
+
+\item{predicate}{An optional expression to subset data, if NULL all data is used}
+
+\item{type}{How to present the item level statistics: \code{raw} for each test booklet 
+separately, \code{averaged} averaged over the test booklet in which the item is included,
+with the number of persons as weights, or {compared}, in which case the pvalues, 
+correlations with the sum score (rit), and correlations with the rest score (rit) are 
+shown in separate tables and compared across booklets}
 }
 \value{
-A list of two data frames, itemStats and testStats.
+A list containing \item{testStats}{a data frame of statistics at test level}, 
+and \item{itemStats}{a data frame of statistics at item level}.
 }
 \description{
-Produce tables with simple test-item analysis statistics
+Show simple Classical Test Analysis statistics
+at item and test level
 }
-\details{
-When an item is contained in more than one booklet, the 
-item statistics are averaged across booklets with the number of 
-persons in each booklets serving as weights.
-}
-\author{
-Ivailo Partchev
-}
-

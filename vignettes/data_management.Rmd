@@ -1,0 +1,122 @@
+---
+title: "Data management"
+author: "Jesse Koops"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+**Dexter** is intended as a fairly comprehensive system for managing and analyzing data from administrations of educational and psychological tests. The more advanced psychometric routines are buttressed by a solid data base management system and various functions allowing users to examine items and tests, detect and correct possible issues.
+
+The data base that works under the hood is created automatically as data is imported into dexter. It remains virtually invisible to the users unless they are interested in it, in which case they can access it via dbplyr, RSQlite, or directly in various SQL tools. Generally, dexter scales well with respect to both the size of the problem and the degree of complexity and flexibility desired.
+
+We begin with a brief review of how to start a dexter project and add data.
+
+
+```{r}
+library(dexter)
+db = start_new_project(verbAggrRules, "verbAggression.db", 
+                       covariates = list(gender="<unknown>"))
+```
+
+The new project is actually a SQLite data base, which is created, initialized, and saved to the file, "~/verbAggression.db". In this example, we add Gender as a person covariate with a default value of `"<unknown>"`.
+
+The data set, `verbAggrData`, contains only one booklet, which we add to the project with:
+
+```{r}
+add_booklet(db, x=verbAggrData, booklet_id="agg")
+```
+
+Had we not declared `gender` as a person covariate, the column would have been ignored, as it is not among the test items declared in `rules`.  Dexter will work happily with data that does not include any person identification, in which case it will automatically create a `person_id` variable. However, there is an advantage to have your own `person_id` column in the data frames you enter. Dexter will treat this column as a key, which prevents you from accidentally entering the same data again by running `add_booklet(db, verbAggrData, "agg")` a second time.
+
+We can also add item properties. This data set comes from an experimental design with three factors, which can be added to the data base with: 
+
+```{r}
+add_item_properties(db, verbAggrProperties)
+```
+
+## A note about names
+
+Due to the fact that we use an SQL database as a backend, the names of all item properties and person covariates must be valid SQL column names. This means that the name has to start with a letter and may contain only letters, numbers and underscores. Specifically, the dot {.} that is often used in variable names in R, cannot be used in a column name. Names that are not valid SQL column names will be silently converted. All names will also be converted to lowercase. 
+
+Of course this only applies to column names, values have no such restrictions.
+
+## Working without a database
+
+Many functions in dexter accept an argument `dataSrc`. A `dataSrc` can be either a dexter project database or a data.frame or a tibble, in long format, containing at least the columns `person_id`, `item_id`, `item_score` and, for a limited number of functions, `response`. See the help files for details.
+
+## Subsetting with logical expressions
+
+Dexter keeps all scoring rules separately from response data, and applies them just before analysis. Together with the powerful techniques for quality analysis, from classical test statistics over distractor plots to the interaction model, this should allow users to detect and correct any items that have a technical flaw, such as a wrong key, which can be corrected with the function `touch_rules()`.
+
+Nevertheless, there are occasions when an item, a booklet or a person must be omitted from analysis. Dexter implements a general system for subsetting data that offers an immensely wider range of possibilities -- and some risks!
+
+Many functions accept an optional argument `predicate`, which is an expression to subset data on. In this expression you can use item_properties, person covariates and several other variables to filter your data. To see which predicate variables are available in your project, use the function `predicate_variables`.
+
+```{r}
+knitr::kable(predicate_variables(db))
+```
+
+As an example, suppose we know of a printing error in the third item in booklet "pretest" so we want to turn it off locally, and we also want to estimate the parameters solely for women. We can pass to `fit_enorm` the following predicate expression:
+
+```{r, eval=FALSE}
+par = fit_enorm(db, gender=='female' & !(booklet_id == 'pretest' & item_position == 3))
+```
+
+You can also use local variables in your expression, therefore the statement below is equivalent to the previous one:
+
+```{r, eval=FALSE}
+bkl = 'pretest'
+par = fit_enorm(db, gender=='female' & !(booklet_id == bkl & item_position == 3))
+```
+
+However, if you have want to use local variables that conflict with the variable names dexter uses, it is best to resolve the ambiguity by using the function `local()` around your local variables:
+
+```{r, eval=FALSE}
+booklet_id = 'pretest' # local variable
+par = fit_enorm(db, gender=='female' & !(booklet_id == local(booklet_id) & item_position == 3))
+```
+
+For consistency, predicates also work when the `dataSrc` argument is a data.frame.
+
+Because the `predicate` is passed to the functions that use it independently, one can do strange things like estimate an IRT model from the test responses of females, and use it to score the tests of males. If you want to apply the same subsetting expression to more than one function, it may be practical to assign it to a variable first.
+
+Another risk with subsetting is that it may destroy the connectedness of the design. The user can check against this with function `design_is_connected`. 
+
+```{r, eval=FALSE}
+# assuming an item property exists in the db which is called cefr_level
+design = design_as_network(db, booklet_id %in% c('bookletA','bookletX','bookletY') & cefr_level == 'B1')
+design_is_connected(design)
+## [1] TRUE
+```
+
+Even though predicates offer a lot of flexibility, there are some limitations due to the fact that they only work on the individual response level. The typical case that can not be solved by using a predicate, is to omit a whole booklet or person based on some of their responses. The following example assumes there are some missing values in your data. Remember, Dexter converts all responses to strings and treats `NA` responses as the string `'NA'`. The following line will omit the missing responses (rather than scoring them 0), and calibrate the extended nominal response model. Based on the predicate, just individual responses will be omitted, which does not extend to exclusion of whole persons.
+
+```{r, eval=FALSE}
+par = fit_enorm(db, response != 'NA')
+```
+
+But there might be a valid consideration for wanting to omit all persons who had *any* missing responses, perhaps administration conditions that caused the missing responses were distracting enough to influence other answers. While this is not possible using the predicate mechanism, Dexter supports extracting the data, manipulating it and feeding it back to an analysis function manually. The following example will use dplyr to do this in a concise way.
+
+```{r, eval=FALSE}
+# goal: fit the extended nominal response model using only persons without any missing responses
+library(dplyr)
+
+# to select on an aggregate level we extract the data from the Dexter project database
+# and manipulate it using dplyr
+data = get_responses(db, columns=c('person_id','item_id','item_score','response')) %>%
+    group_by(person_id) %>%
+    mutate(any_missing = any(response == 'NA')) %>%
+    filter(!any_missing)
+
+# the manipulated data can be fed back to the analysis function
+par = fit_enorm(data)
+```
+
+
+```{r, show=FALSE}
+dbDisconnect(db)
+```

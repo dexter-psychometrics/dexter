@@ -4,15 +4,21 @@
 \alias{start_new_project}
 \title{Start a new project}
 \usage{
-start_new_project(rules, db_name = "dexter.db")
+start_new_project(rules, db = "dexter.db", covariates = NULL)
 }
 \arguments{
-\item{rules}{A data frame with columns \code{item}, \code{response}, and \code{score}.
+\item{rules}{A data frame with columns \code{item_id}, \code{response}, and \code{item_score}.
 The order is not important but spelling is. Any other columns will be ignored.}
 
-\item{db_name}{A name for the data base that will be created. If the name does not
+\item{db}{A connection to an existing sqlite database or a string specifying a filename
+for a new sqlite database to be created. If this name does not
 contain a path, the file will be created in the work
 directory. Any existing file with the same name will be overwritten.}
+
+\item{covariates}{An optional list of person covariates. Names should correspond to covariates.
+Values are treated as default values. The datatype will also be inferred from the values.
+Known covariates will be imported (if supplied) in \code{add_booklet}. 
+The datatypes should match those of your default values.}
 }
 \value{
 If the scoring rules pass a sanity check, a handle to the data base.
@@ -22,18 +28,21 @@ Otherwise, a data frame listing the problems found.
 Imports a complete set of scoring rules and starts a new project (data base)
 }
 \details{
-This package only works with closed items: it does not score any open items.
+This package only works with closed items (e.g. likert, MC or possibly short answer): 
+it does not score any open items.
 The first step to creating a project is to import an exhaustive list of all items and
 all admissible responses, along with the score that any of the latter will be given.
-Responses may be numbers or strings, and they must appear exactly as in the data
-that will be imported. Scores must be integers, and the minimum score for an item
-must be 0. When inputting data, all responses not on the list will be treated as
+Responses may be integers or strings but they will always be treated as strings.
+Scores must be integers, and the minimum score for an item must be 0.
+When inputting data, all responses not specified in the rules can optionally be treated as
 missing and ultimately scored 0, but it is good style to include the missing
-responses in the list.
-importFrom RSQLite dbConnect dbReadTable dbWriteTable dbListFields
-importFrom RSQLite dbGetQuery dbSendQuery
+responses in the list. NA values will be treated as the string 'NA'.
 }
-\author{
-Ivailo Partchev
+\examples{
+\dontrun{
+head(verbAggrRules)
+db = start_new_project(verbAggrRules, "verbAggression.db", 
+   covariates=list(gender="<unknown>"))
 }
 
+}

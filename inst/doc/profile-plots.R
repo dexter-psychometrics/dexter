@@ -18,7 +18,7 @@ blues=function (n, h = 221, c. = c(80, 0), l = c(30, 90), power = 1.5,
   l <- rep(l, length.out = 2L)
   power <- rep(power, length.out = 2L)
   rval <- seq(1, 0, length = n)
-  rval <- hex(polarLUV(L = l[2L] - diff(l) * rval^power[2L], 
+  rval <- colorspace::hex(colorspace::polarLUV(L = l[2L] - diff(l) * rval^power[2L], 
                        C = c[2L] - diff(c) * rval^power[1L], H = h[1L]), fixup = fixup, 
               ...)
   if (!missing(alpha)) {
@@ -42,7 +42,7 @@ function (n, h = 11, c. = c(80, 5), l = c(35, 95), power = 0.6,
   l <- rep(l, length.out = 2L)
   power <- rep(power, length.out = 2L)
   rval <- seq(1, 0, length = n)
-  rval <- hex(polarLUV(L = l[2L] - diff(l) * rval^power[2L], 
+  rval <- colorspace::hex(colorspace::polarLUV(L = l[2L] - diff(l) * rval^power[2L], 
                        C = c[2L] - diff(c) * rval^power[1L], H = h[1L]), fixup = fixup, 
               ...)
   if (!missing(alpha)) {
@@ -55,8 +55,10 @@ function (n, h = 11, c. = c(80, 5), l = c(35, 95), power = 0.6,
 }
 
 ## ---- figProf, echo=FALSE, results="hide"--------------------------------
-db = open_project("verbalAggression.db")
-profile_plot(db, 1, 'mode', 'Gender')
+db = start_new_project(verbAggrRules, ":memory:", covariates=list(gender="<unknown>"))
+add_booklet(db, verbAggrData, "agg")
+add_item_properties(db, verbAggrProperties)
+profile_plot(db, booklet_id=='agg', item_property='mode', covariate='gender')
 
 ## ----frq, echo=FALSE-----------------------------------------------------
 matrix(fq,3,3)
@@ -115,4 +117,7 @@ lines(0:1,1:0,col="gray")
 lines(1:2,2:1,col="gray")
 lines(c(0,2),c(2,0),col="gray")
 lines(c(0,0,1,2,2), c(0,1,1,1,2), col=3, lwd=4)
+
+## ---- show=FALSE---------------------------------------------------------
+dbDisconnect(db)
 

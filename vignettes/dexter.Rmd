@@ -10,58 +10,62 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-**Dexter** is the first of three packages that jointly realize our current approach to the analysis of test data. Dexter provides basic data handling and test-and-item analysis, while the other two packages estimate item parameters and various measures of ability. 
+**Dexter** is an R [@R] package intended as a robust and fairly comprehensive system for managing and analyzing test data organized in booklets. It includes facilities for importing and managing test data, assessing and improving the quality of data through basic test-and-item analysis, fitting an IRT model, and computing various estimates of ability.
 
-While estimation techniques are available in various psychometric libraries, we are not aware of a package that offers a systematic DBMS solution for test data. We have opted for a minimalist approach based on RSQLite that should scale for a wide range of situations, from tiny examples to production-size problems. 
+**Dexter** differs from other psychometric software both in terms of the tools in includes as in those it omits. The data management component is quite developed to promote data integrity and prevent SQL injections and other mishaps. Many psychometric methods not found elsewhere are provided, such as Haberman's (2007) interaction model generalized for polytomous items, new methods for exploratory and confirmatory DIF analysis, support for the 3DC method of standard setting, and more. On the other hand, there is no support for multivariate IRT models, 2PL and 3PL models and other methods sufficiently represented in other packages. The central IRT model is a polytomous generalization of the extended marginal Rasch model: we call it the Extended NOminal Response Model (ENORM). 
 
-Similar to problem size, the level of complexity presented to the user is also scalable. Those fluent in DBMS may wish to tweak the underlying database using either R or SQL, but it is perfectly possible to use Dexter without even realizing that a database is at work in the background.
+**Dexter** scales well to a wide range of situations, from tiny examples to production-size problems. Parallel to problem size, the level of complexity and flexibility offered to the user is also scalable. For example, users fluent in DBMS may wish to tweak the underlying database using either R or SQL, but it is perfectly possible to use Dexter without even realizing that a database is at work in the background. Visual utilities based on *shiny* are provided for some of the most common analyses, but all methods and graphs can be accessed through programming language for customized analyses and reports.
 
 Simplicity of use is achieved by imposing some simple and clear-cut constrains:
 
-* The package does not do any management of persons (test-takers), leaving this entirely to the user. Data without any person identification will be happily processed, but an unlimited number of person covariates will be accepted, stored and possibly attached to estimates of ability. Users who wish to do their own person management may include their own person IDs, and person covariates may be input and used in DIF analysis. The package analyses one test, possibly given in many different test forms (booklets). It is assumed that each person takes the test only once.
-* In principle, all items are assumed to be closed, i.e., have a limited number of possible responses, each of which is assigned a test score. This does not preclude the use of open format items, but these must be graded externally.
+* The package does not do much management of persons (test-takers), leaving this task mainly to the user. Data without any person identification will be happily processed, but an unlimited number of person covariates will be accepted, stored and possibly attached to estimates of ability. Users who wish to do their own person management may include their own person IDs, and person covariates may be input and used in DIF analysis. The package analyses one test, possibly given in many different test forms (booklets). It is assumed that each person takes the test only once.
+* In principle, all items are assumed to be closed, i.e., to have a limited number of possible responses, each of which is assigned a test score. This does not preclude the use of open format items, but these must be graded externally.
 
-To enter and analyse data, the user must start a new project with function `start_new_project()`. This takes as a vital argument a data frame of scoring rules. The data frame must contain, in any order, three columns named _exactly_ `item`, `response`, and `score`. It must provide an exhaustive list of all items in the test (across all booklets), all admissible responses to each items, and the score that will be given to each response.
+To enter and analyse data, the user must start a new project with function `start_new_project`. This takes as a vital argument a data frame of scoring rules. The data frame must contain, in any order, three columns named _exactly_ `item`, `response`, and `score`. It must provide an exhaustive list of all items in the test (across all booklets), all admissible responses to each items, and the score that will be given to each response.
 
 Open items are accommodated by entering given scores in place of the original responses, and providing a trivial scoring rule (0 is scored as 0, 1 as 1, etc.) Missing value codes may be listed explicitly, but any actual responses not matched in the scoring rules will be automatically assigned a score of 0.  
 
-Another argument that may be passed to `start_new_project()` is a name for the SQLite database file (there is a default value). The function creates an empty database under that name, and users are then able to input response data.
+Another argument that may be passed to `start_new_project` is a name for the SQLite database file (there is a default value). The function creates an empty database under that name, and users are then able to input response data. Finally, the names of any person covariates to be entered along with the cognitive data must be declared here.
 
-While various approaches to inputting data may be possible, we believe that the one provided with Dexter is easy and safe. As most researchers seem to keep their data in the rectangular data formats provided by software like Excel, SPSS, or even R, we propose the repeated use of function `add_booklet()`. The user will first use functions like `read.table()`, `read.csv()` or packages like *readxl*, *haven*, *readr*, *foreign*, to read the data for each booklet separately. Function `add_booklet()` will then add the data to the database and return a detailed report on its actions. _It is very important to read this report carefully._ 
+While various approaches to inputting data may be possible, we believe that the one provided with Dexter is easy and safe. As most researchers seem to keep their data in the rectangular data formats provided by software like Excel, SPSS, or even R, we propose the repeated use of function `add_booklet`. The user will first use functions like `read.table`, `read.csv` or packages like *readxl*, *haven*, *readr*, *foreign*, to read the data for each booklet separately. Function `add_booklet` will then add the data to the database and return a detailed report on its actions. _It is very important to read this report carefully._ 
 
-Basically, the data from all columns whose names have an _exact match in the scoring rules table_ will be treated as responses to items. All other columns will be treated as person covariates and simply added to the database for further reference. Hence, great care must be taken with column names but, apart from that, the process is fairly automatic.
+Basically, the data from all columns whose names have an _exact match in the scoring rules table_ will be treated as responses to items. Hence, great care must be taken with column names but, apart from that, the process is fairly automatic.
 
-Non-cognitive variable supplied with the data are treated by name, so one should be careful with their names as well. If a variable is called `sex` in one booklet, `gender` in another, and `Gender` in a third, it will be treated as three different variables. However, a variable with the same name but positioned in different columns will be treated as the same.
+In addition to the person properties provided with the booklets, users can also provide an arbitrary number of item properties. These are supplied as a data frame, one column per item property, and including an item ID column called exactly `item`. The data frame is then passed to function `add_item_properties`. The function returns a detailed report about any items not matched in the database, or items present in the database but not given item properties.
 
-In addition to the person properties provided with the booklets, users can also provide an arbitrary number of item properties. These are supplied as a data frame, one column per item property, and including an item ID column called exactly `item`. The data frame is then passed to function `add_item_properties()`. The function returns a detailed report about any items not matched in the database, or items present in the database but not given item properties.
+Functions like `show_booklets`, `show_items`, `show_item_properties`, and `show_person_properties` help users keep track of what has been entered in the database.
 
-Functions like `show_booklets()`, `show_items()`, `show_item_properties()`, and `show_person_properties()` help users keep track of what has been entered in the database.
+All analyses and graphs are available through R syntax, which facilitates automation and easy programming of customized reports. In addition, there are two interactive functions, `iTIA` and `iModels`
 
-All analyses and graphs are available through R syntax, which facilitates automation and easy programming of customized reports. In addition, there are two interactive functions, `iTIA()` and `iModels()`, which are currently found in a separate package, *shinyDexter*. These may be sufficient for the less demanding users.
+Tools for assessing the quality of items and tests include: 
+* a very traditional table of test-and-item analysis (mean scores, p-values, correlations between the item and the sum/rest score on the test etc.), produced with function `tia_tables`, and supplemented with distractor plots
+* a much less traditional comparison between the Rasch / Partial credit model and the Interaction model proposed by Haberman (2007). This is produced with function `fit_inter` and equipped with print and plot methods.
 
-There are two main analytic tools: 
-* a very traditional table of test-and-item analysis (mean scores, p-values, correlations between the item and the sum/rest score on the test etc.), produced with function `tia_tables()`, and supplemented with distractor plots
-* a much less traditional comparison between the Rasch / Partial credit model and the Interaction model proposed by Haberman (2007). This is produced with function `fit_models()` and equipped with print and plot methods.
+The interaction model was initially developed for dichotomous items. We have generalised it for items having more than two (potentially, a largish number) of response categories. A useful upshot is that we can represent scores on subtests as super-items and analyse these as normal items (function `fit_domains`).
 
-The interaction model was initially developed for dichotomous items. We have generalised it for items having more than two (potentially, a largish number) of response categories. A useful upshot is that we can represent scores on subtests as super-items and analyse these as normal items (function `fit_domains()`).
+Function `profile_plot` produces a novel plot that provides information related to both DIF analysis and the _profile analysis_  proposed by Verhelst (2012).
 
-Finally, function `profile_plot()` produces a novel plot that provides information related to both DIF analysis and the _profile analysis_  proposed by Verhelst (2012).
+When the test contains multiple test forms (booklets), the design is determined automatically as the data is being entered and compared against the scoring rules. Function `design_is_connected` is useful in determining whether the design is connected.
 
-As an example, consider the verbal aggression data [@VanData] analysed in great detail in [@boeck] and many others. 243 females and 73 males have assessed on a 3-point scale ('yes', 'perhaps', or 'no') how likely they are to become verbally aggressive in four different frustrating situations. Responses are further structured by type (curse, scold, or shout) and mode (want to do or actually do), resulting in 24 items. 
+The main function to calibrate an IRT model is `fit_enorm`. Examinee proficiency can be estimated by maximum likelihood (function `ability`) or via plausible values.
+
+Most of the functions accept an arbitrarily complex logical predicate involving booklets, items, responses, persons, person and item covariates etc., allowing to subset the data. An obvious use is to exclude, in a flexible way, some data from analysis. As subsetting can be applied to the functions independently, we can, e.g., estimate a model on one subset of examinees and apply it to another.
+
+As an example of first steps with **Dexter**, consider the verbal aggression data [@VanData] analysed in great detail in [@boeck] and many others. 243 females and 73 males have assessed on a 3-point scale ('yes', 'perhaps', or 'no') how likely they are to become verbally aggressive in four different frustrating situations. Responses are further structured by type (curse, scold, or shout) and mode (want to do or actually do), resulting in 24 items. 
 
 A new project always starts with a complete enumeration of all items, all admissible responses, and the scores assigned to each distinct response. The data does not come from a cognitive test, so the scoring rules are trivial. We have supplied them in data set `verbAggrRules`:
 
 ```{r}
 library(dexter)
 head(verbAggrRules)
-db = start_new_project(verbAggrRules, "verbAggression.db")
+db = start_new_project(verbAggrRules, "verbAggression.db", covariates=list(gender="<unknown>"))
 ```
 
 There is a single booklet provided in data set `verbAggrData`; we add it to the project:
 
 ```{r}
 head(verbAggrData)
-add_booklet(db, verbAggrData, "data")
+add_booklet(db, verbAggrData, "agg")
 ```
 
 The report looks clean. We can take a look at the booklets and items:
@@ -89,17 +93,17 @@ knitr::kable(tt$itemStats, digits=3)
 knitr::kable(tt$testStats, digits=3)
 ```
 
-The Rasch model and the Interaction models can be estimated with the `fit_models()' function. This always happens on a booklet-per-booklet basis, so the number of the booklet must always be given. If more than one booklet are specified, the function will try to find their intersection, i.e., the maximum rectangular data set containing items that are common to all booklets specified. If the intersection is empty, there will be just a warning message. Unfortunately, we cannot demonstrate this with the verbal aggression data because it only contains one booklet.
+The Rasch model and the Interaction models can be estimated with the `fit_inter' function. This always happens on a booklet-per-booklet basis, so the number of the booklet must always be given. If more than one booklet are specified, the function will try to find their intersection, i.e., the maximum rectangular data set containing items that are common to all booklets specified. If the intersection is empty, there will be just a warning message. Unfortunately, we cannot demonstrate this with the verbal aggression data because it only contains one booklet.
 
 ```{r}
-m = fit_models(db, 1)
+m = fit_inter(db, booklet_id=='agg')
 print(m)
 ```
 
 The print function returns only the item IDs because the parameters of the interaction model are not very easy to interpret. The models are most useful when plotted:
 
 ```{r}
-plot(m, 1, show.observed=TRUE)
+plot(m, "S1DoScold", show.observed=TRUE)
 ```
 
 By default, the plot shows the regressions of the item score on the total score. The interaction model is shown with a thicker but lighter line, and the Rasch model is shown with a thinner, darker line. The unsmoothed data is not shown by default, so we had to change the `show.observed` parameter. The 'curtains' are drawn at the 5% lowest and the 5% highest sum scores.
@@ -111,35 +115,66 @@ Furthermore, the interaction model reproduces the mean item scores and the corre
 We can show the response category probabilities instead of the expected item score:
 
 ```{r}
-plot(m, 1, summate=FALSE)
+plot(m, 'S1DoCurse', summate=FALSE)
 ```
 
 Now fit and display models for the sum scores on each of the four frustrating situations:
 
 ```{r}
-mSit = fit_domains(db, 1, "situation")
+mSit = fit_domains(db, item_property= "situation")
 plot(mSit)
 ```
 
 Finally, a profile plot comparing responses by males and females on the two modes, want to curse (scold, shout), against actually curse (scold, shout):
 
 ```{r}
-profile_plot(db, 1, 'mode', 'Gender')
+profile_plot(db, item_property='mode', covariate='gender')
 ```
 
 We would not like to see such a differential effect in a cognitive test, but with this data set the result is quite interesting.
 
+Function `fit_enorm` estimates the parameters of the Extended NOminal Response Model, the principal IRT model. In fact, we have seen this model above, where it was compared to the interaction model. However, similar to the methods associated with CTT, the interaction model requires complete data and can be only applied on a booklet-per-booklet basis, while the `fit_enorm` function also works with incomplete designs (function `design_is_connected` is useful in determining whether the design is connected):
+
+```{r}
+parms = fit_enorm(db)
+```
+
+The default estimation method is conditional maximum likelihood (CML), which is usually quite fast. As an alternative, we have provided a reasonably fast Gibbs sampler:
+
+```{r}
+parms_gibbs = fit_enorm(db, method='Bayes')
+```
+
+The function returns a parameters object, which can be passed to the functions that estimate person parameters. Currently, there are two of them: `ability`, which produces maximum likelihood (MLE) and Bayes expected a posteriori (EAP) estimators, and `plausible_values`. Being able to choose between a frequentist or a Bayesian approach to the estimation of either the item parameters or the person parameters enables the user to consider various sources of uncertainty.
+
+Let us draw plausible values for our subject in what is now a scale of verbal aggression, and examine their distribution.
+
+```{r}
+pv = plausible_values(db, parms)
+plot(density(pv$PV1))
+```
+
+For a direct comparison on gender:
+
+```{r}
+pv = merge(pv, dbReadTable(db, 'dxPersons'))
+boxplot(PV1~gender, data=pv)
+```
+
+It appears that we cannot find a marked difference in verbal agression between male and female respondents _overall_. Compare this result to the very interesting structural differences revealed by the profile plot above.
+
 To show __dexter__ at work with a large set of cognitive test data, we would like to analyse a PISA data set. Such a problem is probably too large for a _vignette_, so we will only present a possible script without actually running it.
 
 ```
+
+library(dplyr)
 library(readr)
 library(SAScii)
  
 # Fetching the data from the OECD site requires a certain ... dexterity
-# that I picked up from a kind soul on stackexchange. I don't even know 
-# how to credit you but you are the greatest!
+# for which we are indebted to a kind soul on stackexchange.
  
-# Download the data dictionaly and read it in with SAScii
+# Download the data dictionary and read it in with SAScii
 temp = tempfile()
 download.file("https://www.oecd.org/pisa/pisaproducts/PISA2012_SAS_scored_cognitive_item.sas", temp)
 dict_scored = parse.SAScii(sas_ri = temp)
@@ -185,15 +220,22 @@ rules$score[rules$response==2] = 2
 rules=rules[order(rules$item, rules$response),]
 
 # create the new project
-db = start_new_project(rules, "PISA12.db")
+db = start_new_project(rules, "pisa_math.db", covariates=list(cnt='<unknown country>'))
 
 # add all booklets one by one, deleting columns that may be all NA
-d_ply(pisa12_M, ~BOOKID, function(x){
-  allMissing = apply(x, 2, function(x)all(is.na(x)))
-  dat = x[,!allMissing]
-  add_booklet(db, dat, x$BOOKID[1])
+pisa12_M %>% 
+group_by(BOOKID) %>%
+do({
+allMissing = apply(., 2, function(x)all(is.na(x)))
+  dat = .[,!allMissing]
+  print(.$BOOKID[1])
+  add_booklet(db, dat, .$BOOKID[1])
 })
+
+
 rm(pisa12_M)
+
+
 
 # add some item properties -- we have supplied a data set to 
 # make things a bit easier
@@ -208,9 +250,9 @@ add_item_properties(db, domain)
 show_item_properties(db)
 show_person_properties(db)
  
-# Fit the two models bor booklet 1, all countries (takes about
+# Fit the two models for booklet 1, all countries (takes about
 # 10 seconds on my current machine)
-system.time({m <- fit_models(db, 1)})
+system.time({m <- fit_inter2(db,booklet_id=='1')})
 plot(m)
  
 # Analyse by domain
@@ -220,6 +262,10 @@ plot(md, nr=2, nc=2)
 # Compare three countries on 'Space and shape' vs NOT 'Shape and space'
 dev.off()
 profile_plot(db, 1, "isSaS", "CNT", c("DEU","FRA","ITA"))
+```
+
+```{r, show=FALSE}
+dbDisconnect(db)
 ```
 
 #References

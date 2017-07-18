@@ -4,18 +4,17 @@
 \alias{open_project}
 \title{Open an existing project}
 \usage{
-open_project(db_name = "dexter.db")
+open_project(db_name = "dexter.db", convert_old = FALSE)
 }
 \arguments{
 \item{db_name}{The name of the data base to be opened.}
+
+\item{convert_old}{automatically try to convert databases 
+from older versions of Dexter that are no longer supported.}
 }
 \value{
 A handle to the data base.
 }
 \description{
-Opens a data base created by function \code{start_new_project}
+Opens a database created by function \code{start_new_project}
 }
-\author{
-Ivailo Partchev
-}
-
