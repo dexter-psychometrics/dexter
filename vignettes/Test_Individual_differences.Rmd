@@ -2,7 +2,7 @@
 title: "One theta to rule them all: Test Individual Differences"
 author: "Timo Bechger and Ivailo Partchev"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-bibliography: irtools.bib
+bibliography: dexter.bib
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette Title}

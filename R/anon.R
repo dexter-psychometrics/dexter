@@ -1040,7 +1040,7 @@ as.data.frame.prms <- function(x, ...){
   
   if (x$inputs$method=="Bayes"){
     hh=apply(x$est$beta.cml,2,hpd)
-    atab=as.data.frame(item_id=x$inputs$ssIS$item_id[-x$inputs$ssI$first],
+    atab=data.frame(item_id=x$inputs$ssIS$item_id[-x$inputs$ssI$first],
                        a=x$inputs$ssIS$item_score[-x$inputs$ssI$first],
                        mb=round(colMeans(x$est$beta.cml),digits=3),
                        sdb=round(apply(x$est$beta.cml, 2, sd),digits=3),
@@ -1266,7 +1266,7 @@ keys_to_rules <- function(keys) {
       y
     })
   }
-  r
+  ungroup(r)
 }
 
 ###########################################

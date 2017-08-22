@@ -1,3 +1,19 @@
+df_identical = function(a, b)
+{
+  # check all values in dataframe equal, disregard column order
+  
+  if(!all(dim(a)==dim(b))) return(FALSE)
+  if(!length(intersect(colnames(a),colnames(b))) == ncol(a)) return(FALSE)
+  
+  a = a %>% mutate_if(is.factor, as.character) 
+  b = b %>% mutate_if(is.factor, as.character)
+  
+  for(col in colnames(a))
+  {
+    if(!all(a[,col]==b[,col])) return(FALSE)
+  }
+  return(TRUE)
+}
 
 dbRunScript <- function(db, fn)
 {

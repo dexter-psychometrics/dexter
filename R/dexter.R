@@ -269,24 +269,26 @@ show_rules = function(db)
 #' }
 #' 
 add_booklet <- function(db, x, booklet_id, auto_add_unknown_rules = TRUE) {
-  x = x %>%
-      mutate_if(is.factor, as.character) 
+  x = x %>% mutate_if(is.factor, as.character) 
   
-  items = intersect(dbGetQuery(db, "SELECT item_id FROM dxItems;")$item_id, names(x))
   covariates = intersect(dbListFields(db,'dxPersons'), tolower(names(x)))
-  
   covariates = covariates[covariates != 'person_id']
   
-  design = tibble(booklet_id = booklet_id, item_id=items, item_position=c(1:length(items)))
+  design = tibble(booklet_id = booklet_id, item_id = names(x), col_order=c(1:ncol(x))) %>%
+    inner_join(dbGetQuery(db, "SELECT item_id FROM dxItems;"), by='item_id') %>%
+    arrange(.data$col_order) %>% 
+    select(-.data$col_order)
   
+  design$item_position = c(1:nrow(design))
+
   dbTransaction(db,{
     if (dbExists(db,'SELECT 1 FROM dxBooklets WHERE booklet_id=:b;',tibble(b=booklet_id)) ) 
     {
-      if(!identical(dbGetQuery(db,'SELECT item_id
-                                      FROM dxBooklet_design USING(testpart_nbr)
+      if(!df_identical(dbGetQuery(db,'SELECT item_id
+                                      FROM dxBooklet_design
                                       WHERE booklet_id=:b
                                      ORDER BY testpart_nbr,item_position;', tibble(b=booklet_id)),
-                    tibble(item_id=items)))
+                    tibble(item_id = design$item_id)))
       {
         stop("There is already a booklet with this ID which has different items or a different item order")
       }
@@ -312,8 +314,8 @@ add_booklet <- function(db, x, booklet_id, auto_add_unknown_rules = TRUE) {
     dbExecute(db,'INSERT INTO dxPersons(person_id) VALUES(:person_id);', tibble(person_id=new_people))
     dbExecute(db,'INSERT INTO dxAdministrations(person_id,booklet_id) VALUES(:person_id,:b);', tibble(person_id=new_people,b=booklet_id))
           
-    responses = x[,c(items,"booklet_id","person_id")] %>%
-      gather_(key_col='item_id', value_col='response', gather_cols=items, na.rm=FALSE)
+    responses = x[,c(design$item_id, "booklet_id", "person_id")] %>%
+      gather_(key_col='item_id', value_col='response', gather_cols=design$item_id, na.rm=FALSE)
             
     responses$response = as.character(responses$response)
     responses$response[is.na(responses$response)] = 'NA'
@@ -332,7 +334,7 @@ add_booklet <- function(db, x, booklet_id, auto_add_unknown_rules = TRUE) {
                                 VALUES(:booklet_id,:person_id,:item_id,:response);', responses)
             
     # make this report before we mutilate the colnames  
-    columns_ignored = setdiff(names(x), c(items,'person_id','item_id','booklet_id') )
+    columns_ignored = setdiff(names(x), c(design$item_id,'person_id','item_id','booklet_id') )
     columns_ignored = columns_ignored[!tolower(columns_ignored) %in% covariates]
                   
     # add covariates
@@ -346,7 +348,7 @@ add_booklet <- function(db, x, booklet_id, auto_add_unknown_rules = TRUE) {
   
   return(
     list(
-      items = items,
+      items = design$item_id,
       covariates = covariates,
       columns_ignored = columns_ignored,
       auto_add_unknown_rules=auto_add_unknown_rules,
@@ -746,9 +748,7 @@ fit_inter <- function(dataSrc, predicate = NULL)
 #' on the same page. Default is 1. May be ignored or adjusted if it does not make sense.
 #' 
 distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1){  
-  
   qtpredicate = eval(substitute(quote(predicate)))
-  
   if(!inherits(dataSrc,'data.frame'))
   {
     if(is.null(qtpredicate))
@@ -766,15 +766,13 @@ distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1){
     x = get_sumscores(dataSrc, qtpredicate, extra_columns=intersect(c('response','item_position'),names(dataSrc)), env=caller_env())
   }
   x = x[x$item_id==item,]
-  if(!'item_position' %in% names(x)) x$item_position = '?'
+  if(!'item_position' %in% names(x)) x$item_position = 0
   booklets = x %>%  
     select(.data$booklet_id, .data$item_position) %>% 
     group_by(.data$booklet_id) %>% 
     slice(1) %>% 
     ungroup() 
-
   if (nrow(x) < 1) stop(paste("Item", item, "not found in dataSrc."))
-  
   names(x)[names(x)=='sumScore'] = 'booklet_score'
 
   foo = x %>% 
@@ -792,36 +790,42 @@ distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1){
   iSt$pvalue = iSt$meanScore / mxSc
   
   npic = nrow(booklets)
-  
   ly = my_layout(npic, nr, nc)
   graphics::layout(matrix(1:(ly$nr * ly$nc), byrow = TRUE, 
                           ncol = ly$nc))
+  
+  foo$response=factor(foo$response)
+  foo$response=addNA(foo$response, ifany=TRUE)
+  labelz = levels(foo$response)
   
   lapply(iSt$booklet_id, function(x){
     st = as.list(iSt[iSt$booklet_id==x,])
     tit = sprintf("%s: position %d in %s", st$item_id, st$item_position, st$booklet_id)
     subtit = sprintf("Pval: %.3f, Rit: %.3f, Rir: %.3f", st$pvalue, st$rit, st$rir)
     y = foo[foo$booklet_id == x,]
+    
     graphics::plot(c(0, max(y$booklet_score)), c(0, 1), type = "n", 
                    main = tit, sub = subtit, xlab = "Sum score", ylab = "Proportion", 
-                   cex.sub = 0.7)
+                   cex.sub = 0.8)
+    
     bar = y %>% 
       group_by(.data$booklet_score) %>% 
       summarise(n = sum(.data$n))
+    
     dAll = density(bar$booklet_score, n = 51, weights = bar$n/sum(bar$n))
     nnn = sum(bar$n)
-    k = 1
     lgnd = y %>% group_by(.data$response)  %>% do({
       dxi = density(.$booklet_score, n = 51, weights = .$n/sum(.$n), 
                     bw = dAll$bw, from = min(dAll$x), to = max(dAll$x))
       yy = dxi$y/dAll$y * sum(.$n)/nnn
-      graphics::lines(dAll$x, yy, co = k <<- k + 1, lw = 2)
+      k = match(.$response[1], labelz) + 1
+      graphics::lines(dAll$x, yy, co = k, lw = 2)
       tibble(col = k, resp = paste0(.$response[1]," (", .$item_score[1], ")"))
     })
-    graphics::legend("right", legend = as.character(lgnd$resp), 
-                     lty = 1, col = lgnd$col, cex = 0.7, box.lty = 0)
-    graphics::box()
-  })
+     graphics::legend("right", legend = as.character(lgnd$resp), 
+                       lty = 1, col = lgnd$col, cex = 0.8, box.lty = 0)
+      graphics::box()
+   })
   return(NULL)
 }
 
@@ -1237,10 +1241,11 @@ tia_tables <- function(dataSrc, predicate = NULL, type=c('raw','averaged','compa
 #' or \code{open_project}
 #'
 iTIA <- function(db) {
-
-  ourItems = dbGetQuery(db, "SELECT item_id as item FROM dxItems ORDER BY item_id;")$item
-  ourBooklets = dbGetQuery(db, "SELECT booklet_id as booklet FROM dxBooklets ORDER BY booklet_id;")$booklet
- 
+  
+  theTIA = tia_tables(db, type='averaged')
+  ourItems = theTIA$itemStats$item_id
+  ourBooklets = theTIA$testStats$booklet_id
+    
   sidebar = dashboardSidebar(
     sidebarMenu(
       menuItem("Booklets", tabName = "booklets"),
@@ -1282,8 +1287,9 @@ iTIA <- function(db) {
   
   server <- function(input, output, session) {
     tia = reactive({
-      result = tia_tables(db, type='averaged')
-      result
+      #result = tia_tables(db, type='averaged')
+      #result
+      theTIA
     })
     
     lapply(ourItems, function(i){

@@ -1,3 +1,10 @@
+New in 0.4.4
+------------
+Included Rdpack in Imports at the request of CRAN, and fixed 4 minor bugs
+
+New in 0.4.2
+------------
+
 We go straight from version 0.1.7 to version 0.4.2 in a major new release.
 The functionality envisaged for two other related packages, enorm and 
 roger, has now been all incorporated into dexter.

@@ -2,7 +2,7 @@
 title: "Dexter: The Fundamentals"
 author: "Ivailo Partchev"
 date: "`r Sys.Date()`"
-bibliography: irtools.bib
+bibliography: dexter.bib
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
