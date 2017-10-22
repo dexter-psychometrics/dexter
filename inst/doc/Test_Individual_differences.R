@@ -45,30 +45,6 @@ add_booklet(db2, verbAggrData, "data")
 dd = individual_differences(db2, booklet_id=="data")
 plot(dd)
 
-## ---- results='hide'-----------------------------------------------------
-f_b = fit_enorm(simulated, method="Bayes")
-b = colMeans(f_b$est$b)
-a = f_b$est$a
-first = f_b$inputs$ssI$first
-last = f_b$inputs$ssI$last
-scoretab = f_b$inputs$stb$N
-
-## ---- fig.align='center',fig.height=4, fig.width=4-----------------------
-plot(0:sum(a[last]), scoretab, col="green", pch=19,
-     xlab="Test-score", ylab="Frequency", cex=0.7)
-  
-theta.est = dexter:::theta_score_distribution(b,a,first,last,scoretab)
-score.est = dexter:::pscore(theta.est,b,a,first,last)
-
-for (i in 1:20)
-{
-  indx=sample(1:500,1)
-  b=f_b$est$b[indx,]
-  theta.est=dexter:::theta_score_distribution(b,a,first,last,scoretab)
-  score.est=dexter:::pscore(theta.est,b,a,first,last)
-  lines(0:sum(a[last]),score.est*2000,col="gray",pch=19,cex=0.7)
-}
-
 ## ---- show=FALSE---------------------------------------------------------
 dbDisconnect(db2)
 

@@ -13,8 +13,13 @@ touch_rules(db, rules)
 The order is not important but spelling is. Any other columns will be ignored. See details}
 }
 \value{
-If the scoring rules pass a sanity check, a small summary of changes.
-Otherwise, nothing.
+If the scoring rules pass a sanity check, a small summary of changes is printed and nothing is returned
+Otherwise this function returns a data frame listing the problems found, with 4 columns:
+item_id: id of the problematic item
+less_than_two_scores: if TRUE, the item has only one distinct score
+duplicated_responses: if TRUE, the item contains two or more identical response categories
+min_score_not_zero: if TRUE, the minimum score of the item was not 0
+Please note that the sanity check is done for the items you change
 }
 \description{
 Having to alter or add a scoring rule is occasionally necessary, e.g. in case of a key error. 
@@ -25,7 +30,7 @@ The rules should contain all rules that you want to change or add. This means th
 in a single multiple choice question, you typically have to change two rules.
 }
 \examples{
-\dontrun{
+\donttest{
 # given that in your dexter project there is an mc item with id 'itm_01', 
 # which currently has key 'A' but you want to change it to 'C'.
 

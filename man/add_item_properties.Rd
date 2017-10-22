@@ -38,12 +38,13 @@ it may be used in analyses involving item properties.
 \examples{
 \dontrun{
 db = start_new_project(verbAggrRules, "verbAggression.db", 
-  covariates=list(gender="<unknown>"))
+covariates=list(gender="<unknown>"))
 head(verbAggrProperties)
 add_item_properties(db, verbAggrProperties)
-show_item_properties(db)
-}
+show_item_properties(db) 
 
+close_project(db)
+}
 
 }
 \seealso{

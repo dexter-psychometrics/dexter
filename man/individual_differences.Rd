@@ -9,10 +9,12 @@ individual_differences(dataSrc, predicate = NULL)
 \arguments{
 \item{dataSrc}{Data source: a dexter project db handle or a data.frame}
 
-\item{predicate}{An optional expression to subset data, if NULL all data is used}
+\item{predicate}{An optional expression to subset data, if NULL all data are used}
 }
 \value{
-Print will show test results. Plot will produce a plot of expected and observed score frequencies.
+an object of type tind. Printing the object  will show test results. 
+Plotting it will produce a plot of expected and observed score frequencies. 
+The former under the hypothesis that there are no individual differences.
 }
 \description{
 Test individual differences
@@ -32,6 +34,8 @@ add_booklet(db, verbAggrData, "agg")
 dd = individual_differences(db)
 print(dd)
 plot(dd)
+
+close_project(db)
 }
 
 }

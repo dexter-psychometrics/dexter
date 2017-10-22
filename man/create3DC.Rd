@@ -41,7 +41,7 @@ sigma = sd(pv$PV1)
 # We'll use the behavior an item depicts as a basis for making the clusters,
 # thus creating clusters of similar items. 
 
-design = data.frame(item_id = verbAggrProperties$item, 
+design = data.frame(item_id = verbAggrProperties$item_id, 
    cluster = verbAggrProperties$behavior)
 
 # specify the actual sample for display in the group_leader page
@@ -57,10 +57,16 @@ add_test3DC(db3dc, parms=par, design, mu=mu, sigma=sigma,
             population=population)
 
 #get a preview
-plot3DC(db3dc)#'
+plot3DC(db3dc)
+
+
+dbDisconnect(db3dc)
+close_project(db)
 }
 
 }
 \references{
-\insertRef{keuning2017}{dexter}
+Keuning J., Straat J.H., Feskens R.C.W. (2017) The Data-Driven Direct Consensus (3DC) Procedure: A New Approach to Standard Setting. 
+In: Blömeke S., Gustafsson JE. (eds) Standard Setting in Education. 
+Methodology of Educational Measurement and Assessment. Springer, Cham
 }

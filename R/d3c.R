@@ -18,7 +18,9 @@
 #' from the 3DC database.
 #' 
 #' @references 
-#' \insertRef{keuning2017}{dexter}
+#' Keuning J., Straat J.H., Feskens R.C.W. (2017) The Data-Driven Direct Consensus (3DC) Procedure: A New Approach to Standard Setting. 
+#' In: Blömeke S., Gustafsson JE. (eds) Standard Setting in Education. 
+#' Methodology of Educational Measurement and Assessment. Springer, Cham
 #' 
 #' @examples
 #' \dontrun{
@@ -35,7 +37,7 @@
 #' # We'll use the behavior an item depicts as a basis for making the clusters,
 #' # thus creating clusters of similar items. 
 #' 
-#' design = data.frame(item_id = verbAggrProperties$item, 
+#' design = data.frame(item_id = verbAggrProperties$item_id, 
 #'    cluster = verbAggrProperties$behavior)
 #' 
 #' # specify the actual sample for display in the group_leader page
@@ -51,7 +53,11 @@
 #'             population=population)
 #' 
 #' #get a preview
-#' plot3DC(db3dc)#'
+#' plot3DC(db3dc)
+#' 
+#' 
+#' dbDisconnect(db3dc)
+#' close_project(db)
 #'}
 #'
 create3DC = function(export_name)
@@ -83,7 +89,6 @@ create3DC = function(export_name)
 #' @param omit the tail probability of the testscores to be omitted. For example, if set to 0.1, 
 #' the 10% highest and the 10% lowest scores will be omitted thus restricting the range on which standards can be set.
 #' Default is 0.0 (omit nothing)
-#' @return nothing interesting
 #'
 add_test3DC = function(db3dc, parms, design, test_id, standards, mu, sigma, 
                         population = NULL, group_leader = 'admin', omit = 0.0)

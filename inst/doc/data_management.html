@@ -12,9 +12,9 @@
 
 <meta name="author" content="Jesse Koops" />
 
-<meta name="date" content="2017-08-23" />
+<meta name="date" content="2017-10-22" />
 
-<title>Data management</title>
+<title>Data management in dexter</title>
 
 
 
@@ -68,9 +68,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<h1 class="title toc-ignore">Data management</h1>
+<h1 class="title toc-ignore">Data management in dexter</h1>
 <h4 class="author"><em>Jesse Koops</em></h4>
-<h4 class="date"><em>2017-08-23</em></h4>
+<h4 class="date"><em>2017-10-22</em></h4>
 
 
 
@@ -118,8 +118,8 @@ db =<span class="st"> </span><span class="kw">start_new_project</span>(verbAggrR
 <h2>Subsetting with logical expressions</h2>
 <p>Dexter keeps all scoring rules separately from response data, and applies them just before analysis. Together with the powerful techniques for quality analysis, from classical test statistics over distractor plots to the interaction model, this should allow users to detect and correct any items that have a technical flaw, such as a wrong key, which can be corrected with the function <code>touch_rules()</code>.</p>
 <p>Nevertheless, there are occasions when an item, a booklet or a person must be omitted from analysis. Dexter implements a general system for subsetting data that offers an immensely wider range of possibilities – and some risks!</p>
-<p>Many functions accept an optional argument <code>predicate</code>, which is an expression to subset data on. In this expression you can use item_properties, person covariates and several other variables to filter your data. To see which predicate variables are available in your project, use the function <code>predicate_variables</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">knitr::<span class="kw">kable</span>(<span class="kw">predicate_variables</span>(db))</code></pre></div>
+<p>Many functions accept an optional argument <code>predicate</code>, which is an expression to subset data on. In this expression you can use item_properties, person covariates and several other variables to filter your data. To see which predicate variables are available in your project, use the function <code>get_variables</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">knitr::<span class="kw">kable</span>(<span class="kw">get_variables</span>(db))</code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -179,17 +179,18 @@ db =<span class="st"> </span><span class="kw">start_new_project</span>(verbAggrR
 <p>You can also use local variables in your expression, therefore the statement below is equivalent to the previous one:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">bkl =<span class="st"> 'pretest'</span>
 par =<span class="st"> </span><span class="kw">fit_enorm</span>(db, gender==<span class="st">'female'</span> &amp;<span class="st"> </span>!(booklet_id ==<span class="st"> </span>bkl &amp;<span class="st"> </span>item_position ==<span class="st"> </span><span class="dv">3</span>))</code></pre></div>
-<p>However, if you have want to use local variables that conflict with the variable names dexter uses, it is best to resolve the ambiguity by using the function <code>local()</code> around your local variables:</p>
+<p>However, if you have want to use local variables that conflict with the variable names in your dexter project, it is best to resolve the ambiguity by using the function <code>local()</code> around your local variables:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">booklet_id =<span class="st"> 'pretest'</span> <span class="co"># local variable</span>
 par =<span class="st"> </span><span class="kw">fit_enorm</span>(db, gender==<span class="st">'female'</span> &amp;<span class="st"> </span>!(booklet_id ==<span class="st"> </span><span class="kw">local</span>(booklet_id) &amp;<span class="st"> </span>item_position ==<span class="st"> </span><span class="dv">3</span>))</code></pre></div>
 <p>For consistency, predicates also work when the <code>dataSrc</code> argument is a data.frame.</p>
-<p>Because the <code>predicate</code> is passed to the functions that use it independently, one can do strange things like estimate an IRT model from the test responses of females, and use it to score the tests of males. If you want to apply the same subsetting expression to more than one function, it may be practical to assign it to a variable first.</p>
+<p>Because the <code>predicate</code> is passed to the functions that use it independently, one can do strange things like estimate an IRT model from the test responses of females, and use it to score the tests of males.</p>
 <p>Another risk with subsetting is that it may destroy the connectedness of the design. The user can check against this with function <code>design_is_connected</code>.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># assuming an item property exists in the db which is called cefr_level</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># assuming an item property called `cefr_level` exists in the project</span>
 design =<span class="st"> </span><span class="kw">design_as_network</span>(db, booklet_id %in%<span class="st"> </span><span class="kw">c</span>(<span class="st">'bookletA'</span>,<span class="st">'bookletX'</span>,<span class="st">'bookletY'</span>) &amp;<span class="st"> </span>cefr_level ==<span class="st"> 'B1'</span>)
 <span class="kw">design_is_connected</span>(design)
 ## [1] TRUE</code></pre></div>
-<p>Even though predicates offer a lot of flexibility, there are some limitations due to the fact that they only work on the individual response level. The typical case that can not be solved by using a predicate, is to omit a whole booklet or person based on some of their responses. The following example assumes there are some missing values in your data. Remember, Dexter converts all responses to strings and treats <code>NA</code> responses as the string <code>'NA'</code>. The following line will omit the missing responses (rather than scoring them 0), and calibrate the extended nominal response model. Based on the predicate, just individual responses will be omitted, which does not extend to exclusion of whole persons.</p>
+<p>Even though predicates offer a lot of flexibility, there are some limitations due to the fact that they only work on the individual response level. The typical case that can not be solved by using a predicate, is to omit a whole booklet or person based on some of their responses, but fortunately there is a relatively easy way to get around that limitation.</p>
+<p>The following example assumes there are some missing values in your data. Remember, Dexter converts all responses to strings and treats <code>NA</code> responses as the string <code>'NA'</code>. The following line will omit the missing responses (rather than scoring them 0), and calibrate the extended nominal response model. Based on the predicate, just individual responses will be omitted, which does not extend to exclusion of whole persons.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">par =<span class="st"> </span><span class="kw">fit_enorm</span>(db, response !=<span class="st"> 'NA'</span>)</code></pre></div>
 <p>But there might be a valid consideration for wanting to omit all persons who had <em>any</em> missing responses, perhaps administration conditions that caused the missing responses were distracting enough to influence other answers. While this is not possible using the predicate mechanism, Dexter supports extracting the data, manipulating it and feeding it back to an analysis function manually. The following example will use dplyr to do this in a concise way.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># goal: fit the extended nominal response model using only persons without any missing responses</span>

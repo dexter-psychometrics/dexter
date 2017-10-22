@@ -10,7 +10,7 @@ add_booklet(db, x=verbAggrData, booklet_id="agg")
 add_item_properties(db, verbAggrProperties)
 
 ## ------------------------------------------------------------------------
-knitr::kable(predicate_variables(db))
+knitr::kable(get_variables(db))
 
 ## ---- eval=FALSE---------------------------------------------------------
 #  par = fit_enorm(db, gender=='female' & !(booklet_id == 'pretest' & item_position == 3))
@@ -24,7 +24,7 @@ knitr::kable(predicate_variables(db))
 #  par = fit_enorm(db, gender=='female' & !(booklet_id == local(booklet_id) & item_position == 3))
 
 ## ---- eval=FALSE---------------------------------------------------------
-#  # assuming an item property exists in the db which is called cefr_level
+#  # assuming an item property called `cefr_level` exists in the project
 #  design = design_as_network(db, booklet_id %in% c('bookletA','bookletX','bookletY') & cefr_level == 'B1')
 #  design_is_connected(design)
 #  ## [1] TRUE

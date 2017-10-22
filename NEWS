@@ -1,3 +1,17 @@
+
+New in 0.5.1
+------------
+
+Plausible_values can now work with covariates. Fit_enorm can optionally 
+take fixed_parameters into account. 
+
+Significant speed increases in profile_plot, iTIA and iModels and minor 
+speed increases in other functions.
+
+Further includes more user control over plotting parameters, 
+updates to documentation, several bugfixes and some smaller updates.
+
+
 New in 0.4.4
 ------------
 Included Rdpack in Imports at the request of CRAN, and fixed 4 minor bugs

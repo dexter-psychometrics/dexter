@@ -10,8 +10,9 @@ add_booklet(db, x, booklet_id, auto_add_unknown_rules = TRUE)
 \item{db}{A handle to the database, i.e. the output of \code{start_new_project}
 or \code{open_project}}
 
-\item{x}{A data frame containing the responses and, possibly, some additional
-person characteristics. See details.}
+\item{x}{A data frame containing the responses and, optionally,
+person covariates. The data.frame should have one row per respondent and the column names should 
+correspond to the item_id's in the rules or the names of the covariates. See details.}
 
 \item{booklet_id}{A (short) string identifying the test form (booklet)}
 
@@ -29,10 +30,10 @@ treated as person covariates}
 Adds item response data for a test form (a.k.a. booklet)
 }
 \details{
-It is common practice to keep data in rectangular tables: data frames
-or foreign software like Excel, SPSS, etc. This function is provided to input
+It is a common practice to keep respons data in tables where each row 
+contains the responses from a single person. This function is provided to input
 data in that form, one booklet at a time. The starting point is a data frame,
-and getting the data frame into R is left to the user. We have found package
+and getting the data frame into R is left to the user. We have found packages
 \code{readxl} to be very good at reading Excel sheets, and \code{haven} quite
 efficient with SPSS files.
 
@@ -40,17 +41,16 @@ If the dataframe \code{x} contains a variable named \code{person_id} this variab
 will be used to identify unique persons. It is assumed that a single person will only 
 make a single booklet once, otherwise an error will be generated. 
 
-If a person ID is not supplied, dexter will generate unique person ID's for each row of data.  
+If a person_id is not supplied, dexter will generate unique person_id's for each row of data.  
 
-Any variable whose name has an exact match in the scoring rules input with
-function \code{start_new_project} will be treated as an item; any variable whose name has an 
+Any column whose name has an exact match in the scoring rules inputted with
+function \code{start_new_project} will be treated as an item; any column whose name has an 
 exact match in the covariates will be treated as covariate. If a name matches both
 a covariate and an item, the item takes precedence. Variables other than items, covariates 
 and person_id will be ignored.
 
 If \code{auto_add_unknown_rules=TRUE}, any responses to an item that do not have an 
-exact match in the scoring rules will be treated 
-as missing  and ultimately given the lowest score of 0. 
+exact match in the scoring rules will be automatically given the lowest score of 0. 
 To score missing data differently, 
 or simply abide to good style, the user can include explicit entries for missing value
 indicators in the scoring rules.
@@ -58,9 +58,11 @@ indicators in the scoring rules.
 \examples{
 \dontrun{
 db = start_new_project(verbAggrRules, "verbAggression.db", 
-  covariates=list(gender="<unknown>"))
+covariates=list(gender="<unknown>"))
 head(verbAggrData)
 add_booklet(db, verbAggrData, "agg")
+
+close_project(db)
 }
 
 }

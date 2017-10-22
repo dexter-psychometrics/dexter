@@ -40,7 +40,7 @@ sim_PV = function(theta, delta) {
 
 ## ----fig.align='center', results='hide'----------------------------------
 theta = rnorm(300)
-delta = runif(50, -3, 1)
+delta = runif(50, -2, 1)
 sim_PV(theta, delta)
 
 ## ----fig.align='center', results='hide', fig.width=7---------------------
@@ -58,9 +58,9 @@ sim_PV2 = function(theta, delta) {
   simulated_data = sim_Rasch(theta, delta) 
   parms = fit_enorm(simulated_data, method="Bayes", nIterations = 50)
   plot(ecdf(theta-mean(theta)), main=paste(length(delta), "items"))
+  which.draw=5*(1:10)
   for (iter in 1:10) {
-    indx = sample(1:50, 1)
-    pv = plausible_values(simulated_data, parms, use_draw=indx)
+    pv = plausible_values(simulated_data, parms, use_draw=which.draw[iter])
     lines(ecdf(pv$PV1-mean(pv$PV1)), col=rgb(.7,.7,.7,.5))
   }
   lines(ecdf(theta-mean(theta)))
@@ -71,5 +71,33 @@ par(mfrow=c(1,3))
 sim_PV2(theta, delta[1:10])
 sim_PV2(theta, delta[1:20])
 sim_PV2(theta, delta)
+par(mfrow=c(1,1))
+
+## ----make_pv3, results='hide',fig.align='center',fig.width=7-------------
+sim_Rasch2 = function(theta, delta,group) {
+  n = length(theta)
+  m = length(delta)
+  data.frame(
+    person_id = rep(paste0('p',1:n), m),
+    item_id = rep(paste0('i',1:m), each=n),
+    item_score = as.integer(rlogis(n*m, outer(theta, delta, "-")) > 0),
+    group=group
+  )
+}
+
+sim_PV3 = function(theta, delta, group) {
+  simulated_data = sim_Rasch2(theta, delta,group) 
+  parms = fit_enorm(simulated_data)
+  plot(ecdf(theta-mean(theta)), main=paste(length(delta), "items"))
+  pv = plausible_values(simulated_data, parms, covariates="group", nPV = 10)
+  for (i in 1:10) lines(ecdf(pv[[i+3]]-mean(pv[[i+3]])), col=rgb(.7,.7,.7,.5))
+  lines(ecdf(theta-mean(theta)))
+  invisible(NULL)
+}
+
+par(mfrow=c(1,3))
+sim_PV3(theta, delta[1:10],grp)
+sim_PV3(theta, delta[1:20],grp)
+sim_PV3(theta, delta,grp)
 par(mfrow=c(1,1))
 

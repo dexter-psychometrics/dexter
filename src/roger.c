@@ -58,6 +58,38 @@ void sampleNRM(double *theta, double *b, int *a, int *i, int *first, int *last, 
   free(p);
 }
 
+// sample test-score on a set of adapted for use with b_0 and a_0 in
+void sampleNRM2(double *theta, double *b, int *a, int *first, int *last, int *nI, int *m, int *score)
+{
+  double *p=NULL, u;
+  int k=0,maxS=0;
+  GetRNGstate(); // get seed
+  for (int i=0;i<nI[0];i++) {if ((last[i]-first[i]+2)>maxS) {maxS=(last[i]-first[i]+2);}}
+  void *_p = realloc(p, ((maxS+1) * sizeof(double)));
+  p=(double*)_p;
+  
+  for (int pers=0;pers<m[0];pers++)
+  {
+    score[pers]=0;
+    for (int i=0;i<nI[0];i++)
+    {
+      p[0]=b[first[i]]*exp(a[first[i]]*theta[pers]); 
+      k=1;
+      for (int j=first[i]+1;j<=last[i];j++) // note the +1
+      {
+        p[k]=p[k-1]+b[j]*exp(a[j]*theta[pers]);
+        k++;
+      }
+      u=p[k-1]*runif(0,1);
+      k=0;
+      while (u>p[k]) {k++;}
+      if (k>0) {score[pers]+=a[first[i]+k];}
+    }
+  }
+  PutRNGstate(); // put seed
+  free(p);
+}
+
 void PV0(double *b, int *a, int *first, int *last, double *mu, double *sigma, int *score, int *pop, int *nP,int *nI, int *nPop, double *theta)
 {
   double atheta=0.0;
@@ -181,6 +213,54 @@ void PV(double *b, int *a, int *first, int *last, double *mu, double *sigma, int
         }
       }
       theta[t*nP[0]+person]=atheta;
+    }
+  }
+  free(p);
+  PutRNGstate(); // put seed
+}
+/*
+ Inputs n; a vector of length Mxs+1, each entry corresponding to a score with the initail value npv.
+ */
+void recyclePV(double *b, int *a, int *first, int *last, int *nI, int *n, double *mu, double *sigma, double *R)
+{
+  int k=0, npv=n[1];
+  double atheta, *p=NULL, u;
+  int sm, ms, Mxs, colindx, nrows, iter;
+  ms=0;Mxs=0;
+  for (int i=0;i<nI[0];i++) {
+    if ((last[i]-first[i]+2)>ms) {ms=(last[i]-first[i]+2);}
+    Mxs += a[last[i]];
+  }
+  nrows=Mxs+1;
+  void *_p = realloc(p, ((ms+1) * sizeof(double)));
+  p=(double*)_p;
+  GetRNGstate(); // get seed
+  
+  iter=0;
+  while (iter<(nrows*npv))
+  {
+    atheta=rnorm(mu[0],sigma[0]);
+    sm=0;
+    for (int i=0;i<nI[0];i++)
+    {
+      p[0]=b[first[i]]*exp(a[first[i]]*atheta); 
+      k=1;
+      for (int j=first[i]+1;j<=last[i];j++) // note the +1
+      {
+        p[k]=p[k-1]+b[j]*exp(a[j]*atheta);
+        k++;
+      }
+      u=p[k-1]*runif(0,1);
+      k=0;
+      while (u>p[k]) {k++;}
+      if (k>0) {sm+=a[first[i]+k];}
+    }
+   
+    if (n[sm]>0) {
+      colindx=npv-n[sm];
+      R[sm+colindx*nrows]=atheta;
+      n[sm]--;
+      iter++;
     }
   }
   free(p);

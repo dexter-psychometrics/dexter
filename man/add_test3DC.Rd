@@ -32,9 +32,6 @@ admin, but can be changed in the 3DC application.}
 the 10% highest and the 10% lowest scores will be omitted thus restricting the range on which standards can be set.
 Default is 0.0 (omit nothing)}
 }
-\value{
-nothing interesting
-}
 \description{
 See create3DC for more information
 }

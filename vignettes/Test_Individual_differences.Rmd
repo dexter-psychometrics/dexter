@@ -5,7 +5,7 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 bibliography: dexter.bib
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{One theta to rule them all: Test Individual Differences}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -67,7 +67,7 @@ plot(dd)
 
 The gray line shows the predicted frequency of each sum score under the hypothesis of no true individual differences. The green dots show the observed frequencies. We now see that our observed data is compatible with the null hypothesis. 
 
-The print function for the test shows a chi-squared test for the null hypothesis. This uses R's option to simulate the p-value, which explains why the degrees of freedom are missing:
+The print function for the test shows a chi-squared test for the null hypothesis. Note that this uses R's option to simulate the p-value, which explains why the degrees of freedom are missing:
 
 ```{r}
 print(dd)
@@ -84,43 +84,8 @@ dd = individual_differences(db2, booklet_id=="data")
 plot(dd)
 ```
 
-This is quite different now, and the chi-squared test is highly significant, with a p-value of  `r round(dd$est$test$p.value, digits=4)`.
+This is quite different now, and the chi-squared test is highly significant.
 
-## Taking uncertainty in item parameters into account
-
-In a Bayesian framework, we are not forced to assume that item parameters are fixed and known quantities. We can take samples from their posterior distributions to take into account the fact that we are not dealing with true values. The current version of dexter does not include a user-level function to do that, but we can easily tinker with some of its internal functions. Function `theta_score_distribution` estimates ability from a score distribution, and function `pscore` produces the expected score distribution given an ability and item parameters.
-
-First, we run a Bayesian calibration and store the results for convenience. We will use the simulated data from the first example.
-
-```{r, results='hide'}
-f_b = fit_enorm(simulated, method="Bayes")
-b = colMeans(f_b$est$b)
-a = f_b$est$a
-first = f_b$inputs$ssI$first
-last = f_b$inputs$ssI$last
-scoretab = f_b$inputs$stb$N
-```
-
-We then produce a plot of observed and estimated frequencies.
-
-```{r, fig.align='center',fig.height=4, fig.width=4}
-plot(0:sum(a[last]), scoretab, col="green", pch=19,
-     xlab="Test-score", ylab="Frequency", cex=0.7)
-  
-theta.est = dexter:::theta_score_distribution(b,a,first,last,scoretab)
-score.est = dexter:::pscore(theta.est,b,a,first,last)
-
-for (i in 1:20)
-{
-  indx=sample(1:500,1)
-  b=f_b$est$b[indx,]
-  theta.est=dexter:::theta_score_distribution(b,a,first,last,scoretab)
-  score.est=dexter:::pscore(theta.est,b,a,first,last)
-  lines(0:sum(a[last]),score.est*2000,col="gray",pch=19,cex=0.7)
-}
-```
-
-The gray band is now not a single line but 20 lines superimposed, each of them showing the frequencies predicted from one of 20 draws from the posterior of the item parameters. As before, the green dots show the observed frequencies.
 
 ```{r, show=FALSE}
 dbDisconnect(db2)

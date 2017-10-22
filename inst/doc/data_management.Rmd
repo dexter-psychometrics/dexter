@@ -1,10 +1,10 @@
 ---
-title: "Data management"
+title: "Data management in dexter"
 author: "Jesse Koops"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Data management in dexter}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -54,10 +54,10 @@ Dexter keeps all scoring rules separately from response data, and applies them j
 
 Nevertheless, there are occasions when an item, a booklet or a person must be omitted from analysis. Dexter implements a general system for subsetting data that offers an immensely wider range of possibilities -- and some risks!
 
-Many functions accept an optional argument `predicate`, which is an expression to subset data on. In this expression you can use item_properties, person covariates and several other variables to filter your data. To see which predicate variables are available in your project, use the function `predicate_variables`.
+Many functions accept an optional argument `predicate`, which is an expression to subset data on. In this expression you can use item_properties, person covariates and several other variables to filter your data. To see which predicate variables are available in your project, use the function `get_variables`.
 
 ```{r}
-knitr::kable(predicate_variables(db))
+knitr::kable(get_variables(db))
 ```
 
 As an example, suppose we know of a printing error in the third item in booklet "pretest" so we want to turn it off locally, and we also want to estimate the parameters solely for women. We can pass to `fit_enorm` the following predicate expression:
@@ -73,7 +73,7 @@ bkl = 'pretest'
 par = fit_enorm(db, gender=='female' & !(booklet_id == bkl & item_position == 3))
 ```
 
-However, if you have want to use local variables that conflict with the variable names dexter uses, it is best to resolve the ambiguity by using the function `local()` around your local variables:
+However, if you have want to use local variables that conflict with the variable names in your dexter project, it is best to resolve the ambiguity by using the function `local()` around your local variables:
 
 ```{r, eval=FALSE}
 booklet_id = 'pretest' # local variable
@@ -82,18 +82,20 @@ par = fit_enorm(db, gender=='female' & !(booklet_id == local(booklet_id) & item_
 
 For consistency, predicates also work when the `dataSrc` argument is a data.frame.
 
-Because the `predicate` is passed to the functions that use it independently, one can do strange things like estimate an IRT model from the test responses of females, and use it to score the tests of males. If you want to apply the same subsetting expression to more than one function, it may be practical to assign it to a variable first.
+Because the `predicate` is passed to the functions that use it independently, one can do strange things like estimate an IRT model from the test responses of females, and use it to score the tests of males. 
 
 Another risk with subsetting is that it may destroy the connectedness of the design. The user can check against this with function `design_is_connected`. 
 
 ```{r, eval=FALSE}
-# assuming an item property exists in the db which is called cefr_level
+# assuming an item property called `cefr_level` exists in the project
 design = design_as_network(db, booklet_id %in% c('bookletA','bookletX','bookletY') & cefr_level == 'B1')
 design_is_connected(design)
 ## [1] TRUE
 ```
 
-Even though predicates offer a lot of flexibility, there are some limitations due to the fact that they only work on the individual response level. The typical case that can not be solved by using a predicate, is to omit a whole booklet or person based on some of their responses. The following example assumes there are some missing values in your data. Remember, Dexter converts all responses to strings and treats `NA` responses as the string `'NA'`. The following line will omit the missing responses (rather than scoring them 0), and calibrate the extended nominal response model. Based on the predicate, just individual responses will be omitted, which does not extend to exclusion of whole persons.
+Even though predicates offer a lot of flexibility, there are some limitations due to the fact that they only work on the individual response level. The typical case that can not be solved by using a predicate, is to omit a whole booklet or person based on some of their responses, but fortunately there is a relatively easy way to get around that limitation. 
+
+The following example assumes there are some missing values in your data. Remember, Dexter converts all responses to strings and treats `NA` responses as the string `'NA'`. The following line will omit the missing responses (rather than scoring them 0), and calibrate the extended nominal response model. Based on the predicate, just individual responses will be omitted, which does not extend to exclusion of whole persons.
 
 ```{r, eval=FALSE}
 par = fit_enorm(db, response != 'NA')

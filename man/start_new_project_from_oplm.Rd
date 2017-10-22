@@ -6,7 +6,8 @@
 \usage{
 start_new_project_from_oplm(dbname, scr_path, dat_path, booklet_position,
   responses_start, response_length = 1, person_id = NULL,
-  missing_character = "9", use_discrim = FALSE, format = "compressed")
+  missing_character = c(" ", "9"), use_discrim = FALSE,
+  format = "compressed")
 }
 \arguments{
 \item{dbname}{filename/path of new dexter project database (will be overwritten if already exists)}
@@ -16,16 +17,17 @@ start_new_project_from_oplm(dbname, scr_path, dat_path, booklet_position,
 \item{dat_path}{path to the .dat file}
 
 \item{booklet_position}{vector of start and end of booklet position in the dat file, e.g. c(1,4), 
-all positions are counted from 1}
+all positions are counted from 1, start and end are both included.}
 
-\item{responses_start}{start position of responses in the dat file}
+\item{responses_start}{start position of responses in the .dat file}
 
 \item{response_length}{length of individual responses, default=1}
 
-\item{person_id}{optionally, a vector of start and end position of person_id in the dat file.
+\item{person_id}{optionally, a vector of start and end position of person_id in the .dat file.
 If NULL, person id's will be auto-generated.}
 
-\item{missing_character}{character used to indicate missing in dat file, usually \code{" "} or \code{"9"}.}
+\item{missing_character}{character used to indicate missing in .dat file, 
+default is to use both a space and a 9 as missing characters.}
 
 \item{use_discrim}{if TRUE, the scores for the responses will be multiplied by the
 discrimination parameters of the items}
@@ -36,16 +38,16 @@ discrimination parameters of the items}
 a handle to the data base.
 }
 \description{
-Creates a dexter project database and fills it with response data from two oplm files
+Creates a dexter project database and fills it with response data based on a .dat and .scr file
 }
 \details{
-start_new_project_from_oplm builds a complete dexter database from a dat and scr file in
+start_new_project_from_oplm builds a complete dexter database from a .dat and .scr file in
 the proprietary oplm format. Three custom variables are added to the database: 
-booklet_on_off, item_local_on_off, item_global_on_off. These are taken from the scr file
+booklet_on_off, item_local_on_off, item_global_on_off. These are taken from the .scr file
 and can be used in expressions in the various dexter functions.
 }
 \examples{
-\dontrun{
+\donttest{
 db = start_new_project_from_oplm('test.db',
    'path_to_scr_file', 'path_to_dat_file', 
    booklet_position=c(1,3), responses_start=101,

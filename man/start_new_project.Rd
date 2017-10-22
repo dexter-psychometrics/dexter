@@ -22,7 +22,11 @@ The datatypes should match those of your default values.}
 }
 \value{
 If the scoring rules pass a sanity check, a handle to the data base.
-Otherwise, a data frame listing the problems found.
+Otherwise, a data frame listing the problems found, with 4 columns:
+item_id: id of the problematic item
+less_than_two_scores: if TRUE, the item has only one distinct score
+duplicated_responses: if TRUE, the item contains two or more identical response categories
+min_score_not_zero: if TRUE, the minimum score of the item was not 0
 }
 \description{
 Imports a complete set of scoring rules and starts a new project (data base)
@@ -39,10 +43,10 @@ missing and ultimately scored 0, but it is good style to include the missing
 responses in the list. NA values will be treated as the string 'NA'.
 }
 \examples{
-\dontrun{
+\donttest{
 head(verbAggrRules)
 db = start_new_project(verbAggrRules, "verbAggression.db", 
-   covariates=list(gender="<unknown>"))
+covariates=list(gender="<unknown>"))
 }
 
 }

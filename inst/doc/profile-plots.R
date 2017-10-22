@@ -54,19 +54,23 @@ function (n, h = 11, c. = c(80, 5), l = c(35, 95), power = 0.6,
   return(rval)
 }
 
-## ---- figProf, echo=FALSE, results="hide"--------------------------------
+## ---- figProf, echo=FALSE, results="hide",out.extra='style="border:none;display:block;margin: 0 auto;"'----
+# fig.align='center' does not work anymore when you specify any css styles
+# therefore the: display:block;margin: 0 auto;
 db = start_new_project(verbAggrRules, ":memory:", covariates=list(gender="<unknown>"))
 add_booklet(db, verbAggrData, "agg")
 add_item_properties(db, verbAggrProperties)
-profile_plot(db, booklet_id=='agg', item_property='mode', covariate='gender')
+profile_plot(db, item_property='mode', covariate='gender', booklet_id=='agg')
 
 ## ----frq, echo=FALSE-----------------------------------------------------
-matrix(fq,3,3)
+rownames(fq) = c(0,1,2)
+colnames(fq) = c(0,1,2)
+fq
 
-## ---- fig1, echo=FALSE---------------------------------------------------
+## ---- fig1, echo=FALSE, out.extra='style="border:none;"'-----------------
 cloud(fq, panel.3d.cloud = panel.3dbars,
       xbase = 0.4, ybase = 0.4, zlim = c(0, max(fq)),
-      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",
+      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B", zlab='',
       col.facet =  "tan",
       screen = list(z = 40, x = -30))
 
@@ -75,7 +79,7 @@ joint = prop.table(fq)
 
 cloud(joint, panel.3d.cloud = panel.3dbars,
       xbase = 0.4, ybase = 0.4, zlim = c(0, 1),
-      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",
+      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",zlab='',
       col.facet =  "skyblue", alpha.facet=.7,
       screen = list(z = 40, x = -30))
 
@@ -84,7 +88,7 @@ co = rep(c('skyblue1','pink1','springgreen1'),3)
 
 cloud(conditional, panel.3d.cloud = panel.3dbars,
       xbase = 0.4, ybase = 0.4, zlim = c(0, 1),
-      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",
+      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",zlab='',
       col.facet =  co, alpha.facet=.7,
       screen = list(z = 40, x = -30))
 
@@ -95,7 +99,7 @@ pa=blues(5)
 sp=pa[j]
 cloud(special, panel.3d.cloud = panel.3dbars,
       xbase = 0.4, ybase = 0.4, zlim = c(0, 1),
-      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",
+      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",zlab='',
       col.facet =  sp, alpha.facet=.7,
       screen = list(z = 40, x = -30))
 
@@ -106,7 +110,7 @@ sp[hi] = pa[j[hi]]
 
 cloud(special, panel.3d.cloud = panel.3dbars,
       xbase = 0.4, ybase = 0.4, zlim = c(0, 1),
-      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",
+      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",zlab='',
       col.facet =  sp, alpha.facet=.7,
       screen = list(z = 40, x = -30))
 
@@ -117,6 +121,10 @@ lines(0:1,1:0,col="gray")
 lines(1:2,2:1,col="gray")
 lines(c(0,2),c(2,0),col="gray")
 lines(c(0,0,1,2,2), c(0,1,1,1,2), col=3, lwd=4)
+
+## ---- prof_plot2, echo=FALSE, fig.height=5, fig.width=5, fig.align='center', out.extra='style="border:none;display:block;margin: 0 auto;"'----
+profile_plot(db, item_property='mode', covariate='gender', booklet_id=='agg', main='Gender')
+mtext('Do versus Want')
 
 ## ---- show=FALSE---------------------------------------------------------
 dbDisconnect(db)

@@ -18,8 +18,17 @@
 #   return(tmp)
 # }
 
-#void PV(double *b, int *a, int *first, int *last, double *mu, double *sigma, int *score, int *pop, int *nP,int *nI, int *nPop, int *nPV, double *theta);
-pv <- function(b,a,first,last,score,npv,mu=0,sigma=2)
+# Wrapper for C function that generates plausible values using a straightforward rejection algorithm
+#
+# @param b      vector of beta's per item_score, including 0 category, ordered by item_id, item_score
+# @param a      vector of discriminations per item_score, inclusing 0 category, ordered by item_id, item_score
+# @param score  vector of sum scores
+# @param        npv, nbr of plausible values per sum score
+# @pop          vector of indices of population for each sum score
+# @mu, sigma    prior mu and sigma for each population
+# @return
+# matrix with in each row npv plausible values for each sum score
+pv_ <- function(b,a,first,last,score,npv,mu,sigma,pop)
 {
   tmp=.C("PV",
          as.double(b),
@@ -29,15 +38,108 @@ pv <- function(b,a,first,last,score,npv,mu=0,sigma=2)
          as.double(mu),
          as.double(sigma),
          as.integer(score),
-         as.integer(rep(0,length(score))),
+         as.integer(pop-1),
          as.integer(length(score)),
          as.integer(length(first)),
-         as.integer(1),
+         as.integer(length(pop)),
          as.integer(npv),
          as.double(rep(0*score,npv)))[[13]]
   tmp=as.vector(tmp)
-  dim(tmp)=c(length(score),npv)
+  if (npv>1) dim(tmp)=c(length(score),npv)
   return(tmp)
+}
+
+# Given samples of plausible values from one or more normal distributions
+# this function samples means and variances of plausible values from their posterior
+# This is used yo update the prior used in sampling plausible values
+update_pv_prior<-function(PV, pop, mu, sigma)
+{
+  min_n=5
+  for (j in 1:length(unique(pop)))
+  {
+    pv_group=subset(PV,pop==j)
+    m=length(pv_group)
+    pv_mean=mean(pv_group)
+    if (m>min_n)
+    {
+      pv_var=var(pv_group)         
+      sigma[j] = sqrt(1/rgamma(1,shape=(m-1)/2,rate=((m-1)/2)*pv_var))
+    }
+    mu[j] = rnorm(1,pv_mean,sigma[j]/sqrt(m))
+  }
+  return(list(mu=mu, sigma=sigma))
+}
+
+# @param x                tibble(booklet_id <char or int>, person_id <char>, sumScore <int>, pop <int>)
+# @param design           list: names: as.character(booklet_id), values: tibble(first <int>, last <int>) ordered by first
+# @param b                vector of beta's per item_score, including 0 category, ordered by item_id, item_score
+# @param a                vector of discriminations per item_score, inclusing 0 category, ordered by item_id, item_score
+# @param nPV              number of plausible values to return per person
+# @param n_prior_updates  number of samples from full-conditional of prior parameters 
+#
+# @return
+# tibble(booklet_id <char or int>, person_id <char>, sumScore <int>, nPV nameless columns with plausible values)
+pv = function(x, design, b, a, nPV, n_prior_updates=4)
+{
+  start_prior=c(0,4)
+  nPop = length(unique(x$pop))
+  priors = list(mu=rep(start_prior[1],nPop),sigma=rep(start_prior[2],nPop))
+ 
+  
+  
+  if (is.matrix(b))
+  {
+    add_pv = function(booklet_id, pop, sumScore, iter, priors, design, a, b)
+    {
+      bkID = as.character(booklet_id[1])
+      pv_(b[iter,], a, design[[bkID]]$first, design[[bkID]]$last, sumScore, 1, priors$mu, priors$sigma, pop)
+    }
+
+    apv=1
+    which.pv = 5*(1:nPV)
+    nIter=max(which.pv)
+    out_pv=matrix(0,length(x$sumScore),nPV)
+    
+    for(iter in c(1:4,which.pv))
+    {
+      x = x %>% 
+        group_by(.data$booklet_id) %>%
+        mutate(PVX = add_pv(.data$booklet_id, .data$pop, .data$sumScore, iter, priors, design, a, b)) %>%
+        ungroup()
+       
+      priors = update_pv_prior(x$PVX, x$pop, priors$mu,priors$sigma)
+      if (iter == which.pv[apv])
+      {
+        colnames(x)[colnames(x)=='PVX'] = paste0('PV', iter)
+        apv=apv+1
+      }
+    }
+
+    x %>% 
+      select(.data$booklet_id, .data$person_id,.data$sumScore, matches('PV\\d+'))
+    
+  }else
+  {
+   for(iter in 1:n_prior_updates)
+   {
+      pv = x %>% 
+        group_by(.data$booklet_id) %>%
+        do({
+         bkID = as.character(.$booklet_id[1])
+         tibble(pop=.$pop, pv = pv_(b, a, design[[bkID]]$first, design[[bkID]]$last, .$sumScore, 1, priors$mu, priors$sigma, .$pop))
+       }) %>%
+       ungroup() 
+      priors = update_pv_prior(pv$pv,pv$pop,priors$mu,priors$sigma)
+    }  
+    x %>% 
+      group_by(.data$booklet_id) %>%
+      do({
+        bkID = as.character(.$booklet_id[1])
+        out_pv = pv_(b, a, design[[bkID]]$first, design[[bkID]]$last, .$sumScore, nPV, priors$mu, priors$sigma, .$pop)
+        data.frame(.$person_id, .$sumScore, as.data.frame(out_pv), stringsAsFactors = FALSE)
+      }) %>%
+      ungroup() 
+  }
 }
 
 # simulate responses to a single item. Adapted for inclusion zero
@@ -55,7 +157,9 @@ renorm <- function(x,b,a,theta,first,last,i)
          as.integer(x))[[8]]
   return(tmp)
 }
-# simulate responses to a single item. NOt adapted for inclusion of parameter for 
+
+# simulate responses to a single item. 
+# NOt adapted for inclusion of parameter for 
 # zero category
 renorm0 <- function(x,b,a,theta,first,last,i)
 {
@@ -72,7 +176,27 @@ renorm0 <- function(x,b,a,theta,first,last,i)
   return(tmp)
 }
 
-#void Escore(double *theta, double *score, double *b, int *a, int *first, int *last, int *n);
+#void sampleNRM2(double *theta, double *b, int *a, int *first, int *last, int *nI, int *m, int *test_score)
+# simulate scores rather then response patterns. Adapted for inclusion zero and used in theta_EAP
+renorm2 <- function(b,a,theta,first,last)
+{
+  m=length(theta)
+  nI=length(first)
+  x=rep(0,m)
+  tmp=.C("sampleNRM2",
+         as.double(theta),
+         as.double(b),
+         as.integer(a),
+         as.integer(first-1),
+         as.integer(last-1),
+         as.integer(nI),
+         as.integer(m),
+         as.integer(x))[[8]]
+  return(tmp)
+}
+
+
+# Expected scores
 E_score=function(theta,b,a,first,last)
 {
   escore=as.double(0.0)
@@ -145,11 +269,49 @@ theta_MLE <- function(b,a,first,last)
   return(c(-Inf,theta,Inf))
 }
 
-# EAP based on npv plausible values
-theta_EAP <- function(b,a,first,last,score,npv=20,mu=0,sigma=2)
+##### EAP based on npv (default 200) plausible values ####
+# Current version uses normal(0,2) prior. With crumpy data one might
+# need a bigger standard deviation
+# Assumes that score is a vector 0:max_score
+# Uses recycling to get npv plausible values for each sum score.
+# Smoothing is an option to avoid non-monotonicity due to random fluctuations
+### In R-code:
+# n=rep(npv,length(score))
+# R=matrix(0,length(score),npv)
+# while (any(n>0))
+# {
+#   atheta=rnorm(1,mu,sigma)
+#   sm=renorm2(b,a,atheta,first,last)+1
+#   if (n[sm]>0)
+#   {
+#     R[sm,n[sm]]=atheta
+#     n[sm]=n[sm]-1
+#   }
+# }
+####
+theta_EAP <- function(b,a,first,last,score,npv=500,mu=0,sigma=4,smooth=FALSE)
 {
-  PV=pv(b,a,first,last,score,npv,mu=0,sigma=2)
-  return(rowMeans(PV))
+  n=rep(npv,length(score))
+  R=rep(0,length(score)*npv)
+  nI=length(first)
+  tmp=.C("recyclePV",
+         as.double(b),
+         as.integer(a),
+         as.integer(first-1),
+         as.integer(last-1),
+         as.integer(nI),
+         as.integer(n),
+         as.double(mu),
+         as.double(sigma),
+         as.double(R))[[9]]
+  dim(tmp)=c(length(score),npv)
+  theta=rowMeans(tmp)
+  if (smooth)
+  {
+    ss=smooth.spline(score, theta, df=20)
+    theta=ss$y
+  }
+  return(theta) #list(theta=theta,se=apply(tmp,1,sd))
 }
 
 # ML estimation (using EM) of theta based on A
@@ -212,9 +374,14 @@ theta_score_distribution <- function(b,a,first,last,scoretab)
 }
 
 
-##################################
+########################################################
 ## Score-by-score table. Currently using mean_ElSym
-## as with estim.. call with c=ic[C]
+########################################################
+# @param m        a rim object produced by fit_inter (but not yet documented anywhere what that looks like)
+# @param AB       list: two mutually exclusive subsets of items as indexes of m$ss$il
+# @param model    Character: Indicates which model is used: "Rasch" or "IM"
+# @return         A list with tbl being a score-by-score matrix of probabilities:
+#                 P(X^A_+=s_a, X^B_+=s_b|X_+=s) where s=s_a+s_b
 SSTable <- function(m, AB, model) {
   if (model=="IM") {ic=m$est$cIM; b=m$est$bIM} else {ic=m$est$cRM; b=m$est$bRM}
   first = m$ss$il$first
@@ -357,6 +524,17 @@ ittotmat0 <- function(b,c,a,first,last)
   return(as.matrix(tmp[[8]])) 
 }
 
+## low-level check for trivial scores. 
+# If TRUE it means that there is no data-reduction
+# Each weighted score can be obtained with only one response pattern
+# @pi_mat An item-total regression matrix as produced by ittotmat
+check_trivial_scores_<-function(pi_mat,scoretab=NULL)
+{
+  if (!is.null(scoretab)) pi_mat=pi_mat[,scoretab>0]
+  pi_mat[(pi_mat==1)|(pi_mat==0)]=NA
+  return(all(is.na(pi_mat)))
+}
+
 ## Wrapper to C function
 # currently using mean_ElSym
 ittotmat <- function(b,c,a,first,last)
@@ -379,8 +557,27 @@ ittotmat <- function(b,c,a,first,last)
 }
 
 
-###################################
+######################################################################
+# Estimation of Rasch and Interaction Model 
+#######################################################################
+# Using Newton-Raphson per item
 # Currently with elsym and scale
+# @param ss list containing:
+#   il: one row per item, ordered item_id
+#       tibble(first, last, sufC <sum(item_score*sumScore)>, nCat <nbr of score categories including 0>)
+#   sl: one row per item-scorecat(including 0), ordered item_id, item_score
+#       tibble(item_score, sufI <count for item_score>, sufC <sum(tem_score * sumScore)>)
+#   tl: one row per testscore (only one test allowed), complete range 0:max_observed, ordered by test_score
+#       tibble(N <count for test score>)
+# @returns:
+#      bRM:    Parameter estimates of the Rasch model
+#      bIM:    Parameter estimates of the Interaction model
+#      cIM:    Estimate of (log-)interaction parameter
+#      cRM:    Interaction parameters under the Rasch model: all equal to 1
+#      HRM:    Asymptotic var-covvar matrix of item parameters under RM
+#     se.c:   Standard error of interaction parameter
+# fit.stat: log(cIM)/se.c. Wald statistic normally distributed under Rasch model
+#########################################################################
 EstIM  <- function(ss) {
   first = ss$il$first
   last = ss$il$last
@@ -394,7 +591,7 @@ EstIM  <- function(ss) {
   nI=length(last)
   b=rep(0,length(sufI))
   ic=rep(1,length(sufC))
-  se.ic=vector("numeric", nI)
+  var.ic=vector("numeric", nI)
   HRM=matrix(0,length(b),length(b))
   
   # Identification
@@ -407,28 +604,32 @@ EstIM  <- function(ss) {
     upd_set[[i]]=(first[i]:last[i])[upd_set[[i]]]
   }
   
+  if (check_trivial_scores_(ittotmat0(b,ic[C],a,first,last),scoretab)) warning("Only trivial weighted scores observed")
+  
   converged=2
-  while(converged>0.001)
+  scale=2
+  while(converged>0.01)
   {
     converged=-1
     pi_mat=ittotmat0(b,ic[C],a,first,last) ##
+    pi_mat[is.na(pi_mat)]=0
     for (i in 1:nI)
     {
       if (length(upd_set[[i]])>0)
       {
         pi=pi_mat[upd_set[[i]],,drop=FALSE]
-        pi[is.na(pi)]=0
         E=sufI[upd_set[[i]]]-pi%*%scoretab
         H=-pi%*%diag(scoretab)%*%t(pi)
         diag(H)=pi%*%scoretab+diag(H)
         
         # NR update for parameters of item i
-        update=solve(H,E)
+        update=solve(H*scale,E)
         b[upd_set[[i]]]=b[upd_set[[i]]]*exp(update)
         converged=max(converged,max(abs(E))/m) #
         HRM[upd_set[[i]],upd_set[[i]]]=H
       }
     }
+    if (converged<1) scale=1
   }
   
   bRM=b
@@ -440,14 +641,14 @@ EstIM  <- function(ss) {
   while(converged>0.001)
   {
     converged=-1
-    pi_mat=ittotmat0(b,ic[C],a,first,last) ##
+    pi_mat=ittotmat0(b,ic[C],a,first,last)
+    pi_mat[is.na(pi_mat)]=0
     for (i in 1:nI)
     {
       # gradient and hessian for thresholds of item i
       if (length(upd_set[[i]])>0)
       {
         pi=pi_mat[upd_set[[i]],,drop=FALSE]
-        pi[is.na(pi)]=0
         E=sufI[upd_set[[i]]]-pi%*%scoretab
         H=-pi%*%diag(scoretab)%*%t(pi)
         diag(H)=pi%*%scoretab+diag(H)
@@ -482,21 +683,26 @@ EstIM  <- function(ss) {
         update=solve(H*scale,E)
         b[upd_set[[i]]]=b[upd_set[[i]]]*exp(update[-length(update)])
         ic[i]=ic[i]*exp(update[length(update)])
-        se.ic[i]=solve(H)[nrow(H),nrow(H)]
+        var.ic[i]=solve(H)[nrow(H),nrow(H)]
         converged=max(converged,max(abs(E))/m)
       }
     }
     if (converged<1) scale=1
   }
   
-  return(list(group=ss$group,bRM=bRM,cRM=cRM,bIM=b,cIM=ic,se.c=se.ic,HRM=HRM))
+  return(list(group=ss$group,bRM=bRM,cRM=cRM,bIM=b,cIM=ic,se.c=sqrt(var.ic),HRM=HRM, fit.stats=log(ic)/sqrt(var.ic)))
 }
 
 
-##################################################### calibrate
+
+##################################################### calibrate incomplete designs: 
+# CML
+# Bayes
+#####################################################
 
 #### Bayes
-calibrate = function (itemList, booklet, sufI, b, a, first, last, nIter) {
+calibrate_Bayes = function(itemList, booklet, sufI, b, a, first, last, nIter, fixed_b=NULL) 
+{
   nb = length(booklet)
   n = length(itemList)
   y = rep(0, length(sufI))
@@ -518,7 +724,7 @@ calibrate = function (itemList, booklet, sufI, b, a, first, last, nIter) {
       z[bl] = rgamma(1, shape=booklet[[bl]]$m, rate=sum(g*scale_g*booklet[[bl]]$lambda))
       # update lambda
       idx = which(g != 0.0)
-      booklet[[bl]]$lambda[idx] = rgamma(length(idx), shape=booklet[[bl]]$scoretab[idx]+1.1, rate=(g*scale_g*z[bl])[idx])
+      booklet[[bl]]$lambda[idx] = rgamma(length(idx), shape=booklet[[bl]]$scoretab[idx]+0.1, rate=(g*scale_g*z[bl])[idx]) # 1.1
       booklet[[bl]]$lambda[-idx] = 0.0
       # scale lambda such that g*lambda~scoretab
       booklet[[bl]]$lambda[idx] = booklet[[bl]]$m*booklet[[bl]]$lambda[idx]/sum(g*scale_g*booklet[[bl]]$lambda)
@@ -542,30 +748,38 @@ calibrate = function (itemList, booklet, sufI, b, a, first, last, nIter) {
       }
       b[first[i]:last[i]] = rgamma(1+last[i]-first[i],shape=sufI[first[i]:last[i]]+1.1,rate=y[first[i]:last[i]])
     }
-    # identify 
-      # within items
+    # identify
     for (i in 1:n)
     {
       range=first[i]:last[i]
       b[range]=b[range]/b[first[i]]
     }
-      # Between items
-    f=b[2]
-    b[-first] = b[-first]/f
-    b[is.nan(b)] = 1 # deal with items that are not in data
-      # Lambda
-    for (bl in 1:nb) 
+    
+    if (is.null(fixed_b))
     {
-      booklet[[bl]]$lambda = booklet[[bl]]$lambda*f^(0:sum(a[booklet[[bl]]$last]))
-      booklet[[bl]]$lambda = booklet[[bl]]$lambda/booklet[[bl]]$lambda[1]
-      lx[[bl]][iter,]=booklet[[bl]]$lambda
+      f=b[2]
+      b[-first] = b[-first]/f
+      # Lambda
+      for (bl in 1:nb) 
+      {
+        booklet[[bl]]$lambda = booklet[[bl]]$lambda*f^(0:sum(a[booklet[[bl]]$last]))
+        booklet[[bl]]$lambda = booklet[[bl]]$lambda/booklet[[bl]]$lambda[1]
+        lx[[bl]][iter,]=booklet[[bl]]$lambda
+      }
+    }else
+    {
+      fixed_set=which(!is.na(fixed_b))
+      b[fixed_set]=fixed_b[fixed_set]
+      for (bl in 1:nb) lx[[bl]][iter,]=booklet[[bl]]$lambda
     }
     
+    b[is.nan(b)] = 1 # deal with items that are not in data
     bx[iter,] = b
     setTxtProgressBar(pb, value=iter)
   }
   close(pb)
-  OPCML_out=toOPLM(a,bx, first, last, H=NULL)
+
+  OPCML_out=toOPLM(a,bx, first, last, H=NULL,fixed_b=fixed_b)
   return(list(a=a, b=bx,lambda=lx, beta.cml=OPCML_out$delta))
 }
 
@@ -592,100 +806,170 @@ est_lambda <- function(b, a, first, last, scoretab)
 ### Do CML
 ## Must be changed to handle the case where 0 categories does not occur
 ## Or category-scores (a) are not increasing
-calibrateCML <- function(booklet, sufI, a, first, last, nIter) {
+## If fixed_b is not NULL unfixed parameters are NA
+## fixed are numbers in the dexter parametrisation (including 0 category)
+calibrate_CML <- function(booklet, sufI, a, first, last, nIter, fixed_b=NULL) {
   nb = length(booklet)
   ni=length(first)
-  b=rep(1,length(a))
-  ic=b
   EsufI=sufI
-  ref_cat=2
+  max_nr_iter=20
   
-  ## 
-  nn=0
-  for (bl in 1:nb) nn=nn+booklet[[bl]]$m
-  nn=nn*ni
-  
-  ## Implicit Equations  ###
-  converged=FALSE
-  iter=0
-  pb = txtProgressBar(min=0, max=nIter)
-  while ((!converged)&(iter<=nIter))
+  if (is.null(fixed_b)) # if no fixed parameters
   {
-    iter=iter+1
-    EsufI=EsufI-EsufI
-    for (bl in 1:nb)
+    nn=0
+    for (bl in 1:nb) nn=nn+booklet[[bl]]$m
+    nn=nn*ni
+    b =rep(1,length(a))
+                ## Implicit Equations  ###
+    converged=FALSE
+    iter=0
+    pb = txtProgressBar(min=0, max=nIter)
+    while ((!converged)&(iter<=nIter))
     {
-      EsufI = EsufI + E.STEP(b,a,booklet[[bl]]$first,booklet[[bl]]$last,booklet[[bl]]$scoretab) 
+      iter=iter+1
+      EsufI=EsufI-EsufI
+      for (bl in 1:nb)
+      {
+        EsufI = EsufI + E.STEP(b,a,booklet[[bl]]$first,booklet[[bl]]$last,booklet[[bl]]$scoretab) 
+      }
+      b = b*sufI/EsufI
+      converged=(max(abs(sufI-EsufI))/nn<1e-04)
+      setTxtProgressBar(pb, value=iter)
     }
-    b=b*sufI/EsufI
-    converged=(max(abs(sufI-EsufI))/nn<1e-04)
-    setTxtProgressBar(pb, value=iter)
-  }
-  if (!converged) warning(paste('Implicit Equations not Converged in',as.character(nIter),"iterations"))
-  
-  ## identification: 
-  ## within items 
-  for (i in 1:length(first))
-  {
-    range=first[i]:last[i]
-    b[range]=b[range]/b[first[i]]
-  }
-  ## Between items; for now one item parameter set to zero(one)
-  b[-first]=b[-first]/b[ref_cat]
-  #const=log(b[2])
-  #for (i in 1:length(first))
-  #{
-  #  range=(first[i]+1):last[i]
-  #  b[range]=b[range]/exp(a[range]*const)
-  #}
-  
-  
-  ###  NR  ###
-  H=matrix(0,length(a),length(a))
-  convergence=FALSE
-  while (!convergence)
-  {
-    iter=iter+1
-    EsufI=EsufI-EsufI
-    H=H-H
-    for (bl in 1:nb)
-    {
-      EsufI = EsufI + E.STEP0(b,a,booklet[[bl]]$first+1,booklet[[bl]]$last,booklet[[bl]]$scoretab) 
-      H     = H     + H.STEP(b,a,booklet[[bl]]$first+1,booklet[[bl]]$last,booklet[[bl]]$scoretab)
-    }
-    # identify
+    if (!converged) warning(paste('Implicit Equations not Converged in',as.character(nIter),"iterations"))
+    
+        ### identification ###
+    # within items
     for (i in 1:length(first))
     {
-      H[first[i],first[i]]=1
-      EsufI[first[i]]=sufI[first[i]]
+      range=first[i]:last[i]
+      b[range]=b[range]/b[first[i]]
     }
-    H[ref_cat,]=0
-    H[,ref_cat]=0
-    H[ref_cat,ref_cat]=1
-    EsufI[ref_cat]=sufI[ref_cat]
-    b=b*exp(solve(H,sufI-EsufI))
-    convergence=(max(abs(EsufI-sufI))/nn<1e-10)
-    setTxtProgressBar(pb, value=iter)
+    # determine suitable ref_cat 
+    ref_cat=2
+    rc_set=intersect(first+1,which(((b>1.1)&(b<exp(0.8)))))
+    if (length(rc_set)>0) ref_cat=intersect(rc_set,which(sufI==max(sufI[rc_set])))[1]
+    # between items
+    b[-first] = b[-first]/b[ref_cat]
+    
+              ###  NR  ###
+    H=matrix(0,length(a),length(a))
+    converged=FALSE
+    nr_iter=0
+    while ((!converged)&(nr_iter<max_nr_iter))
+    {
+      iter=iter+1
+      EsufI=EsufI-EsufI
+      H=H-H
+      for (bl in 1:nb)
+      {
+        EsufI = EsufI + E.STEP(b,a,booklet[[bl]]$first,booklet[[bl]]$last,booklet[[bl]]$scoretab) 
+        H     = H     + H.STEP0(b,a,booklet[[bl]]$first,booklet[[bl]]$last,booklet[[bl]]$scoretab)
+      }
+      # identify
+      for (i in 1:length(first))
+      {
+        H[first[i],first[i]]=1
+        EsufI[first[i]]=sufI[first[i]]
+      }
+      H[ref_cat,]=0
+      H[,ref_cat]=0
+      H[ref_cat,ref_cat]=1
+      EsufI[ref_cat]=sufI[ref_cat]
+      b = b*exp(solve(H,sufI-EsufI))
+      converged=(max(abs(EsufI-sufI))/nn<1e-10)
+      setTxtProgressBar(pb, value=iter)
+      nr_iter=nr_iter+1
+    }
+    close(pb)
+    if (!converged) warning(paste('Newton-Raphson not Converged in',as.character(nr_iter),"iterations"))
+  }else  ### if fixed parameters
+  {
+    fixed_set=which(!is.na(fixed_b))
+    update_set=which(is.na(fixed_b))
+    b=fixed_b
+    ni_free=sum(is.na(fixed_b[last]))
+    b[update_set]=1
+    nn=0
+    for (bl in 1:nb) nn=nn+booklet[[bl]]$m
+    nn=nn*ni_free
+    
+    converged=FALSE
+    iter=0
+    pb = txtProgressBar(min=0, max=nIter)
+    while ((!converged)&(iter<=nIter))
+    {
+      iter=iter+1
+      EsufI=EsufI-EsufI
+      for (bl in 1:nb)
+      {
+        EsufI = EsufI + E.STEP(b,a,booklet[[bl]]$first,booklet[[bl]]$last,booklet[[bl]]$scoretab) 
+      }
+      b[update_set] = b[update_set]*sufI[update_set]/EsufI[update_set]
+      converged=(max(abs(sufI[update_set]-EsufI[update_set]))/nn<1e-04)
+      setTxtProgressBar(pb, value=iter)
+    }
+    if (!converged) warning(paste('Implicit Equations not Converged in',as.character(nIter),"iterations"))
+    
+    for (i in 1:length(first))
+    {
+      range=first[i]:last[i]
+      b[range]=b[range]/b[first[i]]
+    }
+    
+    H=matrix(0,length(a),length(a))
+    converged=FALSE
+    nr_iter=0
+    while ((!converged)&(nr_iter<max_nr_iter))
+    {
+      iter=iter+1
+      EsufI=EsufI-EsufI
+      H=H-H
+      for (bl in 1:nb)
+      {
+        EsufI = EsufI + E.STEP(b,a,booklet[[bl]]$first,booklet[[bl]]$last,booklet[[bl]]$scoretab) 
+        H     = H     + H.STEP0(b,a,booklet[[bl]]$first,booklet[[bl]]$last,booklet[[bl]]$scoretab)
+      }
+      # identify
+      for (i in 1:length(first))
+      {
+        H[first[i],first[i]]=1
+        EsufI[first[i]]=sufI[first[i]]
+      }
+      H[fixed_set,]=0
+      H[,fixed_set]=0
+      diag(H)[fixed_set]=1
+      EsufI[fixed_set]=sufI[fixed_set]
+      b = b*exp(solve(H,sufI-EsufI))
+      converged=(max(abs(EsufI[update_set]-sufI[update_set]))/nn<1e-10)
+      setTxtProgressBar(pb, value=iter)
+    }
+    close(pb)
+    if (!converged) warning(paste('Newton-Raphson not Converged in',as.character(nr_iter),"iterations"))
   }
-  close(pb)
   
   lx=list()
   length(lx)=nb
   names(lx)=names(booklet)
   for (bl in 1:nb) lx[[bl]]=est_lambda(b,a,booklet[[bl]]$first,booklet[[bl]]$last,booklet[[bl]]$scoretab)
   
-  OPCML_out=toOPLM(a,b, first, last, H=H)
-  return(list(b=b,H=H,beta.cml=OPCML_out$delta,acov.cml=OPCML_out$cov_delta,lambda=lx))
+  OPCML_out=toOPLM(a, b, first, last, H=H, fixed_b=fixed_b)
+  return(list(b=b, H=H, beta.cml=OPCML_out$delta, acov.cml=OPCML_out$cov_delta, lambda=lx, n_iter=iter))
 }
 
 
 ### Change parameterization and normalization to produce OPCML output
-toOPLM = function(a,b, first, last, H=NULL)
+## assumes that the first parameters is the reference unless there are fixed parameters
+toOPLM = function(a,b,first, last, H=NULL, fixed_b=NULL)
 {
   ## for now remove zero category manually
   if (!is.null(H)) H=H[-first,-first]
-  if (is.matrix(b)) b=b[,-first]
+  if (is.matrix(b)) {
+    b=b[,-first]
+    if (is.null(dim(b))) b=as.matrix(t(b))
+  }
   if (is.vector(b)) b=b[-first]
+  if (!is.null(fixed_b)) fixed_b=fixed_b[-first]
   a=a[-first]
   new_first=first
   new_last=last-1
@@ -698,9 +982,10 @@ toOPLM = function(a,b, first, last, H=NULL)
   first=new_first
   last=new_last
   logb=log(b)
+  acov=NULL
   ########################
   
-  ### Bayesian
+  ### Bayesian # a better criterion may be needed if b is Bayesian but there was one sample and b is a vector
   if (is.matrix(b))
   {
     k=ncol(b)
@@ -717,9 +1002,11 @@ toOPLM = function(a,b, first, last, H=NULL)
           delta[r,(first[i]+1):last[i]]=tmp
         }
       }
-      delta[r,]=delta[r,]-mean(delta[r,]) ## mean centered
+      if (is.null(fixed_b)) delta[r,]=delta[r,]-mean(delta[r,]) ## mean centered
     }
-    acov=cov(delta)
+    if (nrow(delta)>20*ncol(delta)){
+      acov=cov(delta)
+    }
   }else{   ### CML; b is a single vector
     k=length(b)
     ## construct linear transformation
@@ -739,26 +1026,36 @@ toOPLM = function(a,b, first, last, H=NULL)
         tel=tel+1
       }
     }
-    CC=matrix(-1/k,k,k); diag(CC)=(k-1)/k
-    AA=CC%*%DD
+    if (is.null(fixed_b))
+    {
+      CC=matrix(-1/k,k,k); diag(CC)=(k-1)/k
+      AA=CC%*%DD
     ## calculate Deltaś and asymp. variance cov matrix
-    delta=AA%*%logb
-    if (!is.null(H))
+    #  Note: assumes that the first parameters is the reference
+      delta=AA%*%logb
+      if (!is.null(H))
+      {
+        acov=solve(H[-1,-1])
+        acov=AA[,-1]%*%acov%*%t(AA[,-1])
+      }
+    }else # if there are fixed parameters we do not normalize
     {
-      acov=solve(H[-1,-1])
-      acov=AA[,-1]%*%acov%*%t(AA[,-1])
-    }else
-    {
-      acov=NULL
+      delta=DD%*%logb
+      if (!is.null(H))
+      {
+        fixed_set=which(!is.na(fixed_b))
+        acov=solve(H[-fixed_set,-fixed_set])
+        acov=DD[,-fixed_set]%*%acov%*%t(DD[,-fixed_set])
+      }
     }
   }  
   return(list(delta=delta, cov_delta=acov))
 }
 
-## Thus function expects categry thresholds delta, a vector of item_category scores a,
+## Thus function expects category thresholds delta, a vector of item_category scores a,
 #  and first and last. All without the zero category.
 #  It returns dexter parameters b, as well as new a, first and last with the zero category.
-toDexter <- function(delta, a,first,last)
+toDexter <- function(delta, a,first,last, re_normalize=TRUE)
 {
   ## Make D
   k=length(delta)
@@ -778,17 +1075,20 @@ toDexter <- function(delta, a,first,last)
       tel=tel+1
     }
   }
-  delta=delta-delta[1]  # normalize different
+  if (re_normalize) delta=delta-delta[1]  # normalize different
   b=exp(solve(DD)%*%delta) # exp(logb)
   names(b)=names(delta)
   
   new_first=first[1]
   new_last=last[1]+1
-  for (i in 2:length(first))
+  if (length(first)>1)
   {
-    nn=last[i-1]-first[i-1]
-    new_first[i]=new_last[i-1]+1
-    new_last=c(new_last,new_first[i]+nn+1)
+    for (i in 2:length(first))
+    {
+      nn=last[i-1]-first[i-1]
+      new_first[i]=new_last[i-1]+1
+      new_last=c(new_last,new_first[i]+nn+1)
+    }
   }
   new_a=vector("numeric",length(a)+length(first))
   new_b=vector("numeric",length(a)+length(first))
@@ -803,6 +1103,91 @@ toDexter <- function(delta, a,first,last)
   return(parms)
 }
 
+#################################### Wrappers for C- FUnctions for CML
+## THis version uses Elsym and is adapted for inclusion of b_0. However
+## THere must still be a small error somewhere.
+H.STEP <- function(b,a,first,last,nscore)
+{
+  n=length(first)
+  ms=length(nscore)-1
+  output = double(length(b)^2)
+  tmp=.C("H",
+         as.double(b),
+         as.integer(a),
+         as.integer(length(b)),
+         as.integer(first-1),
+         as.integer(last-1),
+         as.integer(nscore),
+         as.integer(n),
+         as.integer(ms),
+         as.double(output))[[9]]
+  tmp=as.matrix(tmp)
+  dim(tmp)=c(length(b),length(b))
+  tmp=tmp+t(tmp)
+  diag(tmp)=diag(tmp)/2
+  return(tmp)
+}
+
+## This version uses Elsym0... 
+H.STEP0 = function(b,a,first,last,nscore)
+{
+  first=first+1
+  n=length(first)
+  ms=length(nscore)-1
+  output = double(length(b)^2)
+  tmp=.C("H0",
+         as.double(b),
+         as.integer(a),
+         as.integer(length(b)),
+         as.integer(first-1),
+         as.integer(last-1),
+         as.integer(nscore),
+         as.integer(n),
+         as.integer(ms),
+         as.double(output))[[9]]
+  tmp=as.matrix(tmp)
+  dim(tmp)=c(length(b),length(b))
+  tmp=tmp+t(tmp)
+  diag(tmp)=diag(tmp)/2
+  return(tmp)
+}
+
+########################################
+# version with Elsym
+E.STEP <- function(b,a,first,last,nscore)
+{
+  n=length(first)
+  ms=length(nscore)-1
+  output = double(length(b)) 
+  tmp=.C("E",
+         as.double(b),
+         as.integer(a),
+         as.integer(first-1),
+         as.integer(last-1),
+         as.integer(nscore),
+         as.integer(n),
+         as.integer(ms),
+         as.double(output))[[8]]
+  return(tmp)
+}
+# version with Elsym0
+E.STEP0 <- function(b,a,first,last,nscore)
+{
+  first=first+1
+  n=length(first)
+  ms=length(nscore)-1
+  output = double(length(b)) 
+  tmp=.C("E0",
+         as.double(b),
+         as.integer(a),
+         as.integer(first-1),
+         as.integer(last-1),
+         as.integer(nscore),
+         as.integer(n),
+         as.integer(ms),
+         as.double(output))[[8]]
+  return(tmp)
+}
 
 
 ############################ Elementary Symmetry
@@ -846,512 +1231,6 @@ mean_ElSym <- function(b,a,first,last)
           as.integer(0))
   return(tmp[[9]])
 }
-
-
-
-######################################## FUnctions for CML
-H.STEP <- function(b,a,first,last,nscore)
-{
-  n=length(first)
-  ms=length(nscore)-1
-  output = double(length(b)^2)
-  tmp=.C("H",
-         as.double(b),
-         as.integer(a),
-         as.integer(length(b)),
-         as.integer(first-1),
-         as.integer(last-1),
-         as.integer(nscore),
-         as.integer(n),
-         as.integer(ms),
-         as.double(output))[[9]]
-  tmp=as.matrix(tmp)
-  dim(tmp)=c(length(b),length(b))
-  tmp=tmp+t(tmp)
-  diag(tmp)=diag(tmp)/2
-  return(tmp)
-}
-
-#########################################
-E.STEP0 <- function(b,a,first,last,nscore)
-{
-  n=length(first)
-  ms=length(nscore)-1
-  output = double(length(b)) 
-  tmp=.C("E",
-         as.double(b),
-         as.integer(a),
-         as.integer(first-1),
-         as.integer(last-1),
-         as.integer(nscore),
-         as.integer(n),
-         as.integer(ms),
-         as.double(output))[[8]]
-  return(tmp)
-}
-
-########################################
-E.STEP <- function(b,a,first,last,nscore)
-{
-  n=length(first)
-  ms=length(nscore)-1
-  output = double(length(b)) 
-  tmp=.C("E_n",
-         as.double(b),
-         as.integer(a),
-         as.integer(first-1),
-         as.integer(last-1),
-         as.integer(nscore),
-         as.integer(n),
-         as.integer(ms),
-         as.double(output))[[8]]
-  return(tmp)
-}
-
-
-
-## produces a matrix of statistics for pairwise DIF
-PairDIF_ <- function(par1,par2,cov1,cov2)
-{
-  labs=rownames(par1)
-  D=kronecker(par2,t(par2),FUN="-")-kronecker(par1,t(par1),FUN="-") 
-  var1=diag(cov1)
-  var2=diag(cov2)
-  S=(kronecker(var1,t(var1),FUN="+")-2*cov1)+(kronecker(var2,t(var2),FUN="+")-2*cov2)
-  diag(S)=1
-  D=D/sqrt(S)
-  colnames(D)=labs; rownames(D)=labs
-  return(D)
-}
-
-## produces a statistics for overall-DIF
-OverallDIF_ <- function(par1,par2, cov1,cov2)
-{
-  r=1
-  nI=length(par1)
-  beta=par1-par2
-  Sigma=cov1+cov2
-  DIF_test=mahalanobis(beta[-r],rep(0,(nI-1)),Sigma[-r,-r])
-  DIF_p=pchisq(DIF_test,(nI-1),lower.tail=FALSE)
-  return(list(stat=DIF_test,df=nI-1, p=DIF_p))
-}
-
-###
-
-
-#################################
-bty = function (n, h = c(265, 75), c. = c(61, 66),
-                l = c(25, 73), power = c(0.7, 1.742),
-                fixup = TRUE, gamma = NULL, alpha = 1, ...)
-{
-  if (!is.null(gamma))
-    warning("'gamma' is deprecated and has no effect")
-  if (n < 1L)
-    return(character(0L))
-  h <- rep(h, length.out = 2L)
-  c <- rep(c., length.out = 2L)
-  l <- rep(l, length.out = 2L)
-  power <- rep(power, length.out = 2L)
-  rval <- seq(1, 0, length = n)
-  rval <- hex(polarLUV(L = l[2L] - diff(l) * rval^power[2L],
-                       C = c[2L] - diff(c) * rval^power[1L], H = h[2L] - diff(h) *
-                         rval), fixup = fixup, ...)
-  if (!missing(alpha)) {
-    alpha <- pmax(pmin(alpha, 1), 0)
-    alpha <- format(as.hexmode(round(alpha * 255 + 1e-04)),
-                    width = 2L, upper.case = TRUE)
-    rval <- paste(rval, alpha, sep = "")
-  }
-  return(rval)
-}
-
-##########################################
-#' A print method for ENORM parms
-#'
-#' @param x An object produced by function \code{fit_enorm}
-#' @param ... Any other parameters to the print method
-#' @method print prms
-#'
-#'
-print.prms <- function(x, ...){
-  
-  hpd=function(x, conf=0.95){
-    conf <- min(conf, 1-conf)
-    n <- length(x)
-    nn <- round( n*conf )
-    x <- sort(x)
-    xx <- x[ (n-nn+1):n ] - x[1:nn]
-    m <- min(xx)
-    nnn <- which(xx==m)[1]
-    return(paste0("(",as.character(round(x[ nnn ],digits=3))," , "
-                  ,as.character(round(x[ n-nn+nnn ],digits=3)),")") )
-  }
-  
-  if (x$inputs$method=="CML")
-  {
-    atab=as.data.frame(cbind(x$inputs$ssIS$item_id[-x$inputs$ssI$first],
-                             x$inputs$ssIS$item_score[-x$inputs$ssI$first],
-                             round(x$est$beta.cml,digits=3),
-                             round(sqrt(diag(x$est$acov.cml)),digits=3)))
-    colnames(atab)=c("item_id" ,"a", "B", "SE(B)")
-  }
-
-  if (x$inputs$method=="Bayes"){
-    hh=apply(x$est$beta.cml,2,hpd)
-    atab=as.data.frame(cbind(x$inputs$ssIS$item_id[-x$inputs$ssI$first],
-                             x$inputs$ssIS$item_score[-x$inputs$ssI$first],
-                             round(colMeans(x$est$beta.cml),digits=3),
-                             round(apply(x$est$beta.cml, 2, sd),digits=3),
-                             hh))
-    colnames(atab)=c("item_id" ,"a", "mean(B)", "SD(B)", "95%hpd(B)")
-  }
-  row.names(atab)=NULL
-  print(atab)
-}
-
-##########################################
-#' Coerce parameters object to a data.frame of parameters
-#'
-#' @param x An object produced by function \code{fit_enorm}
-#' @param ... Any other parameters to the as.data.frame
-#' @method as.data.frame prms
-#'
-#'
-as.data.frame.prms <- function(x, ...){
-  hpd=function(x, conf=0.95){
-    conf <- min(conf, 1-conf)
-    n <- length(x)
-    nn <- round( n*conf )
-    x <- sort(x)
-    xx <- x[ (n-nn+1):n ] - x[1:nn]
-    m <- min(xx)
-    nnn <- which(xx==m)[1]
-    return(data.frame(l=round(x[ nnn ],digits=3),r=round(x[ n-nn+nnn ],digits=3)))
-  }
-  
-  if (x$inputs$method=="CML")
-  {
-    atab=as.data.frame(cbind(x$inputs$ssIS$item_id[-x$inputs$ssI$first],
-                             x$inputs$ssIS$item_score[-x$inputs$ssI$first],
-                             round(x$est$beta.cml,digits=3),
-                             round(sqrt(diag(x$est$acov.cml)),digits=3)))
-    colnames(atab)=c("item_id" ,"a", "B", "SE(B)")
-  }
-  
-  if (x$inputs$method=="Bayes"){
-    hh=apply(x$est$beta.cml,2,hpd)
-    atab=data.frame(item_id=x$inputs$ssIS$item_id[-x$inputs$ssI$first],
-                       a=x$inputs$ssIS$item_score[-x$inputs$ssI$first],
-                       mb=round(colMeans(x$est$beta.cml),digits=3),
-                       sdb=round(apply(x$est$beta.cml, 2, sd),digits=3),
-                       hpdl= hh[,1], hpdr=hh[,2])
-    colnames(atab)=c("item_id" ,"a", "mean(B)", "SD(B)", "95%hpd(B) left","95%hpd(B) right")
-
-  }
-  row.names(atab)=NULL
-  return(atab)
-}
-
-
-
-
-##########################################
-#' A plot method for the interaction model
-#'
-#' Plot the item-total regressions fit by the interaction (or Rasch) model
-#'
-#'
-#' @param x An object produced by function \code{fit_inter}
-#' @param items The items to plot (column numbers). If NULL, all items will be plotted
-#' @param summate If FALSE, regressions for polytomous items will be shown for each
-#' response option separately; default is TRUE.
-#' @param overlay If TRUE and more than one item is specified, there will be two plots,
-#' one for the Rasch model and the other for the interaction model, with all items
-#' overlayed; otherwise, multiple plots with the two models overlayed. Default is FALSE
-#' @param nc An integer between 1 and 3. Number of columns when putting mutiple plots
-#' on the same page. Default is 1. May be ignored or adjusted if it does not make sense.
-#' @param nr An integer between 1 and 3. Number of rows when putting mutiple plots
-#' on the same page. Default is 1. May be ignored or adjusted if it does not make sense.
-#' @param curtains 100*the tail probability of the sum scores to be shaded. Default is 10.
-#' Set to 0 to have no curtains shown at all.
-#' @param show.observed If TRUE, the observed proportion correct at each sum score
-#' will be shown as dots. Default is FALSE.
-#' @param ... Any additional plotting parameters
-#' @method plot rim
-#'
-plot.rim <- function(x, items=NULL, summate=TRUE, overlay=FALSE,
-                    nc=1, nr=1, curtains=10, show.observed=FALSE, ...){
-  allItems = x$ss$il$item_id
-  qua = curtains/200
-  if(qua>0 & qua<.5) {
-    qnt = quantile(rep(as.integer(x$ss$tl$sumScore), x$ss$tl$N), c(qua,1-qua))
-  } else {
-    qnt=NULL
-  }
-  if (is.null(items)) items=allItems
-  npic = length(items)
-  if (length(items)==1) nr=nc=1
-  if (overlay & !summate) overlay=FALSE
-  if (overlay) {
-  # only summate possible
-  if (nr*nc==2) graphics::layout(matrix(1:2,nr,nc)) else graphics::layout(1)
-  # do the Rasch model
-  #
-  z = x$regs$itrRM
-  z = z[row.names(z) %in% items,]
-  maxScore = ncol(z)-1
-  graphics::plot(c(0,maxScore),c(0,max(z)),type="n",main="Rasch model",xlab="Test score",
-                 ylab="Item score")
-  if (!is.null(qnt)) {
-    tmp = graphics::par('usr')
-    graphics::rect(tmp[1], tmp[3], qnt[1], tmp[2], col="#EEEEEE", border=NA)
-    graphics::rect(qnt[2], tmp[3], tmp[2], tmp[4], col="#EEEEEE", border=NA)
-  }
-  for (i in 1:npic) graphics::lines(0:maxScore,z[i,]) # the actual lines
-  lx = sample(0:maxScore, npic, replace = FALSE) # label the lines
-  for (i in 1:npic) {
-    graphics::points(lx[i], z[i,lx[i]+1], co="white", cex=1.6, pch=19)
-    graphics::text(lx[i], z[i,lx[i]+1], items[i], co=1, cex=.6)
-  }
-  # do the Interaction model
-  #
-  z = x$regs$itrIM
-  z = z[row.names(z) %in% items,]
-  maxScore = ncol(z)-1
-  graphics::plot(c(0,maxScore),c(0,max(z,na.rm=TRUE)),type="n",main="Interaction model",xlab="Test score",
-                 ylab="Item score")
-  if (!is.null(qnt)) {
-    tmp = graphics::par('usr')
-    graphics::rect(tmp[1], tmp[3], qnt[1], tmp[2], col="#EEEEEE", border=NA)
-    graphics::rect(qnt[2], tmp[3], tmp[2], tmp[4], col="#EEEEEE", border=NA)
-  }
-  for (i in 1:npic) graphics::lines(0:maxScore,z[i,]) # the actual lines
-  lx = sample(0:maxScore, npic, replace = FALSE) # label the lines
-  for (i in 1:npic) {
-    graphics::points(lx[i], z[i,lx[i]+1], co="white", cex=1.6, pch=19)
-    graphics::text(lx[i], z[i,lx[i]+1], items[i], co=1, cex=.6)
-  }
-  graphics::box()
-  # end of overlay
-  
-  } else {
-    # not overlay: do many plots
-    ly = my_layout(npic, nr, nc)
-    graphics::layout(matrix(1:(ly$nr*ly$nc), byrow=TRUE, ncol=ly$nc))
-    if (summate) {
-      # for each item in turn, do both models (with summation), and plot
-      zI = x$regs$itrIM
-      zR = x$regs$itrRM
-      maxScore = ncol(zR)-1
-      for (i in items) {
-        mxY = max(zR[row.names(zR)==i,],na.rm=TRUE)
-        graphics::plot(c(0,maxScore), c(0,mxY), type="n",
-                       main=paste("Item", i),
-                       xlab="Test score", ylab="Item score")
-        if (!is.null(qnt)) {
-          tmp = graphics::par('usr')
-          graphics::rect(tmp[1], tmp[3], qnt[1], tmp[2], col="#EEEEEE", border=NA)
-          graphics::rect(qnt[2], tmp[3], tmp[2], tmp[4], col="#EEEEEE", border=NA)
-        }
-        if(show.observed) {
-          plt = x$ss$plt[x$ss$plt$item_id==i,]
-          graphics::points(plt$sumScore,plt$meanScore,col="coral",pch=20)
-        }
-        graphics::lines(0:maxScore, zI[row.names(zI)==i,], col="gray80", lwd=3)
-        graphics::lines(0:maxScore, zR[row.names(zR)==i,])
-      }
-      graphics::box()
-    } else {
-      zI = x$regs$ctrIM
-      zR = x$regs$ctrRM
-      maxScore = ncol(zR)-1
-      # for each item in turn, similar but possibly multiline and coloured
-      for (i in items) {
-        prb = zI[x$ss$il$first[x$ss$il$item_id==i]:x$ss$il$last[x$ss$il$item_id==i],]
-        pte = bty(nrow(prb), alpha=.6)
-        graphics::plot(c(0,maxScore), 0:1, type="n",
-                       main=paste("Item", i),
-                       xlab="Test score", ylab="Probability")
-        if (!is.null(qnt)) {
-          tmp = graphics::par('usr')
-          graphics::rect(tmp[1], tmp[3], qnt[1], tmp[2], col="#EEEEEE", border=NA)
-          graphics::rect(qnt[2], tmp[3], tmp[2], tmp[4], col="#EEEEEE", border=NA)
-        }
-        for (j in 1:nrow(prb)) {
-          graphics::lines(0:maxScore, prb[j,], col=pte[j], lwd=3)
-        }
-        prb = zR[x$ss$il$first[x$ss$il$item_id==i]:x$ss$il$last[x$ss$il$item_id==i],]
-        pte = bty(nrow(prb))
-        for (j in 1:nrow(prb)) {
-          graphics::lines(0:maxScore, prb[j,], col=pte[j])
-        }
-      } # eol items
-      graphics::box()
-    } # eo not summate
-  } # eo not overlay
-}
-
-
-
-
-
-
-##############################
-my_layout <- function(npic, nr, nc) {
-  if(npic==1) nr=nc=1
-  nc = min(nc, 3)
-  nc = min(nc, npic)
-  nw = npic %/% nc + npic %% nc
-  nr = min(nr, 3)
-  nr = min(nr, nw)
-  list(nr=nr, nc=nc)
-}
-
-
-##################################################
-shinierInput <- function(FUN, id, namez, ...){
-  inputs = character(length(namez))
-  for (i in 1:length(namez))
-  {
-    inputs[i] = as.character(FUN(paste0(id, namez[i]), ...))
-  }
-  inputs
-}
-
-
-
-##################################
-#' Derive scoring rules from keys
-#'
-#' For multiple choice items that will be scored as 0/1, derive the
-#' scoring rules from the keys to the correct responses
-#'
-#'
-#' @param keys  A data frame containing columns \code{item_id}, \code{nOptions}, and
-#' \code{key} (the spelling is important). See details.
-#' @return A data frame that can be used as input to \code{start_new_project}
-#' @details
-#' This function might be useful in setting up the scoring rules when all items
-#' are multiple-choice and scored as 0/1. (Hint: Because the order in which the
-#' scoring rules is not important, one can use the function to generate rules for
-#' many MC items and then append per hand the rules for a few complex items.)
-#'
-#' The input data frame must contain the exact name of each item, the number
-#' of options, and the key. If the keys are all integers, it will be assumed that
-#' responses are coded as 1 through nOptions. If they are all uppercase letters,
-#' it is assumed that responses are coded as A,B,C,... All other cases result
-#' in an error.
-#'
-keys_to_rules <- function(keys) {
-  # for backward compatibility we rename
-  names(keys)[names(keys)=='item'] = 'item_id'
-  
-  if (is.numeric(keys$key)) ABC=FALSE else {
-    if (all(keys$key %in% LETTERS)) ABC=TRUE
-    else stop("You have inadmissible keys")
-  }
-  if (ABC) {
-    m = match(keys$key, LETTERS)
-    if (any(m>keys$nOptions)) stop("You have out-of-range keys")
-    r = keys %>% group_by(.data$item_id) %>% do({
-      y = data.frame(response=LETTERS[1:.$nOptions[1]], score=0L)
-      y$score[match(.$key[1],LETTERS)] = 1
-      y
-    })
-  } else {
-    if (any(keys$key>keys$nOptions)) stop("You have out-of-range keys")
-    r = keys %>% group_by(.data$item_id) %>% do({
-      y = data.frame(response=1:.$nOptions[1], score=0L)
-      y$score[.$key[1]] = 1
-      y
-    })
-  }
-  ungroup(r)
-}
-
-###########################################
-#' A print method for the interaction model
-#'
-#' Print the available items for plots of the Rasch and the interaction models
-#'
-#'
-#' @param x An object produced by function \code{fit_inter}
-#' @param ... Included to stop check from nagging
-#' @method print rim
-#'
-print.rim <- function(x, ...){
-  available_items = x$ss$il[,"item_id"]
-  print.default(available_items)
-  invisible(x)
-}
-
-# use for forwarding arguments to e.g. plot function
-merge_arglists = function(args, default = NULL, override = NULL)
-{
-  if(!is.null(default))
-    for(nm in names(default)) 
-      if(! nm %in% names(args)) 
-        args[[nm]] = default[[nm]]
-      
-      if(!is.null(override))
-        for(nm in names(override)) 
-          args[[nm]] = override[[nm]]
-        
-        return(args)
-}
-
-
-#########################
-#' Verbal aggression data
-#' 
-#' A data set of self-reported verbal behaviour in different frustrating
-#' situations (Vansteelandt, 2000)
-#' 
-#' 
-#' @name verbAggrData
-#' @docType data
-#' @format A data set with 316 rows and 25 columns.
-#' @keywords datasets
-NULL
-
-###############################################
-#' Scoring rules for the verbal aggression data
-#' 
-#' A set of (trivial) scoring rules for the verbal 
-#' aggression data set
-#' 
-#' 
-#' @name verbAggrRules
-#' @docType data
-#' @format A data set with 72 rows and 3 columns (item, response, score).
-#' @keywords datasets
-NULL
-
-################################################
-#' Item properties in the verbal aggression data
-#' 
-#' A data set of item properties related to the verbal
-#' aggression data
-#' 
-#' 
-#' @name verbAggrProperties
-#' @docType data
-#' @format A data set with 24 rows and 5 columns.
-#' @keywords datasets
-NULL
-
-###########################################
-#' Item properties in the PISA 2012 example
-#' 
-#' A data set of item properties in the PISA 2012 example (see the
-#' help screen for function add_booklet)
-#' 
-#' 
-#' @name PISA_item_class
-#' @docType data
-#' @format A data set with 109 rows and 6 columns.
-#' @keywords datasets
-NULL
 
 
 

@@ -2,13 +2,13 @@
 % Please edit documentation in R/dexter.R
 \name{design_as_network}
 \alias{design_as_network}
-\title{Design as network}
+\title{Test design as network}
 \usage{
 design_as_network(dataSrc, predicate = NULL, weights = c("items",
   "responses"))
 }
 \arguments{
-\item{dataSrc}{Data source: a dexter project db handle or a data.frame}
+\item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score}
 
 \item{predicate}{An optional expression to subset data, if NULL all data is used}
 
@@ -30,7 +30,7 @@ packages automatically as they are fairly large and rely on a number
 of dependencies.
 }
 \examples{
-\dontrun{
+\donttest{
 dsgn = design_as_network(db)
 # Check if design is connected
 design_is_connected(dsgn)

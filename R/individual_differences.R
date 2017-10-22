@@ -2,14 +2,16 @@
 #' Test individual differences
 #'
 #' @param dataSrc Data source: a dexter project db handle or a data.frame
-#' @param predicate An optional expression to subset data, if NULL all data is used
+#' @param predicate An optional expression to subset data, if NULL all data are used
 #' @details This function uses a score distribution to test whether there are individual 
 #' differences in ability. First, it estimates ability based on the score distribution. Then, 
 #' the observed distribution is compared to the one expected from the single estimated ability.
 #' The data are typically from one booklet but can also consist of 
 #' the intersection (i.e., the common items) of two or more booklets. If the intersection is empty 
 #' (no common items for all persons), the function will exit with an error message.
-#' @return Print will show test results. Plot will produce a plot of expected and observed score frequencies.
+#' @return an object of type tind. Printing the object  will show test results. 
+#' Plotting it will produce a plot of expected and observed score frequencies. 
+#' The former under the hypothesis that there are no individual differences.
 #'
 #'@examples
 #' \dontrun{
@@ -18,25 +20,30 @@
 #' dd = individual_differences(db)
 #' print(dd)
 #' plot(dd)
+#' 
+#' close_project(db)
 #' }
 #' 
 individual_differences <- function(dataSrc, predicate = NULL)
 {
   qtpredicate = eval(substitute(quote(predicate)))
-  respData = get_responses_(dataSrc,qtpredicate, env=caller_env()) 
   
-  if (nrow(respData)<1) stop("No responses to analyse")
-  respData = 
-    respData %>%
-    spread_(key_col='item_id', value_col='item_score') %>%
-    select(which(c(TRUE, !is.na(colSums(.[,-1]))))) 
+  respData = get_resp_data(dataSrc, qtpredicate, env = caller_env()) 
   
-  if(ncol(respData)==1) stop (paste('No common items across booklets.'))
-  
-  itcol = setdiff((names(respData)), 'person_id')
-  respData = respData %>%
-    gather_(key_col='person_id', value_col='item_score', itcol)
-  colnames(respData)[2]="item_id"  ### this is ugly
+  # make sure we have an intersection
+  if(length(unique(respData$design$booklet_id)) > 1)
+  {
+    respData$design = tibble(booklet_id='b', 
+                             item_id = Reduce(intersect, split(respData$design$item_id, respData$design$booklet_id)))
+    
+    respData$x = respData$x %>%
+      semi_join(respData$design, by='item_id') %>%
+      group_by(.data$person_id) %>%
+      mutate(sumScore = sum(.data$item_score), booklet_id = 'b') %>%
+      ungroup()
+  }
+
+  if (nrow(respData$x)<1) stop ('No common items across booklets.')
   
   parms=fit_enorm(respData)
   b=parms$est$b
@@ -44,20 +51,21 @@ individual_differences <- function(dataSrc, predicate = NULL)
   first=parms$inputs$bkList[[1]]$first
   last=parms$inputs$bkList[[1]]$last
   m=parms$inputs$bkList[[1]]$m
-  
   observed=parms$inputs$bkList[[1]]$scoretab
+  
   theta.est = theta_score_distribution(b,a,first,last,observed)
   expected = pscore(theta.est,b,a,first,last)
-  max.score=sum(a[last])
-  
   chi = chisq.test(x=observed,p=expected,simulate.p.value = TRUE)
   
-  inputs = list(items=parms$inputs$bkList[[1]]$items, m=m, max.score=max.score, observed=observed, xpr=as.character(qtpredicate))
+  
+  inputs = list(items=parms$inputs$bkList[[1]]$items, m=m, max.score=sum(a[last]), 
+                observed=observed, xpr=as.character(qtpredicate))
   est =list(test=chi, theta=theta.est)
   outpt = list(inputs=inputs, est=est)
   class(outpt) = append("tind",class(outpt))
   outpt
 }
+
 
 print.tind=function(x,...)
 {

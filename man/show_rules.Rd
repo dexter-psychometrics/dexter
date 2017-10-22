@@ -2,16 +2,40 @@
 % Please edit documentation in R/dexter.R
 \name{show_rules}
 \alias{show_rules}
-\title{Show scoring rules}
+\alias{show_booklets}
+\alias{show_item_properties}
+\alias{show_person_properties}
+\alias{show_items}
+\alias{show_design}
+\alias{show_persons}
+\title{Deprecated function names}
 \usage{
 show_rules(db)
+
+show_booklets(db)
+
+show_item_properties(db)
+
+show_person_properties(db)
+
+show_items(db)
+
+show_design(db)
+
+show_persons(db)
 }
 \arguments{
 \item{db}{handle to a Dexter project database}
 }
 \value{
-data.frame of scoring rules
+data.frame
 }
 \description{
-Show the scoring rules currently present in the dexter project db
+All 'show_<something>' functions have been renamed to 'get_<something>'.
+}
+\seealso{
+\code{\link{get_booklets}}, \code{\link{get_design}}, 
+\code{\link{get_item_properties}}, \code{\link{get_items}}, 
+\code{\link{get_person_properties}}, \code{\link{get_persons}}, 
+\code{\link{get_rules}}
 }

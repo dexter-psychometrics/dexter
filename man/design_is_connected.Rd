@@ -16,7 +16,7 @@ TRUE or FALSE
 Use the output from design_as_network to check if your design is connected.
 }
 \examples{
-\dontrun{
+\donttest{
 # as an example, turn off some your booklets and see if you are
 # still left with a connected design
 dsgn = design_as_network(db, !(booklet_id \%in\% c('b1','b3','b4')))

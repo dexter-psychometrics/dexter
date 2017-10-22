@@ -1,11 +1,11 @@
 ---
-title: "Profile plots"
+title: "Profile plots in dexter"
 author: "Timo Bechger and Ivailo Partchev"
 date: "`r Sys.Date()`"
 bibliography: dexter.bib
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Profile plots in dexter}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -67,30 +67,37 @@ function (n, h = 11, c. = c(80, 5), l = c(35, 95), power = 0.6,
 }
 ```
 
-Function `profile_plot` in package dexter produces plots like the following one based on the verbal agression dataset:
+The function `profile_plot` in package dexter produces plots like the following one based on the verbal agression dataset:
 
-```{r, figProf, echo=FALSE, results="hide"}
+```{r, figProf, echo=FALSE, results="hide",out.extra='style="border:none;display:block;margin: 0 auto;"'}
+# fig.align='center' does not work anymore when you specify any css styles
+# therefore the: display:block;margin: 0 auto;
 db = start_new_project(verbAggrRules, ":memory:", covariates=list(gender="<unknown>"))
 add_booklet(db, verbAggrData, "agg")
 add_item_properties(db, verbAggrProperties)
-profile_plot(db, booklet_id=='agg', item_property='mode', covariate='gender')
+profile_plot(db, item_property='mode', covariate='gender', booklet_id=='agg')
 ```
+
 
 The plot is, as we will try to show, quite informative. However, it is not very easy to understand as it is very condensed and contains some less familiar elements. Furthermore, experience shows that persons who are at ease with complicated formulae or tables may be challenged by a relatively simple graph, or vice versa. May this serve as an excuse for the very elementary level of this vignette.
 
 Let us assume a test of four dichotomous items. The possible sum scores are then 0 through 4. Let the four items be classified into two non-overlapping domains, A and B, with two items each. The following table could be the frequency distribution of a sample of students by their scores on the two domains:
 
 ```{r frq, echo=FALSE}
-matrix(fq,3,3)
+rownames(fq) = c(0,1,2)
+colnames(fq) = c(0,1,2)
+fq
 ```
+
+
 
 We never expected to use a 3-dimensional bar plot, ever, but we will make a once-in-a-lifetime exception:
 
 
-```{r, fig1, echo=FALSE}
+```{r, fig1, echo=FALSE, out.extra='style="border:none;"'}
 cloud(fq, panel.3d.cloud = panel.3dbars,
       xbase = 0.4, ybase = 0.4, zlim = c(0, max(fq)),
-      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",
+      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B", zlab='',
       col.facet =  "tan",
       screen = list(z = 40, x = -30))
 ```
@@ -109,7 +116,7 @@ joint = prop.table(fq)
 
 cloud(joint, panel.3d.cloud = panel.3dbars,
       xbase = 0.4, ybase = 0.4, zlim = c(0, 1),
-      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",
+      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",zlab='',
       col.facet =  "skyblue", alpha.facet=.7,
       screen = list(z = 40, x = -30))
 
@@ -118,7 +125,7 @@ co = rep(c('skyblue1','pink1','springgreen1'),3)
 
 cloud(conditional, panel.3d.cloud = panel.3dbars,
       xbase = 0.4, ybase = 0.4, zlim = c(0, 1),
-      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",
+      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",zlab='',
       col.facet =  co, alpha.facet=.7,
       screen = list(z = 40, x = -30))
 ```
@@ -135,7 +142,7 @@ pa=blues(5)
 sp=pa[j]
 cloud(special, panel.3d.cloud = panel.3dbars,
       xbase = 0.4, ybase = 0.4, zlim = c(0, 1),
-      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",
+      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",zlab='',
       col.facet =  sp, alpha.facet=.7,
       screen = list(z = 40, x = -30))
 ```
@@ -152,7 +159,7 @@ sp[hi] = pa[j[hi]]
 
 cloud(special, panel.3d.cloud = panel.3dbars,
       xbase = 0.4, ybase = 0.4, zlim = c(0, 1),
-      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",
+      scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",zlab='',
       col.facet =  sp, alpha.facet=.7,
       screen = list(z = 40, x = -30))
 
@@ -172,6 +179,13 @@ The thin gray lines connect all patterns that yield the same total score on the 
 * The plots we made are based on observed proportions while dexter uses probabilities predicted by the interaction model or, optionally, the Rasch model
 
 Back to the original profile plot: what does it mean? There are two paths, one for female respondents, the other one for males. The diagonal lines pass through all pairs of scores on "Want to curse, shout, "  and "Actually curse, shout" that result in the same overall score on verbally aggressive behavior. The fact that the curve for the females lies consistently to the left and above the curve for males means that, at each level of verbal aggressiveness, they tend to want more but do less.
+
+
+```{r, prof_plot2, echo=FALSE, fig.height=5, fig.width=5, fig.align='center', out.extra='style="border:none;display:block;margin: 0 auto;"'}
+profile_plot(db, item_property='mode', covariate='gender', booklet_id=='agg', main='Gender')
+mtext('Do versus Want')
+```
+
 
 Speaking in general, the profile plots can be used to investigate whether two (or more) groups of respondents attain the same test score in the same way. When applied to educational test data, the plots can be used to detect differences in the relative difficulty of (sets of) items for respondents that belong to different groups and are matched on the test score. This is different from regular procedures to detect *Differential Item Functioning (or DIF)*; and better. First of all, the procedure is not exploratory but requires its user to provide a meaningful classification of the items which should improve the odds that the results make sense to content-experts. Second, it looks explicitly at relations between items and avoids the erroneous conception of DIF as an item property [@BechgerMarisDIF]. 
 
