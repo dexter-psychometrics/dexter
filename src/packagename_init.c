@@ -19,6 +19,8 @@ extern void PV(void *, void *, void *, void *, void *, void *, void *, void *, v
 extern void sampleNRM(void *, void *, void *, void *, void *, void *, void *, void *);
 extern void sampleNRM2(void *, void *, void *, void *, void *, void *, void *, void *);
 extern void recyclePV(void *, void *, void *, void *, void *, void *, void *, void *, void *);
+extern void recyclePV2(void *, void *, void *, void *, void *, void *, void *, void *, void *);
+
 
 static const R_CMethodDef CEntries[] = {
   {"E",          (DL_FUNC) &E,           8},
@@ -32,6 +34,7 @@ static const R_CMethodDef CEntries[] = {
   {"meanElSym",  (DL_FUNC) &meanElSym,  10},
   {"PV",         (DL_FUNC) &PV,         13},
   {"recyclePV",  (DL_FUNC) &recyclePV,   9},
+  {"recyclePV2", (DL_FUNC) &recyclePV,   9},    
   {"sampleNRM",  (DL_FUNC) &sampleNRM,   8},
   {"sampleNRM2", (DL_FUNC) &sampleNRM2,  8},
   {NULL, NULL, 0}

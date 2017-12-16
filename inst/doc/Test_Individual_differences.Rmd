@@ -10,6 +10,10 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+<style>
+img{ border:none;}
+</style>
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(dexter)
@@ -43,8 +47,8 @@ ss= simulated %>%
   group_by(person_id) %>% 
   summarise(sumscore=sum(item_score)) 
 par(mfrow=c(1,2))
-hist(ss$sumscore)
-plot(ecdf(ss$sumscore))
+hist(ss$sumscore, main='', xlab='sumScore')
+plot(ecdf(ss$sumscore), bty='l', main='ecdf', xlab='sumScore' )
 mm = fit_inter(simulated)
 ```
 
@@ -61,11 +65,11 @@ plot(mm, show.observed = TRUE,
 The curtains that eliminate the 5% smallest and 5% largest sum scores are drawn somewhat narrow but, apart from that, all regressions look nice. It appears that, by just looking at the response data, we are not in a very good position to judge whether there are any true individual differences in ability. To help with that, dexter offers a function, `individual_differences`:  
 
 ```{r, fig.align='center', fig.height=4, fig.width=4}
-dd = individual_differences(simulated)
+dd = individual_differences(simulated,degree=10)
 plot(dd)
 ```
 
-The gray line shows the predicted frequency of each sum score under the hypothesis of no true individual differences. The green dots show the observed frequencies. We now see that our observed data is compatible with the null hypothesis. 
+The gray line shows the predicted frequency of each sum score under the hypothesis of no true individual differences. The green dots show the observed frequencies and it will be clear that our observed data is compatible with the null hypothesis. 
 
 The print function for the test shows a chi-squared test for the null hypothesis. Note that this uses R's option to simulate the p-value, which explains why the degrees of freedom are missing:
 
@@ -88,7 +92,7 @@ This is quite different now, and the chi-squared test is highly significant.
 
 
 ```{r, show=FALSE}
-dbDisconnect(db2)
+close_project(db2)
 ```
 
 #References

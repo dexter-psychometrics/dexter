@@ -23,7 +23,7 @@ dbRunScript <- function(db, fn)
 convert_old_db = function(db)
 {
   # assumes sqlite
-  #dbRunScript(db,"dexter_sqlite.sql")
+  dbRunScript(db,"dexter_sqlite.sql")
   dbTransaction(db,
   {
     if(dbExistsTable(db, "item_properties"))
@@ -105,19 +105,15 @@ dbUniquePersonIds <- function(db,n)
 
 project_CreateTables <- function(db, covariates=NULL)
 {
-  # db is a handle to a database
-  
   if(is(db, 'SQLiteConnection'))
   {
     dbRunScript(db,"dexter_sqlite.sql")
-  } 
-  else if(is(db, 'PostgreSQLConnection')) 
+  } else if(is(db, 'PostgreSQLConnection')) 
   {
     stop('Postgres is not supported yet')
-    dbRunScript(db,"dexter_standard.sql")
-    dbRunScript(db,"dexter_pgsql_triggers.sql")
-  } 
-  else {stop('unsupported database')}
+    #dbRunScript(db,"dexter_standard.sql")
+    #dbRunScript(db,"dexter_pgsql_triggers.sql")
+  } else {stop('unsupported database')}
   
   if (!is.null(covariates))
   {
@@ -135,9 +131,9 @@ sql_data_type = function(value)
 {
   if(inherits(value,'Date')) return(' DATE ')
   else if(inherits(value,'factor')) return(' TEXT ')
-  else if(inherits(value,'POSIXlt') | inherits(value,'POSIXt')) return(' DATETIME ')
+  else if(inherits(value,'POSIXlt') || inherits(value,'POSIXt')) return(' DATETIME ')
   else if(typeof(value) == 'integer') return(' INTEGER ')
-  else if(typeof(value) == 'double') return(' DOUBLE PRECISION ')
+  else if(is.numeric(value)) return(' DOUBLE PRECISION ')
   else return(" TEXT ")
 }
 
@@ -149,10 +145,10 @@ sql_col_def = function(value, is.default=FALSE, db=NULL)
     return(dt) 
   } else if(is.numeric(value))
   {
-    return(paste(dt,'DEFAULT',ifelse(is.na(value)|is.null(value),'NULL',value)))
+    return(paste(dt,'DEFAULT',ifelse(is.na(value) || is.null(value),'NULL',value)))
   } else
   {
-    return(paste(dt,'DEFAULT',sql_quote(value,"'")))
+    return(paste(dt,'DEFAULT',sql_quote(as.character(value),"'")))
   }
 }
 

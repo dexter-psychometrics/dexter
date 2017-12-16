@@ -2,7 +2,8 @@
 #' Test individual differences
 #'
 #' @param dataSrc Data source: a dexter project db handle or a data.frame
-#' @param predicate An optional expression to subset data, if NULL all data are used
+#' @param predicate An optional expression to subset data, if NULL all data are used.
+#' @param degree The degree of a polynomial used to smooth observed score distribution. 
 #' @details This function uses a score distribution to test whether there are individual 
 #' differences in ability. First, it estimates ability based on the score distribution. Then, 
 #' the observed distribution is compared to the one expected from the single estimated ability.
@@ -24,7 +25,7 @@
 #' close_project(db)
 #' }
 #' 
-individual_differences <- function(dataSrc, predicate = NULL)
+individual_differences <- function(dataSrc, predicate = NULL, degree=7)
 {
   qtpredicate = eval(substitute(quote(predicate)))
   
@@ -52,6 +53,7 @@ individual_differences <- function(dataSrc, predicate = NULL)
   last=parms$inputs$bkList[[1]]$last
   m=parms$inputs$bkList[[1]]$m
   observed=parms$inputs$bkList[[1]]$scoretab
+  observed_smooth=ENORM2ScoreDist(parms, degree,booklet_id=parms$inputs$bkList[[1]]$booklet)$n.smooth
   
   theta.est = theta_score_distribution(b,a,first,last,observed)
   expected = pscore(theta.est,b,a,first,last)
@@ -59,7 +61,7 @@ individual_differences <- function(dataSrc, predicate = NULL)
   
   
   inputs = list(items=parms$inputs$bkList[[1]]$items, m=m, max.score=sum(a[last]), 
-                observed=observed, xpr=as.character(qtpredicate))
+                observed=observed, observed_smooth=observed_smooth, xpr=as.character(qtpredicate))
   est =list(test=chi, theta=theta.est)
   outpt = list(inputs=inputs, est=est)
   class(outpt) = append("tind",class(outpt))
@@ -69,25 +71,28 @@ individual_differences <- function(dataSrc, predicate = NULL)
 
 print.tind=function(x,...)
 {
-  print("Chi-Square Test for the hypothesis that all respondents have the same ability:")
+  cat("Chi-Square Test for the hypothesis that all respondents have the same ability:\n")
   print(x$est$test,...)
 }
+
 
 plot.tind=function(x,...)
 {
   user.args = list(...)
   mx.frq=max(max(x$est$test$expected),max(x$est$test$observed))
-  default.args = list(col="green",
+  default.args = list(col="#4DAF4A",
                       ylim=c(0,mx.frq),
                       xlab="Test-score", 
                       ylab="Frequency",
                       cex=0.7, 
+                      bty='l',
                       pch=19)
   override.args = list(x=0:x$inputs$max.score, y=x$est$test$observed)
-  
+ 
   do.call(plot,merge_arglists(user.args,override=override.args, default=default.args))
 
   lines(0:x$inputs$max.score,x$est$test$expected,col="gray",pch=19,cex=0.7)
+  lines(0:x$inputs$max.score,x$inputs$observed_smooth,col="lightgreen")
   legend("topleft", legend = c("observed", "expected"), bty = "n",
-         lwd = 1, cex = 0.7, col = c("green", "gray"), lty = c(NA,1), pch = c(19,NA))
+         lwd = 1, cex = 0.7, col = c("#4DAF4A", "gray"), lty = c(NA,1), pch = c(19,NA))
 }

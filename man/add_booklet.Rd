@@ -32,8 +32,8 @@ Adds item response data for a test form (a.k.a. booklet)
 \details{
 It is a common practice to keep respons data in tables where each row 
 contains the responses from a single person. This function is provided to input
-data in that form, one booklet at a time. The starting point is a data frame,
-and getting the data frame into R is left to the user. We have found packages
+data in that form, one booklet at a time. The starting point is a data frame.
+Getting the data frame into R is left to the user. We have found packages
 \code{readxl} to be very good at reading Excel sheets, and \code{haven} quite
 efficient with SPSS files.
 
@@ -58,7 +58,7 @@ indicators in the scoring rules.
 \examples{
 \dontrun{
 db = start_new_project(verbAggrRules, "verbAggression.db", 
-covariates=list(gender="<unknown>"))
+  covariates=list(gender="<unknown>"))
 head(verbAggrData)
 add_booklet(db, verbAggrData, "agg")
 

@@ -4,10 +4,12 @@
 \alias{distractor_plot}
 \title{Distractor plot}
 \usage{
-distractor_plot(dataSrc, item, predicate = NULL, nc = 1, nr = 1, ...)
+distractor_plot(dataSrc, item, predicate = NULL, nc = 1, nr = 1,
+  legend = TRUE, ...)
 }
 \arguments{
-\item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, response, item_score}
+\item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, response, item_score
+and optionally booklet_id}
 
 \item{item}{The ID of the item to plot. A separate plot will be produced
 for each booklet that contains the item, or an error message if the item ID
@@ -22,6 +24,8 @@ on the same page. Default is 1. May be ignored or adjusted if it does not make s
 \item{nr}{An integer between 1 and 3. Number of rows when putting mutiple plots
 on the same page. Default is 1. May be ignored or adjusted if it does not make sense.}
 
+\item{legend}{logical, whether to include the legend. default is TRUE}
+
 \item{...}{further arguments to plot.}
 }
 \description{
@@ -29,12 +33,7 @@ Produce a diagnostic distractor plot for an item
 }
 \details{
 Customisation of title and subtitle can be done by using the arguments main and sub. 
-These arguments can contain references to the variables item_id, booklet_id, item_position 
-(only if dataSrc is a dexter db), pvalue, rit and rir. References are made by prefixing 
-these variables with a dollar sign. Variable names can optionally be postfixed 
-with a sprintf string, e.g.:
- 
-\code{distractor_plot(
-db, main='item: $item_id', 
-sub='Item-rest corr.: $rir:.2f')}
+These arguments can contain references to the variables item_id, booklet_id, item_position(only if dataSrc is a dexter db),
+pvalue, rit and rir. References are made by prefixing these variables with a dollar sign. Variable names can optionally be postfixed 
+with a sprintf style format string, e.g.: distractor_plot(db, main='item: $item_id', sub='Item rest correlation: $rir:.2f')
 }

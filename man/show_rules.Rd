@@ -34,8 +34,6 @@ data.frame
 All 'show_<something>' functions have been renamed to 'get_<something>'.
 }
 \seealso{
-\code{\link{get_booklets}}, \code{\link{get_design}}, 
-\code{\link{get_item_properties}}, \code{\link{get_items}}, 
-\code{\link{get_person_properties}}, \code{\link{get_persons}}, 
-\code{\link{get_rules}}
+\code{\link{get_booklets}}, \code{\link{get_design}}, \code{\link{get_item_properties}}, 
+\code{\link{get_items}}, \code{\link{get_person_properties}}, \code{\link{get_persons}}, \code{\link{get_rules}}
 }

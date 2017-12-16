@@ -66,3 +66,7 @@ close_project(db)
 }
 
 }
+\references{
+Marsman, M., Maris, G., Bechger, T. M., and Glas, C.A.C. (2016) What can we learn from plausible values? 
+Psychometrika. 2016; 81: 274–289.
+}

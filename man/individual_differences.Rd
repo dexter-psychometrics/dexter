@@ -4,12 +4,14 @@
 \alias{individual_differences}
 \title{Test individual differences}
 \usage{
-individual_differences(dataSrc, predicate = NULL)
+individual_differences(dataSrc, predicate = NULL, degree = 7)
 }
 \arguments{
 \item{dataSrc}{Data source: a dexter project db handle or a data.frame}
 
-\item{predicate}{An optional expression to subset data, if NULL all data are used}
+\item{predicate}{An optional expression to subset data, if NULL all data are used.}
+
+\item{degree}{The degree of a polynomial used to smooth observed score distribution.}
 }
 \value{
 an object of type tind. Printing the object  will show test results. 

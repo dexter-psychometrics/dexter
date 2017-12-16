@@ -21,8 +21,8 @@ ss= simulated %>%
   group_by(person_id) %>% 
   summarise(sumscore=sum(item_score)) 
 par(mfrow=c(1,2))
-hist(ss$sumscore)
-plot(ecdf(ss$sumscore))
+hist(ss$sumscore, main='', xlab='sumScore')
+plot(ecdf(ss$sumscore), bty='l', main='ecdf', xlab='sumScore' )
 mm = fit_inter(simulated)
 
 ## ---- fig.align='center', fig.width=7------------------------------------
@@ -33,7 +33,7 @@ plot(mm, show.observed = TRUE,
      nr=1, nc=2)
 
 ## ---- fig.align='center', fig.height=4, fig.width=4----------------------
-dd = individual_differences(simulated)
+dd = individual_differences(simulated,degree=10)
 plot(dd)
 
 ## ------------------------------------------------------------------------
@@ -46,5 +46,5 @@ dd = individual_differences(db2, booklet_id=="data")
 plot(dd)
 
 ## ---- show=FALSE---------------------------------------------------------
-dbDisconnect(db2)
+close_project(db2)
 

@@ -6,7 +6,7 @@
 #include "elsymean.h"
 #include "pascal.h"
 
-// compute Symmetric Basis Functions without item (stored in gi)
+// compute Symmetric Basis Functions 
 // Warning: It is necessary that elements of a are montone nondecreasing !
 // This is used in CML and should be replaced with time
 void ElSym0(double *b, int *a, int *first, int *last, int *item1,int* item2, int *nI, int *mS, double *g)
@@ -73,9 +73,12 @@ void ElSym(double *b, int *a, int *first, int *last, int *item1, int* item2, int
   free(gg);
 }
 
-
-
-void meanElSym(double *b, int *a, int *first, int *last, int *item1,int* item2, int *nI, int *mS, double *g, int *idx)
+// This calculates elsym functions devided by appropriate binomial coeficients using
+// Pascal.c which stores the binomial coeficients
+// Purpose is to keep the elsym functions from over- or underflowing
+// This function also allows b to contain the parameters that would normally be
+// implicit and equal to one
+void meanElSym(double *b, int *a, int *first, int *last, int *item1, int *item2, int *nI, int *mS, double *g, int *idx)
 {
   int Msc,n;
   double cij, gg[10000]={0};
@@ -107,8 +110,8 @@ void meanElSym(double *b, int *a, int *first, int *last, int *item1,int* item2, 
   for (int s=0;s<=Msc;s++) {g[s]=gg[2*s+idx[0]];}
 }
 
-// c routines to calculate a matrix of item-total probabilties //
-  // This one uses Esym //
+// C routines to calculate a matrix of item-total probabilties //
+  // This one uses Elsym //
 void ittot_mat0(double *b, int *a, double *c, int *first, int *last, int *nI, int *ms, double *pi)
 {
   int nscores = ms[0]+1;
@@ -222,7 +225,7 @@ void ittot_mat(double *b, int *a, double *c, int *first, int *last, int *nI, int
 }
 
 
-/// routines for CML using Elsym //
+/// routines for CML //
 
 /*
  E: E-step. Routine to calculate the expected sufficient statistics
@@ -230,14 +233,14 @@ void ittot_mat(double *b, int *a, double *c, int *first, int *last, int *nI, int
 void E(double *b, int *a, int *first, int *last, int *scoretab, int *nI, int *mS, double *expect)
 {
   int i1,i2;
-  double g[10000]={0};
-  double gi[10000]={0}; 
-  
+  double g[2000]={0.0};
+ 
   i1=-1;
   i2=-1;
   ElSym(b,a,first,last,&i1,&i2,nI,mS,g);
   for (int item=0;item<nI[0];item++)
   {
+    double gi[2000]={0.0}; // for (int i=0; i<=mS[0];i++) gi[i]=0.0;
     ElSym(b,a,first,last,&item,&i2,nI,mS,gi);
     for (int j=first[item];j<=last[item];j++)
     {
@@ -249,33 +252,11 @@ void E(double *b, int *a, int *first, int *last, int *scoretab, int *nI, int *mS
   }
 }
 
-void E0(double *b, int *a, int *first, int *last, int *nscore, int *nI, int *mS, double *expect)
-{
-  int i1,i2;
-  double g[10000]={0};
-  double gi[10000]={0}; 
-  // pre-compute Symmetric Basis Functions
-  i1=-1;
-  i2=-1;
-  ElSym0(b,a,first,last,&i1,&i2,nI,mS,g);
-  for (int item=0;item<nI[0];item++)
-  {
-    ElSym0(b,a,first,last,&item,&i2,nI,mS,gi);
-    for (int j=first[item];j<=last[item];j++)
-    {
-      for (int s=a[j];s<=mS[0];s++)
-      {
-        if (g[s]>0) expect[j]+=nscore[s]*gi[s-a[j]]*b[j]/g[s];
-      }
-    }
-  }
-}
 
 
 /*
 H: Routine to calculate the information matrix/Hessian
 */
-
 void H(double *b, int *a, int* nPar, int *first, int *last, int *scoretab, int *nI, int *mS, double *Hess)
 {
   int i1,i2,tel=-1, jump=0;
@@ -284,19 +265,14 @@ void H(double *b, int *a, int* nPar, int *first, int *last, int *scoretab, int *
   double gk[10000]={0};
   double gik[10000]={0}; 
 
-  // pre-compute Symmetric Basis Functions
   i1=-1;i2=-1;
   ElSym(b,a,first,last,&i1,&i2,nI,mS,g);
-  // compute expected sufficient statistics
   for (int item=0;item<nI[0];item++)
   {
     tel+=1+jump;
     jump+=(last[item]-first[item]);
-    
-    // compute Symmetric Basis Functions without item (stored in gi)
+    for (int i=0; i<=mS[0];i++) gi[i]=0.0;
     ElSym(b,a,first,last,&item,&i2,nI,mS,gi);
-    
-    // compute expected sufficient statistics
     for (int j=(first[item]+1);j<=last[item];j++)
     {
       for (int s=a[j];s<=mS[0];s++)
@@ -320,6 +296,7 @@ void H(double *b, int *a, int* nPar, int *first, int *last, int *scoretab, int *
       }
       for (int k=(item+1);k<nI[0];k++)
       {
+        for (int i=0; i<=mS[0];i++) {gk[i]=0.0; gik[i]=0.0;}
         ElSym(b,a,first,last,&k,&i2,nI,mS,gk);
         ElSym(b,a,first,last,&k,&item,nI,mS,gik);
         for (int l=(first[k]+1);l<=last[k];l++)
@@ -339,9 +316,43 @@ void H(double *b, int *a, int* nPar, int *first, int *last, int *scoretab, int *
   }
 }
 
+//* Older routines for CML //
+void E0(double *b, int *a, int *first, int *last, int *nscore, int *nI, int *mS, double *expect)
+{
+  int i1,i2;
+  double *g=NULL;
+  double *gi=NULL;
+  // initialize g and gi
+  void *_g = realloc(g, ((mS[0]+1) * sizeof(double)));
+  void *_gi = realloc(gi, ((mS[0]+1) * sizeof(double)));
+  g = (double*)_g;
+  gi = (double*)_gi;
+  // pre-compute Symmetric Basis Functions
+  i1=-1;
+  i2=-1;
+  ElSym0(b,a,first,last,&i1,&i2,nI,mS,g);
+  // compute expected sufficient statistics
+  for (int item=0;item<nI[0];item++)
+  {
+    // compute Symmetric Basis Functions without item (stored in gi)
+    ElSym0(b,a,first,last,&item,&i2,nI,mS,gi);
+    
+    // compute expected sufficient statistics
+    for (int j=first[item];j<=last[item];j++)
+    {
+      for (int s=a[j];s<=mS[0];s++)
+      {
+        if (g[s]>0) expect[j]+=nscore[s]*gi[s-a[j]]*b[j]/g[s];
+      }
+    }
+  }
+  free(g);
+  free(gi);
+}
+
 void H0(double *b, int *a, int* nPar, int *first, int *last, int *nscore, int *nI, int *mS, double *Hess)
 {
- /* int i1,i2,tel=-1, jump=0, idx;
+  int i1,i2,tel=-1, jump=0, idx;
   double *g=NULL;
   double *gi=NULL;
   double *gk=NULL;
@@ -354,14 +365,8 @@ void H0(double *b, int *a, int* nPar, int *first, int *last, int *nscore, int *n
   g = (double*)_g;
   gi = (double*)_gi;
   gk = (double*)_gk;
-  gik = (double*)_gik; */
+  gik = (double*)_gik; 
  
-  int i1,i2,tel=-1, jump=0;
-  double g[10000]={0};
-  double gi[10000]={0}; 
-  double gk[10000]={0};
-  double gik[10000]={0}; 
-  
   // pre-compute Symmetric Basis Functions
   i1=-1;i2=-1;
   ElSym0(b,a,first,last,&i1,&i2,nI,mS,g);
@@ -415,8 +420,8 @@ void H0(double *b, int *a, int* nPar, int *first, int *last, int *nscore, int *n
       }
     }
   }
-/*  free(g);
+  free(g);
   free(gi);
   free(gk);
-  free(gik); */
+  free(gik); 
 }

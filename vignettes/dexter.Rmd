@@ -10,6 +10,14 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+<style>
+img{ border:none;}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,fig.align='center', fig.width=6, fig.height=5)
+```
+
 **Dexter** is an R [@R] package intended as a robust and fairly comprehensive system for managing and analyzing test data organized in booklets. It includes facilities for importing and managing test data, assessing and improving the quality of data through basic test-and-item analysis, fitting an IRT model, and computing various estimates of ability.
 
 **Dexter** differs from other psychometric software both in terms of the tools it includes as in those it omits. The data management component is quite developed to promote data integrity and prevent SQL injections and other mishaps. Many psychometric methods not found elsewhere are provided, such as Haberman's (2007) interaction model generalized for polytomous items, new methods for exploratory and confirmatory DIF analysis, support for the 3DC method of standard setting, and more. On the other hand, there is no support for multivariate IRT models, 2PL and 3PL models and other methods sufficiently represented in other packages. The central IRT model is a polytomous generalization of the extended marginal Rasch model: we call it the Extended NOminal Response Model (ENORM). 
@@ -124,12 +132,12 @@ Now fit and display models for the sum scores on each of the four frustrating si
 
 ```{r}
 mSit = fit_domains(db, item_property= "situation")
-plot(mSit)
+plot(mSit, nr=2,nc=2)
 ```
 
 Finally, a profile plot comparing responses by males and females on the two modes, want to curse (scold, shout), against actually curse (scold, shout):
 
-```{r}
+```{r, fig.width=5, fig.height=5}
 profile_plot(db, item_property='mode', covariate='gender')
 ```
 
@@ -153,14 +161,15 @@ Let us draw plausible values for our subject in what is now a scale of verbal ag
 
 ```{r}
 pv = plausible_values(db, parms)
-plot(density(pv$PV1))
+plot(density(pv$PV1), bty='l', main='verbal aggression',xlab='plausible value')
 ```
 
 For a direct comparison on gender:
 
 ```{r}
 pv = merge(pv, get_persons(db))
-boxplot(PV1~gender, data=pv)
+par(bty='n', fg='white')
+boxplot(PV1~gender, data=pv, border='black')
 ```
 
 It appears that we cannot find a marked difference in verbal agression between male and female respondents _overall_. Compare this result to the very interesting structural differences revealed by the profile plot above.
@@ -250,7 +259,7 @@ get_item_properties(db)
 get_person_properties(db)
 
 # Fit the interaction model for booklet 1, all countries 
-m <- fit_inter(db,booklet_id=='B1')
+m = fit_inter(db,booklet_id=='B1')
 plot(m)
 
 # Analyse by domain
@@ -263,7 +272,7 @@ profile_plot(db, item_property = "isSaS", covariate="cnt", predicate=(cnt %in% c
 ```
 
 ```{r, show=FALSE}
-dbDisconnect(db)
+close_project(db)
 ```
 
 #References

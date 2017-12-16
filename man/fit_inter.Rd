@@ -22,9 +22,8 @@ Estimate the parameters of the Interaction model and the Rasch model
 Unlike the Rasch model, the interaction model cannot be computed
 concurrently for a whole design of test forms. This function fits the
 Rasch model and the interaction model on a complete rectangular array of
-responses, with comparison between the two models playing an important role.
-The rectangular array is typically one booklet but can also consist of 
-the intersection (common items) of two or more booklets. If the intersection is empty 
+responses. This typically consist of responses to items in one booklet but can also consist of
+the intersection (common items) of two or more booklets. If the intersection is empty
 (no common items for all persons), the function will exit with an error message.
 }
 \examples{

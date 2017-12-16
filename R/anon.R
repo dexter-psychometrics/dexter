@@ -3,7 +3,7 @@
 # pv1 <- function(b,a,first,last,score,mu=0,sigma=2)
 # {
 #   tmp=.C("PV1",
-#          as.double(b),
+#          as.double(b),theta_
 #          as.integer(a),
 #          as.integer(first-1),
 #          as.integer(last-1),
@@ -49,15 +49,84 @@ pv_ <- function(b,a,first,last,score,npv,mu,sigma,pop)
   return(tmp)
 }
 
+## Uses recycling to produce npv plausible values per score in scores
+#  on a test defined by first and last
+# If scores=NULL it takes scores to be 0 to the maxScore on the test
+recycle_pv = function(b, a, first, last, scores=NULL, npv=1, mu=0, sigma=2)
+{
+  ms.a=sum(a[last])
+  if (is.null(scores)) {
+    scores=0:ms.a
+  }else
+  {
+    if (!identical(intersect(0:ms.a,scores),scores)) stop("wrong scores in recycle_pv")
+  }
+  n=rep(npv,length(scores))
+  R=rep(0,length(scores)*npv)
+  nI=length(first)
+  tmp=.C("recyclePV",
+         as.double(b),
+         as.integer(a),
+         as.integer(first-1),
+         as.integer(last-1),
+         as.integer(nI),
+         as.integer(n),
+         as.double(mu),
+         as.double(sigma),
+         as.double(R))[[9]]
+  dim(tmp)=c(length(scores),npv)
+  return(tmp)
+}
+
+## Uses recycling to produce npv plausible values per score in scores
+#  on a test defined by first and last
+# If scores=NULL it takes scores to be 0 to the maxScore on the test
+# This version accepts a sample from the prior
+recycle_pv2 = function(b, a, first, last, scores=NULL, npv, prior_sample)
+{
+  ms.a=sum(a[last])
+  if (is.null(scores)) {
+    scores=0:ms.a
+  }else
+  {
+    if (!identical(intersect(0:ms.a,scores),scores)) stop("wrong scores in recycle_pv")
+  }
+  nprior=length(prior_sample)
+  if (nprior<1) stop("wrong prior sample")
+  
+  n=rep(npv,length(scores))
+  R=rep(0,length(scores)*npv)
+  nI=length(first)
+  tmp=.C("recyclePV2",
+         as.double(b),
+         as.integer(a),
+         as.integer(first-1),
+         as.integer(last-1),
+         as.integer(nI),
+         as.integer(n),
+         as.double(prior_sample),
+         as.double(nprior),
+         as.double(R))[[9]]
+  dim(tmp)=c(length(scores),npv)
+  return(tmp)
+}
+
 # Given samples of plausible values from one or more normal distributions
 # this function samples means and variances of plausible values from their posterior
-# This is used yo update the prior used in sampling plausible values
-update_pv_prior<-function(PV, pop, mu, sigma)
+# It updates the prior used in sampling plausible values
+#
+# @param pv     vector of plausible values
+# @param pop    vector of population indexes. These indices refer to mu and sigma
+# @param mu     current means of each population
+# @param sigma  current standard deviation of each population
+#
+# @return       a sample of mu and sigma
+update_pv_prior<-function(pv, pop, mu, sigma)
 {
-  min_n=5
+  min_n=5 # no need to update when groups are very small
   for (j in 1:length(unique(pop)))
   {
-    pv_group=subset(PV,pop==j)
+    pv_group=subset(pv,pop==j)
     m=length(pv_group)
     pv_mean=mean(pv_group)
     if (m>min_n)
@@ -72,21 +141,22 @@ update_pv_prior<-function(PV, pop, mu, sigma)
 
 # @param x                tibble(booklet_id <char or int>, person_id <char>, sumScore <int>, pop <int>)
 # @param design           list: names: as.character(booklet_id), values: tibble(first <int>, last <int>) ordered by first
-# @param b                vector of beta's per item_score, including 0 category, ordered by item_id, item_score
-# @param a                vector of discriminations per item_score, inclusing 0 category, ordered by item_id, item_score
+# @param b                vector of b's per item_score, including 0 category, ordered by item_id, item_score
+# @param a                vector of weights per item_score, inclusing 0 category, ordered by item_id, item_score
 # @param nPV              number of plausible values to return per person
 # @param n_prior_updates  number of samples from full-conditional of prior parameters 
+### If the parameters are estimated with calibrate_Bayes:
+# @param from             burn-in: first sample of b that is used
+# @param by               every by-th sample of b is used. If by>1 auto-correlation is avoided.
 #
 # @return
 # tibble(booklet_id <char or int>, person_id <char>, sumScore <int>, nPV nameless columns with plausible values)
-pv = function(x, design, b, a, nPV, n_prior_updates=4)
+pv = function(x, design, b, a, nPV, n_prior_updates=4, from=4, by=5)
 {
   start_prior=c(0,4)
   nPop = length(unique(x$pop))
   priors = list(mu=rep(start_prior[1],nPop),sigma=rep(start_prior[2],nPop))
- 
-  
-  
+
   if (is.matrix(b))
   {
     add_pv = function(booklet_id, pop, sumScore, iter, priors, design, a, b)
@@ -96,11 +166,12 @@ pv = function(x, design, b, a, nPV, n_prior_updates=4)
     }
 
     apv=1
-    which.pv = 5*(1:nPV)
+    which.pv = seq(from,(from-by)*(from>by)+by*nPV,by=by)
     nIter=max(which.pv)
     out_pv=matrix(0,length(x$sumScore),nPV)
-    
-    for(iter in c(1:4,which.pv))
+    if (nrow(b)<nIter) stop(paste("at least", as.character(nIter), "samples of item parametes needed in function pv"))
+                            
+    for(iter in 1:nIter)
     {
       x = x %>% 
         group_by(.data$booklet_id) %>%
@@ -114,7 +185,6 @@ pv = function(x, design, b, a, nPV, n_prior_updates=4)
         apv=apv+1
       }
     }
-
     x %>% 
       select(.data$booklet_id, .data$person_id,.data$sumScore, matches('PV\\d+'))
     
@@ -142,10 +212,13 @@ pv = function(x, design, b, a, nPV, n_prior_updates=4)
   }
 }
 
-# simulate responses to a single item. Adapted for inclusion zero
-renorm <- function(x,b,a,theta,first,last,i)
+# simulate 0-based index of responses to a single item. Adapted for inclusion zero
+# the index i is local in that it refers to an item-index in first and last
+renorm <- function(b,a,theta,first,last,i)
 {
   m=length(theta)
+  x=rep(0,m)
+  if ((i<0)|(i>length(first))) stop("wrong item-indx in renorm")
   tmp=.C("sampleNRM",
          as.double(theta),
          as.double(b),
@@ -161,9 +234,10 @@ renorm <- function(x,b,a,theta,first,last,i)
 # simulate responses to a single item. 
 # NOt adapted for inclusion of parameter for 
 # zero category
-renorm0 <- function(x,b,a,theta,first,last,i)
+renorm0 <- function(b,a,theta,first,last,i)
 {
   m=length(theta)
+  x=rep(0,m)
   tmp=.C("sampleNRM0",
          as.double(theta),
          as.double(b),
@@ -177,9 +251,14 @@ renorm0 <- function(x,b,a,theta,first,last,i)
 }
 
 #void sampleNRM2(double *theta, double *b, int *a, int *first, int *last, int *nI, int *m, int *test_score)
-# simulate scores rather then response patterns. Adapted for inclusion zero and used in theta_EAP
-renorm2 <- function(b,a,theta,first,last)
+# simulate test-scores rather then response patterns. Adapted for inclusion zero
+rscore <- function(theta,b,a,first,last, cntr=NULL, use_b_matrix=FALSE)
 {
+  if(use_b_matrix)
+  {
+    if(is.null(cntr)) stop('use_b_matrix is true, need a counter')
+    b = b[cntr$get(),]
+  }
   m=length(theta)
   nI=length(first)
   x=rep(0,m)
@@ -196,7 +275,7 @@ renorm2 <- function(b,a,theta,first,last)
 }
 
 
-# Expected scores
+# Expected scores given a single ability value theta
 E_score=function(theta,b,a,first,last)
 {
   escore=as.double(0.0)
@@ -210,6 +289,146 @@ E_score=function(theta,b,a,first,last)
          as.integer(last-1),
          as.integer(n))[[2]]
   return(tmp)
+}
+
+# Expected distribution given one ability theta
+pscore <- function(theta,b,a,first,last)
+{
+  g=elsym(b,a,first,last)
+  p=rep(0.0,length(g))
+  for (s in 1:length(g))
+  {
+    p[s]=g[s]*exp((s-1)*theta)
+  }
+  return(p/sum(p))
+}
+
+####################################################
+# Computes likelihood and test information for internal use
+#
+# For a vector of thetas it returns:
+# l = a matrix (n of response cats * length of theta) of the likelihood or log-likelihood if log=TRUE
+# I = a vector of the information function computed at each theta = sum(P'^2/PQ)
+# J = something sum(P'P"/PQ) 
+# The vector theta can be a set of quadrature points or 
+# estimates to compute their SE
+#
+IJ_=function(b,a,first,last, theta, log=FALSE) {
+  indx = first_last2indx(first,last)
+  a = a[indx]
+  b = b[indx]
+  
+  i = rep(1:length(first),times=last-first+1)
+  scores = 0:Reduce('+', by(a, i, max))
+  p = sweep(exp(outer(a,theta)), 1, b, '*')
+  hh = Reduce('+', by(p,i,function(x)log(colSums(x))))
+  l = sweep(outer(scores,theta), 2, hh, '-')
+  p = by(p, i, function(x)sweep(x,2,colSums(x),'/'), simplify=T)
+  p = do.call(rbind, lapply(p, as.matrix))
+  p = data.frame(A=a, p=p)
+  IJ = by(p, i, function(x){
+    M1 = colSums(m<-sweep(x[,-1],1,x$A,'*'))
+    M2 = colSums(m<-sweep(m,1,x$A,'*'))
+    M3 = colSums(sweep(m,1,x$A,'*'))
+    data.frame(I=M2-M1^2,J=M3-3*M1*M2+2*M1^3)
+  })
+  I = rowSums(sapply(IJ, function(x)x$I))
+  J = rowSums(sapply(IJ, function(x)x$J))
+  if (!log) l=exp(l)
+  list(l=l,I=I, J=J)
+}
+
+
+#### ML estimation of theta
+# uses an implicit equations algorithm
+# se is the option to calculate standard-errors or not
+theta_MLE <- function(b,a,first,last, se=FALSE)
+{
+  ms.a=sum(a[last])
+  theta=rep(0,ms.a-1)
+  for (s in 1:(ms.a-1))
+  {
+    escore=-1
+    while (abs(escore-s)>1e-1)
+    {
+      escore=E_score(theta[s],b,a,first,last)
+      theta[s]=theta[s]+log(s/escore)
+    }
+  }
+  theta=c(-Inf,theta,Inf)
+  sem=rep(NA,length(theta))
+  if (se)
+  {
+    f = IJ_(b,a,first,last, theta)
+    sem=1/sqrt(f$I)
+  }
+  return(list(theta=theta,se=sem))
+}
+
+##### EAP based on npv (default 500) plausible values ####
+# Current version uses normal(0,2) prior. With crumpy data one might
+# need a bigger standard deviation
+# Assumes that score is a vector 0:max_score
+# Uses recycling to get npv plausible values for each sum score.
+# Options:
+# Smoothing is an option to avoid non-monotonicity due to random fluctuations
+# se is the option to calculate standard-errors or not
+### In R-code:
+# n=rep(npv,length(score))
+# R=matrix(0,length(score),npv)
+# while (any(n>0))
+# {
+#   atheta=rnorm(1,mu,sigma)
+#   sm=rscore(b,a,atheta,first,last)+1
+#   if (n[sm]>0)
+#   {
+#     R[sm,n[sm]]=atheta
+#     n[sm]=n[sm]-1
+#   }
+# }
+####
+theta_EAP <- function(b,a,first,last,npv=500,mu=0,sigma=4,smooth=FALSE, se=FALSE)
+{
+  ms.a=sum(a[last])
+  score=0:ms.a
+  n=rep(npv,(ms.a+1))
+  R=rep(0,length(score)*npv)
+  nI=length(first)
+  tmp=.C("recyclePV",
+         as.double(b),
+         as.integer(a),
+         as.integer(first-1),
+         as.integer(last-1),
+         as.integer(nI),
+         as.integer(n),
+         as.double(mu),
+         as.double(sigma),
+         as.double(R))[[9]]
+  dim(tmp)=c((ms.a+1),npv)
+  theta=rowMeans(tmp)
+  if (smooth) theta = predict(lm(theta ~ poly(score,7)))
+  sem=rep(NA,(ms.a+1))
+  if (se) sem=apply(tmp,1,sd)
+  return(list(theta=theta, se=sem))
+}
+
+## EAP using Jeffrey's prior: aka propto sqrt(information)
+# Uses a weighted average to integrate over a grid defined by:
+# grid_from, grid_to and grid_length.
+theta_jEAP=function(b, a, first,last, se=FALSE, grid_from=-6, grid_to=6, grid_length=101) 
+{
+  theta_grid = seq(grid_from, grid_to, length=grid_length)
+  f = IJ_(b,a,first,last,theta_grid)
+  prior=sqrt(f$I)
+  w = sweep(f$l, 2, prior, '*')
+  theta = apply(w, 1, function(x)weighted.mean(theta_grid, w=x))
+  sem=rep(NA,length(theta))
+  if (se)
+  {
+    f = IJ_(b,a,first,last, theta)
+    sem =sqrt((f$I+(f$J/(2*f$I))^2)/f$I^2)
+  }
+  return(list(theta=theta,se=sem))
 }
 
 # computes distribution of score weighted with A conditionally on score weighted with a
@@ -252,68 +471,6 @@ elsymat <- function(b,a,A,first,last)
   return(G[,,(1-idx)+1])
 }
 
-# ML estimation of theta
-theta_MLE <- function(b,a,first,last)
-{
-  ms.a=sum(a[last])
-  theta=rep(0,ms.a-1)
-  for (s in 1:(ms.a-1))
-  {
-    escore=-1
-    while (abs(escore-s)>1e-1)
-    {
-      escore=E_score(theta[s],b,a,first,last)
-      theta[s]=theta[s]+log(s/escore)
-    }
-  }
-  return(c(-Inf,theta,Inf))
-}
-
-##### EAP based on npv (default 200) plausible values ####
-# Current version uses normal(0,2) prior. With crumpy data one might
-# need a bigger standard deviation
-# Assumes that score is a vector 0:max_score
-# Uses recycling to get npv plausible values for each sum score.
-# Smoothing is an option to avoid non-monotonicity due to random fluctuations
-### In R-code:
-# n=rep(npv,length(score))
-# R=matrix(0,length(score),npv)
-# while (any(n>0))
-# {
-#   atheta=rnorm(1,mu,sigma)
-#   sm=renorm2(b,a,atheta,first,last)+1
-#   if (n[sm]>0)
-#   {
-#     R[sm,n[sm]]=atheta
-#     n[sm]=n[sm]-1
-#   }
-# }
-####
-theta_EAP <- function(b,a,first,last,score,npv=500,mu=0,sigma=4,smooth=FALSE)
-{
-  n=rep(npv,length(score))
-  R=rep(0,length(score)*npv)
-  nI=length(first)
-  tmp=.C("recyclePV",
-         as.double(b),
-         as.integer(a),
-         as.integer(first-1),
-         as.integer(last-1),
-         as.integer(nI),
-         as.integer(n),
-         as.double(mu),
-         as.double(sigma),
-         as.double(R))[[9]]
-  dim(tmp)=c(length(score),npv)
-  theta=rowMeans(tmp)
-  if (smooth)
-  {
-    ss=smooth.spline(score, theta, df=20)
-    theta=ss$y
-  }
-  return(theta) #list(theta=theta,se=apply(tmp,1,sd))
-}
-
 # ML estimation (using EM) of theta based on A
 theta_aA <- function(b,a,A,first,last)
 {
@@ -343,20 +500,9 @@ theta_aA <- function(b,a,A,first,last)
   return(c(-Inf,theta,Inf))
 }
 
-# Expected distribution given one ability theta
-pscore <- function(theta,b,a,first,last)
-{
-  g=elsym(b,a,first,last)
-  p=rep(0.0,length(g))
-  for (s in 1:length(g))
-  {
-    p[s]=g[s]*exp((s-1)*theta)
-  }
-  return(p/sum(p))
-}
 
-# estimate a single ability for a whole score distribution
-# to be used for the 3DC standard setting method
+# Estimate a single ability for a whole score distribution.
+# Used for the 3DC standard setting method
 # and testing for overdispersion
 theta_score_distribution <- function(b,a,first,last,scoretab)
 {
@@ -472,36 +618,7 @@ SSTable <- function(m, AB, model) {
 
 
 #################################### Item-Total Regressions
-## original in R
-## Using elsym
-ittotmat0R = function (b, c, a, first, last) 
-{
-  ms=sum(a[last])
-  mm=sum(last-first+1)
-  pi=matrix(0, mm,(ms+1))
-  logb = log(b)
-  logc = log(c)
-  for (s in 0:ms)
-  {
-    eta = exp(logb + (a * s) * logc)
-    g = elsym(eta, a, first, last)
-    k = 1
-    for (it in 1:length(first)) 
-    {
-      gi = elsym(eta, a, first[-it], last[-it])
-      for (j in first[it]:last[it]) 
-      {
-        idx = s + 1 - a[j]
-        if ((idx > 0) & (idx <= length(gi))) 
-        {
-          pi[k, s + 1] = exp(log(eta[j]) + log(gi[idx]) - log(g[s + 1]))
-        }
-        k = k + 1
-      }
-    }
-  }
-  return(pi)
-}
+
 
 ## Wrapper to C function
 # using Elsym
@@ -574,7 +691,7 @@ ittotmat <- function(b,c,a,first,last)
 #      bIM:    Parameter estimates of the Interaction model
 #      cIM:    Estimate of (log-)interaction parameter
 #      cRM:    Interaction parameters under the Rasch model: all equal to 1
-#      HRM:    Asymptotic var-covvar matrix of item parameters under RM
+#      HRM:    Block diag. Asymptotic var-covvar matrix of item parameters under RM
 #     se.c:   Standard error of interaction parameter
 # fit.stat: log(cIM)/se.c. Wald statistic normally distributed under Rasch model
 #########################################################################
@@ -631,7 +748,7 @@ EstIM  <- function(ss) {
     }
     if (converged<1) scale=1
   }
-  
+
   bRM=b
   cRM=ic
   
@@ -701,7 +818,7 @@ EstIM  <- function(ss) {
 #####################################################
 
 #### Bayes
-calibrate_Bayes = function(itemList, booklet, sufI, b, a, first, last, nIter, fixed_b=NULL) 
+calibrate_Bayes = function(itemList, booklet, sufI, b, a, first, last, nIter, fixed_b=NULL, lambda_out=FALSE) 
 {
   nb = length(booklet)
   n = length(itemList)
@@ -709,9 +826,13 @@ calibrate_Bayes = function(itemList, booklet, sufI, b, a, first, last, nIter, fi
   z = NULL
   bx = matrix(0, nIter, length(b))
   lx=list()
-  length(lx)=nb
-  names(lx)=names(booklet)
-  for (bl in 1:nb) lx[[bl]]=matrix(0,nIter,sum(a[booklet[[bl]]$last])+1)
+  if (lambda_out)
+  {
+    length(lx)=nb
+    names(lx)=names(booklet)
+    for (bl in 1:nb) lx[[bl]]=matrix(0,nIter,sum(a[booklet[[bl]]$last])+1)
+  }
+ 
   pb = txtProgressBar(min=0, max=nIter)
   for (iter in 1:nIter)
   {
@@ -746,7 +867,7 @@ calibrate_Bayes = function(itemList, booklet, sufI, b, a, first, last, nIter, fi
           if (a[j] == a[last[i]]) y[j]=y[j]+z[bl]*sum(g*scale_g*tail(booklet[[bl]]$lambda,-a[j]))
         }
       }
-      b[first[i]:last[i]] = rgamma(1+last[i]-first[i],shape=sufI[first[i]:last[i]]+1.1,rate=y[first[i]:last[i]])
+      b[first[i]:last[i]] = rgamma(1+last[i]-first[i],shape=sufI[first[i]:last[i]]+1.1,rate=y[first[i]:last[i]]) #1.1
     }
     # identify
     for (i in 1:n)
@@ -764,15 +885,14 @@ calibrate_Bayes = function(itemList, booklet, sufI, b, a, first, last, nIter, fi
       {
         booklet[[bl]]$lambda = booklet[[bl]]$lambda*f^(0:sum(a[booklet[[bl]]$last]))
         booklet[[bl]]$lambda = booklet[[bl]]$lambda/booklet[[bl]]$lambda[1]
-        lx[[bl]][iter,]=booklet[[bl]]$lambda
+        if (lambda_out) lx[[bl]][iter,]=booklet[[bl]]$lambda
       }
     }else
     {
       fixed_set=which(!is.na(fixed_b))
       b[fixed_set]=fixed_b[fixed_set]
-      for (bl in 1:nb) lx[[bl]][iter,]=booklet[[bl]]$lambda
+      if (lambda_out) { for (bl in 1:nb) lx[[bl]][iter,]=booklet[[bl]]$lambda }
     }
-    
     b[is.nan(b)] = 1 # deal with items that are not in data
     bx[iter,] = b
     setTxtProgressBar(pb, value=iter)
@@ -806,19 +926,17 @@ est_lambda <- function(b, a, first, last, scoretab)
 ### Do CML
 ## Must be changed to handle the case where 0 categories does not occur
 ## Or category-scores (a) are not increasing
-## If fixed_b is not NULL unfixed parameters are NA
-## fixed are numbers in the dexter parametrisation (including 0 category)
+## If fixed_b is not NULL unfixed c.q. free parameters are NA
+## Note that fixed_b contains values in the dexter parametrisation (including 0 category)
 calibrate_CML <- function(booklet, sufI, a, first, last, nIter, fixed_b=NULL) {
   nb = length(booklet)
   ni=length(first)
   EsufI=sufI
-  max_nr_iter=20
+  max_nr_iter=30
   
   if (is.null(fixed_b)) # if no fixed parameters
   {
-    nn=0
-    for (bl in 1:nb) nn=nn+booklet[[bl]]$m
-    nn=nn*ni
+    nn=sum(sufI)
     b =rep(1,length(a))
                 ## Implicit Equations  ###
     converged=FALSE
@@ -840,34 +958,35 @@ calibrate_CML <- function(booklet, sufI, a, first, last, nIter, fixed_b=NULL) {
     
         ### identification ###
     # within items
-    for (i in 1:length(first))
+    for (i in 1:ni)
     {
       range=first[i]:last[i]
       b[range]=b[range]/b[first[i]]
     }
-    # determine suitable ref_cat 
-    ref_cat=2
-    rc_set=intersect(first+1,which(((b>1.1)&(b<exp(0.8)))))
-    if (length(rc_set)>0) ref_cat=intersect(rc_set,which(sufI==max(sufI[rc_set])))[1]
     # between items
+    ref_cat=2
+    rc_set=intersect(first+1,which(((b>0.3)&(b<1.3))))
+    if (length(rc_set)>0) ref_cat=intersect(rc_set,which(sufI==max(sufI[rc_set])))[1]
     b[-first] = b[-first]/b[ref_cat]
     
               ###  NR  ###
     H=matrix(0,length(a),length(a))
     converged=FALSE
     nr_iter=0
+    scale=2
     while ((!converged)&(nr_iter<max_nr_iter))
     {
       iter=iter+1
+      nr_iter=nr_iter+1
       EsufI=EsufI-EsufI
       H=H-H
       for (bl in 1:nb)
       {
         EsufI = EsufI + E.STEP(b,a,booklet[[bl]]$first,booklet[[bl]]$last,booklet[[bl]]$scoretab) 
-        H     = H     + H.STEP0(b,a,booklet[[bl]]$first,booklet[[bl]]$last,booklet[[bl]]$scoretab)
+        H     = H     + H.STEP(b,a,booklet[[bl]]$first,booklet[[bl]]$last,booklet[[bl]]$scoretab)
       }
       # identify
-      for (i in 1:length(first))
+      for (i in 1:ni)
       {
         H[first[i],first[i]]=1
         EsufI[first[i]]=sufI[first[i]]
@@ -876,10 +995,10 @@ calibrate_CML <- function(booklet, sufI, a, first, last, nIter, fixed_b=NULL) {
       H[,ref_cat]=0
       H[ref_cat,ref_cat]=1
       EsufI[ref_cat]=sufI[ref_cat]
-      b = b*exp(solve(H,sufI-EsufI))
+      b = b*exp(solve(H*scale,sufI-EsufI))
       converged=(max(abs(EsufI-sufI))/nn<1e-10)
       setTxtProgressBar(pb, value=iter)
-      nr_iter=nr_iter+1
+      if (nr_iter==1) scale=1
     }
     close(pb)
     if (!converged) warning(paste('Newton-Raphson not Converged in',as.character(nr_iter),"iterations"))
@@ -911,7 +1030,7 @@ calibrate_CML <- function(booklet, sufI, a, first, last, nIter, fixed_b=NULL) {
     }
     if (!converged) warning(paste('Implicit Equations not Converged in',as.character(nIter),"iterations"))
     
-    for (i in 1:length(first))
+    for (i in 1:ni)
     {
       range=first[i]:last[i]
       b[range]=b[range]/b[first[i]]
@@ -920,15 +1039,17 @@ calibrate_CML <- function(booklet, sufI, a, first, last, nIter, fixed_b=NULL) {
     H=matrix(0,length(a),length(a))
     converged=FALSE
     nr_iter=0
+    scale=2
     while ((!converged)&(nr_iter<max_nr_iter))
     {
       iter=iter+1
+      nr_iter=nr_iter+1
       EsufI=EsufI-EsufI
       H=H-H
       for (bl in 1:nb)
       {
         EsufI = EsufI + E.STEP(b,a,booklet[[bl]]$first,booklet[[bl]]$last,booklet[[bl]]$scoretab) 
-        H     = H     + H.STEP0(b,a,booklet[[bl]]$first,booklet[[bl]]$last,booklet[[bl]]$scoretab)
+        H     = H     + H.STEP(b,a,booklet[[bl]]$first,booklet[[bl]]$last,booklet[[bl]]$scoretab)
       }
       # identify
       for (i in 1:length(first))
@@ -940,9 +1061,10 @@ calibrate_CML <- function(booklet, sufI, a, first, last, nIter, fixed_b=NULL) {
       H[,fixed_set]=0
       diag(H)[fixed_set]=1
       EsufI[fixed_set]=sufI[fixed_set]
-      b = b*exp(solve(H,sufI-EsufI))
+      b = b*exp(solve(H*scale,sufI-EsufI))
       converged=(max(abs(EsufI[update_set]-sufI[update_set]))/nn<1e-10)
       setTxtProgressBar(pb, value=iter)
+      if (nr_iter==1) scale=1
     }
     close(pb)
     if (!converged) warning(paste('Newton-Raphson not Converged in',as.character(nr_iter),"iterations"))
@@ -955,6 +1077,56 @@ calibrate_CML <- function(booklet, sufI, a, first, last, nIter, fixed_b=NULL) {
   
   OPCML_out=toOPLM(a, b, first, last, H=H, fixed_b=fixed_b)
   return(list(b=b, H=H, beta.cml=OPCML_out$delta, acov.cml=OPCML_out$cov_delta, lambda=lx, n_iter=iter))
+}
+
+## Get the score distribution of a booklet from fit_enorm
+#  If also gives you a smooth version based on a polynomial smoothing
+#  of the log-lambda's
+#### Example
+# db = start_new_project(verbAggrRules, "verbAggression.db", covariates=list(gender=""))
+# add_booklet(db, verbAggrData, "agg")
+# f=fit_enorm(db)
+# xx=dexter:::ENORM2ScoreDist(f,degree=7,booklet_id="data")
+# plot(xx$score,xx$p.obs,pch=16, main=paste("degree =", as.character(xx$degree)))
+# lines(xx$score,xx$p.obs,col="red")
+# lines(xx$score,xx$p.smooth, col="green")
+ENORM2ScoreDist <- function (parms, degree=7, booklet_id) 
+{
+  bk_indx=which(names(parms$inputs$bkList)==booklet_id)
+  stopifnot(length(bk_indx)>0) 
+  if (parms$inputs$method!="CML") stop("ENORM2ScoreDist only for CML at the moment")
+  score_range=0:(length(parms$est$lambda[[bk_indx]])-1)
+  a=parms$inputs$ssIS$item_score
+  first=parms$inputs$bkList[[bk_indx]]$first
+  last=parms$inputs$bkList[[bk_indx]]$last
+  lambda=parms$est$lambda[[bk_indx]]
+  b=parms$est$b
+  log_l=log(lambda)
+  
+  degree=min(degree,length(!is.na(log_l)))
+  qr=lm(log_l~poly(score_range,degree,raw=TRUE)) 
+  beta=as.numeric(qr$coefficients)[-1]
+  
+  lambda[is.na(lambda)]=0
+  g = elsym(b,a,first,last)
+  sc_obs=vector("numeric", sum(a[last])+1)
+  sc_sm=vector("numeric", sum(a[last])+1)
+  num_obs=0.0
+  num_sm=0.0
+  for (s in 0:sum(a[last]))
+  {
+    sc_obs[s+1]=g[s+1]*lambda[s+1]
+    sc_sm[s+1]=g[s+1]*exp(sum(beta*s^(1:degree)))
+    num_obs=num_obs+sc_obs[s+1]
+    num_sm=num_sm+sc_sm[s+1]
+  }
+  sc_obs=sc_obs/num_obs
+  sc_sm=sc_sm/num_sm
+  data.frame(score=score_range,
+             n.obs=sc_obs*sum(parms$inputs$stb$N), 
+             n.smooth=sc_sm*sum(parms$inputs$stb$N),
+             p.obs=sc_obs,
+             p.smooth=sc_sm)
 }
 
 
@@ -1173,7 +1345,7 @@ E.STEP <- function(b,a,first,last,nscore)
 # version with Elsym0
 E.STEP0 <- function(b,a,first,last,nscore)
 {
-  first=first+1
+  first=first
   n=length(first)
   ms=length(nscore)-1
   output = double(length(b)) 

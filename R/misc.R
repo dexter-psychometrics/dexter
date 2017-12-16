@@ -1,5 +1,72 @@
 # common utility functions and datasets
 
+
+# kind of fit a monotone B-spline
+# a is an object containing Timo's EAPs, output of ability_tables
+# monosm = function(a){
+#   nss = nrow(a)
+#   if (nrow(a)<4) return(a$theta) # no smoothing if too short
+#   x = a$sumScore
+#   y = a$theta
+#   typical_no_knots = 15
+#   typical_order = 5
+#   nik = min(nss, typical_no_knots)
+#   order = typical_order
+#   innerknots = seq(x[1], x[nss], length=nik)
+#   multiplicities = rep(1, nik-2)
+#   lowend = x[1]
+#   highend = x[nss]
+#   innerknots = innerknots[2:(nik-1)]
+#   knots = extendPartition (innerknots, multiplicities, order,
+#                            lowend, highend)$knots
+#   h = bsplineBasis (x, knots, order)
+#   g = rowSums(h) - t(apply (h, 1, cumsum))
+#   g = cbind (1, g)
+#   u = pnnls (g, x, 1)$x
+#   v = g%*%u
+#   return(v)
+# }
+
+
+
+# logger for debugging
+# add message with debug.log$send()
+# retreive and clear all messages with debug.log$retrieve(), returns list
+
+logger = setRefClass('logger', 
+  fields = list(stack='list', msg='logical'), 
+  methods = list(
+    send = function(obj, name = 'no_name')
+      {
+        if(msg) message(obj)
+        stack[[length(stack)+1]] <<-  obj
+        names(stack)[length(stack)] <<- name 
+        invisible(obj)
+      },
+    retrieve = function()
+      {
+        res = stack
+        stack <<- list()
+        return(res)
+      }
+  )
+)
+# global object
+debug.log = logger$new(msg=FALSE)
+           
+counter = setRefClass('counter',
+  fields=list(x='numeric'), 
+  methods=list(
+    initialize = function(...)
+    {
+      callSuper(..., x=0)
+    },
+    get=function()
+    { 
+      x <<- x+1;
+      return(x)
+    }))
+
 # use for forwarding arguments to e.g. plot function
 merge_arglists = function(args, default = NULL, override = NULL)
 {
@@ -75,6 +142,44 @@ GCD_ <-function (x)
     }
   }
   return(g)
+}
+
+
+first_last2indx = function(first,last) unlist(apply(data.frame(first,last),1,function(x) x[1]:x[2]))
+
+# internal utility function
+# @parameter ssI: ssI as found in parms object
+# @parameter design: data.frame with a column item_id
+# we assume design is valid(i.e. doesn't contain items not existing in ssI)
+# @return ssI like in parms but for a single booklet
+subset_ssI = function(ssI, design)
+{	
+  # I see no need to recompute nCat, since it's already there in ssI
+  ssI %>%
+    semi_join(design, by='item_id') %>%
+    arrange(.data$item_id) %>%
+    mutate(first = cumsum(.data$nCat) - .data$nCat + 1,last = cumsum(.data$nCat))	 
+}
+
+
+# highest posterior density interval
+# not save for bimodal distributions
+hpd=function(x, conf=0.95, print=TRUE)
+{
+  conf <- min(conf, 1-conf)
+  n <- length(x)
+  nn <- round( n*conf )
+  x <- sort(x)
+  xx <- x[ (n-nn+1):n ] - x[1:nn]
+  m <- min(xx)
+  nnn <- which(xx==m)[1]
+  if (print)
+  {
+    return(data.frame(l=x[ nnn ],r=x[ n-nn+nnn ]))
+  }else
+  {
+    return(rbind(x[ nnn ],x[ n-nn+nnn ]))
+  }
 }
 
 

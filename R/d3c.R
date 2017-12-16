@@ -126,8 +126,8 @@ add_test3DC = function(db3dc, parms, design, test_id, standards, mu, sigma,
   x = matrix(0, m, n)
   colnames(x) = design$item_id
   theta = rnorm(m, mu, sigma)
- 
-  for (i in 1:n) x[,i] = renorm(x[,i], b, a, theta, design$first, design$last, i)
+
+  for (i in 1:n) x[,i] = renorm(b, a, theta, design$first, design$last, i)
   
   cl_scores = as_tibble(sapply(unique(design$cluster), function(cl)
   {

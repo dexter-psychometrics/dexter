@@ -1,10 +1,5 @@
-# dirty trick to avoid rewriting dplyr's do
-# jennybc on https://github.com/STAT545-UBC/Discussion/issues/451
+
 if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
-
-# prevent cran from complaining
-booklet_id='_'
-
 
 ############################################
 ######      exported functions        ######
@@ -23,10 +18,9 @@ booklet_id='_'
 #' for a new sqlite database to be created. If this name does not
 #' contain a path, the file will be created in the work
 #' directory. Any existing file with the same name will be overwritten.
-#' @param covariates An optional list of person covariates. Names should correspond to covariates.
-#' Values are treated as default values. The datatype will also be inferred from the values.
-#' Known covariates will be imported (if supplied) in \code{add_booklet}. 
-#' The datatypes should match those of your default values.
+#' @param covariates An optional list of person covariates. Names should correspond to covariates intended to be used in the project.
+#' Values are used as default (missing) values for these covariates. The datatype will also be inferred from the values.
+#' Known covariates will be imported (if supplied) in \code{\link{add_booklet}}. 
 #' @return If the scoring rules pass a sanity check, a handle to the data base.
 #' Otherwise, a data frame listing the problems found, with 4 columns:
 #' item_id: id of the problematic item
@@ -47,7 +41,7 @@ booklet_id='_'
 #'\donttest{
 #' head(verbAggrRules)
 #' db = start_new_project(verbAggrRules, "verbAggression.db", 
-#' covariates=list(gender="<unknown>"))
+#'   covariates=list(gender="<unknown>"))
 #' }
 #' 
 start_new_project <- function(rules, db="dexter.db", covariates=NULL) {
@@ -71,8 +65,9 @@ start_new_project <- function(rules, db="dexter.db", covariates=NULL) {
     filter(.data$less_than_two_scores | .data$duplicated_responses | .data$min_score_not_zero)
 
   if (nrow(sanity)>0) {
-    warning("There were problems with your scoring rules.\nCheck the output for possible reasons.\n")
-    return(sanity)
+    message("There were problems with your scoring rules.\nCheck the output below for possible reasons.\n")
+    print(as.data.frame(sanity))
+    stop('Scoring rules are not valid')
   } else 
   {
     if (is(db,'character'))
@@ -87,7 +82,7 @@ start_new_project <- function(rules, db="dexter.db", covariates=NULL) {
                       tibble(id=unique(rules$item_id)))
       dbExecute(db,'INSERT INTO dxScoring_rules(item_id, response, item_score) 
                           VALUES(:item_id, :response, :item_score);', rules)
-    })
+    },on_error = function(e){dbDisconnect(db);stop(e)})
     return(db)
   }
 }
@@ -167,7 +162,7 @@ close_project = function(db) dbDisconnect(db)
 #'
 keys_to_rules <- function(keys, include_NA_rule = FALSE) {
   # for backward compatibility we rename
-  names(keys)[names(keys)=='item'] = 'item_id'
+  colnames(keys)[colnames(keys)=='item'] = 'item_id'
   
   keys = mutate_if(keys, is.factor,as.character)
   
@@ -178,24 +173,27 @@ keys_to_rules <- function(keys, include_NA_rule = FALSE) {
   if (ABC) {
     m = match(keys$key, LETTERS)
     if (any(m>keys$nOptions)) stop("You have out-of-range keys")
-    r = keys %>% group_by(.data$item_id) %>% do({
-      y = data.frame(response=LETTERS[1:.$nOptions[1]], score=0L)
-      y$score[match(.$key[1],LETTERS)] = 1
+    r = keys %>% 
+      group_by(.data$item_id) %>% 
+      do({
+      y = tibble(response=LETTERS[1:.$nOptions[1]], item_score=0)
+      y$item_score[match(.$key[1],LETTERS)] = 1
       y
     })
   } else {
     if (any(keys$key>keys$nOptions)) stop("You have out-of-range keys")
     r = keys %>% group_by(.data$item_id) %>% do({
-      y = data.frame(response=1:.$nOptions[1], score=0L)
-      y$score[.$key[1]] = 1
+      y = tibble(response=1:.$nOptions[1], item_score=0)
+      y$item_score[.$key[1]] = 1
       y
     })
   }
   r = ungroup(r)
   
   if(include_NA_rule){
-    r = rbind(r, tibble(item_id=unique(r$item_id), response='NA', score=0))
+    r = bind_rows(r, tibble(item_id=unique(r$item_id), response='NA', item_score=0))
   }
+  r$item_score = as.integer(r$item_score)
   r
 }
 
@@ -235,43 +233,58 @@ touch_rules = function(db, rules)
   names(rules)[names(rules)=='item'] = 'item_id'
   names(rules)[names(rules)=='score'] = 'item_score'
   
+  if(any(is.na(rules$item_id)) || any(is.na(rules$item_score)))
+    stop("The item_id and item_score columns may not contain NA values")
+  
   rules = rules[, c("item_id", "response", "item_score")]
   rules$response = as.character(rules$response)
   rules$response[is.na(rules$response)] = 'NA'
-  # the following line gets rid of dplyr factor warnings
   rules$item_id = as.character(rules$item_id)
   
+  # check if same options are supplied multiple times, this is the only check not done in conjuntion
+  # with the existing rules so it has to be gotten out of the way
+  items_with_duplicate_options = unique(rules[duplicated(select(rules,.data$item_id,.data$response)),]$item_id)
+
   existing_rules = dbGetQuery(db, 'SELECT item_id, response, item_score FROM dxScoring_rules;')
+  # remove the no-ops
+  rules = dplyr::setdiff(rules, existing_rules)
+  
   existing_opts = existing_rules %>% select(-.data$item_score)
   
+  # new items or responses
   new_rules = rules %>% anti_join(existing_opts, by=c('item_id','response'))
+  
+  # existing items or responses but with new scores
   amended_rules = rules %>% inner_join(existing_opts, by=c('item_id','response'))
   
   # to judge the validity of the new rules, we have to look at them in combination
   # with the rules in the db that will not be changed
-  sanity = new_rules %>% 
-    dplyr::union(amended_rules)  %>% 
+  sanity = rules %>% 
     dplyr::union(existing_rules %>% 
-                   inner_join(tibble(item_id=amended_rules$item_id), by='item_id') %>%
-                   anti_join(amended_rules, by=c('item_id','response'))
+                   anti_join(rules, by=c('item_id','response'))
                  ) %>%
     group_by(.data$item_id) %>%
     summarise(less_than_two_scores = length(unique(.data$item_score))<2,
               duplicated_responses = any(duplicated(.data$response)),
-              min_score_not_zero = min(.data$item_score)>0) %>%
-    filter(.data$less_than_two_scores | .data$duplicated_responses | .data$min_score_not_zero)
+              min_score_not_zero = min(.data$item_score)>0) 
+  
+  if(any(sanity$item_id %in% items_with_duplicate_options))
+    sanity[sanity$item_id %in% items_with_duplicate_options,]$duplicated_responses = TRUE
+  
+  sanity = filter(sanity, .data$less_than_two_scores | .data$duplicated_responses | .data$min_score_not_zero)
   
   
   if (nrow(sanity)) {
-    warning("There were problems with your scoring rules.\nCheck the output for possible reasons.\n")
-    return(sanity)
+    message("There were problems with your scoring rules.\nCheck the output below for possible reasons.\n")
+    print(as.data.frame(sanity))
+    stop('Scoring rules are not valid')
   }    
   
   dbTransaction(db,
   {
     if(nrow(new_rules)>0)
     {
-      new_items = setdiff(new_rules$item_id, dbGetQuery('SELECT item_id FROM dxItems;')$item_id)
+      new_items = setdiff(new_rules$item_id, dbGetQuery(db, 'SELECT item_id FROM dxItems;')$item_id)
       if(length(new_items)>0) dbExecute(db,'INSERT INTO dxItems(item_id) VALUES(:id);', tibble(id=new_items))
       dbExecute(db,'INSERT INTO dxScoring_rules(item_id, response, item_score) 
 							                            VALUES(:item_id, :response, :item_score);', new_rules)
@@ -307,8 +320,8 @@ touch_rules = function(db, rules)
 #' \item{not_listed}{A data frame of all responses that will be treated as missing}
 #' @details It is a common practice to keep respons data in tables where each row 
 #' contains the responses from a single person. This function is provided to input
-#' data in that form, one booklet at a time. The starting point is a data frame,
-#' and getting the data frame into R is left to the user. We have found packages
+#' data in that form, one booklet at a time. The starting point is a data frame.
+#' Getting the data frame into R is left to the user. We have found packages
 #' \code{readxl} to be very good at reading Excel sheets, and \code{haven} quite
 #' efficient with SPSS files.
 #'
@@ -333,7 +346,7 @@ touch_rules = function(db, rules)
 #' @examples 
 #' \dontrun{
 #' db = start_new_project(verbAggrRules, "verbAggression.db", 
-#' covariates=list(gender="<unknown>"))
+#'   covariates=list(gender="<unknown>"))
 #' head(verbAggrData)
 #' add_booklet(db, verbAggrData, "agg")
 #' 
@@ -439,21 +452,22 @@ add_booklet <- function(db, x, booklet_id, auto_add_unknown_rules = TRUE) {
 #' @param db A handle to the database, e.g. the output of \code{start_new_project}
 #' or \code{open_project}
 #' @param item_properties A data frame containing the item properties. See details.
-#' @param overwrite Whether overwrite is permitted (default=FALSE)
-#' @return A list of: \item{unknown_items}{Item IDs for any items that were provided
-#' in the data frame but could not be found in the data base}
-#' \item{items_unaccounted_for}{Item IDs for any items that exist in the data base
-#' but were not given properties in the data frame}
+#' @param overwrite Whether existing item properties should be overwritten (default=TRUE)
+#' @param default_values a list where the names are item_properties and the values are defaults.
+#' The defaults will be used as the value for an item for which the property is not specified, 
+#' for example when you add new items using \code{\link{touch_rules}}.
+#' Default_values for an item property will only be processed
+#' the first time you define an item property.
+#' @return nothing
 #' @details When entering response data in the form of a rectangular person x item
 #' table, it is easy to provide person properties but practically impossible
 #' to provide item properties. This function provides a possibility to do so.
 #' The order of the rows and columns in the data frame is not important but
-#' (i) there must be a column called exactly \code{item} or \code{item_id} containing the item IDs
-#' exactly as entered before, and (ii) all items in the data frame must be known
-#' to the data base and all items in the data base must be given properties --
-#' otherwise, there will be a warning message, and nothing else will be done.
-#' If all is well, the data frame will be added to the project database, and any variables in 
-#' it may be used in analyses involving item properties.
+#' there must be a column called \code{item_id} containing the item id's
+#' exactly as entered before.
+#' 
+#' Note that is is not possible to add new items with this function, 
+#' use \code{\link{touch_rules}} if you want to add new items to your project.
 #' 
 #' @seealso \code{\link{fit_domains}}, \code{\link{profile_plot}} for
 #'  possible uses of item_properties
@@ -461,22 +475,24 @@ add_booklet <- function(db, x, booklet_id, auto_add_unknown_rules = TRUE) {
 #' @examples 
 #' \dontrun{
 #' db = start_new_project(verbAggrRules, "verbAggression.db", 
-#' covariates=list(gender="<unknown>"))
+#'   covariates=list(gender="<unknown>"))
 #' head(verbAggrProperties)
 #' add_item_properties(db, verbAggrProperties)
-#' show_item_properties(db) 
+#' get_item_properties(db) 
 #' 
 #' close_project(db)
 #' }
 #'
-add_item_properties <- function(db, item_properties, overwrite=FALSE) {
+add_item_properties <- function(db, item_properties, overwrite=TRUE, default_values=list()) {
   item_properties = item_properties %>%
     mutate_if(is.factor, as.character) 
   
-  names(item_properties)[names(item_properties)=='item'] = 'item_id'
-  names(item_properties) = dbValid_colnames(names(item_properties))
+  colnames(item_properties)[colnames(item_properties)=='item'] = 'item_id'
+  colnames(item_properties) = dbValid_colnames(colnames(item_properties))
   
-  if(!'item_id'%in%names(item_properties))
+  names(default_values) = dbValid_colnames(names(default_values))
+  
+  if(!'item_id' %in% colnames(item_properties))
   {
     stop("there was no column provided with name 'item_id'")
   }
@@ -486,15 +502,22 @@ add_item_properties <- function(db, item_properties, overwrite=FALSE) {
     stop('Some of the listed item properties already exist, specify overwrite=TRUE to overwrite')
   }
 
-  if(!setequal(dbGetQuery(db,'SELECT item_id FROM dxItems;')$item_id, item_properties$item_id))
-  {
-    stop('properties not specified for all items.')
-  }
+  #if(!setequal(dbGetQuery(db,'SELECT item_id FROM dxItems;')$item_id, item_properties$item_id))
+  #{
+  #  stop('properties not specified for all items.')
+  #}
   dbTransaction(db, 
   {
     for(prop_name in setdiff(names(item_properties), existing_item_properties))
     {
-      dbExecute(db, paste0("ALTER TABLE dxItems ADD COLUMN ",prop_name, sql_data_type(item_properties[,prop_name]),";"))
+      if(prop_name %in% names(default_values) && (is.na(default_values[[prop_name]]) && is.logical(NA)))
+      {
+        dbExecute(db, paste0("ALTER TABLE dxItems ADD COLUMN ",prop_name, sql_col_def(default_values[[prop_name]], TRUE, db),';'))
+
+      } else
+      {
+        dbExecute(db, paste0("ALTER TABLE dxItems ADD COLUMN ",prop_name, sql_data_type(item_properties[,prop_name]),";"))
+      }
     }
     pnames = names(item_properties)[names(item_properties)!='item_id']
     
@@ -513,42 +536,47 @@ add_item_properties <- function(db, item_properties, overwrite=FALSE) {
 #' @param db handle to a Dexter project database
 #' @return data.frame
 #' 
-#' @seealso \code{\link{get_booklets}}, \code{\link{get_design}}, 
-#' \code{\link{get_item_properties}}, \code{\link{get_items}}, 
-#' \code{\link{get_person_properties}}, \code{\link{get_persons}}, 
-#' \code{\link{get_rules}}
+#' @seealso \code{\link{get_booklets}}, \code{\link{get_design}}, \code{\link{get_item_properties}}, 
+#' \code{\link{get_items}}, \code{\link{get_person_properties}}, \code{\link{get_persons}}, \code{\link{get_rules}}
 show_rules = function(db)
 {
+  message('show_rules is deprecated, use get_rules() instead')
   get_rules(db)
 }
 
 #' @rdname show_rules
 show_booklets <- function(db) {
+  message('show_booklets is deprecated, use get_booklets() instead')
   get_booklets(db)
 }
 
 #' @rdname show_rules
 show_item_properties <- function(db) {
+  message('show_item_properties is deprecated, use get_item_properties() instead')
   get_item_properties(db)
 }
 
 #' @rdname show_rules
 show_person_properties <- function(db) {
+  message('show_person_properties is deprecated, use get_person_properties() instead')
   get_person_properties(db)
 }
 
 #' @rdname show_rules
 show_items <- function(db){
+  message('show_items is deprecated, use get_items() instead')
   get_items(db)
 }
 
 #' @rdname show_rules
 show_design <- function(db){
+  message('show_design is deprecated, use get_design() instead')
   get_design(db)
 }
 
 #' @rdname show_rules
 show_persons <- function(db){
+  message('show_persons is deprecated, use get_persons() instead')
   get_persons(db)
 }
 
@@ -738,10 +766,11 @@ get_design <- function(db,
 #' of dependencies. 
 #' @examples
 #' \donttest{
+#' \dontrun{
 #' dsgn = design_as_network(db)
 #' # Check if design is connected
 #' design_is_connected(dsgn)
-#' }
+#' }}
 #'
 design_as_network <- function(dataSrc, predicate = NULL, weights=c("items","responses")){
   
@@ -803,10 +832,13 @@ design_as_network <- function(dataSrc, predicate = NULL, weights=c("items","resp
 #' @return TRUE or FALSE
 #' @examples
 #' \donttest{
+#' \dontrun{
 #' # as an example, turn off some your booklets and see if you are
 #' # still left with a connected design
+#' 
 #' dsgn = design_as_network(db, !(booklet_id %in% c('b1','b3','b4')))
 #' design_is_connected(dsgn)
+#' }
 #' }
 #'
 design_is_connected = function(design)

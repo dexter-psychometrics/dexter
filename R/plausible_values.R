@@ -25,6 +25,10 @@
 #' @return A data.frame with columns booklet_id, person_id, sumScore and nPV plausible values
 #' named PV1...PVn.
 #' 
+#' @references 
+#' Marsman, M., Maris, G., Bechger, T. M., and Glas, C.A.C. (2016) What can we learn from plausible values? 
+#' Psychometrika. 2016; 81: 274–289. 
+#' 
 #' @examples
 #' \dontrun{
 #' db = start_new_project(verbAggrRules, "verbAggression.db", 
@@ -59,7 +63,7 @@ plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL
   plausible_values_(dataSrc, parms, qtpredicate=qtpredicate, covariates=covariates, nPV=nPV, use_draw=use_draw, env=caller_env())
 }
 
-plausible_values_ = function(dataSrc, parms, qtpredicate=NULL, covariates=NULL, nPV=1, use_draw=NULL, env=NULL)
+plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=NULL, nPV=1, use_draw=NULL, env=NULL, use_b_matrix=FALSE)
 {
   if(is.null(env)) env = caller_env()
 
@@ -71,7 +75,7 @@ plausible_values_ = function(dataSrc, parms, qtpredicate=NULL, covariates=NULL, 
   } else
   {
     r = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, extra_columns=covariates, env=env)
-    parms = fit_enorm_(r, method='Bayes', nIterations=(4+nPV*5))
+    parms = fit_enorm_(r, method='Bayes', nIterations=(nPV*5-1)) ## nIterations fits defaults 'by' and 'from' in pv used below
     r = get_resp_data(r, summarised=TRUE, extra_columns=covariates)
   } 
  
@@ -85,7 +89,7 @@ plausible_values_ = function(dataSrc, parms, qtpredicate=NULL, covariates=NULL, 
   
   if(any(is.na(design$first))) stop('some of your items are without parameters')
   
-  if (parms_given)
+  if (parms_given && !use_b_matrix)
   {
     if(parms$input$method=='CML') 
     {
@@ -99,21 +103,17 @@ plausible_values_ = function(dataSrc, parms, qtpredicate=NULL, covariates=NULL, 
         b = colMeans(parms$est$b)  
       } else 
       {
-        if (use_draw %in% 1:nrow(parms$est$b)) 
-        {
-          b = parms$est$b[use_draw,]  
-        } else 
-        {
-          b = parms$est$b[nrow(parms$est$b),]
-        }
+        b = parms$est$b[min(use_draw,nrow(parms$est$b)),]  
       }   
     }
   }else
   {
     b = parms$est$b
     a = parms$inputs$ssIS$item_score
+    if (nrow(b)<(nPV*5-1)) stop(paste("To produce", as.character(nPV), 
+                                      "plausible values. Do at least", 
+                                      as.character((nPV*5-1)), "iterations of fit_enorm" ))
   }
-    
     
   if(!is.null(covariates))
   {
@@ -136,7 +136,7 @@ plausible_values_ = function(dataSrc, parms, qtpredicate=NULL, covariates=NULL, 
   names(design) = as.character(bkl)
   
   # arranging probably makes pv faster but it is not required
-  y = x %>% arrange(.data$booklet_id, .data$pop) %>% pv(design, b, a, nPV)
+  y = x %>% arrange(.data$booklet_id, .data$pop) %>% pv(design, b, a, nPV, from=4, by=5)
   
   colnames(y) = c('booklet_id','person_id','sumScore',paste0('PV',1:nPV))
   if(is.null(covariates))

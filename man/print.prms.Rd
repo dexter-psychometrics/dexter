@@ -7,9 +7,9 @@
 \method{print}{prms}(x, ...)
 }
 \arguments{
-\item{x}{An object produced by function \code{fit_enorm}}
+\item{x}{An object produced by function \code{\link{fit_enorm}}}
 
-\item{...}{Any other parameters to the print method}
+\item{...}{Any other parameters to the print method are silently ignored}
 }
 \description{
 A print method for ENORM parameters

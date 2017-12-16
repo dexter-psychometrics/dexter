@@ -1,3 +1,6 @@
+## ----setup, include=FALSE------------------------------------------------
+knitr::opts_chunk$set(echo = TRUE,fig.align='center', fig.width=6, fig.height=5)
+
 ## ---- message=FALSE------------------------------------------------------
 library(dexter)
 
@@ -37,9 +40,9 @@ plot(m, 'S1DoCurse', summate=FALSE)
 
 ## ------------------------------------------------------------------------
 mSit = fit_domains(db, item_property= "situation")
-plot(mSit)
+plot(mSit, nr=2,nc=2)
 
-## ------------------------------------------------------------------------
+## ---- fig.width=5, fig.height=5------------------------------------------
 profile_plot(db, item_property='mode', covariate='gender')
 
 ## ------------------------------------------------------------------------
@@ -50,11 +53,12 @@ parms_gibbs = fit_enorm(db, method='Bayes')
 
 ## ------------------------------------------------------------------------
 pv = plausible_values(db, parms)
-plot(density(pv$PV1))
+plot(density(pv$PV1), bty='l', main='verbal aggression',xlab='plausible value')
 
 ## ------------------------------------------------------------------------
 pv = merge(pv, get_persons(db))
-boxplot(PV1~gender, data=pv)
+par(bty='n', fg='white')
+boxplot(PV1~gender, data=pv, border='black')
 
 ## ---- eval=FALSE---------------------------------------------------------
 #  library(dexter)
@@ -139,7 +143,7 @@ boxplot(PV1~gender, data=pv)
 #  get_person_properties(db)
 #  
 #  # Fit the interaction model for booklet 1, all countries
-#  m <- fit_inter(db,booklet_id=='B1')
+#  m = fit_inter(db,booklet_id=='B1')
 #  plot(m)
 #  
 #  # Analyse by domain
@@ -151,5 +155,5 @@ boxplot(PV1~gender, data=pv)
 #  
 
 ## ---- show=FALSE---------------------------------------------------------
-dbDisconnect(db)
+close_project(db)
 

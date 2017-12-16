@@ -1,4 +1,17 @@
 
+New in 0.6.0
+------------
+Added function ability_tables to generate score transformation tables 
+for arbitrary subsets of items. Ability and ability_tables can now also 
+take Jeffreys prior and variatons of the normal prior and can optionally 
+output standard errors.
+
+Added function Plausible_scores to generate scores on arbitrary itemsets
+(or the entire bank). 
+
+Updates to documentation.
+
+
 New in 0.5.1
 ------------
 

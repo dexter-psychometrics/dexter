@@ -15,10 +15,9 @@ for a new sqlite database to be created. If this name does not
 contain a path, the file will be created in the work
 directory. Any existing file with the same name will be overwritten.}
 
-\item{covariates}{An optional list of person covariates. Names should correspond to covariates.
-Values are treated as default values. The datatype will also be inferred from the values.
-Known covariates will be imported (if supplied) in \code{add_booklet}. 
-The datatypes should match those of your default values.}
+\item{covariates}{An optional list of person covariates. Names should correspond to covariates intended to be used in the project.
+Values are used as default (missing) values for these covariates. The datatype will also be inferred from the values.
+Known covariates will be imported (if supplied) in \code{\link{add_booklet}}.}
 }
 \value{
 If the scoring rules pass a sanity check, a handle to the data base.
@@ -46,7 +45,7 @@ responses in the list. NA values will be treated as the string 'NA'.
 \donttest{
 head(verbAggrRules)
 db = start_new_project(verbAggrRules, "verbAggression.db", 
-covariates=list(gender="<unknown>"))
+  covariates=list(gender="<unknown>"))
 }
 
 }

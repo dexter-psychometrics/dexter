@@ -18,15 +18,20 @@ a data.frame with columns: item_id, item_score (omitting 0 score category) and b
 \item{method}{If CML, the estimation method will be Conditional Maximum Likelihood;
 otherwise, a Gibbs sampler will be used to produce a sample from the posterior}
 
-\item{nIterations}{Number of Gibbs samples when method is Bayes, max. number of iterations 
-when method is CML}
+\item{nIterations}{Number of Gibbs samples when estimation method is Bayes. The maximum 
+number of iterations when using CML.}
 }
 \value{
 An object of type \code{prms}. The prms object can be cast to a data.frame of item parameters 
 using the \code{as.data.frame} built-in function or used directly as input for other Dexter functions.
 }
 \description{
-Fits the extended nominal response model by Bayesian sampling or CML
+Fits an Extended NOminal Response Model (ENORM) using conditional maximum likelihood (CML)
+or a Gibbs sampler for Bayesian estimation.
+}
+\references{
+Maris, G., Bechger, T.M. and San-Martin, E. (2015) A Gibbs sampler for the (extended) marginal Rasch model. 
+Psychometrika. 2015; 80(4): 859–879.
 }
 \seealso{
 functions that accept a prms object as input: \code{\link{ability}}, \code{\link{plausible_values}}

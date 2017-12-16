@@ -9,6 +9,10 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+<style>
+img{ border:none;}
+</style>
+
 **Dexter** is intended as a fairly comprehensive system for managing and analyzing data from administrations of educational and psychological tests. The more advanced psychometric routines are buttressed by a solid data base management system and various functions allowing users to examine items and tests, detect and correct possible issues.
 
 The data base that works under the hood is created automatically as data is imported into dexter. It remains virtually invisible to the users unless they are interested in it, in which case they can access it via dbplyr, RSQlite, or directly in various SQL tools. Generally, dexter scales well with respect to both the size of the problem and the degree of complexity and flexibility desired.
@@ -16,13 +20,15 @@ The data base that works under the hood is created automatically as data is impo
 We begin with a brief review of how to start a dexter project and add data.
 
 
-```{r}
+```{r, message=FALSE}
+library(dplyr)
 library(dexter)
+
 db = start_new_project(verbAggrRules, "verbAggression.db", 
                        covariates = list(gender="<unknown>"))
 ```
 
-The new project is actually a SQLite data base, which is created, initialized, and saved to the file, "~/verbAggression.db". In this example, we add Gender as a person covariate with a default value of `"<unknown>"`.
+The new project is actually a SQLite data base, which is created, initialized, and saved to the file, "verbAggression.db". In this example, we add Gender as a person covariate with a default value of `"<unknown>"`.
 
 The data set, `verbAggrData`, contains only one booklet, which we add to the project with:
 
@@ -38,17 +44,47 @@ We can also add item properties. This data set comes from an experimental design
 add_item_properties(db, verbAggrProperties)
 ```
 
-## A note about names
+### A note about names
 
 Due to the fact that we use an SQL database as a backend, the names of all item properties and person covariates must be valid SQL column names. This means that the name has to start with a letter and may contain only letters, numbers and underscores. Specifically, the dot {.} that is often used in variable names in R, cannot be used in a column name. Names that are not valid SQL column names will be silently converted. All names will also be converted to lowercase. 
 
 Of course this only applies to column names, values have no such restrictions.
 
-## Working without a database
+### Working without a database
 
 Many functions in dexter accept an argument `dataSrc`. A `dataSrc` can be either a dexter project database or a data.frame or a tibble, in long format, containing at least the columns `person_id`, `item_id`, `item_score` and, for a limited number of functions, `response`. See the help files for details.
 
-## Subsetting with logical expressions
+
+
+## Tidy data
+
+All data in dexter is stored and treated as normalized data, which is often called tidy data in the R world. As a result dexter ties in nicely with the Tidyverse packages and it is easy to extract tidy data from dexter and use it in ggplot or for your own summaries and statistics. As an example we look at the distribution of responses for the items in the verbal aggression dataset.
+
+```{r}
+
+get_responses(db, columns = c('item_id','response')) %>%
+  group_by(item_id, response) %>%
+  summarise(count = n()) %>%
+  slice(1:10)
+  
+```
+It is also easy enough to make some plots based on one of the item properties (situation in this instance). For the verbal aggression dataset this makes sense since identical items were administered for all situtations, which makes the scores for each situation directly comparable.
+
+
+```{r, fig.height=5,fig.width=7}
+scores = get_responses(db, columns = c('person_id','item_score','situation')) %>%
+  group_by(person_id, situation) %>%
+  summarise(situation_score = sum(item_score))  
+
+par(bty='n', fg='white')
+
+boxplot(situation_score ~ situation, scores, border='black')
+
+```
+
+
+
+## Using predicate expressions
 
 Dexter keeps all scoring rules separately from response data, and applies them just before analysis. Together with the powerful techniques for quality analysis, from classical test statistics over distractor plots to the interaction model, this should allow users to detect and correct any items that have a technical flaw, such as a wrong key, which can be corrected with the function `touch_rules()`.
 
@@ -57,7 +93,7 @@ Nevertheless, there are occasions when an item, a booklet or a person must be om
 Many functions accept an optional argument `predicate`, which is an expression to subset data on. In this expression you can use item_properties, person covariates and several other variables to filter your data. To see which predicate variables are available in your project, use the function `get_variables`.
 
 ```{r}
-knitr::kable(get_variables(db))
+get_variables(db)
 ```
 
 As an example, suppose we know of a printing error in the third item in booklet "pretest" so we want to turn it off locally, and we also want to estimate the parameters solely for women. We can pass to `fit_enorm` the following predicate expression:
@@ -95,23 +131,21 @@ design_is_connected(design)
 
 Even though predicates offer a lot of flexibility, there are some limitations due to the fact that they only work on the individual response level. The typical case that can not be solved by using a predicate, is to omit a whole booklet or person based on some of their responses, but fortunately there is a relatively easy way to get around that limitation. 
 
-The following example assumes there are some missing values in your data. Remember, Dexter converts all responses to strings and treats `NA` responses as the string `'NA'`. The following line will omit the missing responses (rather than scoring them 0), and calibrate the extended nominal response model. Based on the predicate, just individual responses will be omitted, which does not extend to exclusion of whole persons.
+The following example assumes there are some missing values in your data. Remember, Dexter converts all responses to strings and treats `NA` responses as the string `'NA'`. The following line will omit the missing responses (rather than scoring them 0), and calibrate the extended nominal response model. Based on this predicate, only individual missing responses will be omitted, which does not extend to exclusion of whole persons.
 
 ```{r, eval=FALSE}
 par = fit_enorm(db, response != 'NA')
 ```
 
-But there might be a valid consideration for wanting to omit all persons who had *any* missing responses, perhaps administration conditions that caused the missing responses were distracting enough to influence other answers. While this is not possible using the predicate mechanism, Dexter supports extracting the data, manipulating it and feeding it back to an analysis function manually. The following example will use dplyr to do this in a concise way.
+But there might be a valid consideration for wanting to omit all persons who had *any* missing responses, perhaps administration conditions that caused the missing responses were distracting enough to influence other answers. While this is not possible using just the predicate mechanism, Dexter supports extracting the data, manipulating it and feeding it back to an analysis function manually. The following example will use dplyr to do this in a concise way.
 
 ```{r, eval=FALSE}
 # goal: fit the extended nominal response model using only persons without any missing responses
-library(dplyr)
 
-# to select on an aggregate level we extract the data from the Dexter project database
-# and manipulate it using dplyr
 data = get_responses(db, columns=c('person_id','item_id','item_score','response')) %>%
     group_by(person_id) %>%
     mutate(any_missing = any(response == 'NA')) %>%
+    ungroup() %>%
     filter(!any_missing)
 
 # the manipulated data can be fed back to the analysis function
@@ -119,6 +153,9 @@ par = fit_enorm(data)
 ```
 
 
+
+
+
 ```{r, show=FALSE}
-dbDisconnect(db)
+close_project(db)
 ```

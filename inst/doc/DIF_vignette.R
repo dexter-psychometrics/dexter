@@ -1,5 +1,5 @@
 ## ----setup, include=FALSE------------------------------------------------
-knitr::opts_chunk$set(echo = TRUE,fig.align='centre', fig.width=6, fig.height=5)
+knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=5)
 library(dexter)
 
 ## ----get_data, results='hide'--------------------------------------------
@@ -11,19 +11,19 @@ add_item_properties(db, verbAggrProperties)
 dif_gender=DIF(db,"gender")
 print(dif_gender)
 
-## ---- echo=FALSE, results='hide'-----------------------------------------
+## ---- echo=FALSE, results='hide', fig.height=3---------------------------
 cc=fit_enorm(db,(gender=="Male")&(item_id%in%c("S1DoCurse","S1WantCurse","S3WantScold")))
-plot(-2:3,c(rep(0,3),rep(1,3)),xaxt='n',yaxt='n',bty='n',pch='',ylab='',xlab='ability-scale')
-lines(-1.5:2.5,rep(0.2,5),lty=2,col="gray")
-lines(-1.5:2.5,rep(0.8,5),lty=2,col="gray")
+plot(c(-2,3),c(0,1),xaxt='n',yaxt='n',bty='n',pch='',ylab='',xlab='ability-scale')
+lines(-1.4:2.6,rep(0,5),lty=2,col="gray")
+lines(-1.4:2.6,rep(0.8,5),lty=2,col="gray")
 for (i in 1:6)
-text(cc$est$beta.cml[i],0.8,rownames(cc$est$beta.cml)[i],cex=0.6,adj=1,srt=90,pos = 3)
+text(cc$est$beta.cml[i],0.8,rownames(cc$est$beta.cml)[i],cex=0.6,adj=1,srt=90,pos = 3, xpd=NA)
 
 cc=fit_enorm(db,(gender=="Female")&(item_id%in%c("S1DoCurse","S1WantCurse","S3WantScold")))
 for (i in 1:6)
-text(cc$est$beta.cml[i],0.2,rownames(cc$est$beta.cml)[i],cex=0.6,adj=1,srt=90,pos = 3)
-text(-1.9,0.8,"Males")
-text(-1.87,0.2,"Females")
+text(cc$est$beta.cml[i],0,rownames(cc$est$beta.cml)[i],cex=0.6,adj=1,srt=90,pos = 3, xpd=NA)
+text(-1.3,0.8,"Males", pos=2, xpd=NA)
+text(-1.3,0,"Females", pos=2, xpd=NA)
 
 ## ------------------------------------------------------------------------
 plot(dif_gender)
@@ -35,5 +35,5 @@ dif_gender$DIF_pair=D[o,o]
 plot(dif_gender)
 
 ## ---- echo=FALSE, results='hide'-----------------------------------------
-dbDisconnect(db)
+close_project(db)
 

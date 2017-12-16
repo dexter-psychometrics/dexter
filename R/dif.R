@@ -68,14 +68,17 @@ bty = function (n, h = c(265, 75), c. = c(61, 66),
 #' overall-DIF and a matrix of statistics for DIF in the relative position of
 #' item-category parameters in the regular parameterization used e.g., by OPLM.
 #' @details 
-#' Tests for DIF as described in Bechger and Maris (2014; A Statistical Test 
-#' for Differential Item Pair Functioning. Psychometrica). Supplements the 
-#' confirmatory approach of the profile plot
-#'
+#' Tests for equality of relative item difficulties category locations across groups.
+#' Supplements the confirmatory approach of the profile plot
+#' 
+#' @references 
+#' Bechger, T. M. and Maris, G (2015); A Statistical Test for Differential Item Pair Functioning. 
+#' Psychometrika. Vol. 80, no. 2, 317–340.
+#' 
 #' @examples
 #' \dontrun{
 #' db = start_new_project(verbAggrRules, "verbAggression.db", 
-#' covariates=list(gender='unknown'))
+#'   covariates=list(gender='unknown'))
 #' add_booklet(db, verbAggrData, "agg")
 #' dd = DIF(db,covariate="gender")
 #' print(dd)

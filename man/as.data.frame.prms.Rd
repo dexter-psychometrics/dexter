@@ -2,7 +2,7 @@
 % Please edit documentation in R/enorm.R
 \name{as.data.frame.prms}
 \alias{as.data.frame.prms}
-\title{Coerce enorm parameters object to a data.frame of parameters}
+\title{deprecated method}
 \usage{
 \method{as.data.frame}{prms}(x, row.names = NULL, optional = FALSE, ...)
 }
@@ -17,5 +17,5 @@ Missing values are not allowed.}
 \item{...}{any other parameters to the as.data.frame method are ignored silently}
 }
 \description{
-Coerce enorm parameters object to a data.frame of parameters
+deprecated, please use \code{coef()}
 }

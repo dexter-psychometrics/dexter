@@ -12,7 +12,7 @@ get_responses(dataSrc, predicate = NULL, columns = c("person_id", "item_id",
 
 \item{predicate}{an expression to select data on}
 
-\item{columns}{the columns you wish to select}
+\item{columns}{the columns you wish to select, can include all columns in the project, see: \code{\link{get_variables}}}
 
 \item{env}{optionally, an environment to evaluate the expression in}
 }

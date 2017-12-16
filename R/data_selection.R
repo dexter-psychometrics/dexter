@@ -6,7 +6,7 @@
 #' 
 #' @param dataSrc a dexter project database or data.frame
 #' @param predicate an expression to select data on
-#' @param columns the columns you wish to select
+#' @param columns the columns you wish to select, can include all columns in the project, see: \code{\link{get_variables}}
 #' @param env optionally, an environment to evaluate the expression in
 #' @return a data.frame of responses
 #' @details 
@@ -56,7 +56,6 @@ get_responses_ <- function(dataSrc, qtpredicate=NULL, columns=c('person_id','ite
       respData = dataSrc[,columns]
     } else
     {
-      #respData = with(dataSrc, dataSrc[eval(partial_eval(qtpredicate, env=env)), columns])
       respData = dataSrc[eval_tidy(qtpredicate, data=dataSrc, env=env), columns]
     }
   } else
@@ -75,7 +74,7 @@ get_responses_ <- function(dataSrc, qtpredicate=NULL, columns=c('person_id','ite
     # decide which tables we need to join since joining costs time
     used_columns = setdiff(used_columns, 
                            c(dbListFields(db,'dxResponses'), dbListFields(db,'dxScoring_rules')))
-    cte = c()
+    cte = " dxResponses INNER JOIN dxScoring_rules USING(item_id, response)"
     if(length(intersect(dbListFields(db,'dxPersons'),used_columns))>0) 
       cte = c(cte, 'INNER JOIN dxPersons USING(person_id)')
     if(length(intersect(dbListFields(db,'dxItems'),used_columns))>0) 
@@ -85,6 +84,8 @@ get_responses_ <- function(dataSrc, qtpredicate=NULL, columns=c('person_id','ite
     if(length(intersect(dbListFields(db,'dxBooklet_design'),used_columns))>0) 
       cte = c(cte, 'INNER JOIN dxBooklet_design USING(booklet_id, item_id, testpart_nbr)')
     
+    if(getOption('dexter.debug', default=FALSE)) debug.log$send(paste0(cte,collapse=' '), 'get_responses_cte')
+    
     # can have unexpected behavior if person makes more than one testform
     respData = NULL
     tryCatch(
@@ -92,13 +93,15 @@ get_responses_ <- function(dataSrc, qtpredicate=NULL, columns=c('person_id','ite
         respData = dbGetQuery(db, 
                               paste("SELECT", 
                                     paste0(columns, collapse=','),
-                                    "FROM dxResponses INNER JOIN dxScoring_rules USING(item_id, response)",
+                                    " FROM ",
                                     paste0(cte,collapse=" "),
                                     where,
                                     'ORDER BY person_id, item_id;'))
       }, 
       error = function(e)
       {
+        if(getOption('dexter.debug', default=FALSE)) debug.log$send(e$message, 'get_responses_error_caught')
+        
         if(grepl('(syntax error)|(no such function)', e$message, ignore.case=TRUE))
         {
           # could be that dbplyr cannot translate the r syntax since it contains non sql functions
@@ -108,12 +111,13 @@ get_responses_ <- function(dataSrc, qtpredicate=NULL, columns=c('person_id','ite
                                   paste("SELECT", 
                                         paste0(intersect(union(columns, all.vars(qtpredicate)),
                                                          get_variables(db)$name), collapse=','),
-                                        "FROM dxResponses INNER JOIN dxScoring_rules USING(item_id, response)",
+                                        " FROM ",
                                         paste0(cte,collapse=" "),
                                         'ORDER BY person_id, item_id;'))
           
-          #respData <<- with(respData, respData[eval(qtpredicate), columns])
           respData <<- respData[eval_tidy(qtpredicate, data=respData, env=env), columns]
+          
+          if(getOption('dexter.debug', default=FALSE)) debug.log$send(TRUE, 'get_responses_filter_success')
         } else
         {
           stop(e)
@@ -160,11 +164,22 @@ get_resp_data <- function(dataSrc, qtpredicate=NULL, extra_columns=NULL, extra_d
     
     if(summarised == TRUE & !dataSrc$summarised)
     {
-      dataSrc$x = dataSrc$x %>%
-        group_by_at(c('booklet_id','person_id',extra_columns)) %>% 
-        summarise(sumScore = sum(.data$item_score))  %>% 
-        ungroup()
-      dataSrc$summarised == TRUE
+      if(is.null(extra_columns)) 
+      {
+        dataSrc$x = dataSrc$x %>%
+          group_by(.data$booklet_id, .data$person_id) %>% 
+          summarise(sumScore = sum(.data$item_score))  %>% 
+          ungroup()
+      } else
+      {
+        dataSrc$x = dataSrc$x %>%
+          group_by(.data$booklet_id, .data$person_id) %>% 
+          mutate(sumScore = sum(.data$item_score)) %>% 
+          slice(1) %>%
+          ungroup()
+      }
+      
+      dataSrc$summarised = TRUE
     } else if(dataSrc$summarised != summarised)
     {
       stop('cannot unsummarise')
@@ -338,3 +353,31 @@ filter.dx_resp_data = function(respData, predicate, env=NULL, .recompute_sumscor
   
   return(respData)
 }
+
+# filter join for a dx_resp_data object similar to a dplyr semi_join statement
+# @parameter respData an object of type dx_resp_data
+# @parameter y tibble for semi_join
+# @parameter by may only contain columns that are present in the design and in the data(x)
+# @parameter .recompute_sumscores shall sumScores be recomputed
+semi_join.dx_resp_data = function(respData, y, by=NULL, .recompute_sumscores = FALSE)
+{
+  if(.recompute_sumscores & respData$summarised) stop('cannot recompute sumScores on summarised data')
+
+  respData$design = semi_join(respData$design, y, by = by)
+  respData$x = semi_join(respData$x, y, by = by)
+  
+  if(.recompute_sumscores)
+  {
+    respData$x = respData$x %>% 
+      group_by(.data$person_id, .data$booklet_id) %>% 
+      mutate(sumScore = sum(.data$item_score))  %>% 
+      ungroup()
+  }
+  
+  return(respData)
+}
+
+
+
+
+

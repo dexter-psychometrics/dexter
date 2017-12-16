@@ -22,11 +22,21 @@ my_layout <- function(npic, nr, nc) {
 #
 fstr = function(f, arglist)
 {
-  if(length(arglist)==0 || is.null(f)) return(f)
+  if(length(arglist)==0 || is.null(f) || f == '') return(f)
   f = gsub(paste0('\\$(?!(\\$|',paste0('(',names(arglist),')',collapse='|'),'))'),'$$', f, perl = TRUE)
   f = gsub('\\:(?!(\\.|\\:|(\\+\\.)))','::', f, perl=TRUE)
   rprintf(f,arglist)
 }
+
+qcolors = function(n, pal='Set1')
+{
+  npal = brewer.pal.info[rownames(brewer.pal.info) == pal,'maxcolors']
+  step = ceiling(n/npal)
+  ord = unlist(lapply(1:step, function(x) seq.int(x, by=step,length.out=npal)))
+  ord = ord[ord<=n]
+  colorRampPalette(brewer.pal(max(min(npal,n),3), pal))(n)[ord]
+}
+
 
 
 
@@ -37,6 +47,7 @@ fstr = function(f, arglist)
 #'
 #'
 #' @param dataSrc Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, response, item_score
+#' and optionally booklet_id
 #' @param item The ID of the item to plot. A separate plot will be produced
 #' for each booklet that contains the item, or an error message if the item ID
 #' is not known. Each plot contains a non-parametric regression of each possible
@@ -46,19 +57,15 @@ fstr = function(f, arglist)
 #' on the same page. Default is 1. May be ignored or adjusted if it does not make sense.
 #' @param nr An integer between 1 and 3. Number of rows when putting mutiple plots
 #' on the same page. Default is 1. May be ignored or adjusted if it does not make sense.
+#' @param legend logical, whether to include the legend. default is TRUE
 #' @param ... further arguments to plot.
 #' @details 
 #' Customisation of title and subtitle can be done by using the arguments main and sub. 
-#' These arguments can contain references to the variables item_id, booklet_id, item_position 
-#' (only if dataSrc is a dexter db), pvalue, rit and rir. References are made by prefixing 
-#' these variables with a dollar sign. Variable names can optionally be postfixed 
-#' with a sprintf string, e.g.:
-#'  
-#' \code{distractor_plot(
-#' db, main='item: $item_id', 
-#' sub='Item-rest corr.: $rir:.2f')}
+#' These arguments can contain references to the variables item_id, booklet_id, item_position(only if dataSrc is a dexter db),
+#' pvalue, rit and rir. References are made by prefixing these variables with a dollar sign. Variable names can optionally be postfixed 
+#' with a sprintf style format string, e.g.: distractor_plot(db, main='item: $item_id', sub='Item rest correlation: $rir:.2f')
 #' 
-distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1, ...){  
+distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1, legend = TRUE, ...){  
   qtpredicate = eval(substitute(quote(predicate)))
   
   if(is.null(qtpredicate) & inherits(dataSrc,'DBIConnection'))
@@ -76,15 +83,15 @@ distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1, ...){
   respData = get_resp_data(dataSrc, qtpredicate = qtpredicate, extra_columns='response', env=env, summarised=FALSE) %>%
     filter(.data$item_id == item, .recompute_sumscores = FALSE )
   
-  respData$x$response = factor(respData$x$response)
+  #respData$x$response = factor(respData$x$response)
 
   if (nrow(respData$design) == 0) stop(paste("Item", item, "not found in dataSrc."))
   
   default.args = list(sub = "Pval: $pvalue:.2f, Rit: $rit:.3f, Rir: $rir:.3f", 
-                      xlab = "Sum score", ylab = "Proportion", cex.sub = 0.8, xaxs="i")
+                      xlab = "Sum score", ylab = "Proportion", cex.sub = 0.8, xaxs="i", bty="l")
   
   default.args$main = ifelse('item_position' %in% colnames(respData$design),
-                             '$item_id: position $item_position in booklet $booklet_id',
+                             '$item_id, position $item_position in booklet $booklet_id',
                              '$item_id in booklet $booklet_id')
   
   user.args = list(...)
@@ -92,7 +99,16 @@ distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1, ...){
   rsp_counts = respData$x %>%
     group_by(.data$booklet_id, .data$response, .data$item_score, .data$sumScore) %>%
     summarise(n = n()) %>% 
-    ungroup() 
+    ungroup()
+  
+
+  rsp_colors = rsp_counts %>%
+    group_by(.data$response) %>%
+    summarise(n = sum(.data$n)) %>%
+    ungroup() %>%
+    arrange(desc(.data$n), .data$response) 
+  # cannot make this a list since a response can be an empty string
+  rsp_colors = rsp_colors %>% add_column(color = qcolors(nrow(rsp_colors)))
   
   max_score = max(rsp_counts$item_score)
   # statistics by booklet
@@ -110,10 +126,8 @@ distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1, ...){
   graphics::layout(matrix(1:(ly$nr * ly$nc), byrow = TRUE, 
                           ncol = ly$nc))
   
-  labelz = levels(rsp_counts$response)
-  
   rsp_counts = split(rsp_counts, rsp_counts$booklet_id)
-  
+
   stats %>%
     rowwise() %>%
     do({
@@ -141,23 +155,24 @@ distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1, ...){
       
       # this generates the legend and has the  side effect of drawing the lines in the plot
       lgnd = y %>% group_by(.data$response)  %>% do({
+        k = rsp_colors[rsp_colors$response == .$response[1],]$color
+
         dxi = density(.$sumScore, n = 51, weights = .$n/sum(.$n), 
                       bw = dAll$bw, from = min(dAll$x), to = max(dAll$x))
         yy = dxi$y/dAll$y * sum(.$n)/N
-        k = match(.$response[1], labelz) + 1
         graphics::lines(dAll$x, yy, co = k, lw = 2)
         tibble(col = k, resp = paste0(.$response[1]," (", .$item_score[1], ")"))
       })
-      graphics::legend("right", legend = as.character(lgnd$resp), 
-                       lty = 1, col = lgnd$col, cex = 0.8, box.lty = 0)
-    
+      if(legend)
+      {
+        graphics::legend("right", legend = as.character(lgnd$resp), 
+                         lty = 1, col = lgnd$col, cex = 0.8,lwd=2, box.lty = 0)
+      }
       data.frame()
     })
   if(nc>1 || nr>1) par(mfrow=c(1,1))
   invisible(NULL)
 }
-
-
 
 #' Profile plot
 #'
@@ -192,7 +207,7 @@ distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1, ...){
 #' @examples
 #' \dontrun{
 #' db = start_new_project(verbAggrRules, "verbAggression.db", 
-#' covariates=list(gender="<unknown>"))
+#'   covariates=list(gender="<unknown>"))
 #' add_booklet(db, verbAggrData, "agg")
 #' add_item_properties(db, verbAggrProperties)
 #' profile_plot(db, item_property='mode', covariate='gender')
@@ -221,6 +236,7 @@ profile_plot <- function(dataSrc, item_property, covariate, predicate = NULL, mo
     common_items = Reduce(intersect, split(respData$design$item_id, respData$design$booklet_id))
     if(length(common_items) == 0) stop('The intersection of the items across booklets is empty')
     
+    # we do it this convoluted way because we would loose the extra design columns otherwise
     respData$design = respData$design %>%
       distinct(.data$item_id, .keep_all=TRUE) %>%
       semi_join(tibble(item_id = common_items), by = 'item_id') %>%
@@ -291,12 +307,11 @@ profile_plot <- function(dataSrc, item_property, covariate, predicate = NULL, mo
   sg = data.frame(k=0:(maxA+maxB))
   
   default.args = list(asp=1, main="Profile plot", xlab=props[1], 
-                      ylab=props[2],xlim=c(0,maxA),ylim=c(0,maxB))
+                      ylab=props[2],xlim=c(0,maxA),ylim=c(0,maxB),bty='l',xaxs="i")
   do.call(graphics::plot, 
           merge_arglists(user.args, 
                          default=default.args,
-                         override=list(x=c(0,maxA), y=c(0,maxB),
-                                       xaxs="i", type="n")))
+                         override=list(x=c(0,maxA), y=c(0,maxB),type="n")))
   
   # The timolines
   k = maxA + maxB
@@ -309,6 +324,7 @@ profile_plot <- function(dataSrc, item_property, covariate, predicate = NULL, mo
   graphics::text(0:maxA,0,0:maxA,cex=.6,col="lightgray")
   graphics::text(maxA,1:maxB,(maxA+1:maxB),cex=.6,col="lightgray")
   
+  colors = qcolors(length(tt))
   
   for (i in seq_along(tt)) {
     ta = tt[[i]]$tbl
@@ -322,14 +338,14 @@ profile_plot <- function(dataSrc, item_property, covariate, predicate = NULL, mo
     stp = y %>% 
       group_by(.data$v) %>%
       do(.[which.max(.$value),]-1)
-    graphics::lines(stp$Var1, stp$Var2, col=i+1, lw=2)
+    graphics::lines(stp$Var1, stp$Var2, col=colors[i], lw=2)
   }
   
-  graphics::legend("topleft", 
+  graphics::legend(x=0,y=maxB, 
                    legend=names(tt), 
-                   lty=1, col=1+(1:length(tt)),
+                   lty=1, col=colors,
                    cex=.7, 
-                   box.lty=0)
-  graphics::box()
+                   box.lty=0,
+                   bg='white')
 }
 

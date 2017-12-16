@@ -74,7 +74,7 @@ CREATE TABLE dxAdministrations(
 	person_id VARCHAR(100) NOT NULL,
 	booklet_id VARCHAR(100) NOT NULL,
 	
-	PRIMARY KEY (booklet_id, person_id)
+	PRIMARY KEY (booklet_id, person_id),
 
 	FOREIGN KEY (person_id) REFERENCES dxPersons(person_id) ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY (booklet_id) REFERENCES dxBooklets(booklet_id) ON UPDATE CASCADE ON DELETE CASCADE

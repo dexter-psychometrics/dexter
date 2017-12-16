@@ -4,7 +4,8 @@
 \alias{add_item_properties}
 \title{Add item properties to a project}
 \usage{
-add_item_properties(db, item_properties, overwrite = FALSE)
+add_item_properties(db, item_properties, overwrite = TRUE,
+  default_values = list())
 }
 \arguments{
 \item{db}{A handle to the database, e.g. the output of \code{start_new_project}
@@ -12,13 +13,16 @@ or \code{open_project}}
 
 \item{item_properties}{A data frame containing the item properties. See details.}
 
-\item{overwrite}{Whether overwrite is permitted (default=FALSE)}
+\item{overwrite}{Whether existing item properties should be overwritten (default=TRUE)}
+
+\item{default_values}{a list where the names are item_properties and the values are defaults.
+The defaults will be used as the value for an item for which the property is not specified, 
+for example when you add new items using \code{\link{touch_rules}}.
+Default_values for an item property will only be processed
+the first time you define an item property.}
 }
 \value{
-A list of: \item{unknown_items}{Item IDs for any items that were provided
-in the data frame but could not be found in the data base}
-\item{items_unaccounted_for}{Item IDs for any items that exist in the data base
-but were not given properties in the data frame}
+nothing
 }
 \description{
 Adds item properties to an existing database
@@ -28,20 +32,19 @@ When entering response data in the form of a rectangular person x item
 table, it is easy to provide person properties but practically impossible
 to provide item properties. This function provides a possibility to do so.
 The order of the rows and columns in the data frame is not important but
-(i) there must be a column called exactly \code{item} or \code{item_id} containing the item IDs
-exactly as entered before, and (ii) all items in the data frame must be known
-to the data base and all items in the data base must be given properties --
-otherwise, there will be a warning message, and nothing else will be done.
-If all is well, the data frame will be added to the project database, and any variables in 
-it may be used in analyses involving item properties.
+there must be a column called \code{item_id} containing the item id's
+exactly as entered before.
+
+Note that is is not possible to add new items with this function, 
+use \code{\link{touch_rules}} if you want to add new items to your project.
 }
 \examples{
 \dontrun{
 db = start_new_project(verbAggrRules, "verbAggression.db", 
-covariates=list(gender="<unknown>"))
+  covariates=list(gender="<unknown>"))
 head(verbAggrProperties)
 add_item_properties(db, verbAggrProperties)
-show_item_properties(db) 
+get_item_properties(db) 
 
 close_project(db)
 }

@@ -6,5 +6,7 @@ void sampleNRM2(double *theta, double *b, int *a, int *first, int *last, int *nI
 //void PV1(double *b, int *a, int *first, int *last, double *mu, double *sigma, int *score, int *pop, int *nP,int *nI, int *nPop, double *theta);
 void PV(double *b, int *a, int *first, int *last, double *mu, double *sigma, int *score, int *pop, int *nP,int *nI, int *nPop, int *nPV, double *theta);
 void Escore(double *theta, double *score, double *b, int *a, int *first, int *last, int *n);
+void recyclePV(double *b, int *a, int *first, int *last, int *nI, int *n, double *mu, double *sigma, double *R);
+void recyclePV2(double *b, int *a, int *first, int *last, int *nI, int *n, double *prior, int *nprior, double *R);
   
 #endif

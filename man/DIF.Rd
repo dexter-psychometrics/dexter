@@ -22,14 +22,13 @@ item-category parameters in the regular parameterization used e.g., by OPLM.
 Exploratory test for Differential Item Functioning
 }
 \details{
-Tests for DIF as described in Bechger and Maris (2014; A Statistical Test 
-for Differential Item Pair Functioning. Psychometrica). Supplements the 
-confirmatory approach of the profile plot
+Tests for equality of relative item difficulties category locations across groups.
+Supplements the confirmatory approach of the profile plot
 }
 \examples{
 \dontrun{
 db = start_new_project(verbAggrRules, "verbAggression.db", 
-covariates=list(gender='unknown'))
+  covariates=list(gender='unknown'))
 add_booklet(db, verbAggrData, "agg")
 dd = DIF(db,covariate="gender")
 print(dd)
@@ -38,4 +37,8 @@ plot(dd)
 close_project(db)
 }
 
+}
+\references{
+Bechger, T. M. and Maris, G (2015); A Statistical Test for Differential Item Pair Functioning. 
+Psychometrika. Vol. 80, no. 2, 317–340.
 }

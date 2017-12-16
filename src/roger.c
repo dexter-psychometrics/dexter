@@ -6,7 +6,8 @@
 #include "roger.h"
 
 
-// sample responses to one item. Not adapted to include null category
+// sample the 0-based indices of responses to one item with (0-based) index i: 
+// NOT adapted for use with b_0 and a_0 in
 void sampleNRM0(double *theta, double *b, int *a, int *i, int *first, int *last, int *m, int *response)
 {
   double *p=NULL, u;
@@ -32,7 +33,8 @@ void sampleNRM0(double *theta, double *b, int *a, int *i, int *first, int *last,
   free(p);
 }
 
-// sample responses to one item adapted for use with b_0 and a_0 in
+// sample the 0-based indices of responses to one item with (0-based) index i: 
+// adapted for use with b_0 and a_0 in
 void sampleNRM(double *theta, double *b, int *a, int *i, int *first, int *last, int *m, int *response)
 {
   double *p=NULL, u;
@@ -58,7 +60,7 @@ void sampleNRM(double *theta, double *b, int *a, int *i, int *first, int *last, 
   free(p);
 }
 
-// sample test-score on a set of adapted for use with b_0 and a_0 in
+// sample test-scores: This routine is adapted for use with b_0 and a_0.
 void sampleNRM2(double *theta, double *b, int *a, int *first, int *last, int *nI, int *m, int *score)
 {
   double *p=NULL, u;
@@ -223,7 +225,7 @@ void PV(double *b, int *a, int *first, int *last, double *mu, double *sigma, int
  */
 void recyclePV(double *b, int *a, int *first, int *last, int *nI, int *n, double *mu, double *sigma, double *R)
 {
-  int k=0, npv=n[1];
+  int k=0, npv=n[0];
   double atheta, *p=NULL, u;
   int sm, ms, Mxs, colindx, nrows, iter;
   ms=0;Mxs=0;
@@ -266,6 +268,58 @@ void recyclePV(double *b, int *a, int *first, int *last, int *nI, int *n, double
   free(p);
   PutRNGstate(); // put seed
 }
+
+/*
+ Inputs n; a vector of length Mxs+1, each entry corresponding to a score with value npv.
+ This version accepts a vector called prior which contains a sample from the prior
+*/
+void recyclePV2(double *b, int *a, int *first, int *last, int *nI, int *n, double *prior, int *nprior, double *R)
+{
+  int k=0, npv=n[0], rindx;
+  double atheta, *p=NULL, u;
+  int sm, ms, Mxs, colindx, nrows, iter;
+  ms=0;Mxs=0;
+  for (int i=0;i<nI[0];i++) {
+    if ((last[i]-first[i]+2)>ms) {ms=(last[i]-first[i]+2);}
+    Mxs += a[last[i]];
+  }
+  nrows=Mxs+1;
+  void *_p = realloc(p, ((ms+1) * sizeof(double)));
+  p=(double*)_p;
+  GetRNGstate(); // get seed
+  
+  iter=0;
+  while (iter<(nrows*npv))
+  {
+    rindx = (int)floor(runif(0,(nprior[0]-1))) ;
+    atheta = prior[rindx];
+    sm=0;
+    for (int i=0;i<nI[0];i++)
+    {
+      p[0]=b[first[i]]*exp(a[first[i]]*atheta); 
+      k=1;
+      for (int j=first[i]+1;j<=last[i];j++) // note the +1
+      {
+        p[k]=p[k-1]+b[j]*exp(a[j]*atheta);
+        k++;
+      }
+      u=p[k-1]*runif(0,1);
+      k=0;
+      while (u>p[k]) {k++;}
+      if (k>0) {sm+=a[first[i]+k];}
+    }
+    
+    if (n[sm]>0) {
+      colindx=npv-n[sm];
+      R[sm+colindx*nrows]=atheta;
+      n[sm]--;
+      iter++;
+    }
+  }
+  PutRNGstate(); // put seed
+  free(p);
+}
+
 
 void Escore(double *theta, double *score, double *b, int *a, int *first, int *last, int *n)
 {

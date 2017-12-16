@@ -1,5 +1,7 @@
-## ------------------------------------------------------------------------
+## ---- message=FALSE------------------------------------------------------
+library(dplyr)
 library(dexter)
+
 db = start_new_project(verbAggrRules, "verbAggression.db", 
                        covariates = list(gender="<unknown>"))
 
@@ -10,7 +12,25 @@ add_booklet(db, x=verbAggrData, booklet_id="agg")
 add_item_properties(db, verbAggrProperties)
 
 ## ------------------------------------------------------------------------
-knitr::kable(get_variables(db))
+
+get_responses(db, columns = c('item_id','response')) %>%
+  group_by(item_id, response) %>%
+  summarise(count = n()) %>%
+  slice(1:10)
+  
+
+## ---- fig.height=5,fig.width=7-------------------------------------------
+scores = get_responses(db, columns = c('person_id','item_score','situation')) %>%
+  group_by(person_id, situation) %>%
+  summarise(situation_score = sum(item_score))  
+
+par(bty='n', fg='white')
+
+boxplot(situation_score ~ situation, scores, border='black')
+
+
+## ------------------------------------------------------------------------
+get_variables(db)
 
 ## ---- eval=FALSE---------------------------------------------------------
 #  par = fit_enorm(db, gender=='female' & !(booklet_id == 'pretest' & item_position == 3))
@@ -34,18 +54,16 @@ knitr::kable(get_variables(db))
 
 ## ---- eval=FALSE---------------------------------------------------------
 #  # goal: fit the extended nominal response model using only persons without any missing responses
-#  library(dplyr)
 #  
-#  # to select on an aggregate level we extract the data from the Dexter project database
-#  # and manipulate it using dplyr
 #  data = get_responses(db, columns=c('person_id','item_id','item_score','response')) %>%
 #      group_by(person_id) %>%
 #      mutate(any_missing = any(response == 'NA')) %>%
+#      ungroup() %>%
 #      filter(!any_missing)
 #  
 #  # the manipulated data can be fed back to the analysis function
 #  par = fit_enorm(data)
 
 ## ---- show=FALSE---------------------------------------------------------
-dbDisconnect(db)
+close_project(db)
 

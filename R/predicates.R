@@ -8,6 +8,8 @@ qtpredicate2where = function(qtpredicate, db, env)
                   dbListFields(db,'dxBooklet_design'),dbListFields(db,'dxResponses')))
   sql = translate_sql_(list(partial_eval(qtpredicate,vars=vars,env=env)),con=db)
 
+  if(getOption('dexter.debug', default=FALSE)) debug.log$send(sql, 'qtpredicate2where_uncorrected_sql')
+  
   # translate_sql bug occurs for expressions like: booklet_id %in% as.character(1:4) 
   # <SQL> `booklet_id` IN CAST((1, 2, 3, 4) AS TEXT)
   # unfortunately regular expression functionality in R is a bit awkward 
@@ -44,12 +46,17 @@ qtpredicate2where = function(qtpredicate, db, env)
     paste0(split, collapse=' ')
   })
   
+
   # translate_sql_ has a bug with expressions like a %in% c(b) if b has length 1, solve here
-  sql = gsub("IN *([^, \\(\\)'\"]+)","IN(\\1)", sql, perl=TRUE)
-  sql = gsub("IN *('[^']*')","IN(\\1)", sql, perl=TRUE)
-  sql = gsub('IN *("[^"]*")',"IN(\\1)", sql, perl=TRUE)
+  ## no longer necessary since dbplyr 1.1.0
+  #sql = gsub("IN *([^, \\(\\)'\"]+)","IN(\\1)", sql, perl=TRUE)
+  #sql = gsub("IN *('[^']*')","IN(\\1)", sql, perl=TRUE)
+  #sql = gsub('IN *("[^"]*")',"IN(\\1)", sql, perl=TRUE)
+
   
   if(length(sql) > 1) sql = paste0('(',sql,')',collapse=' AND ')
+  
+  if(getOption('dexter.debug', default=FALSE)) debug.log$send(sql, 'qtpredicate2where_sql')
   
   return(paste(' WHERE ', sql))
 }
@@ -77,19 +84,6 @@ is_bkl_safe = function(dataSrc, qtpredicate)
   return(length(intersect(all.vars(qtpredicate), blacklist)) == 0 )
 }
 
-
-#' Deprecated alias for get_variables
-#' 
-#' This function has been renamed to \code{\link{get_variables}}. 
-#' \code{Predicate_variables} will be removed in a future version.
-#' 
-#' @param db a dexter project database
-#' @return a data.frame with name and type of the variables defined in your dexter project
-#'
-predicate_variables = function(db)
-{
-  get_variables(db)
-}
 
 
 

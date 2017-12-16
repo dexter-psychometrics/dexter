@@ -9,7 +9,7 @@ fit_domains(dataSrc, item_property, predicate = NULL)
 \arguments{
 \item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score}
 
-\item{item_property}{The item property defining the 
+\item{item_property}{The item property defining the
 domains (subtests)}
 
 \item{predicate}{An optional expression to subset data, if NULL all data is used}
@@ -22,13 +22,9 @@ for the Rasch model and the interaction model.
 Estimate the parameters of the Rasch model and the Interaction model
 }
 \details{
-Unlike the Rasch model, the interaction model cannot be computed
-concurrently for a whole design of test forms. This function fits the
-Rasch model and the interaction model on a complete rectangular array of
-responses, with comparison between the two models playing an important role.
-The rectangular array is typically one booklet but can also consist of 
-the intersection (common items) of two or more booklets. If the intersection is empty 
-(no common items for all persons), the function will exit with an error message.
+We have generalised the interaction model for items having more than two (potentially, a largish number) 
+of response categories. This function represents scores on subtests as 
+super-items and analyses these as normal items.
 }
 \examples{
 \dontrun{
