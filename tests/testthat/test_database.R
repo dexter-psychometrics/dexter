@@ -28,7 +28,7 @@ test_that('rule updates and sanity checks',
   expect_true(nrow(rules) == 72, 'expect 72 rules in verbal aggression database')
   
   ## test no-op
-  expect_message(touch_rules(db, slice(rules,1:10)),
+  expect_output(touch_rules(db, slice(rules,1:10)),
                  '(changed\\D*0\\D*added\\D*0\\D*)|(addeded\\D*0\\D*changed\\D*0\\D*)$',
                  info = 'expect message saying 0 changes when resupplying an existing rule')
   
@@ -37,7 +37,7 @@ test_that('rule updates and sanity checks',
   
   
   ## test update score
-  expect_message(touch_rules(db, filter(rules, item_id=='S1DoCurse' & response ==1) %>% mutate(item_score=2) ),
+  expect_output(touch_rules(db, filter(rules, item_id=='S1DoCurse' & response ==1) %>% mutate(item_score=2) ),
                  '(changed\\D*1\\D*added\\D*0\\D*)|(added\\D*0\\D*changed\\D*1\\D*)$',
                  info = 'expect message saying 1 change and 0 added when modyfying item_score')
   
@@ -79,7 +79,7 @@ test_that('rule updates and sanity checks',
   
   # we should be allowed to add a new rule with a score not 0
   # because this sanity check should be done in conjunction with the data already in the db
-  expect_message(touch_rules(db, tibble(item_id='S3DoCurse',response=5,item_score=5)),
+  expect_output(touch_rules(db, tibble(item_id='S3DoCurse',response=5,item_score=5)),
                  '(changed\\D*0\\D*added\\D*1\\D*)|(added\\D*1\\D*changed\\D*0\\D*)$',
                  info = 'expect message saying 0 change and 1 added when adding a new rule for an item')
   

@@ -77,8 +77,7 @@ bty = function (n, h = c(265, 75), c. = c(61, 66),
 #' 
 #' @examples
 #' \dontrun{
-#' db = start_new_project(verbAggrRules, "verbAggression.db", 
-#'   covariates=list(gender='unknown'))
+#' db = start_new_project(verbAggrRules, "verbAggression.db", covariates=list(gender='unknown'))
 #' add_booklet(db, verbAggrData, "agg")
 #' dd = DIF(db,covariate="gender")
 #' print(dd)
@@ -150,7 +149,7 @@ print.DIF_stats <- function(x, ...)
   specify_decimal <- function(x, k) format(round(x, k), nsmall=k)
   tmp = specify_decimal(x$DIF_overall$p,3)
   if (tmp=="0.000") tmp="< 0.0006"
-  print(paste0("Test for DIF:"," Chi-square = ", as.character(round(x$DIF_overall$stat, digits=3)),
+  cat(paste0("Test for DIF:"," Chi-square = ", as.character(round(x$DIF_overall$stat, digits=3)),
                ", df = ", 
                as.character(x$DIF_overall$df),
                ", p = ", tmp))  

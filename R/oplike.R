@@ -26,7 +26,7 @@
 #' start_new_project_from_oplm builds a complete dexter database from a .dat and .scr file in
 #' the proprietary oplm format. Three custom variables are added to the database: 
 #' booklet_on_off, item_local_on_off, item_global_on_off. These are taken from the .scr file
-#' and can be used in expressions in the various dexter functions.
+#' and can be used in predicates in the various dexter functions.
 #' 
 #' @examples
 #'\donttest{
@@ -35,11 +35,11 @@
 #'    booklet_position=c(1,3), responses_start=101,
 #'    person_id=c(50,62))
 #'
-#' par = fit_enorm(db, 
-#'    (item_global_on_off==1)&(item_local_on_off==1)&(booklet_on_off==1))
+#' prms = fit_enorm(db, 
+#'    item_global_on_off==1 & item_local_on_off==1 & booklet_on_off==1)
 #' 
-#' abilities = ability(db, par, 
-#'    (item_global_on_off==1)&(item_local_on_off==1)&(booklet_on_off==1))
+#' abilities = ability(db, prms, 
+#'    item_global_on_off==1 & item_local_on_off==1 & booklet_on_off==1)
 #' 
 #' head(abilities)
 #'}
@@ -112,9 +112,9 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
             
     dbExecute(db,'INSERT INTO dxBooklets(booklet_id, booklet_on_off) VALUES(:b,:onoff);',
                       tibble(b=as.character(1:scr$nBook),onoff=scr$bookOn))
-    dbExecute(db,'INSERT INTO dxTestparts(booklet_id, testpart_nbr) VALUES(:b,:tp);',tibble(b=unique(design$booklet_id),tp=1))
-    dbExecute(db,'INSERT INTO dxBooklet_design(booklet_id,testpart_nbr, item_id, item_position, item_local_on_off) 
-                            VALUES(:booklet_id,1,:item_id,:item_position, :onoff);', design %>% select(-.data$item_nbr))                
+    dbExecute(db,'INSERT INTO dxBooklet_design(booklet_id, item_id, item_position, item_local_on_off) 
+                            VALUES(:booklet_id,:item_id,:item_position, :onoff);', 
+					select(design, .data$booklet_id,.data$item_id,.data$item_position, .data$onoff))                
     
     vp = 1
     con = file(dat_path, "r")
@@ -126,9 +126,29 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
       cat('\rreading lines:', vp, '-', as.integer(vp + length(lines)-1))
       bkl = as.integer(substr(lines, booklet_position[1], booklet_position[2]))
       
+      if(anyNA(bkl))
+      {
+        stop(paste0("empty booklet id's at position (", paste0(booklet_position, collapse=', ' ),")"))
+      } else if(min(bkl) < 1 || max(bkl) > scr$nBook)
+      {
+        stop(paste0("The following booklet_id's in data are not present in the .scr file:\n",
+                    paste(setdiff(bkl, 1:scr$nBook), collapse = ' ')))
+      }
+      
+      
       rsp = rsplit(substring(lines, 
                         responses_start, 
                         responses_start + scr$nitBook[bkl] * response_length - 1))
+      
+      if(any(nchar(rsp) < (scr$nitBook[bkl] * response_length + responses_start - 1)))
+      {
+        lnbr = min(which(nchar(rsp) < (scr$nitBook[bkl] * response_length + responses_start - 1))) 
+        stop(paste0('Error on line ', (lnbr + vp - 1), 
+                    '. Line is too short for the number of responses in booklet "',bkl[lnbr],
+                    '" with response_length = ',response_length,' and number of items = ',
+                    scr$nitBook[bkl[lnbr]],'.'))
+      }
+      
 
       bkl=as.character(bkl)
       
@@ -152,9 +172,10 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
       dbExecute(db,'INSERT INTO dxAdministrations(person_id,booklet_id) VALUES(:person_id,:booklet_id);', 
                       tibble(person_id=prs,booklet_id=bkl))
 
-      dbExecute(db,'INSERT INTO dxResponses(booklet_id,person_id,item_id,response) 
+      dbExecute(db,
+                'INSERT INTO dxResponses(booklet_id,person_id,item_id,response) 
                                   VALUES(:booklet_id,:person_id,:item_id,:response);', 
-                      data)
+                select(data, .data$booklet_id,.data$person_id,.data$item_id,.data$response))
     
     }
     close(con)
@@ -162,8 +183,11 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
     cat('\nvalidating constraints...')
  }, on_error = function(e)
     {
+      if(!finished) close(con)
+   
       if(finished & grepl('foreign key', e$message,ignore.case=TRUE))
       {
+
         # there are three deferred foreign key constraints
         # that are not caught until the end of the transaction (for efficiency reasons)
         # we can test them one by one
@@ -171,12 +195,13 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
                                             EXCEPT SELECT item_id, response FROM dxScoring_rules;')
         if(nrow(unknown_responses) > 0)
         {
-          print('\nThe following responses were found in the data but they are not defined in the .scr file or coded as missing responses.')
-          print('Possible causes are that not all missing characters are correctly specified or your screen and dat files do not match.')
+          cat('\nThe following responses were found in the data but they are not defined in the .scr file or coded as missing responses.')
+          cat('Possible causes are that not all missing characters are correctly specified, your screen and dat files do not match ')
+          cat('or responses_start is incorrect.\n')
           print(unknown_responses)
           e$message = 'Invalid responses, see output'
         } 
-        # FOREIGN KEY (booklet_id, testpart_nbr, item_id) is highly unlikely to be violated. 
+        # FOREIGN KEY (booklet_id, item_id) is highly unlikely to be violated. 
         # because this will most likely manifest in the previous constraint
         # FOREIGN KEY (booklet_id, person_id) can also not be wrong in this function because they are entered together
 
@@ -194,7 +219,7 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
 #' Read item parameters from oplm PAR or CML files
 #'
 #' @param par_path path to a file in the (binary) OPLM PAR format or the human readable CML format
-#' @return depends on the input. For .PAR files a tibble with columns: item_id, item_score, beta, nr; 
+#' @return depends on the input. For .PAR files a tibble with columns: item_id, item_score, beta, nbr,
 #' for .CML files also several statistics columns that are outputted by OPLM as part of the calibration.
 #' 
 #' @details
@@ -214,17 +239,18 @@ read_oplm_par = function(par_path){
     return(
       lapply(readPAR(par_path), function(p)
       {
-        tibble(item_id=p$label,
+        tibble(item_id=trimws(p$label),
                item_score=c(1:p$ncat)*p$discr,
                beta=p$delta,
-               nr=p$ilabel)
+               nbr=p$ilabel)
       }) %>% 
         bind_rows() %>%
-        arrange(.data$item_id, .data$item_score)
+        arrange(.data$item_id, .data$item_score) %>%
+        as.data.frame()
     )
   } else
   {
-    return(readCML(par_path))
+    return(as.data.frame(readCML(par_path)))
   }
 }
 
@@ -243,7 +269,7 @@ readCML = function(cml_path)
   l = l[(i + 5):length(l)]
   l = l[1:(min(which(grepl('^-+$',l,perl=TRUE) == TRUE))-1)]
   
-  par = as_tibble(do.call(rbind, 
+  pars = as_tibble(do.call(rbind, 
                                 lapply(strsplit(trimws(l),'\\s+',perl=TRUE),
                                        function(x)
                                        {
@@ -253,12 +279,12 @@ readCML = function(cml_path)
                                          return(x)
                                         }))) 
   
-  par[,c(1,3:ncol(par))] = lapply(par[,c(1,3:ncol(par))],as.numeric)
-  colnames(par) = gsub('\\.+$','',make.names(tolower(colnames)))
-  colnames(par)[2:4] = c('item_id','item_score','beta') 
+  pars[,c(1,3:ncol(pars))] = lapply(pars[,c(1,3:ncol(pars))],as.numeric)
+  colnames(pars) = gsub('\\.+$','',make.names(tolower(colnames)))
+  colnames(pars)[2:4] = c('item_id','item_score','beta') 
   
   # fill out the NA's in the first two columns
-  return(par %>% fill(.data$nr, .data$item_id))
+  return(pars %>% fill(.data$nr, .data$item_id) %>% rename(nbr = 'nr'))
 }
 
 

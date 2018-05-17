@@ -27,8 +27,7 @@ Supplements the confirmatory approach of the profile plot
 }
 \examples{
 \dontrun{
-db = start_new_project(verbAggrRules, "verbAggression.db", 
-  covariates=list(gender='unknown'))
+db = start_new_project(verbAggrRules, "verbAggression.db", covariates=list(gender='unknown'))
 add_booklet(db, verbAggrData, "agg")
 dd = DIF(db,covariate="gender")
 print(dd)

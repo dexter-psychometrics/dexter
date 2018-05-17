@@ -1,4 +1,32 @@
 
+# change in rsqlite, now shows error if not all columns are used
+# this is an ugly workaround, but it's a stupid change so hope it balances out
+# not decided if should be used yet
+dbGetQuery_ = function(db, stmt, df=NULL)
+{
+  if(is.null(df))
+  {
+    dbGetQuery(db, stmt)
+  } else
+  {
+    m = gregexpr('(?<=[=,\\(]) *:\\w+', stmt, perl=TRUE)
+    cols = gsub('^:','',trimws(regmatches(stmt, m)[[1]]), perl=TRUE)
+    dbGetQuery(db, stmt, df[,cols])
+  }
+}
+
+dbExecute_ = function(db, stmt, df=NULL)
+{
+  if(is.null(df))
+  {
+    dbExecute(db, stmt)
+  } else
+  {
+    m = gregexpr('(?<=[=,\\(]) *:\\w+', stmt, perl=TRUE)
+    cols = gsub('^:','',trimws(regmatches(stmt, m)[[1]]), perl=TRUE)
+    dbExecute(db, stmt, df[,cols])
+  }
+}
 
 dbRunScript <- function(db, fn)
 {
@@ -19,63 +47,6 @@ dbRunScript <- function(db, fn)
   }
 }
 
-# converts db from a very old dexter version to the current dexter
-convert_old_db = function(db)
-{
-  # assumes sqlite
-  dbRunScript(db,"dexter_sqlite.sql")
-  dbTransaction(db,
-  {
-    if(dbExistsTable(db, "item_properties"))
-    {
-      iprops = setdiff(tolower(dbListFields(db,'item_properties')),'item')
-      for(col in iprops)
-      {
-        dbExecute(db, paste0("ALTER TABLE dxItems ADD COLUMN ",col, sql_col_def('<empty>',is.default=TRUE),';'))
-      }
-      dbExecute(db, paste0('INSERT INTO dxItems(item_id,',paste(iprops,collapse=','),')
-                              SELECT item,',paste(iprops,collapse=','),' FROM item_properties;'))
-    } else 
-    {
-      dbExecute(db, 'INSERT INTO dxItems(item_id) SELECT item FROM Rules;')
-    }
-    
-    dbExecute(db, 'INSERT INTO dxScoring_rules(item_id, response, item_score)
-                    SELECT item, CAST(response AS TEXT), score FROM Rules;')
-    if(dbExistsTable(db, "design"))
-    {
-      dbExecute(db, 'INSERT INTO dxBooklets(booklet_id) SELECT DISTINCT booklet_id FROM Design;')
-      dbExecute(db, 'INSERT INTO dxTestparts(booklet_id, testpart_nbr) SELECT bookletName, 1 FROM Booklets;')
-      dbExecute(db, 'INSERT INTO dxBooklet_design(booklet_id,	testpart_nbr,	item_id, item_position)
-                        SELECT booklet_id, 1, item, position FROM Design;')
-      dbExecute(db, 'INSERT INTO dxPersons(person_id) SELECT DISTINCT  dxpersonid FROM Persons;')
-      dbExecute(db, 'INSERT INTO dxAdministrations(person_id, booklet_id) 
-                        SELECT DISTINCT dxpersonid, booklet_id 
-                          FROM Persons
-                            INNER JOIN (SELECT DISTINCT booklet AS dxbookletid, booklet_id FROM Design) AS B1
-                              USING(dxbookletid);')
-      
-      dbExecute(db, 'INSERT INTO dxResponses(person_id, booklet_id, item_id, response)
-                        SELECT person, booklet_id, item, CAST(response AS TEXT)
-                          FROM Responses
-                            INNER JOIN (SELECT DISTINCT booklet, booklet_id FROM Design) AS B1
-                                USING(booklet);')
-      if('variable' %in% dbListFields(db,'persons'))
-      {
-        persons = dbGetQuery(db,'SELECT dxPersonID, variable, value FROM Persons;')
-        persons %>% 
-          group_by(.data$variable) %>%
-          do({
-            col = dbValid_colnames(.[1,1])
-            dbExecute(db, paste0("ALTER TABLE dxPersons ADD COLUMN ",col, sql_col_def('<empty>',is.default=TRUE),';'))
-            dbExecute(db, paste('UPDATE dxPersons SET',col,'=:val WHERE person_id=:person;'),
-                      tibble(val = .$value, person = .$dxPersonID))
-            data.frame()
-          })
-      }
-    }
-  })
-}
 
                            
 dbExists <- function(db, query, data)

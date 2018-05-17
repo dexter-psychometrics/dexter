@@ -34,6 +34,7 @@ of dependencies.
 \dontrun{
 dsgn = design_as_network(db)
 # Check if design is connected
+
 design_is_connected(dsgn)
 }}
 

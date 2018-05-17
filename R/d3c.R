@@ -99,8 +99,12 @@ add_test3DC = function(db3dc, parms, design, test_id, standards, mu, sigma,
   design$cluster = as.character(design$cluster)
   
   # preserve the order of things if necessary
-  if(!'cluster_nbr' %in% names(design)) design$cluster_nbr = match(design$cluster, factor(design$cluster))
-
+  if(!'cluster_nbr' %in% names(design)) 
+  {
+    design = design %>% 
+      mutate(cluster_nbr = dense_rank(.data$cluster))
+  }
+  
   if(!'item_nbr' %in% names(design))
   {
     design = design %>% 
@@ -118,7 +122,7 @@ add_test3DC = function(db3dc, parms, design, test_id, standards, mu, sigma,
   
   if(any(is.na(design$first))) stop('some of your items are without parameters')
   
-  if(parms$input$method=='CML') { b = parms$est$b 
+  if(parms$inputs$method=='CML') { b = parms$est$b 
   } else { b = colMeans(parms$est$b) }
   a = parms$inputs$ssIS$item_score
   
@@ -158,7 +162,7 @@ add_test3DC = function(db3dc, parms, design, test_id, standards, mu, sigma,
     dbExecute(db3dc, 
               "INSERT INTO Population(test_id,test_score,test_score_frequency) 
                 VALUES(:test_id, :test_score, :frequency);",
-              population)
+              select(population, .data$test_id, .data$test_score, .data$frequency))
     
     
     if(!dbExists(db3dc,'SELECT 1 FROM Users WHERE username=?;', group_leader))
@@ -179,9 +183,7 @@ add_test3DC = function(db3dc, parms, design, test_id, standards, mu, sigma,
     dbExecute(db3dc, 
               "INSERT INTO Clusters (test_id, cluster_nbr, cluster_name) 
                 VALUES(:test_id, CAST(:cluster_nbr AS INTEGER), :cluster);",
-              design[,c('test_id', 'cluster_nbr', 'cluster')] %>% 
-                group_by(.data$test_id, .data$cluster_nbr, .data$cluster) %>%
-                slice(1))
+              distinct(design, .data$test_id, .data$cluster_nbr, .data$cluster))
   
     dbExecute(db3dc,
               "INSERT INTO Standards(test_id, standard_nbr, standard_name) 

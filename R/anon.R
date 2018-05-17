@@ -50,64 +50,77 @@ pv_ <- function(b,a,first,last,score,npv,mu,sigma,pop)
 }
 
 ## Uses recycling to produce npv plausible values per score in scores
-#  on a test defined by first and last
-# If scores=NULL it takes scores to be 0 to the maxScore on the test
-recycle_pv = function(b, a, first, last, scores=NULL, npv=1, mu=0, sigma=2)
+#  on a test defined by first and last. Scores defined to be 
+#  0 to the maxScore on the test
+#  If a prior sample is provided this is used; Otherwise prior is normal(mu,sigma)
+#  A is a vector like a with alternative weightes. Used in theta_tables.
+recycle_pv = function(b, a, first, last, npv=1, mu=0, sigma=2, prior_sample=NULL, A=NULL)
 {
-  ms.a=sum(a[last])
-  if (is.null(scores)) {
-    scores=0:ms.a
-  }else
-  {
-    if (!identical(intersect(0:ms.a,scores),scores)) stop("wrong scores in recycle_pv")
+  if (is.null(A)){
+    scores=0:sum(a[last])
+    not_possible=setdiff(scores,possible_scores(a,first,last))
+  }else {
+    if (length(A)!=length(a)) stop("Wrong vector A in recycle_pv")
+    scores=0:sum(A[last])
+    not_possible=setdiff(scores,possible_scores(A,first,last))
   }
   n=rep(npv,length(scores))
-  R=rep(0,length(scores)*npv)
-  nI=length(first)
-  tmp=.C("recyclePV",
-         as.double(b),
-         as.integer(a),
-         as.integer(first-1),
-         as.integer(last-1),
-         as.integer(nI),
-         as.integer(n),
-         as.double(mu),
-         as.double(sigma),
-         as.double(R))[[9]]
-  dim(tmp)=c(length(scores),npv)
-  return(tmp)
-}
-
-## Uses recycling to produce npv plausible values per score in scores
-#  on a test defined by first and last
-# If scores=NULL it takes scores to be 0 to the maxScore on the test
-# This version accepts a sample from the prior
-recycle_pv2 = function(b, a, first, last, scores=NULL, npv, prior_sample)
-{
-  ms.a=sum(a[last])
-  if (is.null(scores)) {
-    scores=0:ms.a
-  }else
-  {
-    if (!identical(intersect(0:ms.a,scores),scores)) stop("wrong scores in recycle_pv")
-  }
-  nprior=length(prior_sample)
-  if (nprior<1) stop("wrong prior sample")
   
-  n=rep(npv,length(scores))
+  if (length(not_possible)>0)
+  {
+    warning("Some scores are not possible given the weights.")
+    n[not_possible+1]=0
+  }
+  
   R=rep(0,length(scores)*npv)
   nI=length(first)
-  tmp=.C("recyclePV2",
-         as.double(b),
-         as.integer(a),
-         as.integer(first-1),
-         as.integer(last-1),
-         as.integer(nI),
-         as.integer(n),
-         as.double(prior_sample),
-         as.double(nprior),
-         as.double(R))[[9]]
+  if (is.null(A))
+  {
+    if (is.null(prior_sample))
+    {
+      if (sigma<0) stop('prior standard deviation must be positive')
+      tmp=.C("recyclePV",
+             as.double(b),
+             as.integer(a),
+             as.integer(first-1),
+             as.integer(last-1),
+             as.integer(nI),
+             as.integer(n),
+             as.double(mu),
+             as.double(sigma),
+             as.double(R))[[9]]
+    }else
+    {
+      nprior=length(prior_sample)
+      if (nprior<1) stop("wrong prior sample")
+      tmp=.C("recyclePV2",
+             as.double(b),
+             as.integer(a),
+             as.integer(first-1),
+             as.integer(last-1),
+             as.integer(nI),
+             as.integer(n),
+             as.double(prior_sample),
+             as.double(nprior),
+             as.double(R))[[9]]
+    }
+  }else
+  {
+    if (sigma<0) stop('prior standard deviation must be positive')
+    tmp=.C("recyclePVaA",
+           as.double(b),
+           as.integer(a),
+           as.integer(A),
+           as.integer(first-1),
+           as.integer(last-1),
+           as.integer(nI),
+           as.integer(n),
+           as.double(mu),
+           as.double(sigma),
+           as.double(R))[[10]]
+  }
   dim(tmp)=c(length(scores),npv)
+  tmp[not_possible+1,]=NA
   return(tmp)
 }
 
@@ -151,7 +164,7 @@ update_pv_prior<-function(pv, pop, mu, sigma)
 #
 # @return
 # tibble(booklet_id <char or int>, person_id <char>, sumScore <int>, nPV nameless columns with plausible values)
-pv = function(x, design, b, a, nPV, n_prior_updates=4, from=4, by=5)
+pv = function(x, design, b, a, nPV, n_prior_updates = 10, from = 20, by = 5)
 {
   start_prior=c(0,4)
   nPop = length(unique(x$pop))
@@ -178,7 +191,7 @@ pv = function(x, design, b, a, nPV, n_prior_updates=4, from=4, by=5)
         mutate(PVX = add_pv(.data$booklet_id, .data$pop, .data$sumScore, iter, priors, design, a, b)) %>%
         ungroup()
        
-      priors = update_pv_prior(x$PVX, x$pop, priors$mu,priors$sigma)
+      priors = update_pv_prior(x$PVX, x$pop, priors$mu, priors$sigma)
       if (iter == which.pv[apv])
       {
         colnames(x)[colnames(x)=='PVX'] = paste0('PV', iter)
@@ -190,7 +203,7 @@ pv = function(x, design, b, a, nPV, n_prior_updates=4, from=4, by=5)
     
   }else
   {
-   for(iter in 1:n_prior_updates)
+   for(iter in 1:n_prior_updates) 
    {
       pv = x %>% 
         group_by(.data$booklet_id) %>%
@@ -292,10 +305,10 @@ E_score=function(theta,b,a,first,last)
 }
 
 # Expected distribution given one ability theta
-pscore <- function(theta,b,a,first,last)
+pscore <- function(theta, b, a, first, last)
 {
-  g=elsym(b,a,first,last)
-  p=rep(0.0,length(g))
+  g=elsym(b, a, first, last)
+  p=rep(0, length(g))
   for (s in 1:length(g))
   {
     p[s]=g[s]*exp((s-1)*theta)
@@ -366,9 +379,6 @@ theta_MLE <- function(b,a,first,last, se=FALSE)
 }
 
 ##### EAP based on npv (default 500) plausible values ####
-# Current version uses normal(0,2) prior. With crumpy data one might
-# need a bigger standard deviation
-# Assumes that score is a vector 0:max_score
 # Uses recycling to get npv plausible values for each sum score.
 # Options:
 # Smoothing is an option to avoid non-monotonicity due to random fluctuations
@@ -386,28 +396,27 @@ theta_MLE <- function(b,a,first,last, se=FALSE)
 #     n[sm]=n[sm]-1
 #   }
 # }
+# The final argument allows EAPs based on A-weighted score, where A need not equal a.
 ####
-theta_EAP <- function(b,a,first,last,npv=500,mu=0,sigma=4,smooth=FALSE, se=FALSE)
+theta_EAP <- function(b, a, first, last, npv=500, mu=0, sigma=4, smooth=FALSE, se=FALSE, A=NULL)
 {
-  ms.a=sum(a[last])
-  score=0:ms.a
-  n=rep(npv,(ms.a+1))
-  R=rep(0,length(score)*npv)
-  nI=length(first)
-  tmp=.C("recyclePV",
-         as.double(b),
-         as.integer(a),
-         as.integer(first-1),
-         as.integer(last-1),
-         as.integer(nI),
-         as.integer(n),
-         as.double(mu),
-         as.double(sigma),
-         as.double(R))[[9]]
-  dim(tmp)=c((ms.a+1),npv)
+  tmp=recycle_pv(b, a, first, last, npv=npv, mu=mu, sigma=sigma, A)
   theta=rowMeans(tmp)
-  if (smooth) theta = predict(lm(theta ~ poly(score,7)))
-  sem=rep(NA,(ms.a+1))
+  if (is.null(A))
+  {
+    if (smooth) {
+      score=0:sum(a[last])
+      theta = predict(lm(theta ~ poly(score,7)))
+    }
+    sem=rep(NA,(sum(a[last])+1))
+  }else
+  {
+    if (smooth) {
+      score=0:sum(A[last])
+      theta = predict(lm(theta ~ poly(score,7)))
+    }
+    sem=rep(NA,(sum(A[last])+1))
+  }
   if (se) sem=apply(tmp,1,sd)
   return(list(theta=theta, se=sem))
 }
@@ -434,7 +443,7 @@ theta_jEAP=function(b, a, first,last, se=FALSE, grid_from=-6, grid_to=6, grid_le
 # computes distribution of score weighted with A conditionally on score weighted with a
 # used for estimation of theta from the unweighted score (for instance)
 # colSums(G[,,(1-idx)+1]) are elementary symmetric function with a
-elsymat <- function(b,a,A,first,last)
+elsymat <- function(b, a, A, first, last)
 {
   ms.a=sum(a[last])
   ms.A=sum(A[last])
@@ -497,7 +506,9 @@ theta_aA <- function(b,a,A,first,last)
       theta[s]=theta[s]+log(E/E_score(theta[s],b,a,first,last))
     }
   }
-  return(c(-Inf,theta,Inf))
+  #return(c(-Inf,theta,Inf))
+  theta = c(-Inf,theta,Inf)
+  return(list(theta=theta,se=rep(NA, length(theta))))
 }
 
 
@@ -528,6 +539,7 @@ theta_score_distribution <- function(b,a,first,last,scoretab)
 # @param model    Character: Indicates which model is used: "Rasch" or "IM"
 # @return         A list with tbl being a score-by-score matrix of probabilities:
 #                 P(X^A_+=s_a, X^B_+=s_b|X_+=s) where s=s_a+s_b
+# @details        NA's indicate that a total scores was not possible given the weights
 SSTable <- function(m, AB, model) {
   if (model=="IM") {ic=m$est$cIM; b=m$est$bIM} else {ic=m$est$cRM; b=m$est$bRM}
   first = m$ss$il$first
@@ -541,13 +553,14 @@ SSTable <- function(m, AB, model) {
   if (length(intersect(A,B))!=0) stop("sets not disjunct")
 
   ## Bookkeeping
+  nI=length(first)
   bA=NULL; bB=NULL
   aA=NULL; aB=NULL
   cA=NULL; cB=NULL
   lastA=NULL; firstA=NULL
   lastB=NULL; firstB=NULL
   telAF=1; telBF=1
-  for (i in 1:length(first))
+  for (i in 1:nI)
   {
     if (i %in% A)
     {
@@ -582,11 +595,18 @@ SSTable <- function(m, AB, model) {
     
     for (s in 0:Msc)
     {
-      for (s_a in max(0,s-MscB):min(s,MscA))
+      if (g[s+1]>0)
       {
-        s_b=s-s_a
-        out[s_a+1,s_b+1] = log(gA[s_a+1]) + log(gB[s_b+1]) - log(g[s+1])
-        out[s_a+1,s_b+1] = out[s_a+1,s_b+1] + lchoose(MscA, s_a) + lchoose(MscB, s_b) - lchoose(Msc, s)
+        for (s_a in max(0,s-MscB):min(s,MscA))
+        {
+          s_b=s-s_a
+          out[s_a+1,s_b+1] = -Inf
+          if ((gA[s_a+1]>0)&(gB[s_b+1]>0))
+          {
+            out[s_a+1,s_b+1] = log(gA[s_a+1]) + log(gB[s_b+1]) - log(g[s+1])
+            out[s_a+1,s_b+1] = out[s_a+1,s_b+1] + lchoose(MscA, s_a) + lchoose(MscB, s_b) - lchoose(Msc, s)
+          }
+        }
       }
     }
   }
@@ -605,15 +625,66 @@ SSTable <- function(m, AB, model) {
       gA = mean_ElSym(etaA,aA,firstA,lastA)
       gB = mean_ElSym(etaB,aB,firstB,lastB)
       g =  mean_ElSym(eta,a,first,last)
-      for (s_a in max(0,s-MscB):min(s,MscA))
+      if (g[s+1]>0)
       {
-        s_b=s-s_a
-        out[s_a+1,s_b+1]=log(gA[s_a+1])+log(gB[s_b+1])-log(g[s+1])
-        out[s_a+1,s_b+1] = out[s_a+1,s_b+1] + lchoose(MscA, s_a) + lchoose(MscB, s_b) - lchoose(Msc, s)
+        for (s_a in max(0,s-MscB):min(s,MscA))
+        {
+          s_b=s-s_a
+          out[s_a+1,s_b+1] = -Inf
+          if ((gA[s_a+1]>0)&(gB[s_b+1]>0))
+          {
+            out[s_a+1,s_b+1] = log(gA[s_a+1])+log(gB[s_b+1])-log(g[s+1])
+            out[s_a+1,s_b+1] = out[s_a+1,s_b+1] + lchoose(MscA, s_a) + lchoose(MscB, s_b) - lchoose(Msc, s)
+          }
+        }
       }
     }
   }
   return(list(tbl=exp(out),m=m,AB=AB,model=model))
+}
+
+########################################################
+## Score-by-score table ENORM Currently using mean_ElSym
+########################################################
+# @param m        a parms object produced by fit_enorm
+# @param AB       list: two mutually exclusive subsets of items as indexes of items in first and last
+# @return         A list with tbl being a score-by-score matrix of probabilities:
+#                 P(X^A_+=s_a, X^B_+=s_b|X_+=s) where s=s_a+s_b. 
+# @details        NA's indicate that a total scores was not possible given the weights
+SSTable_ENORM <- function(b, a, first, last, AB) {
+  A = AB[[1]]
+  B = AB[[2]]
+  ### Check
+  if (length(intersect(A,B))!=0) stop("sets not disjunct")
+  unionAB = unlist(AB, use.names = F)
+  firstA =first[A]; lastA = last[A]
+  firstB =first[B]; lastB = last[B]
+  MscA = sum(a[lastA])
+  MscB = sum(a[lastB])
+  Msc  = sum(a[last[unionAB]])
+  out = matrix(NA,MscA+1,MscB+1)
+  
+  gA = mean_ElSym(b,a,firstA,lastA)
+  gB = mean_ElSym(b,a,firstB,lastB)
+  g =  mean_ElSym(b,a,first[unionAB],last[unionAB])
+  
+  for (s in 0:Msc)
+  {
+    if (g[s+1]>0)
+    {
+      for (s_a in max(0,s-MscB):min(s,MscA))
+      {
+        s_b = s-s_a
+        out[s_a+1,s_b+1] = -Inf
+        if ((gA[s_a+1]>0)&(gB[s_b+1]>0))
+        {
+          out[s_a+1,s_b+1] = log(gA[s_a+1]) + log(gB[s_b+1]) - log(g[s+1])
+          out[s_a+1,s_b+1] = out[s_a+1,s_b+1] + lchoose(MscA, s_a) + lchoose(MscB, s_b) - lchoose(Msc, s)
+        }
+      }
+    }
+  }
+  return(list(tbl=exp(out),AB=AB,model="RM"))
 }
 
 
@@ -683,7 +754,7 @@ ittotmat <- function(b,c,a,first,last)
 #   il: one row per item, ordered item_id
 #       tibble(first, last, sufC <sum(item_score*sumScore)>, nCat <nbr of score categories including 0>)
 #   sl: one row per item-scorecat(including 0), ordered item_id, item_score
-#       tibble(item_score, sufI <count for item_score>, sufC <sum(tem_score * sumScore)>)
+#       tibble(item_score, sufI <count for item_score>, sufC <sum(item_score * sumScore)>)
 #   tl: one row per testscore (only one test allowed), complete range 0:max_observed, ordered by test_score
 #       tibble(N <count for test score>)
 # @returns:
@@ -707,7 +778,7 @@ EstIM  <- function(ss) {
   m=sum(scoretab) ##
   nI=length(last)
   b=rep(0,length(sufI))
-  ic=rep(1,length(sufC))
+  ic=rep(1,nI)
   var.ic=vector("numeric", nI)
   HRM=matrix(0,length(b),length(b))
   
@@ -721,7 +792,8 @@ EstIM  <- function(ss) {
     upd_set[[i]]=(first[i]:last[i])[upd_set[[i]]]
   }
   
-  if (check_trivial_scores_(ittotmat0(b,ic[C],a,first,last),scoretab)) warning("Only trivial weighted scores observed")
+  if (check_trivial_scores_(ittotmat0(b,ic[C],a,first,last),scoretab)){
+    warning("Only trivial weighted scores observed") }
   
   converged=2
   scale=2
@@ -736,7 +808,7 @@ EstIM  <- function(ss) {
       {
         pi=pi_mat[upd_set[[i]],,drop=FALSE]
         E=sufI[upd_set[[i]]]-pi%*%scoretab
-        H=-pi%*%diag(scoretab)%*%t(pi)
+        H=-pi%*%tcrossprod(diag(scoretab), pi) #diag(scoretab)%*%t(pi)
         diag(H)=pi%*%scoretab+diag(H)
         
         # NR update for parameters of item i
@@ -767,18 +839,18 @@ EstIM  <- function(ss) {
       {
         pi=pi_mat[upd_set[[i]],,drop=FALSE]
         E=sufI[upd_set[[i]]]-pi%*%scoretab
-        H=-pi%*%diag(scoretab)%*%t(pi)
+        H=-pi%*%tcrossprod(diag(scoretab), pi)
         diag(H)=pi%*%scoretab+diag(H)
         
         # gradient and hessian for interaction parameter
-        ncol_pi=ncol(pi)
+        ncol_pi=ncol(pi); nrow_pi=nrow(pi)
         E=c(E,sufC[i])
-        H=cbind(H,rep(0,nrow(H)))
-        H=rbind(H,rep(0,ncol(H)))
+        H=cbind(H,rep.int(0,nrow(H)))
+        H=rbind(H,rep.int(0,ncol(H)))
         k=1
         e0=0; e1=0
-        f=matrix(0,nrow(pi),ncol_pi)
-        g=matrix(0,nrow(pi),ncol_pi)
+        f=matrix(0,nrow_pi,ncol_pi)
+        g=matrix(0,nrow_pi,ncol_pi)
         h=0
         for (j in upd_set[[i]])
         {
@@ -907,21 +979,10 @@ calibrate_Bayes = function(itemList, booklet, sufI, b, a, first, last, nIter, fi
 ## arguments first, last and scoretab are for specific booklet
 est_lambda <- function(b, a, first, last, scoretab)
 {
-  ms=length(scoretab)
-  N=sum(scoretab)
-  g=elsym(b,a,first,last)
-  lx=vector("numeric",ms)
-  lx=lx*NA  # deal with unobserved scores
-  for (s in 1:ms)
-  {
-    if (scoretab[s]>0) {
-      lx[s]=scoretab[s]/(N*g[s])
-    }
-  }
-  return(lx)
-}
+  ifelse(scoretab>0, scoretab/(elsym(b,a,first,last)*sum(scoretab)), NA) 
+}  
 
-
+  
 #####################################################################
 ### Do CML
 ## Must be changed to handle the case where 0 categories does not occur
@@ -930,14 +991,14 @@ est_lambda <- function(b, a, first, last, scoretab)
 ## Note that fixed_b contains values in the dexter parametrisation (including 0 category)
 calibrate_CML <- function(booklet, sufI, a, first, last, nIter, fixed_b=NULL) {
   nb = length(booklet)
-  ni=length(first)
-  EsufI=sufI
-  max_nr_iter=30
+  ni = length(first)
+  EsufI = sufI
+  max_nr_iter = 30
   
   if (is.null(fixed_b)) # if no fixed parameters
   {
-    nn=sum(sufI)
-    b =rep(1,length(a))
+    nn= sum(sufI)
+    b = rep(1,length(a))
                 ## Implicit Equations  ###
     converged=FALSE
     iter=0
@@ -963,17 +1024,15 @@ calibrate_CML <- function(booklet, sufI, a, first, last, nIter, fixed_b=NULL) {
       range=first[i]:last[i]
       b[range]=b[range]/b[first[i]]
     }
-    # between items
+    # between items. Note if ref_cat is allowed to be something else then 2 has to adapt toOPLM and toDexter
     ref_cat=2
-    rc_set=intersect(first+1,which(((b>0.3)&(b<1.3))))
-    if (length(rc_set)>0) ref_cat=intersect(rc_set,which(sufI==max(sufI[rc_set])))[1]
     b[-first] = b[-first]/b[ref_cat]
     
               ###  NR  ###
     H=matrix(0,length(a),length(a))
     converged=FALSE
     nr_iter=0
-    scale=2
+    scale=3
     while ((!converged)&(nr_iter<max_nr_iter))
     {
       iter=iter+1
@@ -998,7 +1057,7 @@ calibrate_CML <- function(booklet, sufI, a, first, last, nIter, fixed_b=NULL) {
       b = b*exp(solve(H*scale,sufI-EsufI))
       converged=(max(abs(EsufI-sufI))/nn<1e-10)
       setTxtProgressBar(pb, value=iter)
-      if (nr_iter==1) scale=1
+      if (nr_iter==2) scale=1
     }
     close(pb)
     if (!converged) warning(paste('Newton-Raphson not Converged in',as.character(nr_iter),"iterations"))
@@ -1064,7 +1123,7 @@ calibrate_CML <- function(booklet, sufI, a, first, last, nIter, fixed_b=NULL) {
       b = b*exp(solve(H*scale,sufI-EsufI))
       converged=(max(abs(EsufI[update_set]-sufI[update_set]))/nn<1e-10)
       setTxtProgressBar(pb, value=iter)
-      if (nr_iter==1) scale=1
+      scale=1
     }
     close(pb)
     if (!converged) warning(paste('Newton-Raphson not Converged in',as.character(nr_iter),"iterations"))
@@ -1131,8 +1190,8 @@ ENORM2ScoreDist <- function (parms, degree=7, booklet_id)
 
 
 ### Change parameterization and normalization to produce OPCML output
-## assumes that the first parameters is the reference unless there are fixed parameters
-toOPLM = function(a,b,first, last, H=NULL, fixed_b=NULL)
+## assumes that the first parameter is the reference unless there are fixed parameters
+toOPLM = function(a, b, first, last, H=NULL, fixed_b=NULL)
 {
   ## for now remove zero category manually
   if (!is.null(H)) H=H[-first,-first]
@@ -1221,13 +1280,13 @@ toOPLM = function(a,b,first, last, H=NULL, fixed_b=NULL)
       }
     }
   }  
-  return(list(delta=delta, cov_delta=acov))
+  return(list(delta=delta, cov_delta=acov, a=a, first=new_first, last=new_last))
 }
 
 ## Thus function expects category thresholds delta, a vector of item_category scores a,
 #  and first and last. All without the zero category.
 #  It returns dexter parameters b, as well as new a, first and last with the zero category.
-toDexter <- function(delta, a,first,last, re_normalize=TRUE)
+toDexter <- function(delta, a, first, last, re_normalize=TRUE)
 {
   ## Make D
   k=length(delta)
@@ -1257,7 +1316,7 @@ toDexter <- function(delta, a,first,last, re_normalize=TRUE)
   {
     for (i in 2:length(first))
     {
-      nn=last[i-1]-first[i-1]
+      nn=last[i]-first[i]
       new_first[i]=new_last[i-1]+1
       new_last=c(new_last,new_first[i]+nn+1)
     }
@@ -1269,7 +1328,7 @@ toDexter <- function(delta, a,first,last, re_normalize=TRUE)
   new_b[-new_first]=b
   
   ## put everything in a (minimal) parms object
-  est=list(b=new_b, beta.cml=delta-mean(delta))
+  est=list(b=new_b, a=new_a, beta.cml=delta-mean(delta))
   inputs=list(ssIS=list(item_score=new_a),ssI=list(first=new_first,last=new_last))
   parms = list(est=est, inputs=inputs)
   return(parms)

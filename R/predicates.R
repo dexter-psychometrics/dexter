@@ -5,11 +5,9 @@
 qtpredicate2where = function(qtpredicate, db, env)
 {
   vars = unique(c(dbListFields(db,'dxItems'), dbListFields(db,'dxBooklets'), dbListFields(db,'dxPersons'), 
-                  dbListFields(db,'dxBooklet_design'),dbListFields(db,'dxResponses')))
+                  dbListFields(db,'dxBooklet_design'),dbListFields(db,'dxResponses'),dbListFields(db,'dxScoring_rules')))
   sql = translate_sql_(list(partial_eval(qtpredicate,vars=vars,env=env)),con=db)
 
-  if(getOption('dexter.debug', default=FALSE)) debug.log$send(sql, 'qtpredicate2where_uncorrected_sql')
-  
   # translate_sql bug occurs for expressions like: booklet_id %in% as.character(1:4) 
   # <SQL> `booklet_id` IN CAST((1, 2, 3, 4) AS TEXT)
   # unfortunately regular expression functionality in R is a bit awkward 
@@ -44,7 +42,7 @@ qtpredicate2where = function(qtpredicate, db, env)
       paste0(vec, remainder)
     },"")
     paste0(split, collapse=' ')
-  })
+  }) %>% unlist()
   
 
   # translate_sql_ has a bug with expressions like a %in% c(b) if b has length 1, solve here
@@ -55,8 +53,6 @@ qtpredicate2where = function(qtpredicate, db, env)
 
   
   if(length(sql) > 1) sql = paste0('(',sql,')',collapse=' AND ')
-  
-  if(getOption('dexter.debug', default=FALSE)) debug.log$send(sql, 'qtpredicate2where_sql')
   
   return(paste(' WHERE ', sql))
 }
@@ -105,7 +101,8 @@ is_bkl_safe = function(dataSrc, qtpredicate)
 #' 
 get_variables = function(db)
 {
-    lapply(c('dxItems','dxPersons','dxResponses','dxScoring_rules','dxBooklets','dxBooklet_design'),
+    lapply(c('dxItems','dxPersons','dxResponses','dxScoring_rules','dxBooklets',
+             'dxBooklet_design','dxAdministrations'),
            function(tbl)
            {
              res = DBI::dbSendQuery(db,paste('SELECT * FROM',tbl,'WHERE 0=1;'))

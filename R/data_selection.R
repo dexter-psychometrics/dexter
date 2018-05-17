@@ -39,13 +39,13 @@
 #' correct = fit_enorm(data)
 #' 
 #' }}
-get_responses <- function(dataSrc, predicate=NULL, columns=c('person_id','item_id','item_score'), env=NULL)
+get_responses = function(dataSrc, predicate=NULL, columns=c('person_id','item_id','item_score'), env=NULL)
 {
   if(is.null(env)) env = caller_env() 
-  get_responses_(dataSrc, eval(substitute(quote(predicate))), columns=columns, env=env)
+  as.data.frame(get_responses_(dataSrc, eval(substitute(quote(predicate))), columns=columns, env=env)) 
 }
 
-get_responses_ <- function(dataSrc, qtpredicate=NULL, columns=c('person_id','item_id','item_score'), env=NULL)
+get_responses_ = function(dataSrc, qtpredicate=NULL, columns=c('person_id','item_id','item_score'), env=NULL)
 {
   if(is.null(env)) env=caller_env() 
   
@@ -82,9 +82,7 @@ get_responses_ <- function(dataSrc, qtpredicate=NULL, columns=c('person_id','ite
     if(length(intersect(dbListFields(db,'dxBooklets'),used_columns))>0) 
       cte = c(cte, 'INNER JOIN dxBooklets USING(booklet_id)')
     if(length(intersect(dbListFields(db,'dxBooklet_design'),used_columns))>0) 
-      cte = c(cte, 'INNER JOIN dxBooklet_design USING(booklet_id, item_id, testpart_nbr)')
-    
-    if(getOption('dexter.debug', default=FALSE)) debug.log$send(paste0(cte,collapse=' '), 'get_responses_cte')
+      cte = c(cte, 'INNER JOIN dxBooklet_design USING(booklet_id, item_id)')
     
     # can have unexpected behavior if person makes more than one testform
     respData = NULL
@@ -100,8 +98,7 @@ get_responses_ <- function(dataSrc, qtpredicate=NULL, columns=c('person_id','ite
       }, 
       error = function(e)
       {
-        if(getOption('dexter.debug', default=FALSE)) debug.log$send(e$message, 'get_responses_error_caught')
-        
+
         if(grepl('(syntax error)|(no such function)', e$message, ignore.case=TRUE))
         {
           # could be that dbplyr cannot translate the r syntax since it contains non sql functions
@@ -117,7 +114,6 @@ get_responses_ <- function(dataSrc, qtpredicate=NULL, columns=c('person_id','ite
           
           respData <<- respData[eval_tidy(qtpredicate, data=respData, env=env), columns]
           
-          if(getOption('dexter.debug', default=FALSE)) debug.log$send(TRUE, 'get_responses_filter_success')
         } else
         {
           stop(e)
@@ -153,7 +149,7 @@ get_responses_ <- function(dataSrc, qtpredicate=NULL, columns=c('person_id','ite
 # @details 
 # in case of a qtpredicate that can potentially harm booklets or a data.frame as dataSrc
 # this function computes booklets from the data 
-get_resp_data <- function(dataSrc, qtpredicate=NULL, extra_columns=NULL, extra_design_columns=NULL, summarised=FALSE, env=NULL){
+get_resp_data = function(dataSrc, qtpredicate=NULL, extra_columns=NULL, extra_design_columns=NULL, summarised=FALSE, env=NULL){
   # gets data and adds sumscores (and booklets if necessary)
   if(is.null(env)) env = caller_env()
   

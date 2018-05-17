@@ -29,7 +29,7 @@
 #' }
 #'
 #'
-fit_inter <- function(dataSrc, predicate = NULL)
+fit_inter = function(dataSrc, predicate = NULL)
 {
   qtpredicate = eval(substitute(quote(predicate)))
 
@@ -347,7 +347,7 @@ plot.rim <- function(x, items=NULL, summate=TRUE, overlay=FALSE,
         plot.args$main = fstr(plot.args$main, list(item_id=i))
         plot.args$sub = fstr(plot.args$sub, list(item_id=i))
 
-        do.call(graphics::plot, plot.args)
+        do.call(plot, plot.args)
 
         draw_curtains(qnt)
         for (j in 1:nrow(prb)) {
@@ -367,34 +367,18 @@ plot.rim <- function(x, items=NULL, summate=TRUE, overlay=FALSE,
 
 
 
-###########################################
-#' A print method for the interaction model
-#'
-#' Print the available items for plots of the Rasch and the interaction models
-#'
-#'
-#' @param x An object produced by function \code{fit_inter}
-#' @param ... Further arguments to print
-#' @method print rim
-#'
 print.rim <- function(x, ...){
-  do.call(print.default, merge_arglists(list(...), override = list(x=pull(x$ss$il,"item_id"))))
+  res = paste0('Parameters for the Rasch and Interaction Model\n\nitems: ',
+               paste0(pull(x$ss$il,"item_id"), collapse = ' '),
+               '\n\n# use plot() for plotting the Rasch and Interaction Model or coef() for retreiving the parameters\n')
+  cat(res)
+  invisible(res)
 }
 
 
-###########################################
-#' Coefficients for the interaction model
-#'
-#' Extract parameters for the interaction and the Rasch model
-#'
-#'
-#' @param object An object produced by function \code{fit_inter}
-#' @param ... Further arguments currently ignored
-#' @method coef rim
-#'
+
 coef.rim = function(object, ...) 
 {
-  #can also add an argument like what=c('parameters','fit')
   x = object
   first=x$ss$il$first
   dRM=x$est$bRM[-first]
@@ -406,6 +390,6 @@ coef.rim = function(object, ...)
               delta_rasch = dRM, delta_IM = dIM)
   I = tibble(item_id = x$ss$il$item_id, sigma = log(x$est$cIM), SE_sigma= x$est$se.c, fit_IM=x$est$fit.stats)
   
-  inner_join(IS,I,by='item_id') %>% arrange(.data$item_id, .data$item_score)
+  inner_join(IS,I,by='item_id') %>% arrange(.data$item_id, .data$item_score) %>% as.data.frame()
 }
 

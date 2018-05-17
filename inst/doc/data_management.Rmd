@@ -68,7 +68,7 @@ get_responses(db, columns = c('item_id','response')) %>%
   slice(1:10)
   
 ```
-It is also easy enough to make some plots based on one of the item properties (situation in this instance). For the verbal aggression dataset this makes sense since identical items were administered for all situtations, which makes the scores for each situation directly comparable.
+It is also easy enough to make some plots based on one of the item properties (situation in this instance). For the verbal aggression dataset this makes sense since identical items were administered for all situations, which makes the scores for each situation directly comparable.
 
 
 ```{r, fig.height=5,fig.width=7}

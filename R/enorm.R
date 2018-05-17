@@ -9,13 +9,14 @@
 #' @param dataSrc Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score
 #' @param predicate An optional expression to subset data, if NULL all data is used
 #' @param fixed_params Optionally, a prms object from a previous analysis or 
-#' a data.frame with columns: item_id, item_score (omitting 0 score category) and beta
+#' a data.frame with columns: item_id, item_score (omitting 0 score category) and beta. To facilitate the user in 
+#' entering parameter values, we assume the parameterisation used by OPLM; in short, beta's are thresholds between categories.
 #' @param method If CML, the estimation method will be Conditional Maximum Likelihood;
 #' otherwise, a Gibbs sampler will be used to produce a sample from the posterior
 #' @param nIterations Number of Gibbs samples when estimation method is Bayes. The maximum 
 #' number of iterations when using CML.
 #' @return An object of type \code{prms}. The prms object can be cast to a data.frame of item parameters 
-#' using the \code{as.data.frame} built-in function or used directly as input for other Dexter functions.
+#' using function `coef` or used directly as input for other Dexter functions.
 #' 
 #' @references 
 #' Maris, G., Bechger, T.M. and San-Martin, E. (2015) A Gibbs sampler for the (extended) marginal Rasch model. 
@@ -53,30 +54,39 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
   
   itm_max = x %>% 
     group_by(.data$item_id) %>% 
-    summarise(maxScore=max(.data$item_score)) %>%
+    summarise(maxScore = max(.data$item_score)) %>% #, nsc = n_distinct(.data$item_score)) %>%
 	  ungroup()
   
-  if(any(itm_max$maxScore==0)) stop('One or more items has a maximum score of 0')
+  if(any(itm_max$maxScore == 0)) 
+    stop('One or more items has a maximum score of 0')
   # for now, just error. May possibly become warning later
+  
+  #if(any(itm_max$nsc) < 2)
+  #  stop('One or more items has no score variation at all')
+	  # not sure if this should be allowed
 
   ssBIS = x %>% 
     group_by(.data$booklet_id, .data$item_id, .data$item_score) %>% 
     summarise(sufI=n(), sufC=sum(.data$item_score * .data$sumScore)) %>% 
     ungroup()
   
+  # mean item score per booklet score, can possibly be removed
   plt = x %>% 
     group_by(.data$booklet_id, .data$item_id, .data$sumScore) %>% 
     summarise(meanScore=mean(.data$item_score), N=n()) %>% 
     ungroup()
   
+  # max booklet scores
   maxScores = itm_max %>%
     inner_join(design, by='item_id') %>%
     group_by(.data$booklet_id) %>%
     summarise(maxTotScore = sum(.data$maxScore))
   
+  # booklets 0:maxscore
   allScores = maxScores %>% group_by(.data$booklet_id) %>%
     do(tibble(sumScore=0:.$maxTotScore))
   
+  # this seems a relic from the past, will try removing it
   stb = plt %>%
     select(.data$booklet_id, .data$sumScore, .data$N) %>%
     distinct() %>%
@@ -98,12 +108,13 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
   ssI  = ssIS %>% 
     group_by(.data$item_id) %>%
     summarise(nCat = n()) %>% 
-    mutate(first = cumsum(.data$nCat) - .data$nCat + 1,last = cumsum(.data$nCat)) %>%
+    mutate(first = cumsum(.data$nCat) - .data$nCat + 1L,last = cumsum(.data$nCat)) %>%
     ungroup() %>%
     arrange(.data$item_id)
   
   if(any(ssI$nCat == 1)) stop('One or more items are without score variation')
   
+  # persons per booklet
   m = x  %>% 
     group_by(.data$booklet_id)  %>% 
     summarise(m = n_distinct(.data$person_id))
@@ -128,21 +139,28 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
   
   itemList = lapply(ssI$item_id, function(x) design$booklet_id[design$item_id==x])
   
-  itemListInt = lapply(itemList, function(x)match(x,m$booklet_id))
+  itemListInt = lapply(itemList, function(x) match(x,m$booklet_id))
   
   it_sc_lab = paste0(ssIS$item_id[-ssI$first], "_",ssIS$item_score[-ssI$first])
   
   ## deal with fixed parameters
   if(is.null(fixed_params))
   { 
+    has_fixed_parms = FALSE
     fixed_b = NULL
   } else 
-  {  
+  {
+    has_fixed_parms = TRUE
     if(inherits(fixed_params,'prms'))
     {
+      #TO DO: if bayes -> colmeans
+      #normalize to OPLM
+      tmp = toOPLM(fixed_params$inputs$ssIS$item_score, fixed_params$est$b,fixed_params$inputs$ssI$first,fixed_params$inputs$ssI$last)
+      fixed_params$est$b = toDexter(tmp$delta, tmp$a, tmp$first, tmp$last, re_normalize = FALSE)$est$b
+      
       fixed_b = (
         fixed_params$inputs$ssIS %>%
-          bind_cols(fixed_params$est$b) %>%
+          add_column(b=fixed_params$est$b) %>%
           right_join(ssIS, by=c('item_id','item_score')) %>%
           arrange(.data$item_id,.data$item_score)
       )$b
@@ -151,7 +169,8 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
       # transform the oplmlike fixed params to the parametrization dexter uses internally
       
       #some cleaning and checking
-      fixed_params = fixed_params %>% mutate_if(is.factor, as.character) 
+      fixed_params = fixed_params %>% 
+        mutate(item_id=as.character(.data$item_id), item_score = as.integer(.data$item_score))
       
       if(length(setdiff(c('item_id','item_score','beta'),colnames(fixed_params))) > 0)
       {
@@ -160,26 +179,28 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
       }
       # check for missing categories in fixed_params
       # missing categories in data are presumably not a problem
-      ssIS %>% 
+      missing_cat = ssIS %>% 
         semi_join(fixed_params, by='item_id') %>%
         left_join(fixed_params, by=c('item_id','item_score')) %>%
-        filter(is.na(.data$beta) & .data$item_score !=0) %>%
-        do({
-          if(nrow(.) > 0)
-          {
-            print('The following score categories are missing:')
-            print(as.data.frame(
-              .[,c('item_id','item_score')] %>% 
-                  arrange(.data$item_id, .data$item_score)))
-            stop('missing score categories in fixed_params, see output')
-          }
-          data.frame()
-        })
+        filter(is.na(.data$beta) & .data$item_score != 0) 
+      
+      if(nrow(missing_cat) > 0)
+      {
+        cat(paste('Some score categories are fixed while some are not, for the same item.',
+                  'Dexter does not know how to deal with that.\nThe following score categories are missing:\n'))
+        missing_cat %>% 
+          select(.data$item_id, .data$item_score) %>%
+          arrange(.data$item_id, .data$item_score) %>%
+          as.data.frame() %>%
+          print()
+        stop('missing score categories for fixed items, see output')
+      }
+  
       
       # we have to mimic the positional dexter structure to be able to call toDexter
       # omit itemscores not found in data
       # an alternative would be to keep them, but that would possibly mess up the prms object
-      # I do wondr if it is better to throw them out before or after the toDexter call
+      # I do wonder if it is better to throw them out before or after the toDexter call
       fixed_params = fixed_params %>%
         semi_join(ssIS, by=c('item_id','item_score')) %>%
         filter(.data$item_score != 0) %>%
@@ -188,7 +209,7 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
       fixed_ssI  = fixed_params %>% 
         group_by(.data$item_id) %>%
         summarise(nCat = n()) %>% 
-        mutate(first = cumsum(.data$nCat) - .data$nCat + 1,last = cumsum(.data$nCat)) %>%
+        mutate(first = cumsum(.data$nCat) - .data$nCat + 1L,last = cumsum(.data$nCat)) %>%
         ungroup() %>%
         arrange(.data$item_id)
       
@@ -197,7 +218,7 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
       # we also have to include the 0 category again
       dx_b = toDexter(fixed_params$beta, fixed_params$item_score, fixed_ssI$first, fixed_ssI$last, 
                       re_normalize=FALSE)
-      dx_b = tibble(item_score = dx_b$inputs$ssIS$item_score, 
+      dx_b = tibble(item_score = as.integer(dx_b$inputs$ssIS$item_score), 
                     b = dx_b$est$b,
                     item_id = (fixed_params %>%
                                  group_by(.data$item_id) %>% 
@@ -208,10 +229,11 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
       # cbind with the dexter parametrization
       # then join with all the items again
       fixed_b = dx_b %>%
-        full_join(ssIS, by=c('item_id','item_score')) %>%
+        right_join(ssIS, by=c('item_id','item_score')) %>%
         arrange(.data$item_id, .data$item_score) %>%
         pull(.data$b) 
     }
+    # this test fails for some reason
     if(!any(is.na(fixed_b))) stop('nothing to calibrate, all parameters are fixed')
   }
   
@@ -232,11 +254,11 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
     colnames(result$b)= paste0(ssIS$item_id, "_",ssIS$item_score) 
     colnames(result$beta.cml)=it_sc_lab
   }
-  if (inherits(result, "try-error")) result=NULL
+  if (inherits(result, "try-error")) stop('Calibration failed')
   
   outpt = list(est=result, 
                inputs=list(bkList=bkl, ssIS=ssIS, ssI=ssI, 
-                           stb=stb, method=method), 
+                           stb=stb, method=method, has_fixed_parms = has_fixed_parms), 
                xpr=as.character(qtpredicate))
   class(outpt) = append('prms', class(outpt)) 
   outpt
@@ -245,26 +267,19 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
 
 
 
-##########################################
-#' A print method for ENORM parameters
-#'
-#' @param x An object produced by function \code{\link{fit_enorm}}
-#' @param ... Any other parameters to the print method are silently ignored
-#' @method print prms
-#'
-#'
-print.prms <- function(x, ...){
+
+print.prms = function(x, ...){
   p = paste0( 'Parameters for the Extended Nominal Response Model\n\n',
               'Method: ', x$inputs$method, ', ',
               ifelse(x$inputs$method == 'CML',
                      paste0('converged in ',x$est$n_iter, ' iterations'),
                      paste0('number of Gibbs samples: ',nrow(x$est$beta.cml))),
               '\nitems: ', nrow(x$inputs$ssI), 
-              '\nresponses: ', sum(x$inputs$stb$N),'\n\n',
+              '\nresponses: ', sum(x$inputs$ssIS$sufI),'\n\n',
               'Use coef() or coefficients() to extract the item parameters.\n')
     
   cat(p)
-  invisible(p)
+  invisible(x)
 }
 
 
@@ -272,17 +287,17 @@ print.prms <- function(x, ...){
 #' extract enorm item parameters
 #' 
 #' @param object an enorm parameters object, generated by the function \code{\link{fit_enorm}}
-#' @param ... futher arguments to coef, the following are currently supported;
+#' @param ... further arguments to coef, the following are currently supported;
 #' \describe{
 #'  \item{bayes_hpd_b}{width of Bayesian highest posterior density interval around mean_beta, 
 #'  value must be between 0 and 1, default is 0.95 }  
 #' }
 #' 
 #' @return 
-#' depends on the calibration method:
+#' Depends on the calibration method:
 #' \describe{
 #' \item{for CML}{a data.frame with columns: item_id, item_score, beta, SE_b}
-#' \item{for Bayes}{a data.frame with columns: item_id, item_score, mean_beta, SD_beta, <bayes_hpd_b>_hpd_b_left, <bayes_hpd_b>_hpd_b_right}
+#' \item{for Bayes}{a data.frame with columns: item_id, item_score, mean_beta, SD_beta, -bayes_hpd_b_left-, -bayes_hpd_b_right-}
 #' }
 coef.prms = function(object, ...)
 {
@@ -329,20 +344,4 @@ coef.prms = function(object, ...)
 }
 
 
-##########################################
-#' deprecated method
-#' 
-#' deprecated, please use \code{coef()}
-#'
-#' @param x An object produced by function \code{fit_enorm}
-#' @param row.names	NULL or a character vector giving the row names for the data frame. 
-#' Missing values are not allowed.
-#' @param optional Will be set to FALSE, so ignore.
-#' @param ... any other parameters to the as.data.frame method are ignored silently
-#' @method as.data.frame prms
-#'
-#'
-as.data.frame.prms <- function(x, row.names=NULL, optional=FALSE, ...){
-  warning('The as.data.frame method for enorm parms is deprecated and will be removed soon, please use coef() or coefficients()')
-  coef(x)
-}
+

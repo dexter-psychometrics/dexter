@@ -28,6 +28,8 @@ plausible_scores = function(dataSrc, predicate=NULL, parms=NULL, items=NULL, cov
 {
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
+  from = 20 ; by = 5
+  nIter_enorm = from + by*(nPS-1)
   
   respData = get_resp_data(dataSrc, qtpredicate, summarised = FALSE, extra_columns = covariates, env = env)
   
@@ -41,8 +43,8 @@ plausible_scores = function(dataSrc, predicate=NULL, parms=NULL, items=NULL, cov
   if(is.null(parms))
   {
     use_b_matrix = TRUE
-    parms = fit_enorm_(respData, method='Bayes', nIterations=(nPS*5-1))
-    b = parms$est$b[seq(4,5*nPS,by=5),]
+    parms = fit_enorm_(respData, method='Bayes', nIterations = nIter_enorm)
+    b = parms$est$b[seq(from,(from-by)*(from>by)+by*nPS,by=by),]
     if (is.vector(b)) dim(b)=c(1,length(b)) 
   } else
   {
@@ -53,16 +55,16 @@ plausible_scores = function(dataSrc, predicate=NULL, parms=NULL, items=NULL, cov
       stop('Some items are without parameters')
     }
     
-    if (parms$input$method=='CML')
+    if (parms$inputs$method=='CML')
     {
       use_b_matrix = FALSE
       b = parms$est$b
     }else
     {
-      if ( nrow(parms$est$b)>=(nPS*5-1) )#are there enough rows?
+      if ( nrow(parms$est$b)>=nIter_enorm )#are there enough rows?
       {
         use_b_matrix=TRUE
-        b = parms$est$b[seq(4,5*nPS,by=5),]
+        b = parms$est$b[seq(from,(from-by)*(from>by)+by*nPS,by=by),]
         if (is.vector(b)) dim(b)=c(1,length(b)) 
       }else
       {
@@ -79,7 +81,7 @@ plausible_scores = function(dataSrc, predicate=NULL, parms=NULL, items=NULL, cov
   a = parms$inputs$ssIS$item_score
   
   # now we make plausible values using all responses we stil have
-  pv = plausible_values_(respData, parms = parms, covariates = covariates, nPV = nPS, use_b_matrix = use_b_matrix)
+  pv = plausible_values_(respData, parms = parms, covariates = covariates, nPV = nPS, use_b_matrix = use_b_matrix, asOPLM = FALSE)
 
   #save the design since respData may be mutilated below
   design = respData$design
@@ -142,7 +144,8 @@ plausible_scores = function(dataSrc, predicate=NULL, parms=NULL, items=NULL, cov
   
   pv %>%
     rename_at(vars(starts_with('PV')), function(x) sub('PV','PS', x)) %>%
-    select(-.data$sumScore)
+    select(-.data$sumScore) %>%
+    as.data.frame()
 }
 
 

@@ -1,3 +1,9 @@
+New in 0.7.0
+------------
+Added support for RSQLite 2.1.0+ which broke dexter 0.6.0. 
+Added function probability_to_pass for equating to a reference test that is 
+connected to a target test.
+
 
 New in 0.6.0
 ------------

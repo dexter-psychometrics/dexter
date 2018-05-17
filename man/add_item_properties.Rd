@@ -4,28 +4,25 @@
 \alias{add_item_properties}
 \title{Add item properties to a project}
 \usage{
-add_item_properties(db, item_properties, overwrite = TRUE,
-  default_values = list())
+add_item_properties(db, item_properties, default_values = list())
 }
 \arguments{
-\item{db}{A handle to the database, e.g. the output of \code{start_new_project}
+\item{db}{A handle to the dexter project database, e.g. the output of \code{start_new_project}
 or \code{open_project}}
 
 \item{item_properties}{A data frame containing the item properties. See details.}
 
-\item{overwrite}{Whether existing item properties should be overwritten (default=TRUE)}
-
-\item{default_values}{a list where the names are item_properties and the values are defaults.
-The defaults will be used as the value for an item for which the property is not specified, 
+\item{default_values}{a list where the names are the names of item_properties and the values specify defaults.
+The defaults will be used as the value for an item for which the property is not specified yet, 
 for example when you add new items using \code{\link{touch_rules}}.
 Default_values for an item property will only be processed
-the first time you define an item property.}
+for new item properties. It is not possible to change default values at a later time.}
 }
 \value{
 nothing
 }
 \description{
-Adds item properties to an existing database
+Add or change item properties in a dexter project
 }
 \details{
 When entering response data in the form of a rectangular person x item
@@ -40,11 +37,10 @@ use \code{\link{touch_rules}} if you want to add new items to your project.
 }
 \examples{
 \dontrun{
-db = start_new_project(verbAggrRules, "verbAggression.db", 
-  covariates=list(gender="<unknown>"))
+db = start_new_project(verbAggrRules, "verbAggression.db")
 head(verbAggrProperties)
 add_item_properties(db, verbAggrProperties)
-get_item_properties(db) 
+get_items(db) 
 
 close_project(db)
 }

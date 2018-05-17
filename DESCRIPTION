@@ -1,7 +1,7 @@
 Package: dexter
 Type: Package
 Title: Data Management and Analysis of Tests
-Version: 0.6.0
+Version: 0.7.0
 Author: Gunter Maris, Timo Bechger, Jesse Koops, Ivailo Partchev
 Maintainer: Ivailo Partchev <Ivailo.Partchev@cito.nl>
 Description: A system for the management, assessment, and psychometric analysis of data from educational and psychological tests. Developed at Cito, The Netherlands, with subsidy from the Dutch Ministry of Education, Culture, and Science.
@@ -14,9 +14,9 @@ Imports: DBI, graphics, methods, utils, tidyr, tibble, colorspace,
         shiny, shinyBS, shinydashboard, DT, fastmatch, purrr, rlang,
         dplyr (>= 0.7.0), dbplyr (>= 1.1.0), rprintf, RColorBrewer
 RoxygenNote: 6.0.1
-Suggests: knitr, rmarkdown, latticeExtra, testthat
+Suggests: knitr, rmarkdown, latticeExtra, testthat, calibrate, ggplot2
 VignetteBuilder: knitr
 NeedsCompilation: yes
-Packaged: 2017-12-16 16:27:35 UTC; ivailo
+Packaged: 2018-05-17 11:32:36 UTC; ivailo
 Repository: CRAN
-Date/Publication: 2017-12-16 16:48:26 UTC
+Date/Publication: 2018-05-17 16:52:06 UTC

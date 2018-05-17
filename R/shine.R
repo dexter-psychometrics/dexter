@@ -25,7 +25,7 @@ matrix_layout = Vectorize(
 ###########################################################  
 #' Interactive test-item analysis
 #'
-#' Open a shiny application to do interactive item-test
+#' Open a shiny application for interactive item-test
 #' analysis on the database
 #'
 #'

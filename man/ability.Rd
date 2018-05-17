@@ -7,11 +7,12 @@
 \usage{
 ability(dataSrc, parms, predicate = NULL, method = c("MLE", "EAP"),
   prior = c("normal", "Jeffreys"), use_draw = NULL, npv = 500, mu = 0,
-  sigma = 4, standard_errors = FALSE, person_level = TRUE)
+  sigma = 4, standard_errors = FALSE, person_level = TRUE,
+  asOPLM = TRUE)
 
 ability_tables(parms, design = NULL, method = c("MLE", "EAP"),
   prior = c("normal", "Jeffreys"), use_draw = NULL, npv = 500, mu = 0,
-  sigma = 4, standard_errors = TRUE)
+  sigma = 4, standard_errors = TRUE, asOPLM = TRUE)
 }
 \arguments{
 \item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score}
@@ -42,6 +43,8 @@ If outside range, the last iteration will be used.}
 
 \item{person_level}{deprecated, always TRUE.}
 
+\item{asOPLM}{Report abilities on a scale defined by the OPLM normalization. Only when no values in parms have been fixed}
+
 \item{design}{A data.frame with columns item_id and optionally booklet_id. If design is NULL
 the score transformation table will be computed based on the test design 
 that was used to calibrate the items. If the column booklet_id is not included, the score 
@@ -69,14 +72,11 @@ f = fit_enorm(db)
 aa = ability_tables(f,method="MLE",standard_errors=FALSE)
 bb = ability_tables(f,method="EAP",standard_errors=FALSE)
 cc = ability_tables(f,method="EAP",prior="Jeffreys", standard_errors=FALSE)
-plot(bb$sumScore, bb$theta, xlab="test-score", 
-  ylab="ability est.", pch=19, cex=0.7)
+plot(bb$sumScore, bb$theta, xlab="test-score", ylab="ability est.", pch=19, cex=0.7)
 points(aa$sumScore, aa$theta, col="red", pch=19, cex=0.7)
 points(aa$sumScore, cc$theta, col="green", pch=19, cex=0.7)
-legend("topleft", legend = c("EAP normal prior", 
-  "EAP Jeffreys prior", "MLE"), bty = "n",
- lwd = 1, cex = 0.7, col = c("black", "green", "red"), 
- lty=c(0,0,0), pch = c(19,19,19))
+legend("topleft", legend = c("EAP normal prior", "EAP Jeffreys prior", "MLE"), bty = "n",
+        lwd = 1, cex = 0.7, col = c("black", "green", "red"), lty=c(0,0,0), pch = c(19,19,19))
 
 close_project(db)
 }

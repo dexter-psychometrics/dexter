@@ -5,15 +5,15 @@
 \title{Draw plausible values}
 \usage{
 plausible_values(dataSrc, parms = NULL, predicate = NULL,
-  covariates = NULL, nPV = 1, use_draw = NULL)
+  covariates = NULL, nPV = 1, use_draw = NULL, asOPLM = TRUE)
 }
 \arguments{
 \item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score}
 
 \item{parms}{An object returned by function \code{fit_enorm} and containing
 parameter estimates. If parms is given the function provides plausible values conditional on the 
-item paramaters. These are considered known. If parameter estimates are not given, the user is given 
-plausible value marginalized over the posterior distribution of the item parameters. 
+item paramaters. These are considered known. If parms = NULL, the user is given 
+plausible values marginalized over the posterior distribution of the item parameters. 
 In plain words, this means that the uncertainty of the item parameters is taken into account.}
 
 \item{predicate}{an expression to filter data. If missing, the function will use 
@@ -29,6 +29,9 @@ If dataSrc is a data.frame, it must contain the covariate.}
 recognised automatically), the number of the random draw (iteration) to use 
 in generating the PV. If NULL, all draws will be averaged; that is, the posterior means are used for the item parameters.
 If outside range, the last iteration will be used.}
+
+\item{asOPLM}{As a courtesy to the user who has an unhealthy habit to look at parameters or latent stuff, this option normalizes
+the item parameter as in OPLM output. Only used when there are no fixed pameters to determine the origin.}
 }
 \value{
 A data.frame with columns booklet_id, person_id, sumScore and nPV plausible values

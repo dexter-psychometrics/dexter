@@ -20,11 +20,12 @@ extern void sampleNRM(void *, void *, void *, void *, void *, void *, void *, vo
 extern void sampleNRM2(void *, void *, void *, void *, void *, void *, void *, void *);
 extern void recyclePV(void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void recyclePV2(void *, void *, void *, void *, void *, void *, void *, void *, void *);
+extern void recyclePVaA(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 
 
 static const R_CMethodDef CEntries[] = {
   {"E",          (DL_FUNC) &E,           8},
-  {"E0",         (DL_FUNC) &E,           8},  
+  {"E0",         (DL_FUNC) &E0,          8},  
   {"ElSym",      (DL_FUNC) &ElSym,       9},
   {"Escore",     (DL_FUNC) &Escore,      7},
   {"H",          (DL_FUNC) &H,           9},
@@ -34,7 +35,8 @@ static const R_CMethodDef CEntries[] = {
   {"meanElSym",  (DL_FUNC) &meanElSym,  10},
   {"PV",         (DL_FUNC) &PV,         13},
   {"recyclePV",  (DL_FUNC) &recyclePV,   9},
-  {"recyclePV2", (DL_FUNC) &recyclePV,   9},    
+  {"recyclePV2", (DL_FUNC) &recyclePV2,  9},    
+  {"recyclePVaA",(DL_FUNC) &recyclePVaA,10},      
   {"sampleNRM",  (DL_FUNC) &sampleNRM,   8},
   {"sampleNRM2", (DL_FUNC) &sampleNRM2,  8},
   {NULL, NULL, 0}

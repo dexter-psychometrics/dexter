@@ -4,26 +4,26 @@
 \alias{add_booklet}
 \title{Add a booklet to a project}
 \usage{
-add_booklet(db, x, booklet_id, auto_add_unknown_rules = TRUE)
+add_booklet(db, x, booklet_id, auto_add_unknown_rules = FALSE)
 }
 \arguments{
 \item{db}{A handle to the database, i.e. the output of \code{start_new_project}
 or \code{open_project}}
 
 \item{x}{A data frame containing the responses and, optionally,
-person covariates. The data.frame should have one row per respondent and the column names should 
-correspond to the item_id's in the rules or the names of the covariates. See details.}
+person person_properties. The data.frame should have one row per respondent and the column names should 
+correspond to the item_id's in the rules or the names of the person_properties. See details.}
 
 \item{booklet_id}{A (short) string identifying the test form (booklet)}
 
-\item{auto_add_unknown_rules}{If FALSE, an error will be generated if 
-some of the responses do not appear in the scoring rules. Default is TRUE.}
+\item{auto_add_unknown_rules}{If FALSE (the default), an error will be generated if 
+some of the responses do not appear in the scoring rules.}
 }
 \value{
 A list of: \item{items}{The names of the columns in \code{x} that were
 treated as items}
-\item{covariates}{The names of the columns in \code{x} that were
-treated as person covariates}
+\item{person_properties}{The names of the columns in \code{x} that were
+treated as person properties}
 \item{not_listed}{A data frame of all responses that will be treated as missing}
 }
 \description{
@@ -45,22 +45,23 @@ If a person_id is not supplied, dexter will generate unique person_id's for each
 
 Any column whose name has an exact match in the scoring rules inputted with
 function \code{start_new_project} will be treated as an item; any column whose name has an 
-exact match in the covariates will be treated as covariate. If a name matches both
-a covariate and an item, the item takes precedence. Variables other than items, covariates 
+exact match in the person_properties will be treated as a person property. If a name matches both
+a person property and an item, the item takes precedence. Columns other than items, person properties 
 and person_id will be ignored.
 
 If \code{auto_add_unknown_rules=TRUE}, any responses to an item that do not have an 
 exact match in the scoring rules will be automatically given the lowest score of 0. 
 To score missing data differently, 
 or simply abide to good style, the user can include explicit entries for missing value
-indicators in the scoring rules.
+indicators in the scoring rules. Note that responses are always treated as strings, and \code{NA}
+values are transformed to the string \code{"NA"}.
 }
 \examples{
 \dontrun{
 db = start_new_project(verbAggrRules, "verbAggression.db", 
-  covariates=list(gender="<unknown>"))
+                       person_properties=list(gender="unknown"))
 head(verbAggrData)
-add_booklet(db, verbAggrData, "agg")
+add_booklet(db, verbAggrData, "agg")      
 
 close_project(db)
 }

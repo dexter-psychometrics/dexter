@@ -4,7 +4,7 @@
 \alias{get_design}
 \title{Test design}
 \usage{
-get_design(db, format = c("wide", "long"), rows = c("booklet_id", "item_id",
+get_design(db, format = c("long", "wide"), rows = c("booklet_id", "item_id",
   "item_position"), columns = c("item_id", "booklet_id", "item_position"),
   fill = NA)
 }
@@ -18,13 +18,13 @@ or \code{open_project}}
 
 \item{columns}{variable that defines the columns, ignored if format='long'}
 
-\item{fill}{If set, missing values will be replaced with this value}
+\item{fill}{If set, missing values will be replaced with this value, ignored if format='long'}
 }
 \value{
 A data.frame with the design. The contents depend on the rows, columns and format parameters
- if `format` is `'long'` a data.frame with columns: booklet_id, item_id, item_position
- if `format` is `'wide'` a data.frame with the rows defined by the `rows` parameter and 
- the columns by the `columns` parameter, with the remaining variable (i.e. item_id, booklet_id or item_position)
+ if \code{format} is \code{'long'} a data.frame with columns: booklet_id, item_id, item_position
+ if \code{format} is \code{'wide'} a data.frame with the rows defined by the \code{rows} parameter and 
+ the columns by the \code{columns} parameter, with the remaining variable (i.e. item_id, booklet_id or item_position)
  making up the cells
 }
 \description{

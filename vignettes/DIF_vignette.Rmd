@@ -28,7 +28,7 @@ add_booklet(db, verbAggrData, "data")
 add_item_properties(db, verbAggrProperties)
 ```
 
-Gender is available as a discrete covariate which defines two groups: male and femal respondents. We first test whether there is DIF. Note that we see progress bars from two calls to `fit_enorm`; one for each group.
+Gender is available as a discrete covariate which defines two groups: male and female respondents. We first test whether there is DIF. Note that we see progress bars from two calls to `fit_enorm`; one for each group.
 ```{r}
 dif_gender=DIF(db,"gender")
 print(dif_gender)

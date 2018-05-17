@@ -10,7 +10,7 @@ read_oplm_par(par_path)
 \item{par_path}{path to a file in the (binary) OPLM PAR format or the human readable CML format}
 }
 \value{
-depends on the input. For .PAR files a tibble with columns: item_id, item_score, beta, nr; 
+depends on the input. For .PAR files a tibble with columns: item_id, item_score, beta, nbr,
 for .CML files also several statistics columns that are outputted by OPLM as part of the calibration.
 }
 \description{

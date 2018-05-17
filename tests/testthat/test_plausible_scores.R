@@ -32,7 +32,7 @@ test_that('plausible scores works',{
   
 
   expect_true(cor(sc_b2$PS1, sc_b2$test_score)>0.65, 
-              info=paste('expected correlation test_score and PS>0.8, found:',cor(sc_b2$PS1, sc_b2$test_score)))
+              info=paste('expected correlation test_score and PS>0.65, found:',cor(sc_b2$PS1, sc_b2$test_score)))
   
   
   # general test

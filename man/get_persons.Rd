@@ -11,9 +11,9 @@ get_persons(db)
 or \code{open_project}}
 }
 \value{
-A data frame with columns person_id and columns for each person_property/covariate
+A data frame with columns person_id and columns for each person_property
 }
 \description{
 Retrieve all persons/respondents that have been entered in the db
-so far together with their covariates
+so far together with their properties
 }

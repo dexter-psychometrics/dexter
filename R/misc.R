@@ -27,33 +27,12 @@
 #   return(v)
 # }
 
+dropNulls = function (x) 
+{
+  x[!vapply(x, is.null, FUN.VALUE = logical(1))]
+}
 
-
-# logger for debugging
-# add message with debug.log$send()
-# retreive and clear all messages with debug.log$retrieve(), returns list
-
-logger = setRefClass('logger', 
-  fields = list(stack='list', msg='logical'), 
-  methods = list(
-    send = function(obj, name = 'no_name')
-      {
-        if(msg) message(obj)
-        stack[[length(stack)+1]] <<-  obj
-        names(stack)[length(stack)] <<- name 
-        invisible(obj)
-      },
-    retrieve = function()
-      {
-        res = stack
-        stack <<- list()
-        return(res)
-      }
-  )
-)
-# global object
-debug.log = logger$new(msg=FALSE)
-           
+# each time counter is read using $get, it increases by one
 counter = setRefClass('counter',
   fields=list(x='numeric'), 
   methods=list(
@@ -70,16 +49,15 @@ counter = setRefClass('counter',
 # use for forwarding arguments to e.g. plot function
 merge_arglists = function(args, default = NULL, override = NULL)
 {
-  if(!is.null(default))
-    for(nm in names(default)) 
-      if(! nm %in% names(args)) 
-        args[[nm]] = default[[nm]]
-      
-      if(!is.null(override))
-        for(nm in names(override)) 
-          args[[nm]] = override[[nm]]
-        
-        return(args)
+  if(is.null(default))
+    default = list()
+  
+  if(is.null(override))
+    override = list()
+  
+  res = modifyList(default, args)
+  res = modifyList(res, override)
+  res
 }
 
 
@@ -144,6 +122,16 @@ GCD_ <-function (x)
   return(g)
 }
 
+possible_scores <- function(a,first,last)
+{
+  y=a[first[1]:last[1]]
+  for (i in 2:length(first))
+  {
+    y=sort(unique(as.vector((outer(y,a[first[i]:last[i]],'+')))))
+  }
+  return(y)
+}
+
 
 first_last2indx = function(first,last) unlist(apply(data.frame(first,last),1,function(x) x[1]:x[2]))
 
@@ -163,7 +151,7 @@ subset_ssI = function(ssI, design)
 
 
 # highest posterior density interval
-# not save for bimodal distributions
+# not safe for bimodal distributions
 hpd=function(x, conf=0.95, print=TRUE)
 {
   conf <- min(conf, 1-conf)
@@ -181,6 +169,95 @@ hpd=function(x, conf=0.95, print=TRUE)
     return(rbind(x[ nnn ],x[ n-nn+nnn ]))
   }
 }
+
+# For a discrete vector x, this function gives 
+# Frequencies P(x operator i) for i in min_max[1]:min_max[2]
+# where operator can be ==, <, <=, etc.
+# is min_max=NULL the range is min(x):max(x)
+my_freq = function(x, min_max=NULL, operator=c("==", "<", "<=", ">", ">="))
+{
+  operator = match.arg(operator)
+  if (!operator%in%c("==", "<", "<=", ">", ">=")) stop("wrong operator in my_freq")
+  
+  if (is.null(min_max)){
+    rng = min(x):max(x)
+  }else
+  {
+    rng = min_max[1]:min_max[2]
+  }
+  
+  out = NULL
+  if (operator=="==")
+  {
+    for (i in rng)
+    {
+      out = c(out,sum(x==i))
+    }
+  }
+  
+  if (operator=="<")
+  {
+    for (i in rng)
+    {
+      out = c(out,sum(x<i))
+    }
+  }
+  
+  if (operator=="<=")
+  {
+    for (i in rng)
+    {
+      out = c(out,sum(x<=i))
+    }
+  }
+  
+  if (operator==">")
+  {
+    for (i in rng)
+    {
+      out = c(out,sum(x>i))
+    }
+  }
+  
+  if (operator==">=")
+  {
+    for (i in rng)
+    {
+      out = c(out,sum(x>=i))
+    }
+  }
+  
+  out = out/length(x)
+  names(out) = as.character(rng)
+  return(out)
+}
+
+geo_mean = function(x)
+{
+   return(exp(mean(log(x))))
+}
+### round to geometric mean ###
+# Round positive numbers x to integers
+# such that the geometric mean equals approximately J
+r2gm = function(x, J)
+{
+  G=geo_mean(x)
+  out=NULL
+  for (i in 1:length(x)) out = c(out,max(1,floor(0.5+(J*x[i]/G))))
+  return(out)
+}
+
+### Weights based on a rank-one approximation to the
+# Interaction model
+c2weights<-function(cIM)
+{
+  hh=kronecker(t(cIM),cIM,'+')
+  gg=eigen(hh)
+  out=gg$vectors[,which.max(gg$values)]
+  av_indx=which.min(abs(out-mean(out)))
+  return(out/out[av_indx])
+}
+
 
 
 #########################

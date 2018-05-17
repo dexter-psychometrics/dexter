@@ -153,7 +153,7 @@ void ittot_mat0(double *b, int *a, double *c, int *first, int *last, int *nI, in
         indx=s-a[j];
         if ( (indx>=0)&&(indx<(nscores-a[last[it]])) ) 
         {
-          pi[npar*s+k] =exp(log(eta[j])+log(gi[indx])-log(g[s]));
+          pi[npar*s+k] = exp(log(eta[j])+log(gi[indx])-log(g[s]));
         }
         k++;
       }

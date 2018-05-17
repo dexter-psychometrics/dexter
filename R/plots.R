@@ -62,8 +62,9 @@ qcolors = function(n, pal='Set1')
 #' @details 
 #' Customisation of title and subtitle can be done by using the arguments main and sub. 
 #' These arguments can contain references to the variables item_id, booklet_id, item_position(only if dataSrc is a dexter db),
-#' pvalue, rit and rir. References are made by prefixing these variables with a dollar sign. Variable names can optionally be postfixed 
-#' with a sprintf style format string, e.g.: distractor_plot(db, main='item: $item_id', sub='Item rest correlation: $rir:.2f')
+#' pvalue, rit and rir. References are made by prefixing these variables with a dollar sign. Variable names may be postfixed 
+#' with a sprintf style format string, e.g. 
+#' \code{distractor_plot(db, main='item: $item_id', sub='Item rest correlation: $rir:.2f')}
 #' 
 distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1, legend = TRUE, ...){  
   qtpredicate = eval(substitute(quote(predicate)))
@@ -142,7 +143,7 @@ distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1, legend 
       plot.args$main = fstr(plot.args$main, st)
       plot.args$sub = fstr(plot.args$sub, st)
 
-      do.call(graphics::plot, plot.args)
+      do.call(plot, plot.args)
 
       bkl_scores = y %>% 
         group_by(.data$sumScore) %>% 
@@ -206,8 +207,7 @@ distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1, legend 
 #'
 #' @examples
 #' \dontrun{
-#' db = start_new_project(verbAggrRules, "verbAggression.db", 
-#'   covariates=list(gender="<unknown>"))
+#' db = start_new_project(verbAggrRules, "verbAggression.db", covariates=list(gender="<unknown>"))
 #' add_booklet(db, verbAggrData, "agg")
 #' add_item_properties(db, verbAggrProperties)
 #' profile_plot(db, item_property='mode', covariate='gender')
@@ -266,7 +266,7 @@ profile_plot <- function(dataSrc, item_property, covariate, predicate = NULL, mo
       ungroup()
     
     ssIS = ssIS %>% 
-      full_join(tibble(item_id = unique(ssIS$item_id), item_score = 0), by=c('item_id','item_score')) %>%
+      full_join(tibble(item_id = unique(ssIS$item_id), item_score = 0L), by=c('item_id','item_score')) %>%
       arrange(.data$item_id, .data$item_score)
     
     ssIS[is.na(ssIS)] = 0
@@ -276,7 +276,7 @@ profile_plot <- function(dataSrc, item_property, covariate, predicate = NULL, mo
       summarise(nCat = n(), N = sum(.data$sufI), sufC = sum(.data$sufC), mx = max(.data$item_score)) %>%
       ungroup() %>%
       arrange(.data$item_id) %>% 
-      mutate(first = cumsum(.data$nCat) - .data$nCat + 1, last = cumsum(.data$nCat))
+      mutate(first = cumsum(.data$nCat) - .data$nCat + 1L, last = cumsum(.data$nCat))
     
 
     ssT = rsp %>% 

@@ -8,5 +8,6 @@ void PV(double *b, int *a, int *first, int *last, double *mu, double *sigma, int
 void Escore(double *theta, double *score, double *b, int *a, int *first, int *last, int *n);
 void recyclePV(double *b, int *a, int *first, int *last, int *nI, int *n, double *mu, double *sigma, double *R);
 void recyclePV2(double *b, int *a, int *first, int *last, int *nI, int *n, double *prior, int *nprior, double *R);
+void recyclePV_aA(double *b, int *a, int *A, int *first, int *last, int *nI, int *n, double *mu, double *sigma, double *R);
   
 #endif

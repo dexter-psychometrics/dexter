@@ -13,7 +13,8 @@ fit_enorm(dataSrc, predicate = NULL, fixed_params = NULL,
 \item{predicate}{An optional expression to subset data, if NULL all data is used}
 
 \item{fixed_params}{Optionally, a prms object from a previous analysis or 
-a data.frame with columns: item_id, item_score (omitting 0 score category) and beta}
+a data.frame with columns: item_id, item_score (omitting 0 score category) and beta. To facilitate the user in 
+entering parameter values, we assume the parameterisation used by OPLM; in short, beta's are thresholds between categories.}
 
 \item{method}{If CML, the estimation method will be Conditional Maximum Likelihood;
 otherwise, a Gibbs sampler will be used to produce a sample from the posterior}
@@ -23,7 +24,7 @@ number of iterations when using CML.}
 }
 \value{
 An object of type \code{prms}. The prms object can be cast to a data.frame of item parameters 
-using the \code{as.data.frame} built-in function or used directly as input for other Dexter functions.
+using function `coef` or used directly as input for other Dexter functions.
 }
 \description{
 Fits an Extended NOminal Response Model (ENORM) using conditional maximum likelihood (CML)

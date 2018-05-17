@@ -11,7 +11,7 @@ get_booklets(db)
 or \code{open_project}}
 }
 \value{
-A data frame showing with columns: booklet_id, n_persons and n_items.
+A data frame with columns: booklet_id, n_persons and n_items.
 }
 \description{
 Retrieve information about the booklets entered in the db so far

@@ -87,6 +87,6 @@ tia_tables <- function(dataSrc, predicate = NULL, type=c('raw','averaged','compa
               maxTestScore=sum(.data$maxScore),
               N=max(.data$n)) 
   
-  list(itemStats=itemStats, testStats=testStats)
+  list(itemStats=as.data.frame(itemStats), testStats=as.data.frame(testStats))
 }
 

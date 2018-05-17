@@ -14,6 +14,6 @@ or \code{open_project}}
 An object that represents the application. Printing the object or passing it to \code{shiny::runApp} will run the app.
 }
 \description{
-Open a shiny application to do interactive item-test
+Open a shiny application for interactive item-test
 analysis on the database
 }

@@ -108,3 +108,68 @@ EscoreR <- function(theta, b, a, first, last)
   }
   return(escore)
 }
+
+H.STEP_R<-function(b,a,first,last, scoretab)
+{
+  nI=length(last)
+  ms=length(scoretab)-1
+  H=matrix(0,length(a),length(a))
+  
+  g=elsym(b,a,first,last)
+  for (item in 1:nI)
+  {
+    gi=elsym(b,a,first[-item],last[-item])
+    for (j in (first[item]+1):last[item])
+    {
+      for (s in (a[j]+1):(ms))
+      {
+        if (g[s]>0)
+        {
+          H[j,j] = H[j,j]+scoretab[s]*(gi[s-a[j]]*b[j]/g[s])*(1-(gi[s-a[j]]*b[j]/g[s]))
+        }
+      }
+      
+      if ((j+1)<=last[item])
+      {
+        for (k in (j+1):last[item])
+        {
+          for (s in (a[k]+1):(ms))
+          {
+            if (g[s]>0)
+            {
+              H[k,j] = H[k,j]-scoretab[s]*(gi[s-a[j]]*b[j]/g[s])*(gi[s-a[k]]*b[k]/g[s]);
+            }
+          }
+        }
+      }
+      
+      if ((item+1)<=nI)
+      {
+        for (k in (item+1):nI)
+        {
+          gk=elsym(b,a,first[-k],last[-k])
+          gik=elsym(b,a,first[-c(item,k)],last[-c(item,k)])
+          for (l in (first[k]+1):last[k])
+          {
+            for (s in 1:ms)
+            {
+              if (g[s]>0)
+              {
+                if ((s>(a[j]+a[l]))&((s-a[j]-a[l])<=length(gik))){
+                  H[l,j] = H[l,j] + scoretab[s]*(gik[s-a[j]-a[l]])*((b[j]*b[l])/g[s]) 
+                }
+                if ((s>a[j])&(s>a[l])) {
+                  H[l,j] = H[l,j] - scoretab[s]*(gi[s-a[j]]*b[j]/g[s])*(gk[s-a[l]]*b[l]/g[s])
+                }
+              }
+            }
+          }
+        }
+        
+      }
+    }
+  }
+  H=H+t(H)
+  diag(H)=diag(H)/2
+  return(H)
+}

@@ -36,7 +36,7 @@ test_that('calibration of verbal aggression dataset matches oplm results, with f
   # fixing id's etc.
   oplm_params[is.na(oplm_params$se.b),'se.b'] = 0
   
-  items = show_items(db) %>%
+  items = get_items(db) %>%
     mutate(oplm_lab = substr(item_id,1,8))
   
   oplm_params = oplm_params %>% inner_join(items, by='oplm_lab')

@@ -44,7 +44,7 @@ Creates a dexter project database and fills it with response data based on a .da
 start_new_project_from_oplm builds a complete dexter database from a .dat and .scr file in
 the proprietary oplm format. Three custom variables are added to the database: 
 booklet_on_off, item_local_on_off, item_global_on_off. These are taken from the .scr file
-and can be used in expressions in the various dexter functions.
+and can be used in predicates in the various dexter functions.
 }
 \examples{
 \donttest{
@@ -53,11 +53,11 @@ db = start_new_project_from_oplm('test.db',
    booklet_position=c(1,3), responses_start=101,
    person_id=c(50,62))
 
-par = fit_enorm(db, 
-   (item_global_on_off==1)&(item_local_on_off==1)&(booklet_on_off==1))
+prms = fit_enorm(db, 
+   item_global_on_off==1 & item_local_on_off==1 & booklet_on_off==1)
 
-abilities = ability(db, par, 
-   (item_global_on_off==1)&(item_local_on_off==1)&(booklet_on_off==1))
+abilities = ability(db, prms, 
+   item_global_on_off==1 & item_local_on_off==1 & booklet_on_off==1)
 
 head(abilities)
 }

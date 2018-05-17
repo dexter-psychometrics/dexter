@@ -221,11 +221,12 @@ void PV(double *b, int *a, int *first, int *last, double *mu, double *sigma, int
   PutRNGstate(); // put seed
 }
 /*
- Inputs n; a vector of length Mxs+1, each entry corresponding to a score with the initail value npv.
+ Inputs n; a vector of length Mxs+1, each entry corresponding to a score with the initial value npv.
+ If a score is not possible given the weights in a n = 0
  */
 void recyclePV(double *b, int *a, int *first, int *last, int *nI, int *n, double *mu, double *sigma, double *R)
 {
-  int k=0, npv=n[0];
+  int nzero=0, k=0, npv=n[0]; // zero can always occur
   double atheta, *p=NULL, u;
   int sm, ms, Mxs, colindx, nrows, iter;
   ms=0;Mxs=0;
@@ -233,13 +234,16 @@ void recyclePV(double *b, int *a, int *first, int *last, int *nI, int *n, double
     if ((last[i]-first[i]+2)>ms) {ms=(last[i]-first[i]+2);}
     Mxs += a[last[i]];
   }
-  nrows=Mxs+1;
+  for (int i=1;i<=Mxs;i++){ 
+    if (n[i]==0) nzero++;
+  }
+  
   void *_p = realloc(p, ((ms+1) * sizeof(double)));
   p=(double*)_p;
   GetRNGstate(); // get seed
   
-  iter=0;
-  while (iter<(nrows*npv))
+  iter=0; nrows=Mxs+1;
+  while (iter<((nrows-nzero)*npv))
   {
     atheta=rnorm(mu[0],sigma[0]);
     sm=0;
@@ -275,7 +279,7 @@ void recyclePV(double *b, int *a, int *first, int *last, int *nI, int *n, double
 */
 void recyclePV2(double *b, int *a, int *first, int *last, int *nI, int *n, double *prior, int *nprior, double *R)
 {
-  int k=0, npv=n[0], rindx;
+  int nzero=0, k=0, npv=n[0], rindx;
   double atheta, *p=NULL, u;
   int sm, ms, Mxs, colindx, nrows, iter;
   ms=0;Mxs=0;
@@ -283,13 +287,16 @@ void recyclePV2(double *b, int *a, int *first, int *last, int *nI, int *n, doubl
     if ((last[i]-first[i]+2)>ms) {ms=(last[i]-first[i]+2);}
     Mxs += a[last[i]];
   }
-  nrows=Mxs+1;
+  for (int i=1;i<=Mxs;i++){ 
+    if (n[i]==0) nzero++;
+  }
+  
   void *_p = realloc(p, ((ms+1) * sizeof(double)));
   p=(double*)_p;
   GetRNGstate(); // get seed
   
-  iter=0;
-  while (iter<(nrows*npv))
+  iter=0;  nrows=Mxs+1;
+  while (iter<((nrows-nzero)*npv))
   {
     rindx = (int)floor(runif(0,(nprior[0]-1))) ;
     atheta = prior[rindx];
@@ -320,7 +327,60 @@ void recyclePV2(double *b, int *a, int *first, int *last, int *nI, int *n, doubl
   free(p);
 }
 
+/*
+ Inputs n; a vector of length Mxs+1, each entry corresponding to an A-weighted score with the initial value npv.
+ If a score is not possible given the weights in a n = 0
+ */
+void recyclePVaA(double *b, int *a, int *A, int *first, int *last, int *nI, int *n, double *mu, double *sigma, double *R)
+{
+  int nzero=0, k=0, npv=n[0]; // zero can always occur
+  double atheta, *p=NULL, u;
+  int sm, ms, Mxs, colindx, nrows, iter;
+  ms=0;Mxs=0;
+  for (int i=0;i<nI[0];i++) {
+    if ((last[i]-first[i]+2)>ms) {ms=(last[i]-first[i]+2);}
+    Mxs += A[last[i]];
+  }
+  for (int i=1;i<=Mxs;i++){ 
+    if (n[i]==0) nzero++;
+  }
+  
+  void *_p = realloc(p, ((ms+1) * sizeof(double)));
+  p=(double*)_p;
+  GetRNGstate(); // get seed
+  
+  iter=0; nrows=Mxs+1;
+  while (iter<((nrows-nzero)*npv))
+  {
+    atheta=rnorm(mu[0],sigma[0]);
+    sm=0;
+    for (int i=0;i<nI[0];i++)
+    {
+      p[0]=b[first[i]]*exp(a[first[i]]*atheta); 
+      k=1;
+      for (int j=first[i]+1;j<=last[i];j++) // note the +1
+      {
+        p[k]=p[k-1]+b[j]*exp(a[j]*atheta);
+        k++;
+      }
+      u=p[k-1]*runif(0,1);
+      k=0;
+      while (u>p[k]) {k++;}
+      if (k>0) {sm+=A[first[i]+k];}
+    }
+    
+    if (n[sm]>0) {
+      colindx=npv-n[sm];
+      R[sm+colindx*nrows]=atheta;
+      n[sm]--;
+      iter++;
+    }
+  }
+  free(p);
+  PutRNGstate(); // put seed
+}
 
+///////////////////////////////
 void Escore(double *theta, double *score, double *b, int *a, int *first, int *last, int *n)
 {
   double denom, num;

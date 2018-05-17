@@ -11,10 +11,8 @@ get_person_properties(db)
 or \code{open_project}}
 }
 \value{
-A data.frame with one row per unique value of each person property and a count of the nbr of persons it applies to.
-The columns are: person_property, value, N
+A tibble with columns: person_property, type and values. Values shows unique values for your person properties, cut off if there are many.
 }
 \description{
-Retrieve information about the item properties defined in the project (if any).
-This will return a data.frame with one row per unique value of each item property.
+Quickly glimpse the person properties defined in the project (if any).
 }

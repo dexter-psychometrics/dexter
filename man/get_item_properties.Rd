@@ -11,10 +11,9 @@ get_item_properties(db)
 or \code{open_project}}
 }
 \value{
-A data.frame with one row per unique value of each item property and a count of the nbr of items it applies to.
-The columns are: item_property, value, N
+A tibble with columns: item_property, type and values. Values shows 
+unique values for your item properties, cut off if there are many.
 }
 \description{
-Retrieve information about the item properties defined in the project (if any).
-This will return a data.frame with one row per unique value of each item property.
+Quickly glimpse the item properties defined in the project (if any).
 }
