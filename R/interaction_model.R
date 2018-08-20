@@ -220,7 +220,7 @@ draw_curtains = function(qnt)
 #' will be shown as dots. Default is FALSE.
 #' @param ... Any additional plotting parameters.
 #' @details
-#' Customisation of title and subtitle can be done by using the arguments main and sub.
+#' Customization of title and subtitle can be done by using the arguments main and sub.
 #' These arguments can contain references to the variables item_id (if overlay=FALSE) or model (if overlay=TRUE)
 #' by prefixing them with a dollar sign, e.g. plot(m, main='item: $item_id')
 #' @method plot rim
@@ -376,18 +376,20 @@ print.rim <- function(x, ...){
 }
 
 
-
+# TODO: reparameterize pars for IM
 coef.rim = function(object, ...) 
 {
   x = object
   first=x$ss$il$first
+  last =x$ss$il$last
   dRM=x$est$bRM[-first]
   dRM=-log(dRM/dRM[1])
   dIM=x$est$bIM[-first]
   dIM=-log(dIM/dIM[1])
+  OPCML_RM=toOPLM(x$ss$sl$item_score, x$est$bRM, first, last)
   
   IS = tibble(item_id = x$ss$sl$item_id[-first], item_score = x$ss$sl$item_score[-first],
-              delta_rasch = dRM, delta_IM = dIM)
+              beta_rasch = as.vector(OPCML_RM$delta), beta_IM = dIM)
   I = tibble(item_id = x$ss$il$item_id, sigma = log(x$est$cIM), SE_sigma= x$est$se.c, fit_IM=x$est$fit.stats)
   
   inner_join(IS,I,by='item_id') %>% arrange(.data$item_id, .data$item_score) %>% as.data.frame()

@@ -4,18 +4,18 @@
 \alias{plausible_scores}
 \title{Generate plausible testscores}
 \usage{
-plausible_scores(dataSrc, predicate = NULL, parms = NULL, items = NULL,
-  covariates = NULL, keep.observed = TRUE, nPS = 1)
+plausible_scores(dataSrc, parms = NULL, predicate = NULL,
+  items = NULL, covariates = NULL, keep.observed = TRUE, nPS = 1)
 }
 \arguments{
 \item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score}
 
-\item{predicate}{an expression to filter data. If missing, the function will use 
-all data in dataSrc}
-
 \item{parms}{An object returned by function \code{fit_enorm} and containing
 parameter estimates. If parms is given the function provides plausible scores conditional on the 
 item parameters. These are considered known. If \code{parms} is \code{NULL}, Bayesian parameters are calculated from the datasrc}
+
+\item{predicate}{an expression to filter data. If missing, the function will use 
+all data in dataSrc}
 
 \item{items}{vector of item_id's, this specifies the itemset to generate the testscores for. If \code{items} is \code{NULL} 
 all items occurring in \code{dataSrc} are used.}
@@ -27,7 +27,7 @@ If dataSrc is a data.frame, it must contain the covariate.}
 \item{keep.observed}{In some cases, responses to one or more of the items have been observed. 
 The user can choose to keep these observations or generate new ones.}
 
-\item{nPS}{Number of plausible testscore to generate per person.}
+\item{nPS}{Number of plausible testscores to generate per person.}
 }
 \value{
 A data.frame with columns booklet_id, person_id, sumScore and nPS plausible scores

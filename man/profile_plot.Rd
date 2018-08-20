@@ -36,7 +36,7 @@ Profile plot
 \details{
 Profile plots can be used to investigate whether two (or more) groups of respondents 
 attain the same test score in the same way. The user must provide a  
-(meaningfull) classification of the items in two non-overlapping subsets such that 
+(meaningful) classification of the items in two non-overlapping subsets such that 
 the test score is the sum of the scores on the subsets. 
 The plot shows the probabilities to obtain 
 any combinations of subset scores with thin gray lines indicating the combinations 

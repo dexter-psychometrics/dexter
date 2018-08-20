@@ -1,12 +1,16 @@
+context('test database')
+
 library(dplyr)
+library(tibble)
 library(DBI)
 library(RSQLite)
 
 
 
-context('test database')
+
 
 expect_no_error = function(object, info=NULL) expect_error(object, regexp=NA, info=info)
+
 
 
 verbAggCopy = function(pth = '../verbAggression.db')
@@ -97,7 +101,61 @@ test_that('rule updates and sanity checks',
   
   ## less_than_two_scores
   # less than two scores is already covered above I think
-  
+  dbDisconnect(db)
 })
 
 
+test_that('adding person and item properties',
+{
+  # items
+  db = verbAggCopy()
+  
+  expect_error({add_item_properties(db,tibble(a=1,b=2))},'item_id')
+  
+  # item id "1" does not exist
+  expect_output({add_item_properties(db,tibble(Item_id=1,b=2))}, '0 items')
+  
+  expect_output({add_item_properties(db,tibble(item_id='S4DoCurse', BlAme='society', news='olds'))},
+                '2 item properties? for 1 items? added or updated', perl=TRUE)
+
+  items = get_items(db)
+  
+  expect_true(all(items %>% filter(item_id=='S4DoCurse') %>% select(blame,news) %>% unlist() == c("society", "olds" )))
+  
+  expect_output({add_item_properties(db, default_values = list(a=4L))},
+                '1 new item_properties defined')
+  
+  # can only define once
+  expect_output({add_item_properties(db, default_values = list(a=4L))},
+                '0 new item_properties defined')
+  
+  items = get_items(db)
+  
+  expect_true(all(items$a == 4) && class(items$a) == 'integer')
+  
+  #persons
+  
+  expect_error({add_person_properties(db,tibble(a=1,b=2))},'person_id')
+  
+  # person "1" does not exist
+  expect_output({add_person_properties(db,tibble(person_id=1,b=2))}, '0 persons')
+  
+  expect_output({add_person_properties(db,tibble(person_id='dxP1', gender='unchecked', news='olds'))},
+                '2 person properties? for 1 persons? added or updated', perl=TRUE)
+  
+  persons = get_persons(db)
+  
+  expect_true(all(persons %>% filter(person_id=='dxP1') %>% select(gender,news) %>% unlist() == c("unchecked", "olds" )))
+  
+  expect_output({add_person_properties(db, default_values = list(x=4L))},
+                '1 new person_properties defined')
+  
+  # can only define once
+  expect_output({add_person_properties(db, default_values = list(x=4L))},
+                '0 new person_properties defined')
+  
+  persons = get_persons(db)
+  
+  expect_true(all(persons$x == 4) && class(persons$x) == 'integer')
+  dbDisconnect(db)
+})

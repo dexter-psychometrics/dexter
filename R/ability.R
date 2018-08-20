@@ -15,16 +15,15 @@
 #' @param method   Maximum Likelihood (MLE) or Expected A posteriori (EAP) 
 #' @param prior    If an EAP estimate is produced one can choose a normal prior or
 #'                 Jeffreys prior; i.e., a prior proportional to the square root of test information.
-#' @param use_draw When parms is Bayesian (this is recognised automatically), use_draw is 
+#' @param use_draw When parms is Bayesian, use_draw is 
 #'                 the index of the posterior sample of the item 
-#'                 parameters that will be used to generating plausible values. 
+#'                 parameters that will be used for generating plausible values. 
 #'                 If use_draw=NULL, a posterior mean is used. 
 #'                 If outside range, the last iteration will be used. 
 #' @param npv Number of plausible values sampled to calculate EAP with normal prior
 #' @param mu Mean of the normal prior
 #' @param sigma Standard deviation of the normal prior
 #' @param standard_errors If true standard-errors are produced.
-#' @param person_level deprecated, always TRUE.
 #' @param asOPLM Report abilities on a scale defined by the OPLM normalization. Only when no values in parms have been fixed
 #' 
 #' @return 
@@ -56,12 +55,10 @@
 #' 
 #' 
 ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP"), prior=c("normal", "Jeffreys"), use_draw=NULL, 
-                    npv=500, mu=0, sigma=4, standard_errors=FALSE, person_level=TRUE, asOPLM=TRUE){
+                    npv=500, mu=0, sigma=4, standard_errors=FALSE,  asOPLM=TRUE){
 
-  if(!person_level)
-    stop('The person_level argument is deprecated. Use `ability_tables` to get ability estimates per test score.')
-  if(!missing(person_level))
-    message('The person_level argument is deprecated.')
+  check_arg(dataSrc, 'dataSrc')
+  check_arg(parms, 'prms')
   
   method <- match.arg(method)
   prior = match.arg(prior) 
@@ -98,11 +95,21 @@ ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP"), prior=
 ability_tables = function(parms, design = NULL, method = c("MLE","EAP"), prior=c("normal", "Jeffreys"), use_draw = NULL, 
                           npv=500, mu=0, sigma=4, standard_errors = TRUE, asOPLM=TRUE) #smooth=FALSE,
 {
+
   method = match.arg(method)
   prior = match.arg(prior) 
-  if ((method=="EAP")&(prior=="Jeffreys")) method="jEAP"
+  if (method=="EAP" && prior=="Jeffreys") method="jEAP"
+  if(method=='EAP' && prior=="normal")
+  {
+    check_arg(npv, 'integer', .length=1)
+    check_arg(mu, 'numeric', .length=1)
+    check_arg(sigma, 'numeric', .length=1)
+  }
+  check_arg(asOPLM, 'logical', .length=1)
+  check_arg(standard_errors, 'logical', .length=1)
+  check_arg(use_draw, 'integer', .length=1, nullable=TRUE)
   
-  if ((asOPLM)&(!parms$inputs$has_fixed_parms))
+  if (asOPLM && !parms$inputs$has_fixed_parms)
   {
     ff = toOPLM(parms$inputs$ssIS$item_score, parms$est$b, parms$inputs$ssI$first, parms$inputs$ssI$last)
     if (parms$inputs$method=="CML"){
@@ -133,7 +140,14 @@ ability_tables = function(parms, design = NULL, method = c("MLE","EAP"), prior=c
   
   if(is.null(design))
   {
-    design = lapply(parms$inputs$bkList, function(bk) tibble(booklet_id=bk$booklet,item_id=bk$items)) %>% bind_rows()
+    if(is.null(parms$inputs$design))
+    {
+      # old dexterMST version compatibility
+      design = lapply(parms$inputs$bkList, function(bk) tibble(booklet_id=bk$booklet,item_id=bk$items)) %>% bind_rows()
+    } else
+    {
+      design = select(parms$inputs$design, .data$booklet_id, .data$item_id)
+    }
   } else 
   {
     # clean up the design if necessary
@@ -192,6 +206,8 @@ ability_tables = function(parms, design = NULL, method = c("MLE","EAP"), prior=c
     ungroup() %>%
     as.data.frame()
 }
+
+
 
 ## Experimental: produces for unweighted scores
 theta_tables = function(parms, design = NULL, method = c("MLE","EAP"), use_draw = NULL, 

@@ -28,6 +28,9 @@ fit_enorm = function(dataSrc, predicate = NULL, fixed_params = NULL, method=c("C
 {
   method = match.arg(method)
   qtpredicate = eval(substitute(quote(predicate)))
+  check_arg(dataSrc, 'dataSrc')
+  check_arg(nIterations, 'integer', .length=1)
+  
   fit_enorm_(dataSrc, qtpredicate = qtpredicate, fixed_params = fixed_params, method=method, nIterations=nIterations, env=caller_env())
 }
 
@@ -83,22 +86,19 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
     summarise(maxTotScore = sum(.data$maxScore))
   
   # booklets 0:maxscore
-  allScores = maxScores %>% group_by(.data$booklet_id) %>%
-    do(tibble(sumScore=0:.$maxTotScore))
+  allScores = maxScores %>% 
+    group_by(.data$booklet_id) %>%
+    do(tibble(sumScore=0:.$maxTotScore)) %>%
+    ungroup()
   
-  # this seems a relic from the past, will try removing it
+  
   stb = plt %>%
-    select(.data$booklet_id, .data$sumScore, .data$N) %>%
-    distinct() %>%
+    distinct(.data$booklet_id, .data$sumScore, .data$N) %>%
     right_join(allScores, by=c('booklet_id','sumScore')) %>%
-    do({
-      .$N[is.na(.$N)]=0
-      .$booklet_id[is.na(.$booklet_id)] = .$booklet_id[!is.na(.$booklet_id)][1]
-      as.data.frame(.)
-    }) %>%
-    select(.data$booklet_id, .data$sumScore, .data$N) %>%
+    mutate(N=coalesce(.data$N, 0L)) %>%
     arrange(.data$booklet_id, .data$sumScore)
   
+
   ssIS = ssBIS %>% 
     group_by(.data$item_id, .data$item_score) %>%
     summarise(sufI = sum(.data$sufI)) %>%
@@ -114,32 +114,32 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
   
   if(any(ssI$nCat == 1)) stop('One or more items are without score variation')
   
+  design = design %>%
+    inner_join(ssI,by='item_id') %>%
+    arrange(.data$booklet_id, .data$first)
+  
   # persons per booklet
-  m = x  %>% 
-    group_by(.data$booklet_id)  %>% 
-    summarise(m = n_distinct(.data$person_id))
+  # m = x  %>% 
+  #   group_by(.data$booklet_id)  %>% 
+  #   summarise(m = n_distinct(.data$person_id)) %>%
+  #   ungroup() %>%
+  #   arrange(.data$booklet_id)
   
   a = ssIS$item_score
   
-  
-  bkl = lapply(m$booklet_id, function(x) 
-  {
-    itInBk = design$item_id[design$booklet_id==x] 
-    items = ssI$item_id[ssI$item_id %in% itInBk]
-    m = m$m[m$booklet_id==x]
-    first = ssI$first[match(items, ssI$item_id)]
-    last =  ssI$last[match(items, ssI$item_id)]
-    list(booklet=x, items=items, m=m, first=first, last=last, 
-         score=stb$sumScore[stb$booklet_id==x], 
-         scoretab=stb$N[stb$booklet_id==x], 
-         lambda=rep(1,sum(a[last])+1))
-  })
-  
-  names(bkl) = m$booklet_id
-  
-  itemList = lapply(ssI$item_id, function(x) design$booklet_id[design$item_id==x])
-  
-  itemListInt = lapply(itemList, function(x) match(x,m$booklet_id))
+  bkl = lapply(split(design,design$booklet_id),
+    function(bkd)
+    {
+        booklet_id = bkd$booklet_id[1]
+        scoretab = stb$N[stb$booklet_id==booklet_id]
+        list(booklet_id=booklet_id,
+             first=bkd$first,
+             last=bkd$last,
+             scoretab = scoretab,
+             m=sum(scoretab),
+             lambda=rep(1,length(scoretab)))
+    })
+
   
   it_sc_lab = paste0(ssIS$item_id[-ssI$first], "_",ssIS$item_score[-ssI$first])
   
@@ -153,17 +153,28 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
     has_fixed_parms = TRUE
     if(inherits(fixed_params,'prms'))
     {
-      #TO DO: if bayes -> colmeans
       #normalize to OPLM
       tmp = toOPLM(fixed_params$inputs$ssIS$item_score, fixed_params$est$b,fixed_params$inputs$ssI$first,fixed_params$inputs$ssI$last)
       fixed_params$est$b = toDexter(tmp$delta, tmp$a, tmp$first, tmp$last, re_normalize = FALSE)$est$b
       
-      fixed_b = (
-        fixed_params$inputs$ssIS %>%
-          add_column(b=fixed_params$est$b) %>%
-          right_join(ssIS, by=c('item_id','item_score')) %>%
-          arrange(.data$item_id,.data$item_score)
-      )$b
+      if (fixed_params$inputs$method=="CML")
+      {
+        fixed_b = (
+          fixed_params$inputs$ssIS %>%
+            add_column(b=fixed_params$est$b) %>%
+            right_join(ssIS, by=c('item_id','item_score')) %>%
+            arrange(.data$item_id,.data$item_score)
+        )$b
+      }else ## If fixed parms object is Bayesian we take colMeans
+      {
+        fixed_b = (
+          fixed_params$inputs$ssIS %>%
+            add_column(b=colMeans(fixed_params$est$b)) %>%
+            right_join(ssIS, by=c('item_id','item_score')) %>%
+            arrange(.data$item_id,.data$item_score)
+        )$b
+        warning("Posterior means are taken as values of fixed parameters")
+      }
     } else
     {
       # transform the oplmlike fixed params to the parametrization dexter uses internally
@@ -246,8 +257,17 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
     rownames(result$acov.cml)=it_sc_lab
     colnames(result$acov.cml)=it_sc_lab
   } else {
-
+    #itemList = lapply(ssI$item_id, function(x) design$booklet_id[design$item_id==x])
+    #itemListInt = lapply(itemList, function(x) match(x,m$booklet_id))
+    
+    design = design %>%
+      mutate(bn=dense_rank(.data$booklet_id)) %>%
+      arrange(.data$first, .data$bn)
+    
+    itemListInt = split(design$bn, design$item_id)
+    
     b = exp(runif(nrow(ssIS), -1, 1))
+    
     result = try(calibrate_Bayes(itemList=itemListInt, booklet=bkl, sufI=ssIS$sufI, b=b, a=a, 
                                  first=ssI$first, last=ssI$last, nIter=nIterations,
                                  fixed_b=fixed_b))
@@ -256,15 +276,129 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
   }
   if (inherits(result, "try-error")) stop('Calibration failed')
   
+  abl_tables = new.env(parent = emptyenv())
+  abl_tables$mle = NULL
+  
   outpt = list(est=result, 
-               inputs=list(bkList=bkl, ssIS=ssIS, ssI=ssI, 
-                           stb=stb, method=method, has_fixed_parms = has_fixed_parms), 
-               xpr=as.character(qtpredicate))
+               inputs=list(bkList=bkl, ssIS=ssIS, ssI=ssI, design=r$design,plt=plt,#stb=stb,
+                            method=method, has_fixed_parms = has_fixed_parms), 
+               abl_tables = abl_tables,
+               xpr=deparse(qtpredicate))
   class(outpt) = append('prms', class(outpt)) 
   outpt
 }
 
 
+
+enorm_exp = Vectorize(
+  function(theta, alpha, beta)
+  {
+    m = length(beta)
+    dnm = 1
+    nm = 0
+    for (j in 1:m)
+    {
+      nm = nm + alpha[j]*exp(alpha[j]*theta - sum(beta[1:j]))
+      dnm = dnm + exp(alpha[j]*theta - sum(beta[1:j]))
+    }
+    nm/dnm
+  },
+  vectorize.args = 'theta')
+
+
+
+#' Plot for the extended nominal Response model
+#' 
+#' The plot shows 'fit' by comparing the expected score based on the model (grey line)
+#' with the average scores based on the data (black line with dots) for groups of students
+#' with similar estimated ability.
+#' 
+#' @param x object produced by fit_enorm
+#' @param item_id which item to plot, if NULL, one plot for each item is made
+#' @param nbins number of ability groups
+#' @param ci confidence interval for the error bars, between 0 and 1. 0 means no error bars.
+#' Default = 0.95 for a 95\% confidence interval
+#' @param ... further arguments to plot
+#' 
+#' @method plot prms
+#' 
+plot.prms = function(x,item_id=NULL, nbins=5, ci = .95, ...)
+{
+  if(is.null(x$inputs$plt))
+  {
+    if(inherits(x,'mst_enorm')) stop('Sorry, the plot method for enorm_mst will only be supported in dexterMST from version 0.1.1 onwards')
+    stop('Sorry, the plot method is only available for parameters objects produced with dexter 0.8.1 or later')
+  }
+  
+  # if no item id provided plot them all
+  if(is.null(item_id))
+    item_id = x$inputs$ssI$item_id
+
+  if(is.null(x$abl_tables$mle))
+    x$abl_tables$mle = ability_tables(x, standard_errors=FALSE, method='MLE')
+  
+  if(length(item_id) > 1)
+  {
+    for(item in item_id) plot(x, item_id=item, nbins=nbins, ci=ci, ...)
+    
+    return(invisible(NULL))
+  }
+  # for dplyr
+  item_id_ = item_id
+  
+  
+  cf = filter(coef(x), .data$item_id==item_id_)
+  if(x$inputs$method == 'Bayes')
+    cf$beta = cf$mean_beta
+  max_score = max(cf$item_score)
+  
+  plt = x$inputs$plt %>%
+    filter(.data$item_id==item_id_) %>%
+    inner_join(x$abl_tables$mle, by=c('booklet_id','sumScore')) %>%
+    filter(is.finite(.data$theta)) %>%
+    mutate(abgroup = weighted_ntile(.data$theta, .data$N, n = nbins)) %>%
+    group_by(.data$abgroup) %>%
+    summarize(gr_theta = weighted.mean(.data$theta,.data$N), avg_score = weighted.mean(.data$meanScore,.data$N), n=sum(.data$N)) %>%
+    ungroup() %>%
+    mutate(expected_score = enorm_exp(.data$gr_theta, cf$item_score, cf$beta))
+  
+  rng = max(plt$gr_theta) - min(plt$gr_theta)
+  rng = c(min(plt$gr_theta)-.5*rng/nbins,
+          max(plt$gr_theta)+.5*rng/nbins)
+  
+  plot.args = merge_arglists(list(...),
+                             default=list(bty='l',xlab = expression(theta), ylab='score',main=item_id),
+                             override=list(x = rng,y = c(0,max_score), type="n"))
+  
+  plot.args$main = fstr(plot.args$main, list(item_id=item_id))
+  plot.args$sub = fstr(plot.args$sub, list(item_id=item_id))
+  
+  do.call(plot, plot.args)
+  lines(plt$gr_theta,plt$expected_score, col='grey80') 
+  
+  if(!is.null(ci) && !is.na(ci) && ci !=0)
+  {
+    if(ci>1)
+    {
+      if(ci<100) ci = ci/100
+    }  
+    if(ci<0 || ci >= 1)
+      stop('confidence interval must be between 0 and 1')
+    
+    qnt = abs(qnorm((1-ci)/2))
+    
+    cmin = function(p, n) pmax(0, p - qnt * sqrt(p*(1-p)/n))
+    cmax = function(p, n) pmin(1, p + qnt * sqrt(p*(1-p)/n))
+    
+    arrows(plt$gr_theta, max_score*cmin(plt$expected_score/max_score, plt$n), 
+           plt$gr_theta, max_score*cmax(plt$expected_score/max_score, plt$n), 
+           length=0.05, angle=90, code=3, col='grey80')
+  }
+  
+  lines(plt$gr_theta,plt$avg_score)  
+  points(plt$gr_theta, plt$avg_score)
+  invisible(NULL)
+}
 
 
 

@@ -5,7 +5,7 @@
 \title{The probability to pass on a reference test given a score on a new booklet}
 \usage{
 probability_to_pass(dataSrc, ref_items, pass_fail, design = NULL,
-  predicate = NULL)
+  predicate = NULL, similar_groups = TRUE)
 }
 \arguments{
 \item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score and booklet_id}
@@ -19,6 +19,10 @@ if NULL (default) this will be derived from the dataSrc and the probability to p
 for each test score for each booklet in your data.}
 
 \item{predicate}{An optional expression to subset data in dataSrc, if NULL all data is used}
+
+\item{similar_groups}{When TRUE it is assumed that candidates taking the reference test and the target tests are similar 
+in ability. If they are similar, the score distribution on the target test is estimated more precisely. 
+Works only when design contains booklet_id's.}
 }
 \value{
 An object of type p2pass. Use \code{coef()} to extract the 
@@ -55,5 +59,5 @@ where:
    \item{\ifelse{html}{\out{<i>X<sub>+</sub></i>}}{\eqn{X_+}}}{is the score on the booklet}
    \item{\eqn{x}}{are the observed data}
  }
-This probability can be used to establish a pass-fail score for the new booklet
+This probability can be used to establish a pass-fail score for the new booklet.
 }

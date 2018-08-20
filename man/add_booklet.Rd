@@ -2,40 +2,44 @@
 % Please edit documentation in R/dexter.R
 \name{add_booklet}
 \alias{add_booklet}
-\title{Add a booklet to a project}
+\alias{add_response_data}
+\title{Add response data to a project}
 \usage{
 add_booklet(db, x, booklet_id, auto_add_unknown_rules = FALSE)
+
+add_response_data(db, data, auto_add_unknown_rules = FALSE,
+  missing_value = "NA")
 }
 \arguments{
 \item{db}{A handle to the database, i.e. the output of \code{start_new_project}
 or \code{open_project}}
 
 \item{x}{A data frame containing the responses and, optionally,
-person person_properties. The data.frame should have one row per respondent and the column names should 
+person_properties. The data.frame should have one row per respondent and the column names should 
 correspond to the item_id's in the rules or the names of the person_properties. See details.}
 
 \item{booklet_id}{A (short) string identifying the test form (booklet)}
 
 \item{auto_add_unknown_rules}{If FALSE (the default), an error will be generated if 
-some of the responses do not appear in the scoring rules.}
+one or more responses do not appear in the scoring rules. If TRUE, unknown responses will be
+assumed to have a score of 0.}
+
+\item{data}{response data in normalized (long) format. Must contain columns \code{person_id}, \code{booklet_id},
+ \code{item_id} and \code{response} and optionally \code{item_position} 
+(useful if your data contains new booklets, see details)}
+
+\item{missing_value}{value to use for responses in missing rows in your data, see details}
 }
 \value{
-A list of: \item{items}{The names of the columns in \code{x} that were
-treated as items}
-\item{person_properties}{The names of the columns in \code{x} that were
-treated as person properties}
-\item{not_listed}{A data frame of all responses that will be treated as missing}
+A list with information about the recent import.
 }
 \description{
-Adds item response data for a test form (a.k.a. booklet)
+Add item response data in long or wide format
 }
 \details{
 It is a common practice to keep respons data in tables where each row 
-contains the responses from a single person. This function is provided to input
-data in that form, one booklet at a time. The starting point is a data frame.
-Getting the data frame into R is left to the user. We have found packages
-\code{readxl} to be very good at reading Excel sheets, and \code{haven} quite
-efficient with SPSS files.
+contains the responses from a single person. \code{add_booklet} is provided to input
+data in that form, one booklet at a time. 
 
 If the dataframe \code{x} contains a variable named \code{person_id} this variable 
 will be used to identify unique persons. It is assumed that a single person will only 
@@ -46,14 +50,28 @@ If a person_id is not supplied, dexter will generate unique person_id's for each
 Any column whose name has an exact match in the scoring rules inputted with
 function \code{start_new_project} will be treated as an item; any column whose name has an 
 exact match in the person_properties will be treated as a person property. If a name matches both
-a person property and an item, the item takes precedence. Columns other than items, person properties 
+a person_property and an item, the item takes precedence. Columns other than items, person properties 
 and person_id will be ignored.
 
-If \code{auto_add_unknown_rules=TRUE}, any responses to an item that do not have an 
-exact match in the scoring rules will be automatically given the lowest score of 0. 
-To score missing data differently, 
-or simply abide to good style, the user can include explicit entries for missing value
-indicators in the scoring rules. Note that responses are always treated as strings, and \code{NA}
+
+\code{add_response_data} can be used to add data that is already 'normalized'. This function takes a 
+data.frame in long format with columns \code{person_id}, \code{booklet_id}, 
+\code{item_id} and \code{response} such as can usually be found in databases for example. 
+The first time a new booklet is encountered, 
+the design (i.e. which items are contained in each booklet at each position) is derived
+from \code{data}. In this case it is useful if you specify an extra column named \code{item_position},
+otherwise dexter will generate the item_positions automatically in some way that may not reflect your actual design 
+(of course, if the item positions in your tests are randomized, that is not a problem).
+ 
+If there are missing rows (e.g. there are only 9 rows for a person-booklet where the booklet should contain 10 items)  
+ \code{missing_value} will be used for the omitted responses. This can lead to an error in case \code{missing_value}
+is not defined in your rules and \code{auto_add_unknown_rules} is set to FALSE (the default). Please also note
+that the booklet_design for any specific booklet is derived from the distinct combination of booklet_id and item_id
+in \code{data} the first time that booklet is encountered. If subsequent calls to \code{add_response_data} 
+contain data with more/different items for this same booklet, this will cause an error. 
+
+
+Note that responses are always treated as strings (in both functions), and \code{NA}
 values are transformed to the string \code{"NA"}.
 }
 \examples{

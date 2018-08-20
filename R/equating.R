@@ -20,6 +20,9 @@
 #' @param design A data.frame with columns booklet_id (if multiple booklets) and item_id defining the target test booklet(s), 
 #' if NULL (default) this will be derived from the dataSrc and the probability to pass will be computed 
 #' for each test score for each booklet in your data.
+#' @param similar_groups When TRUE it is assumed that candidates taking the reference test and the target tests are similar 
+#' in ability. If they are similar, the score distribution on the target test is estimated more precisely. 
+#' Works only when design contains booklet_id's.
 #' 
 #' @return An object of type p2pass. Use \code{coef()} to extract the 
 #' probablity to pass for each booklet and score. Use \code{plot()} to plot 
@@ -47,16 +50,14 @@
 #'    \item{\ifelse{html}{\out{<i>X<sub>+</sub></i>}}{\eqn{X_+}}}{is the score on the booklet}
 #'    \item{\eqn{x}}{are the observed data}
 #'  }
-#' This probability can be used to establish a pass-fail score for the new booklet     
+#' This probability can be used to establish a pass-fail score for the new booklet.     
 #'    
-probability_to_pass = function(dataSrc, ref_items, pass_fail, design = NULL, predicate = NULL)
+probability_to_pass = function(dataSrc, ref_items, pass_fail, design = NULL, predicate = NULL, similar_groups = TRUE)
 {
   # optionally these can become extra parameters
-  population = "new" # choice between new and all
   est_method = "Bayes"
-  nIterations = 3000
+  nIterations = 500 ## number over which we average
   include_theta = TRUE
-  use_whole_prior = FALSE
   ##
  
   qtpredicate = eval(substitute(quote(predicate)))
@@ -80,7 +81,13 @@ probability_to_pass = function(dataSrc, ref_items, pass_fail, design = NULL, pre
       design$booklet_id = 'target booklet'
   }
   
-  f = fit_enorm(respData, method=est_method, nIterations = nIterations)
+  # Use all available data to estimate the item parameters
+  f = fit_enorm(respData, method=est_method, nIterations = 5*nIterations)
+  
+  # Now reduce data 
+  items_rel = union(ref_items$item_id, design$item_id)
+  bkl_rel = respData$design %>% inner_join(tibble(item_id=items_rel),by='item_id') %>% distinct(.data$booklet_id)
+  respData = semi_join(respData, bkl_rel, by='booklet_id')
   
   ref_ssI = f$inputs$ssI %>% 
     semi_join(ref_items, by = 'item_id') %>% 
@@ -89,9 +96,10 @@ probability_to_pass = function(dataSrc, ref_items, pass_fail, design = NULL, pre
   ref_first = pull(ref_ssI, 'first')
   ref_last = pull(ref_ssI, 'last')
   
-  pv_new = plausible_values(respData, f)
-  new_mu=mean(pv_new$PV1)
-  new_sigma=sd(pv_new$PV1)
+  # Get mean and sd of ability in sample
+  ab=ability(respData, f, method="ML", asOPLM = FALSE) 
+  new_mu = mean(ab$theta[is.finite(ab$theta)])
+  new_sigma = sd(ab$theta[is.finite(ab$theta)])
   
   bkl = unique(pull(design,'booklet_id'))
   bk_results = lapply(bkl, function(booklet)
@@ -104,23 +112,37 @@ probability_to_pass = function(dataSrc, ref_items, pass_fail, design = NULL, pre
     new_first = pull(ssI,'first')
     new_last = pull(ssI,'last')
     
-    # here to add whether per booklet or for population
-    p_new = plausible_scores(respData, parms=f, items = pull(dsg, 'item_id')) %>%
-      group_by(.data$PS1) %>%
-      summarise(n = as.integer(n())) %>%
-      ungroup() %>%
-      full_join(tibble(PS1 = as.integer(0:sum(a[ssI$last]))), by='PS1') %>%
-      mutate(n = coalesce(n,0L)/sum(n, na.rm=TRUE)) %>%
-      pull(.data$n)
+    if ((similar_groups)|(booklet=='target booklet'))
+    {
+      p_new = plausible_scores(respData, parms=f, items = pull(dsg, 'item_id')) %>%
+        group_by(.data$PS1) %>%
+        summarise(n = as.integer(n())) %>%
+        ungroup() %>%
+        full_join(tibble(PS1 = as.integer(0:sum(a[ssI$last]))), by='PS1') %>%
+        mutate(n = coalesce(n,0L)/sum(n, na.rm=TRUE)) %>%
+        pull(.data$n)
+    }else
+    {
+        rel_bkl = respData$design %>% filter(.data$booklet_id==booklet)
+        rel_resp = semi_join(respData, rel_bkl, by='booklet_id')
+        p_new = plausible_scores(rel_resp, parms=f, items = pull(dsg, 'item_id')) %>%
+          group_by(.data$PS1) %>%
+          summarise(n = as.integer(n())) %>%
+          ungroup() %>%
+          full_join(tibble(PS1 = as.integer(0:sum(a[ssI$last]))), by='PS1') %>%
+          mutate(n = coalesce(n,0L)/sum(n, na.rm=TRUE)) %>%
+          pull(.data$n)
+    }
     
+    iter_set = seq(5, 5*nIterations, by=5)
     if (est_method == "Bayes")
     {
-      iter_set = seq(5, nIterations, by=5)
       probs = matrix(0, sum(a[ssI$last])+1, length(iter_set))
       ref_range = (pass_fail:sum(a[ref_ssI$last])) + 1
       eq_score = rep(NA, length(iter_set))
       
       tel = 1
+      pb = txtProgressBar(min=0, max=length(iter_set))
       for (iter in iter_set)
       {
         if (include_theta)
@@ -128,15 +150,11 @@ probability_to_pass = function(dataSrc, ref_items, pass_fail, design = NULL, pre
           ref_theta = theta_MLE(b[iter,],a, ref_first, ref_last)$theta[pass_fail+1]
           eq_score[tel] = min(which(theta_MLE(b[iter,],a, new_first, new_last)$theta >= ref_theta))-1 
         }
-        if (use_whole_prior){
-          spv = recycle_pv(b[iter,], a, new_first, new_last, npv=1, prior_sample = pv_new$PV1)
-        }else
-        {
-          spv = recycle_pv(b[iter,], a, new_first, new_last, npv=1, mu=new_mu, sigma=new_sigma)
-        }
+        spv = recycle_pv(b[iter,], a, new_first, new_last, npv=1, mu=new_mu, sigma=new_sigma)
         prf = apply(spv,1, function(x)pscore(x,b[iter,],a,ref_first,ref_last)) 
         probs[,tel] = apply(prf, 2, function(x)sum(x[ref_range]))
-        tel=tel+1  
+        tel=tel+1
+        setTxtProgressBar(pb, value=tel)
       }
     } else
     {
@@ -146,19 +164,17 @@ probability_to_pass = function(dataSrc, ref_items, pass_fail, design = NULL, pre
       eq_score = min(which(theta_MLE(b,a,new_first,new_last)$theta >= ref_theta))-1 
       
       tel=1
+      pb = txtProgressBar(min=0, max=nIterations)
       for (iter in 1:nIterations)
       {
-        if (use_whole_prior){
-          spv = recycle_pv(b, a, new_first, new_last, npv=1, prior_sample = pv_new$PV1)
-        }else
-        {
-          spv = recycle_pv(b, a, new_first, new_last, npv=1, mu=new_mu, sigma=new_sigma)
-        }
+        spv = recycle_pv(b, a, new_first, new_last, npv=1, mu=new_mu, sigma=new_sigma)
         prf = apply(spv,1, function(x)pscore(x,b,a,ref_first,ref_last)) 
         probs[,tel] = apply(prf, 2, function(x)sum(x[ref_range]))
         tel=tel+1  
+        setTxtProgressBar(pb, value=tel)
       }
     }
+    close(pb)
     
     p_pass_given_new = rowMeans(probs) #unlist(rowMeans(probs), use.names = F)
     ## additional
@@ -276,7 +292,7 @@ plot.p2pass = function(x, ..., booklet_id=NULL, what = c('both','equating','sens
     {
       # sens/spec plot
       dflt = list(xlab = paste("score on", bkl),main="Sensitivity/Specificity", ylab = "sens./spec.",
-                  pch = 16, bty='l',col='#1a9641')
+                  pch = 16, ylim=c(0,1), bty='l',col='#1a9641')
       ovr = list(x = bk_results[[bkl]]$properties$score_new, 
                  y = bk_results[[bkl]]$properties$sensitivity,
                  type="o")

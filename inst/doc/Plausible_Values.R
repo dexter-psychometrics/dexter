@@ -1,5 +1,16 @@
 ## ----setup, include=FALSE------------------------------------------------
-knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+opts_chunk$set(echo = TRUE)
+
+par_hook = function(before, options, envir)
+{
+  if(before)
+  {
+    do.call(par, options$par)
+  }
+}
+knit_hooks$set(par = par_hook)
+
 library(dexter)
 
 ## ------------------------------------------------------------------------
@@ -43,7 +54,7 @@ theta = rnorm(300)
 delta = runif(50, -2, 1)
 sim_PV(theta, delta)
 
-## ----fig.align='center', results='hide', fig.width=7---------------------
+## ----fig.align='center', results='hide', fig.width=7,par=list(mfrow=c(1,1))----
 grp = sample(2, 300, replace = TRUE, prob = c(.5,.5))
 theta = rnorm(300, mean = c(-2,2)[grp], sd = c(1,1)[grp])
 plot(density(theta),bty='l',main='')
@@ -51,7 +62,6 @@ par(mfrow=c(1,3))
 sim_PV(theta, delta[1:10])
 sim_PV(theta, delta[1:20])
 sim_PV(theta, delta)
-par(mfrow=c(1,1))
 
 ## ------------------------------------------------------------------------
 sim_PV2 = function(theta, delta) {
@@ -66,14 +76,12 @@ sim_PV2 = function(theta, delta) {
   lines(ecdf(theta-mean(theta)))
 }
 
-## ----make_pv2, results='hide',fig.align='center',fig.width=7-------------
-par(mfrow=c(1,3))
+## ----make_pv2, results='hide',fig.align='center',fig.width=7, par=list(mfrow=c(1,3))----
 sim_PV2(theta, delta[1:10])
 sim_PV2(theta, delta[1:20])
 sim_PV2(theta, delta)
-par(mfrow=c(1,1))
 
-## ----make_pv3, results='hide',fig.align='center',fig.width=7-------------
+## ----make_pv3, results='hide',fig.align='center',fig.width=7,par=list(mfrow=c(1,3))----
 sim_Rasch2 = function(theta, delta,group) {
   n = length(theta)
   m = length(delta)
@@ -95,7 +103,7 @@ sim_PV3 = function(theta, delta, group) {
   invisible(NULL)
 }
 
-par(mfrow=c(1,3))
+
 sim_PV3(theta, delta[1:10],grp)
 sim_PV3(theta, delta[1:20],grp)
 sim_PV3(theta, delta,grp)

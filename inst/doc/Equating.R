@@ -111,9 +111,12 @@ add_booklet(db_sm, x=x2, "bk2")
 ref_items = paste0("i",1:40)
 new_booklet = "bk2"
 pass_fail = 23
+target_items = colnames(x2)
 
 ## ---- message=FALSE, fig.align='center', results='hide',fig.height=4,fig.width=4----
-ou_e = probability_to_pass(db_sm, ref_items=ref_items, design=tibble(booklet_id="bk2", item_id=colnames(x2)[2:length(colnames(x2))]), pass_fail=pass_fail)
+ou_e = probability_to_pass(db_sm, ref_items = ref_items, 
+                                  design = tibble(booklet_id="bk2", item_id=target_items), 
+                                  pass_fail = pass_fail)
 plot(ou_e, what="equating")
 
 ## ---- echo=TRUE, fig.align='center', results='hide', fig.height=4, fig.width=4----

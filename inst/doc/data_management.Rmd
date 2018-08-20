@@ -84,7 +84,7 @@ boxplot(situation_score ~ situation, scores, border='black')
 
 
 
-## Using predicate expressions
+## Selecting data
 
 Dexter keeps all scoring rules separately from response data, and applies them just before analysis. Together with the powerful techniques for quality analysis, from classical test statistics over distractor plots to the interaction model, this should allow users to detect and correct any items that have a technical flaw, such as a wrong key, which can be corrected with the function `touch_rules()`.
 

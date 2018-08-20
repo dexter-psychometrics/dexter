@@ -7,7 +7,7 @@
 #'
 #' @param export_name path to a new 3DC database
 #' @return a handle to the 3DC sqlite database
-#' @details The data driven direct concensus (3DC) method of standard setting  is described in Keuning et. al. (2017).
+#' @details The data driven direct consensus (3DC) method of standard setting  is described in Keuning et. al. (2017).
 #' To easily apply this procedure, we advise to use the free digital 3DC application. This application 
 #' can be downloaded from the Cito website, see the 
 #' \href{http://www.cito.com/our-expertise/implementation/3dc}{3DC application download page}. 
@@ -77,24 +77,24 @@ create3DC = function(export_name)
 #'
 #' @param db3dc 3dc database handle
 #' @param parms a parameters object produced by fit_enorm
-#' @param design a data.frame with columns item_id and cluster and optionally cluster_nbr and item_nbr. See details.
+#' @param design a data.frame with columns item_id, cluster and optionally cluster_nbr (used for sorting the clusters) 
+#' and item_nbr (used for sorting items within cluster). 
 #' @param test_id name/id of the test as it will be shown in the 3DC application.
 #' @param standards vector of standards to be set
 #' @param mu expected ability in population, used for scaling of the clusters
 #' @param sigma expected standard deviation of ability in population, used for scaling of the clusters
-#' @param population optionally a data.frame with columns test_score and frequency to use for visualisation in 3DC 
+#' @param population optionally a data.frame with columns test_score and frequency to use for visualization in 3DC 
 #' application. If NULL, the distribution will be derived from a simulation.
 #' @param group_leader Login name of the group leader, default is admin. The default password is always
 #' admin, but can be changed in the 3DC application.
-#' @param omit the tail probability of the testscores to be omitted. For example, if set to 0.1, 
+#' @param omit the tail probability of the testscores to be omitted from the 3DC form. For example, if set to 0.1, 
 #' the 10% highest and the 10% lowest scores will be omitted thus restricting the range on which standards can be set.
-#' Default is 0.0 (omit nothing)
+#' The Default is 0.0 (omit nothing)
 #'
 add_test3DC = function(db3dc, parms, design, test_id, standards, mu, sigma, 
                         population = NULL, group_leader = 'admin', omit = 0.0)
 {
-
-  # prevent stupid dplyr warnings
+  
   design$item_id = as.character(design$item_id)
   design$cluster = as.character(design$cluster)
   
@@ -135,7 +135,11 @@ add_test3DC = function(db3dc, parms, design, test_id, standards, mu, sigma,
   
   cl_scores = as_tibble(sapply(unique(design$cluster), function(cl)
   {
-    rowSums(x[,design[design$cluster==cl,]$item_id])
+    if(length(design[design$cluster==cl,]$item_id) > 1) {
+      rowSums(x[,design[design$cluster==cl,]$item_id])
+    } else {
+      x[,design[design$cluster==cl,]$item_id]
+    }
   }, simplify = FALSE, USE.NAMES = TRUE))
   rm(x)
   cl_scores$test_score = rowSums(cl_scores)

@@ -58,18 +58,26 @@ qcolors = function(n, pal='Set1')
 #' @param nr An integer between 1 and 3. Number of rows when putting mutiple plots
 #' on the same page. Default is 1. May be ignored or adjusted if it does not make sense.
 #' @param legend logical, whether to include the legend. default is TRUE
+#' @param curtains 100*the tail probability of the sum scores to be shaded. Default is 10.
+#' Set to 0 to have no curtains shown at all.
 #' @param ... further arguments to plot.
 #' @details 
-#' Customisation of title and subtitle can be done by using the arguments main and sub. 
+#' Customization of title and subtitle can be done by using the arguments main and sub. 
 #' These arguments can contain references to the variables item_id, booklet_id, item_position(only if dataSrc is a dexter db),
 #' pvalue, rit and rir. References are made by prefixing these variables with a dollar sign. Variable names may be postfixed 
 #' with a sprintf style format string, e.g. 
 #' \code{distractor_plot(db, main='item: $item_id', sub='Item rest correlation: $rir:.2f')}
 #' 
-distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1, legend = TRUE, ...){  
+distractor_plot <- function(dataSrc, item, predicate=NULL, nc=1, nr=1, legend=TRUE, curtains=10, ...){  
+  
+  old_par = par(no.readonly = TRUE)
+  
+  on.exit({par(old_par)})
+  
+  
   qtpredicate = eval(substitute(quote(predicate)))
   
-  if(is.null(qtpredicate) & inherits(dataSrc,'DBIConnection'))
+  if(is.null(qtpredicate) && inherits(dataSrc,'DBIConnection'))
   {
     # cheat a little to make things faster
     qtpredicate = quote(booklet_id %in% booklets)
@@ -100,8 +108,7 @@ distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1, legend 
   rsp_counts = respData$x %>%
     group_by(.data$booklet_id, .data$response, .data$item_score, .data$sumScore) %>%
     summarise(n = n()) %>% 
-    ungroup()
-  
+    ungroup() 
 
   rsp_colors = rsp_counts %>%
     group_by(.data$response) %>%
@@ -113,14 +120,17 @@ distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1, legend 
   
   max_score = max(rsp_counts$item_score)
   # statistics by booklet
+  # join with design gets item position
   stats = respData$x %>%
     group_by(.data$booklet_id) %>% 
     summarise(pvalue = mean(.data$item_score)/max_score, 
               rit = cor(.data$item_score, .data$sumScore), 
-              rir = cor(.data$item_score, .data$sumScore - .data$item_score)) %>%
+              rir = cor(.data$item_score, .data$sumScore - .data$item_score),
+              n_book = n()) %>%
     ungroup() %>%
     inner_join(respData$design, by='booklet_id') %>%
     arrange(.data$booklet_id)
+    
 
   npic = nrow(stats)
   ly = my_layout(npic, nr, nc)
@@ -129,7 +139,9 @@ distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1, legend 
   
   rsp_counts = split(rsp_counts, rsp_counts$booklet_id)
 
+  # n>1 is bugfix, density needs at least two values
   stats %>%
+    filter( .data$n_book > 1 ) %>%
     rowwise() %>%
     do({
       st = as.list(.)
@@ -143,35 +155,48 @@ distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1, legend 
       plot.args$main = fstr(plot.args$main, st)
       plot.args$sub = fstr(plot.args$sub, st)
 
-      do.call(plot, plot.args)
-
       bkl_scores = y %>% 
         group_by(.data$sumScore) %>% 
         summarise(n = sum(.data$n)) %>%
         ungroup() %>%
         arrange(.data$sumScore)
       
+      qua = curtains/200
+      qnt=NULL
+      if(qua>0 && qua<.5) {
+        qnt = quantile(rep(as.integer(bkl_scores$sumScore), bkl_scores$n), c(qua,1-qua))
+      }
+
+      do.call(plot, plot.args)
+      draw_curtains(qnt)
+      
       dAll = density(bkl_scores$sumScore, n = 51, weights = bkl_scores$n/sum(bkl_scores$n))
       N = sum(bkl_scores$n)
       
       # this generates the legend and has the  side effect of drawing the lines in the plot
-      lgnd = y %>% group_by(.data$response)  %>% do({
-        k = rsp_colors[rsp_colors$response == .$response[1],]$color
-
-        dxi = density(.$sumScore, n = 51, weights = .$n/sum(.$n), 
-                      bw = dAll$bw, from = min(dAll$x), to = max(dAll$x))
-        yy = dxi$y/dAll$y * sum(.$n)/N
-        graphics::lines(dAll$x, yy, co = k, lw = 2)
-        tibble(col = k, resp = paste0(.$response[1]," (", .$item_score[1], ")"))
-      })
+      # filter(n() > 1)  is bugfix, density needs at least two values
+      lgnd = y %>% 
+        group_by(.data$response)  %>% 
+        filter(n() > 1) %>%
+        do({
+          k = rsp_colors[rsp_colors$response == .$response[1],]$color
+    
+          dxi = density(.$sumScore, weights = .$n/sum(.$n),   n = 51,
+                          bw = dAll$bw, from = min(dAll$x), to = max(dAll$x))
+          yy = dxi$y/dAll$y * sum(.$n)/N
+          graphics::lines(dAll$x, yy, co = k, lw = 2)
+          tibble(col = k, resp = paste0(.$response[1]," (", .$item_score[1], ")"))
+     
+        })
+      
       if(legend)
       {
         graphics::legend("right", legend = as.character(lgnd$resp), 
                          lty = 1, col = lgnd$col, cex = 0.8,lwd=2, box.lty = 0)
       }
-      data.frame()
+      tibble()
     })
-  if(nc>1 || nr>1) par(mfrow=c(1,1))
+
   invisible(NULL)
 }
 
@@ -194,7 +219,7 @@ distractor_plot <- function(dataSrc, item, predicate = NULL, nc=1, nr=1, legend 
 #' @details 
 #' Profile plots can be used to investigate whether two (or more) groups of respondents 
 #' attain the same test score in the same way. The user must provide a  
-#' (meaningfull) classification of the items in two non-overlapping subsets such that 
+#' (meaningful) classification of the items in two non-overlapping subsets such that 
 #' the test score is the sum of the scores on the subsets. 
 #' The plot shows the probabilities to obtain 
 #' any combinations of subset scores with thin gray lines indicating the combinations 

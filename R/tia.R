@@ -65,14 +65,17 @@ tia_tables <- function(dataSrc, predicate = NULL, type=c('raw','averaged','compa
                      },
                      compared={
                        list(
-                         pvalue = ti %>% select(.data$booklet_id,.data$item_id,.data$pvalue) %>% 
-                                    spread_(key_col='booklet_id',value_col='pvalue'),
+                         pvalue = ti %>% 
+							select(.data$booklet_id,.data$item_id,.data$pvalue) %>% 
+                            spread(key=.data$booklet_id, value=.data$pvalue),
                          
-                         rit = ti %>% select(.data$booklet_id,.data$item_id,.data$rit) %>% 
-                                 spread_(key_col='booklet_id',value_col='rit'),
+                         rit = ti %>% 
+							select(.data$booklet_id,.data$item_id,.data$rit) %>% 
+                            spread(key=.data$booklet_id,value=.data$rit),
                          
-                         rir = ti %>% select(.data$booklet_id,.data$item_id,.data$rir) %>% 
-                                 spread_(key_col='booklet_id',value_col='rir')
+                         rir = ti %>% 
+							select(.data$booklet_id,.data$item_id,.data$rir) %>% 
+                            spread(key=.data$booklet_id,value=.data$rir)
                        )
                      }
     )

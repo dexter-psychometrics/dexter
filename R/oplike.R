@@ -10,12 +10,12 @@
 #' @param scr_path path to the .scr file
 #' @param dat_path path to the .dat file
 #' @param booklet_position vector of start and end of booklet position in the dat file, e.g. c(1,4), 
-#' all positions are counted from 1, start and end are both included.
-#' @param responses_start start position of responses in the .dat file
+#' all positions are counted from 1, start and end are both inclusive. If NULL, this is read from the scr file.
+#' @param responses_start start position of responses in the .dat file. If NULL, this is read from the scr file.
 #' @param response_length length of individual responses, default=1
 #' @param person_id optionally, a vector of start and end position of person_id in the .dat file.
 #' If NULL, person id's will be auto-generated.
-#' @param missing_character character used to indicate missing in .dat file, 
+#' @param missing_character vector of character(s) used to indicate missing in .dat file, 
 #' default is to use both a space and a 9 as missing characters.
 #' @param use_discrim if TRUE, the scores for the responses will be multiplied by the
 #' discrimination parameters of the items
@@ -28,6 +28,10 @@
 #' booklet_on_off, item_local_on_off, item_global_on_off. These are taken from the .scr file
 #' and can be used in predicates in the various dexter functions.
 #' 
+#' Booklet_position and responses_start are usually inferred from the scr file but since they
+#' are sometimes misspecified in the scr file they can be overridden. Response_length is not 
+#' inferred from the scr file since anything other than 1 is most often a mistake.
+#' 
 #' @examples
 #'\donttest{
 #' db = start_new_project_from_oplm('test.db',
@@ -38,18 +42,25 @@
 #' prms = fit_enorm(db, 
 #'    item_global_on_off==1 & item_local_on_off==1 & booklet_on_off==1)
 #' 
-#' abilities = ability(db, prms, 
-#'    item_global_on_off==1 & item_local_on_off==1 & booklet_on_off==1)
 #' 
-#' head(abilities)
 #'}
 start_new_project_from_oplm = function(dbname, scr_path, dat_path, 
-                                       booklet_position, responses_start, response_length = 1, 
+                                       booklet_position = NULL, responses_start = NULL, response_length = 1, 
                                        person_id = NULL, missing_character = c(' ','9'), use_discrim=FALSE,
                                        format='compressed')
 {
   if(format != 'compressed') stop(paste('Only compressed format is supported at this time', 
                                         'use the inexpand tool from oplm to compress your data'))
+  
+  scr = readSCR(scr_path)
+  scr$itemLabels = trimws(scr$itemLabels)
+  
+  if(is.null(booklet_position))
+    booklet_position = scr$booklet_position
+  
+  if(is.null(responses_start))
+    responses_start = scr$responses_start
+  
   if(response_length==1)
   { 
     rsplit = function(s) strsplit(s,"")
@@ -76,9 +87,6 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
   if(length(booklet_position)!=2) stop('booklet_position should be a vector of length 2')
   if(booklet_position[2]<booklet_position[1]) stop('booklet_position is invalid, end position is smaller than start position')
   
-  
-  scr = readSCR(scr_path)
-  scr$itemLabels = trimws(scr$itemLabels)
   
   if(anyDuplicated(scr$itemLabels))
   {
@@ -138,11 +146,11 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
       
       rsp = rsplit(substring(lines, 
                         responses_start, 
-                        responses_start + scr$nitBook[bkl] * response_length - 1))
+                        responses_start + scr$nitBook[bkl] * response_length-1))
       
-      if(any(nchar(rsp) < (scr$nitBook[bkl] * response_length + responses_start - 1)))
+      if(any(sapply(rsp,length) < scr$nitBook[bkl]))
       {
-        lnbr = min(which(nchar(rsp) < (scr$nitBook[bkl] * response_length + responses_start - 1))) 
+        lnbr = min(which(sapply(rsp,length) < scr$nitBook[bkl])) 
         stop(paste0('Error on line ', (lnbr + vp - 1), 
                     '. Line is too short for the number of responses in booklet "',bkl[lnbr],
                     '" with response_length = ',response_length,' and number of items = ',
@@ -347,12 +355,17 @@ readSCR = function (file)
     itemsOn[[i]] = readBin(z, integer(), size = 1, nitb[i])
   }
   close(z)
+
+  fmt = as.integer(unlist(regmatches(fmt, gregexpr('\\d+',fmt,perl=TRUE))))
+
   list(nit = nit, nMarg = nMarg, nStat = nStat, itemLabels = itemLabels, 
-       #margLabels = margLabels, statLabels = statLabels, 
+       booklet_position = c(fmt[1], fmt[1] + fmt[2] - 1L),
+       responses_start = fmt[3], response_length = fmt[5],
+       margLabels = margLabels, statLabels = statLabels, 
        globCal = globCal, 
        discrim = discrim, maxScore = maxScore, parFixed = parFixed, 
        nBook = nb, bookOn = inUse, nitBook = nitb, 
-       #margBook = margBook, statBook = statBook, 
+       margBook = margBook, statBook = statBook, 
        itemsBook = itemsBook, itemsOn = itemsOn, 
        expanded = expanded)
 }

@@ -38,7 +38,7 @@ will be shown as dots. Default is FALSE.}
 Plot the item-total regressions fit by the interaction (or Rasch) model
 }
 \details{
-Customisation of title and subtitle can be done by using the arguments main and sub.
+Customization of title and subtitle can be done by using the arguments main and sub.
 These arguments can contain references to the variables item_id (if overlay=FALSE) or model (if overlay=TRUE)
 by prefixing them with a dollar sign, e.g. plot(m, main='item: $item_id')
 }

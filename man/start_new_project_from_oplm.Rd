@@ -4,10 +4,10 @@
 \alias{start_new_project_from_oplm}
 \title{Start a new project from oplm files}
 \usage{
-start_new_project_from_oplm(dbname, scr_path, dat_path, booklet_position,
-  responses_start, response_length = 1, person_id = NULL,
-  missing_character = c(" ", "9"), use_discrim = FALSE,
-  format = "compressed")
+start_new_project_from_oplm(dbname, scr_path, dat_path,
+  booklet_position = NULL, responses_start = NULL,
+  response_length = 1, person_id = NULL, missing_character = c(" ",
+  "9"), use_discrim = FALSE, format = "compressed")
 }
 \arguments{
 \item{dbname}{filename/path of new dexter project database (will be overwritten if already exists)}
@@ -17,16 +17,16 @@ start_new_project_from_oplm(dbname, scr_path, dat_path, booklet_position,
 \item{dat_path}{path to the .dat file}
 
 \item{booklet_position}{vector of start and end of booklet position in the dat file, e.g. c(1,4), 
-all positions are counted from 1, start and end are both included.}
+all positions are counted from 1, start and end are both inclusive. If NULL, this is read from the scr file.}
 
-\item{responses_start}{start position of responses in the .dat file}
+\item{responses_start}{start position of responses in the .dat file. If NULL, this is read from the scr file.}
 
 \item{response_length}{length of individual responses, default=1}
 
 \item{person_id}{optionally, a vector of start and end position of person_id in the .dat file.
 If NULL, person id's will be auto-generated.}
 
-\item{missing_character}{character used to indicate missing in .dat file, 
+\item{missing_character}{vector of character(s) used to indicate missing in .dat file, 
 default is to use both a space and a 9 as missing characters.}
 
 \item{use_discrim}{if TRUE, the scores for the responses will be multiplied by the
@@ -45,6 +45,10 @@ start_new_project_from_oplm builds a complete dexter database from a .dat and .s
 the proprietary oplm format. Three custom variables are added to the database: 
 booklet_on_off, item_local_on_off, item_global_on_off. These are taken from the .scr file
 and can be used in predicates in the various dexter functions.
+
+Booklet_position and responses_start are usually inferred from the scr file but since they
+are sometimes misspecified in the scr file they can be overridden. Response_length is not 
+inferred from the scr file since anything other than 1 is most often a mistake.
 }
 \examples{
 \donttest{
@@ -56,9 +60,6 @@ db = start_new_project_from_oplm('test.db',
 prms = fit_enorm(db, 
    item_global_on_off==1 & item_local_on_off==1 & booklet_on_off==1)
 
-abilities = ability(db, prms, 
-   item_global_on_off==1 & item_local_on_off==1 & booklet_on_off==1)
 
-head(abilities)
 }
 }
