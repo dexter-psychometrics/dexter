@@ -20,11 +20,11 @@
 #' If dataSrc is a data.frame, it must contain the covariate.
 #' @param keep.observed In some cases, responses to one or more of the items have been observed. 
 #' The user can choose to keep these observations or generate new ones.
-#' @param nPS Number of plausible testscore to generate per person.
+#' @param nPS Number of plausible testscores to generate per person.
 #' @return A data.frame with columns booklet_id, person_id, sumScore and nPS plausible scores
 #' named PS1...PSn.
 #'  
-plausible_scores = function(dataSrc, predicate=NULL, parms=NULL, items=NULL, covariates=NULL, keep.observed=TRUE, nPS=1)
+plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, covariates=NULL, keep.observed=TRUE, nPS=1)
 {
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()

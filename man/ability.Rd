@@ -6,13 +6,12 @@
 \title{Estimate abilities}
 \usage{
 ability(dataSrc, parms, predicate = NULL, method = c("MLE", "EAP"),
-  prior = c("normal", "Jeffreys"), use_draw = NULL, npv = 500, mu = 0,
-  sigma = 4, standard_errors = FALSE, person_level = TRUE,
-  asOPLM = TRUE)
+  prior = c("normal", "Jeffreys"), use_draw = NULL, npv = 500,
+  mu = 0, sigma = 4, standard_errors = FALSE, asOPLM = TRUE)
 
 ability_tables(parms, design = NULL, method = c("MLE", "EAP"),
-  prior = c("normal", "Jeffreys"), use_draw = NULL, npv = 500, mu = 0,
-  sigma = 4, standard_errors = TRUE, asOPLM = TRUE)
+  prior = c("normal", "Jeffreys"), use_draw = NULL, npv = 500,
+  mu = 0, sigma = 4, standard_errors = TRUE, asOPLM = TRUE)
 }
 \arguments{
 \item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score}
@@ -27,9 +26,9 @@ parameter estimates}
 \item{prior}{If an EAP estimate is produced one can choose a normal prior or
 Jeffreys prior; i.e., a prior proportional to the square root of test information.}
 
-\item{use_draw}{When parms is Bayesian (this is recognised automatically), use_draw is 
+\item{use_draw}{When parms is Bayesian, use_draw is 
 the index of the posterior sample of the item 
-parameters that will be used to generating plausible values. 
+parameters that will be used for generating plausible values. 
 If use_draw=NULL, a posterior mean is used. 
 If outside range, the last iteration will be used.}
 
@@ -40,8 +39,6 @@ If outside range, the last iteration will be used.}
 \item{sigma}{Standard deviation of the normal prior}
 
 \item{standard_errors}{If true standard-errors are produced.}
-
-\item{person_level}{deprecated, always TRUE.}
 
 \item{asOPLM}{Report abilities on a scale defined by the OPLM normalization. Only when no values in parms have been fixed}
 

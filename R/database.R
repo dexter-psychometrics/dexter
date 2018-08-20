@@ -1,34 +1,6 @@
 
-# change in rsqlite, now shows error if not all columns are used
-# this is an ugly workaround, but it's a stupid change so hope it balances out
-# not decided if should be used yet
-dbGetQuery_ = function(db, stmt, df=NULL)
-{
-  if(is.null(df))
-  {
-    dbGetQuery(db, stmt)
-  } else
-  {
-    m = gregexpr('(?<=[=,\\(]) *:\\w+', stmt, perl=TRUE)
-    cols = gsub('^:','',trimws(regmatches(stmt, m)[[1]]), perl=TRUE)
-    dbGetQuery(db, stmt, df[,cols])
-  }
-}
 
-dbExecute_ = function(db, stmt, df=NULL)
-{
-  if(is.null(df))
-  {
-    dbExecute(db, stmt)
-  } else
-  {
-    m = gregexpr('(?<=[=,\\(]) *:\\w+', stmt, perl=TRUE)
-    cols = gsub('^:','',trimws(regmatches(stmt, m)[[1]]), perl=TRUE)
-    dbExecute(db, stmt, df[,cols])
-  }
-}
-
-dbRunScript <- function(db, fn)
+dbRunScript = function(db, fn)
 {
   # run sql script included in the package
   # The R dbi api does not provide for execution of scripts.
@@ -48,13 +20,33 @@ dbRunScript <- function(db, fn)
 }
 
 
-                           
-dbExists <- function(db, query, data)
+dbExists = function(db, query, data)
 {
   nrow(dbGetQuery(db, query, data)) > 0
 }
 
-dbUniquePersonIds <- function(db,n)
+
+dbCheck_reserved_colnames = function(nm)
+{
+  clash = intersect(tolower(nm), 
+                    c('person_id','item_id','item_position',
+                      'response','item_score','booklet_id'))
+  
+  if(length(clash) == 1)
+  {
+    stop(paste0("'", clash, "' is a reserved variable name in a dexter project"))
+  } else if(length(clash) > 1)   
+  {
+    stop(paste(paste0("'",clash,"'", collapse=", "),
+               'are reserved variable names in a dexter project'))
+                
+  }
+}
+  
+  
+
+
+dbUniquePersonIds = function(db,n)
 {
   if(is(db, 'SQLiteConnection'))
   {
@@ -74,7 +66,7 @@ dbUniquePersonIds <- function(db,n)
   return(paste0('dxP',c((last+1):(last+n))))
 }
 
-project_CreateTables <- function(db, covariates=NULL)
+project_CreateTables = function(db, covariates=NULL)
 {
   if(is(db, 'SQLiteConnection'))
   {

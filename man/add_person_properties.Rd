@@ -4,23 +4,27 @@
 \alias{add_person_properties}
 \title{Add person properties to a project}
 \usage{
-add_person_properties(db, person_properties = NULL, default_values = list())
+add_person_properties(db, person_properties = NULL,
+  default_values = list())
 }
 \arguments{
 \item{db}{A handle to the dexter project database, e.g. the output of \code{start_new_project}
 or \code{open_project}}
 
-\item{person_properties}{A data frame containing the person properties.}
+\item{person_properties}{A data frame containing a column person_id and 1 or more other columns with 
+person properties (e.g. education_type, birthdate)}
 
 \item{default_values}{a list where the names are person_properties and the values are defaults.
-The defaults will be used as the value for unknown person property values,
-for example when you add new data with \code{\link{add_booklet}} without providing values for the person property.
-Default_values for a person property will only be processed
-for new person properties. It is not possible to change default values at a later time.}
+The defaults will be used wherever the person property is unknown.}
 }
 \value{
 nothing
 }
 \description{
-Add, change or define person properties in a dexter project
+Add, change or define person properties in a dexter project. Person properties defined here will 
+also be automatically imported with \code{\link{add_booklet}}
+}
+\details{
+Due to limitations in the sqlite database backend that we use, the default values for a person property 
+can only be defined once for each person_property
 }

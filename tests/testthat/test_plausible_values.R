@@ -1,6 +1,4 @@
-
-
-context('Check plausible_values')
+context('test plausible_values')
 
 test_that('populations work',{
   db = open_project('../verbAggression.db')

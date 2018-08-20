@@ -20,7 +20,7 @@ directory. Any existing file with the same name will be overwritten.}
 Values are used as default (missing) values. The datatype will also be inferred from the values.
 Known person_properties will be automatically imported when adding response data with \code{\link{add_booklet}}.}
 
-\item{covariates}{Alias for person_properties, included for backward compatibility.}
+\item{covariates}{Deprecated alias for person_properties.}
 }
 \value{
 If the scoring rules pass a sanity check, a handle to the data base.
@@ -43,7 +43,7 @@ responses in the list. NA values will be treated as the string 'NA'.
 \donttest{
 head(verbAggrRules)
 db = start_new_project(verbAggrRules, "verbAggression.db", 
-                       person_properties=list(gender="unknown"))
+                       person_properties = list(gender = "unknown"))
 }
 
 }

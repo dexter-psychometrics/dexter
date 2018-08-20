@@ -5,7 +5,7 @@
 \title{Distractor plot}
 \usage{
 distractor_plot(dataSrc, item, predicate = NULL, nc = 1, nr = 1,
-  legend = TRUE, ...)
+  legend = TRUE, curtains = 10, ...)
 }
 \arguments{
 \item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, response, item_score
@@ -26,13 +26,16 @@ on the same page. Default is 1. May be ignored or adjusted if it does not make s
 
 \item{legend}{logical, whether to include the legend. default is TRUE}
 
+\item{curtains}{100*the tail probability of the sum scores to be shaded. Default is 10.
+Set to 0 to have no curtains shown at all.}
+
 \item{...}{further arguments to plot.}
 }
 \description{
 Produce a diagnostic distractor plot for an item
 }
 \details{
-Customisation of title and subtitle can be done by using the arguments main and sub. 
+Customization of title and subtitle can be done by using the arguments main and sub. 
 These arguments can contain references to the variables item_id, booklet_id, item_position(only if dataSrc is a dexter db),
 pvalue, rit and rir. References are made by prefixing these variables with a dollar sign. Variable names may be postfixed 
 with a sprintf style format string, e.g. 

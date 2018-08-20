@@ -1,3 +1,5 @@
+context('test interaction')
+
 library(dplyr)
 library(purrr)
 

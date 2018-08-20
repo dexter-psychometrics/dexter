@@ -2,7 +2,7 @@
 Dexter
 ======
 
-Dexter is an R package for and psychometric analysis of data from educational and psychological tests. Dexter typically works with project database files saved on disk.
+Dexter is an R package for psychometric analysis of data from educational and psychological tests. Dexter typically works with project database files saved on disk.
 
 Installation
 ------------
@@ -11,7 +11,7 @@ Installation
 install.packages('dexter')
 ```
 
-If you encounter a bug, please post a minimal reproducible example on [github](https://github.com/jessekps/dexter/issues). We post news and examples on a [blog](dexterities.netlify.com), it's also the place for general questions.
+If you encounter a bug, please post a minimal reproducible example on [github](https://github.com/jessekps/dexter/issues). We post news and examples on a [blog](http://dexterities.netlify.com), it's also the place for general questions.
 
 Example
 -------
@@ -88,16 +88,16 @@ pv = plausible_values(db, parms = f, nPV = 5)
 head(pv)
 ```
 
-| booklet\_id | person\_id |  sumScore|         PV1|         PV2|        PV3|        PV4|         PV5|
-|:------------|:-----------|---------:|-----------:|-----------:|----------:|----------:|-----------:|
-| verb\_agg   | dxP1       |        13|  -1.0214890|  -0.9521324|  -1.252551|  -1.669846|  -0.9245417|
-| verb\_agg   | dxP10      |         9|  -1.2626779|  -1.2457954|  -1.398498|  -1.378339|  -1.5915501|
-| verb\_agg   | dxP100     |        14|  -1.3186758|  -0.7754019|  -1.266446|  -1.222720|  -0.6871353|
-| verb\_agg   | dxP101     |         0|  -3.2277562|  -2.9269698|  -3.819951|  -3.402195|  -3.4895825|
-| verb\_agg   | dxP102     |        12|  -1.2779256|  -0.7690105|  -1.132858|  -1.274146|  -0.7648520|
-| verb\_agg   | dxP103     |         8|  -0.7125214|  -1.2058239|  -1.366199|  -1.396237|  -1.2682042|
+| booklet\_id | person\_id |  sumScore|         PV1|         PV2|         PV3|         PV4|         PV5|
+|:------------|:-----------|---------:|-----------:|-----------:|-----------:|-----------:|-----------:|
+| verb\_agg   | dxP1       |        13|  -0.8830828|  -0.7066814|  -0.7703465|  -1.0441590|  -0.8918823|
+| verb\_agg   | dxP10      |         9|  -1.5388849|  -1.0014150|  -1.7249607|  -1.3372498|  -1.5627987|
+| verb\_agg   | dxP100     |        14|  -0.6678893|  -1.4039775|  -0.6161149|  -0.9249503|  -0.7607182|
+| verb\_agg   | dxP101     |         0|  -2.3034185|  -3.0623911|  -2.3793639|  -3.1658178|  -3.3999772|
+| verb\_agg   | dxP102     |        12|  -1.0434515|  -1.5317991|  -1.1518701|  -1.0103475|  -1.0057779|
+| verb\_agg   | dxP103     |         8|  -2.0467553|  -1.5357100|  -2.0598186|  -1.2366479|  -1.7367032|
 
 Contributing
 ------------
 
-Contributions are welcome but please check with us first about what you want to contribute to prevent disappointment. Please also note that dexter uses CML estimation and we will not include models that require MML. There are already other R packages for that, most notably [mirt](https://cran.r-project.org/package=mirt).
+Contributions are welcome but please check with us first about what you would like to contribute.

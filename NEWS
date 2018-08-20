@@ -1,62 +1,77 @@
-New in 0.7.0
-------------
-Added support for RSQLite 2.1.0+ which broke dexter 0.6.0. 
-Added function probability_to_pass for equating to a reference test that is 
-connected to a target test.
+# dexter 0.8.1
+
+* significant speed increases in plausible_values, plausible_scores, ability and ability_tables
+* added plot method for the extended nominal response model
+* new function `add_response_data()` for importing normalized data
+
+# dexter 0.8.0
+
+* `profiles()` and `profile_tables()` functions added for analysis of individual deviation profiles
+  (misfit) compared to the fitted model.
+
+* bugfix for solaris
+
+* You may want to take a look at the new sister package, dextergui
 
 
-New in 0.6.0
-------------
-Added function ability_tables to generate score transformation tables 
-for arbitrary subsets of items. Ability and ability_tables can now also 
-take Jeffreys prior and variatons of the normal prior and can optionally 
-output standard errors.
+# dexter 0.7.0
 
-Added function Plausible_scores to generate scores on arbitrary itemsets
-(or the entire bank). 
+* support for RSQLite release 2.1.0+ which broke dexter 0.6.0. 
 
-Updates to documentation.
+* `probability_to_pass()` function added for equating to a reference test that is 
+  connected to a target test.
 
 
-New in 0.5.1
-------------
+# dexter 0.6.0
 
-Plausible_values can now work with covariates. Fit_enorm can optionally 
-take fixed_parameters into account. 
+* `ability_tables()` function added to generate score transformation tables 
+  for arbitrary subsets of items. `ability()` and `ability_tables()` can now also 
+  take Jeffreys prior and variatons of the normal prior and can optionally 
+  output standard errors.
+  
+* `plausible_scores()` function added to generate scores on arbitrary itemsets
+  (or the entire bank). 
+  
+* Updates to documentation.
 
-Significant speed increases in profile_plot, iTIA and iModels and minor 
-speed increases in other functions.
 
-Further includes more user control over plotting parameters, 
-updates to documentation, several bugfixes and some smaller updates.
+# dexter 0.5.1
+
+* `plausible_values()` can now work with covariates. 
+
+* `fit_enorm()` can optionally take fixed_parameters into account. 
+
+* Significant speed increases in profile_plot, iTIA and iModels and minor speed increases in other functions.
+
+* Further includes more user control over plotting parameters, updates to documentation, several bugfixes and some
+  smaller updates.
 
 
-New in 0.4.4
-------------
-Included Rdpack in Imports at the request of CRAN, and fixed 4 minor bugs
+# dexter 0.4.4
 
-New in 0.4.2
-------------
+* included Rdpack in Imports at the request of CRAN, and fixed 4 minor bugs
+
+# dexter 0.4.2
 
 We go straight from version 0.1.7 to version 0.4.2 in a major new release.
 The functionality envisaged for two other related packages, enorm and 
 roger, has now been all incorporated into dexter.
 
-The database has been completely rewritten. Databases created with 0.1.7
-can be imported but are no longer maintained.
+* The database has been completely rewritten. Databases created with 0.1.7 can
+  be imported but are no longer maintained.
+  
+* Many functions now support flexible subsetting of data through a predicate
+  expression; furthermore, the data source can be either the dexter database
+  (more usual), or a data frame or tibble. The latter can be useful in simple
+  simulations or in some non-standard situations.
+  
+* Basic test and item analysis has been extended with two interactive tools
+  based on shiny, and with an exploratory tool to search for DIF. 
 
-Many functions now support flexible subsetting of data through a predicate
-expression; furthermore, the data source can be either the dexter database
-(more usual), or a data frame or tibble. The latter can be useful in 
-simple simulations or in some non-standard situations.
+* Version 0.4.2 estimates the Extended NOminal Response Model (ENORM) by
+  either CML or a Gibbs sampler, computes person scores by either MLE, EAP,
+  or plausible values, and provides a new test for the hypothesis of no true
+  individual differences. In addition, it supports a method for standard
+  settings known as 3DC. 
 
-Basic test and item analysis has been extended with two interactive tools
-based on shiny, and with an exploratory tool to search for DIF. 
-
-Version 0.4.2 estimates the Extended NOminal Response Model (ENORM) by
-either CML or a Gibbs sampler, computes person scores by either MLE, EAP,
-or plausible values, and provides a new test for the hypothesis of no true
-individual differences. In addition, it supports a method for standard
-settings known as 3DC. 
-
-Several vignettes have been added to explain the new features in detail.
+* Several vignettes have been added to explain the new features in detail.

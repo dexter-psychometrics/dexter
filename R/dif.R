@@ -63,7 +63,7 @@ bty = function (n, h = c(265, 75), c. = c(61, 66),
 #'
 #' @param dataSrc Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score
 #' @param predicate An optional expression to subset data, if NULL all data is used
-#' @param covariate Person covariate name for subsetting
+#' @param person_property Defines groups of persons to calculate DIF
 #' @return An object of class \code{DIF_stats} holding statistics for
 #' overall-DIF and a matrix of statistics for DIF in the relative position of
 #' item-category parameters in the regular parameterization used e.g., by OPLM.
@@ -73,40 +73,42 @@ bty = function (n, h = c(265, 75), c. = c(61, 66),
 #' 
 #' @references 
 #' Bechger, T. M. and Maris, G (2015); A Statistical Test for Differential Item Pair Functioning. 
-#' Psychometrika. Vol. 80, no. 2, 317–340.
+#' Psychometrika. Vol. 80, no. 2, 317-340.
 #' 
 #' @examples
 #' \dontrun{
-#' db = start_new_project(verbAggrRules, "verbAggression.db", covariates=list(gender='unknown'))
+#' db = start_new_project(verbAggrRules, "verbAggression.db", person_propertys=list(gender='unknown'))
 #' add_booklet(db, verbAggrData, "agg")
-#' dd = DIF(db,covariate="gender")
+#' dd = DIF(db,person_property="gender")
 #' print(dd)
 #' plot(dd)
 #' 
 #' close_project(db)
 #' }
 #' 
-DIF = function(dataSrc, covariate, predicate=NULL) 
+DIF = function(dataSrc, person_property, predicate=NULL) 
 {
-  ## 1. Interpret input.. much like beginning of profile plot
-  # Check whether there are 2 groups 
-  # Check whether predicate (if not NULL) does not leave us without data
+
+  qtpredicate = eval(substitute(quote(predicate)))
+  
   if(!inherits(dataSrc,'data.frame'))
   {
-    covariate = tolower(covariate)
+    person_property = tolower(person_property)
   }
   
-  columns = c('person_id','item_id','item_score', covariate)
+  columns = c('person_id','item_id','item_score', person_property)
   
-  qtpredicate=eval(substitute(quote(predicate)))
   respData = get_responses_(dataSrc, qtpredicate, columns = columns, env = caller_env()) 
+  
   if(nrow(respData) == 0) stop('no data to analyse')
   
+  respData[[person_property]] = as.character(respData[[person_property]])
+  
   # split into list
-  respData = by(respData, respData[[covariate]], identity)
+  respData = split(respData, respData[[person_property]])
   
   if(length(respData)!=2)
-    stop('The covariate needs to have two unique values in your data to calculate DIF')
+    stop('The person_property needs to have two unique values in your data to calculate DIF')
   
   common_scores = Reduce(dplyr::intersect, lapply(respData, function(x) x[,c('item_id','item_score')]))
   problems = Reduce(dplyr::union,
@@ -116,18 +118,18 @@ DIF = function(dataSrc, covariate, predicate=NULL)
   if(nrow(problems) > 0)
   {
     problems = tibble(item_id = unique(problems$item_id))
-    warning(paste('the following items do not have the same score categories over both covariates and',
+    warning(paste('the following items do not have the same score categories over both person_propertys and',
                   'have been removed from the analysis:', paste0(problems$item_id,collapse=', ')))
     respData = lapply(respData, function(x) x %>% anti_join(problems, by = 'item_id'))
   }
-  
+
   ## 2. Estimate models with fit_enorm using CML
   models = lapply(respData, fit_enorm)
+  #models = list(fit_enorm_(respData[[1]],env=as.environment(list())), 
+  #              fit_enorm_(respData[[2]],env=as.environment(list())))
   
-  ## 3. Make sure parameters pertain to same items-responses in the same order
-  # This should always be correct, since fit_enorm orders on items and scores and
-  # I made sure in the prelim that both models have the same items and score catregories
-  
+
+
   ## 4. Call overallDIF_ and PairDIF_
   DIF_stats = OverallDIF_ (models[[1]]$est$beta.cml, models[[2]]$est$beta.cml, 
                            models[[1]]$est$acov.cml, models[[2]]$est$acov.cml)
@@ -135,10 +137,14 @@ DIF = function(dataSrc, covariate, predicate=NULL)
   D = PairDIF_(models[[1]]$est$beta.cml, models[[2]]$est$beta.cml, 
                models[[1]]$est$acov.cml, models[[2]]$est$acov.cml)
   
-  
+
+  items = common_scores %>%
+    filter(.data$item_score > 0) %>%
+    arrange(.data$item_id, .data$item_score)
+
   ## 5. Report D and DIF_stats and inputs
   ou = list(DIF_overall = DIF_stats, DIF_pair = D, 
-            groups = names(respData), items = unique(common_scores$item_id))
+            group_labels = names(respData), items = items)
   class(ou) = append('DIF_stats', class(ou))
   return(ou)
 }
@@ -155,15 +161,55 @@ print.DIF_stats <- function(x, ...)
                ", p = ", tmp))  
 }
 
-plot.DIF_stats = function(x, ...)
+#' plot method for DIF
+#' 
+#' @param x object produced by DIF
+#' @param items character vector of item id's for a subset of the plot. Useful if you have many items. 
+#' If NULL all items are plotted.
+#' @param itemsX character vector of item id's for the X axis
+#' @param itemsY character vector of item id's for the Y axis
+#' @param ... further arguments to plot
+#'    
+plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, ...)
 {
-  D = x #had to make the parameter name x instead of D for CRAN rules
-  x=D$DIF_pair
-  yLabels = rownames(x)
-  xLabels = colnames(x)
-  min_=min(x)
-  max_=max(x)
-  default.args = list(main = paste(D$groups, collapse = ' vs. '),
+  if(is.null(itemsX)) itemsX = sort(unique(x$items$item_id))
+  if(is.null(itemsY)) itemsY = sort(unique(x$items$item_id))
+  
+  if(length(setdiff(c(itemsX, itemsY), x$items$item_id)) > 0)
+  {
+    cat('items not found in DIF object:\n')
+    print(setdiff(c(itemsX, itemsY), x$items))
+    stop('some of the item_ids you specified are not present in the DIF object')
+  }
+  
+  x$items = x$items %>%
+    mutate(rn = row_number())
+  
+  itemsX = x$items %>%
+    inner_join(tibble(item_id = itemsX, ord = 1:length(itemsX)), by='item_id') %>%
+    arrange(.data$ord)
+  
+  itemsY = x$items %>%
+    inner_join(tibble(item_id = itemsY, ord = 1:length(itemsY)), by='item_id') %>%
+    arrange(.data$ord)
+  
+  DIF_pair = x$DIF_pair[itemsX$rn, itemsY$rn]
+  
+  
+  if(nrow(distinct(x$items,.data$item_id)) == nrow(x$items))
+  {
+    yLabels = pull(itemsY, 'item_id')
+    xLabels = pull(itemsX, 'item_id')
+  } else
+  {
+    yLabels = paste(itemsY$item_id, itemsY$item_score)
+    xLabels = paste(itemsX$item_id, itemsX$item_score)
+    
+  }
+  
+  min_ = min(x$DIF_pair) # keep color range from complete object
+  max_ = max(x$DIF_pair)
+  default.args = list(main = paste(x$group_labels[1],'vs.',x$group_labels[2]),
                       axes=FALSE, zlim=c(min_,max_),xlab='',ylab='')
   
   graphics::layout(matrix(data=c(1,2), nrow=1, ncol=2), widths=c(4,1), heights=c(1,1))
@@ -171,25 +217,24 @@ plot.DIF_stats = function(x, ...)
   
   tmp = rainbow(256)[1:128]
   ColorRamp=c(tmp, tmp[128:1])
-  ColorLevels <- seq(min(x), max(x), length=length(ColorRamp))
+  ColorLevels <- seq(min(x$DIF_pair), max(x$DIF_pair), length=length(ColorRamp))
   
   # Reverse Y axis
-  reverse <- nrow(x) : 1
-  yLabels <- yLabels[reverse]
-  x <- x[reverse,]
+  yLabels <- rev(yLabels)
+  DIF_pair <- DIF_pair[nrow(DIF_pair) : 1,]
   
   # Data Map
   oldpar = par(mar = c(6,8,2.5,2))
+  on.exit({par(oldpar)},add=TRUE)
   do.call(image,
           merge_arglists(list(...),
-                         override = list(x = 1:length(xLabels), y = 1:length(yLabels), z=t(x),
+                         override = list(x = 1:length(yLabels), y = 1:length(xLabels), z=t( DIF_pair),
                                          col=ColorRamp),
                          default = default.args))
   
   
-  axis(1, at=1:length(xLabels), labels=xLabels, las= 3, cex.axis=0.6)
-  axis(2, at=1:length(yLabels), labels=yLabels, las=1,
-       cex.axis=0.6)
+  axis(1, at=1:length(yLabels), labels=yLabels, las= 3, cex.axis=0.6, hadj=1,padj=1)
+  axis(2, at=1:length(xLabels), labels=xLabels, las=1, cex.axis=0.6, hadj=1,padj=1)
   
   #Color Scale
   par(mar=c(6,3,2,2))
@@ -200,6 +245,5 @@ plot.DIF_stats = function(x, ...)
         xaxt="n")
   
   graphics::layout(1)
-  par(oldpar)
-  
+
 }

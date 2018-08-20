@@ -4,12 +4,12 @@
 \alias{DIF}
 \title{Exploratory test for Differential Item Functioning}
 \usage{
-DIF(dataSrc, covariate, predicate = NULL)
+DIF(dataSrc, person_property, predicate = NULL)
 }
 \arguments{
 \item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score}
 
-\item{covariate}{Person covariate name for subsetting}
+\item{person_property}{Defines groups of persons to calculate DIF}
 
 \item{predicate}{An optional expression to subset data, if NULL all data is used}
 }
@@ -27,9 +27,9 @@ Supplements the confirmatory approach of the profile plot
 }
 \examples{
 \dontrun{
-db = start_new_project(verbAggrRules, "verbAggression.db", covariates=list(gender='unknown'))
+db = start_new_project(verbAggrRules, "verbAggression.db", person_propertys=list(gender='unknown'))
 add_booklet(db, verbAggrData, "agg")
-dd = DIF(db,covariate="gender")
+dd = DIF(db,person_property="gender")
 print(dd)
 plot(dd)
 
@@ -39,5 +39,5 @@ close_project(db)
 }
 \references{
 Bechger, T. M. and Maris, G (2015); A Statistical Test for Differential Item Pair Functioning. 
-Psychometrika. Vol. 80, no. 2, 317–340.
+Psychometrika. Vol. 80, no. 2, 317-340.
 }

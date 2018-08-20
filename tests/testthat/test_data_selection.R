@@ -1,7 +1,9 @@
+context('test data selection')
+
 library(dplyr)
 
 
-context('test data selection')
+
 
 expect_no_error = function(object, info=NULL) expect_error(object, regexp=NA, info=info)
 
@@ -18,6 +20,7 @@ test_that('predicates work as expected',
   r2 = get_responses(db, grepl('S1', item_id))
  
   expect_true(dexter:::df_identical(r1, r2))
+  close_project(db)
 
 })
    

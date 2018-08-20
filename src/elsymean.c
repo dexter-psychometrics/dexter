@@ -47,8 +47,8 @@ void ElSym(double *b, int *a, int *first, int *last, int *item1, int* item2, int
 {
   int Msc, idx;
  
- double *gg;
- gg=(double*)calloc((2*(mS[0]+1)), sizeof(double)); 
+  double *gg;
+  gg=(double*)calloc((2*(mS[0]+1)), sizeof(double)); 
   
   idx=0; // start from column one
   gg[0]=1;
@@ -230,21 +230,25 @@ void ittot_mat(double *b, int *a, double *c, int *first, int *last, int *nI, int
 /*
  E: E-step. Routine to calculate the expected sufficient statistics
 */
-void E(double *b, int *a, int *first, int *last, int *scoretab, int *nI, int *mS, double *expect)
+void E(double *b, int *a, int *first, int *last, int *scoretab, int *nI, int *mS_, double *expect)
 {
   int i1,i2;
-  double g[2000]={0.0};
+  int mS = *mS_;
+  double g[mS+1];
+  double gi[mS+1]; 
+  
+  for (int i=0; i<=mS;i++) g[i]=0;
  
   i1=-1;
   i2=-1;
-  ElSym(b,a,first,last,&i1,&i2,nI,mS,g);
+  ElSym(b,a,first,last,&i1,&i2,nI,mS_,g);
   for (int item=0;item<nI[0];item++)
-  {
-    double gi[2000]={0.0}; // for (int i=0; i<=mS[0];i++) gi[i]=0.0;
-    ElSym(b,a,first,last,&item,&i2,nI,mS,gi);
+  {    
+	for (int i=0; i<=mS;i++) gi[i]=0;
+    ElSym(b,a,first,last,&item,&i2,nI,mS_,gi);
     for (int j=first[item];j<=last[item];j++)
     {
-      for (int s=a[j];s<=mS[0];s++)
+      for (int s=a[j];s<=mS;s++)
       {
         if (g[s]>0) expect[j]+=scoretab[s]*gi[s-a[j]]*b[j]/g[s];
       }
@@ -257,25 +261,37 @@ void E(double *b, int *a, int *first, int *last, int *scoretab, int *nI, int *mS
 /*
 H: Routine to calculate the information matrix/Hessian
 */
-void H(double *b, int *a, int* nPar, int *first, int *last, int *scoretab, int *nI, int *mS, double *Hess)
+void H(double *b, int *a, int *nPar, int *first, int *last, int *scoretab, int *nI, int *mS_, double *Hess)
 {
+
   int i1,i2,tel=-1, jump=0;
+  int mS = *mS_;
+  /*
   double g[10000]={0};
   double gi[10000]={0}; 
   double gk[10000]={0};
   double gik[10000]={0}; 
-
+  */
+  double g[mS+1];
+  double gi[mS+1]; 
+  double gk[mS+1];
+  double gik[mS+1];
+  for(int i=1;i<=mS;i++)
+  {
+	g[i]=0;gi[i]=0;gk[i]=0;gik[i]=0;
+  }
+  
   i1=-1;i2=-1;
-  ElSym(b,a,first,last,&i1,&i2,nI,mS,g);
+  ElSym(b,a,first,last,&i1,&i2,nI,mS_,g);
   for (int item=0;item<nI[0];item++)
   {
     tel+=1+jump;
     jump+=(last[item]-first[item]);
-    for (int i=0; i<=mS[0];i++) gi[i]=0.0;
-    ElSym(b,a,first,last,&item,&i2,nI,mS,gi);
+    for (int i=0; i<=mS;i++) gi[i]=0.0;
+    ElSym(b,a,first,last,&item,&i2,nI,mS_,gi);
     for (int j=(first[item]+1);j<=last[item];j++)
     {
-      for (int s=a[j];s<=mS[0];s++)
+      for (int s=a[j];s<=mS;s++)
       {
         if (g[s]>0)
         {
@@ -285,7 +301,7 @@ void H(double *b, int *a, int* nPar, int *first, int *last, int *scoretab, int *
       tel++;
       for (int k=(j+1);k<=last[item];k++)
       {
-        for (int s=a[k];s<=mS[0];s++)
+        for (int s=a[k];s<=mS;s++)
         {
           if (g[s]>0)
           {
@@ -296,12 +312,12 @@ void H(double *b, int *a, int* nPar, int *first, int *last, int *scoretab, int *
       }
       for (int k=(item+1);k<nI[0];k++)
       {
-        for (int i=0; i<=mS[0];i++) {gk[i]=0.0; gik[i]=0.0;}
-        ElSym(b,a,first,last,&k,&i2,nI,mS,gk);
-        ElSym(b,a,first,last,&k,&item,nI,mS,gik);
+        for (int i=0; i<=mS;i++) {gk[i]=0.0; gik[i]=0.0;}
+        ElSym(b,a,first,last,&k,&i2,nI,mS_,gk);
+        ElSym(b,a,first,last,&k,&item,nI,mS_,gik);
         for (int l=(first[k]+1);l<=last[k];l++)
         {
-          for (int s=0;s<=mS[0];s++)
+          for (int s=0;s<=mS;s++)
           {
             if (g[s]>0)
             {
@@ -352,7 +368,7 @@ void E0(double *b, int *a, int *first, int *last, int *nscore, int *nI, int *mS,
 
 void H0(double *b, int *a, int* nPar, int *first, int *last, int *nscore, int *nI, int *mS, double *Hess)
 {
-  int i1,i2,tel=-1, jump=0, idx;
+  int i1,i2,tel=-1, jump=0;
   double *g=NULL;
   double *gi=NULL;
   double *gk=NULL;

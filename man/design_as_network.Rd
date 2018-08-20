@@ -16,8 +16,11 @@ design_as_network(dataSrc, predicate = NULL, weights = c("items",
 \code{"items"} or \code{"responses"} (default is items).}
 }
 \value{
-A list of two data frames: \item{im}{incidence matrix}
+A list of  data frames: 
+\item{im}{incidence matrix}
 \item{wm}{weights matrix}
+\item{ibl}{incidence matrix of items in blocks}
+\item{blb}{incidence matrix of blocks in booklets}
 }
 \description{
 Export the test design as an incidence matrix 

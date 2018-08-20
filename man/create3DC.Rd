@@ -16,7 +16,7 @@ a handle to the 3DC sqlite database
 Creates an empty database for 3DC standard setting application
 }
 \details{
-The data driven direct concensus (3DC) method of standard setting  is described in Keuning et. al. (2017).
+The data driven direct consensus (3DC) method of standard setting  is described in Keuning et. al. (2017).
 To easily apply this procedure, we advise to use the free digital 3DC application. This application 
 can be downloaded from the Cito website, see the 
 \href{http://www.cito.com/our-expertise/implementation/3dc}{3DC application download page}. 

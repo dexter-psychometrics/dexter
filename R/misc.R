@@ -27,6 +27,69 @@
 #   return(v)
 # }
 
+# differs in result from ntile in taking weights and in never putting equal values in different bins
+# take care that if the nbr of distinct values is close to n, this will lead to very unequal sized bins
+weighted_ntile = function(x, weights, n)
+{
+  
+  rn = tibble(x=x,w=weights,ord=1L:length(x)) %>%
+    arrange(.data$x) %>%
+    mutate(rn=cumsum(.data$w)-.data$w) %>%
+    arrange(.data$ord) %>%
+    pull(.data$rn)
+  
+  len = sum(weights)
+  as.integer(floor(n * rn/len + 1))
+}
+
+# other option, less memory efficient and does split equal values
+# weighted_ntile2 = function(x, weights, n)
+# {
+#   x = rep(x,weights)
+#   ntile(x,n)[cumsum(weights)-weights+1]
+# }
+
+
+# does basic argument type and attribute checks with error messages
+# to do:
+# one of multiple possible types
+
+check_arg = function(x, type, name = deparse(substitute(x)), nullable = FALSE, .length = NA )
+{
+  if(is.null(x))
+  {
+    if(!nullable)
+      stop(paste0("Argument'",name, "' may not be NULL"))
+    
+    return(NULL)
+  }
+  
+  if(type == 'dataSrc')
+  {
+    if(!(inherits(x, 'dx_resp_data') || inherits(x, 'data.frame') || inherits(x, 'DBIConnection')))
+    {
+      stop(paste0("Argument'",name, "' must be of type 'DBIConnection' or 'data.frame'"))
+    }
+  } else if(type == 'integer')
+  {
+    if(!is.numeric(x) || x%%1 != 0)
+      stop(paste0("Argument'",name, "' must be an integer value"))
+    
+  } else if(type %in% c('numeric','double'))
+  {
+    if(!is.numeric(x))
+      stop(paste0("Argument'",name, "' must be numeric"))
+    
+  } else if(!inherits(x, type))
+  {
+      stop(paste0("Argument'",name, "' must be of type '", type, "'"))
+  }
+  
+  if(!is.na(.length) && length(x) != .length)
+    stop(paste0("Argument'",name, "' must have length ", .length))
+}
+
+
 dropNulls = function (x) 
 {
   x[!vapply(x, is.null, FUN.VALUE = logical(1))]
@@ -258,6 +321,73 @@ c2weights<-function(cIM)
   return(out/out[av_indx])
 }
 
+#########
+# This function calculates overall and pointwise confidence envelopes 
+# for a curve based on replicates of the curve evaluated at a number of fixed points.
+# Based on theory by Davison, A.C. and Hinkley, D.V. (1997) Bootstrap Methods and Their Application. 
+# Cambridge University Press. Insprired by code from package boot.
+##
+# mat is a matrix with nrow = nr of replications, ncol = nr of points
+# Example: test information for each of ncol ability values is calculated for nrow samples of 
+# item parameters from posterior.
+########
+conf_env = function(mat, level = 0.95) 
+{
+  overall_found = TRUE
+  emperr <- function(rmat, p = 0.05, k = NULL) {
+    R <- nrow(rmat)
+    if (is.null(k)) 
+      k <- p * (R + 1)/2
+    else p <- 2 * k/(R + 1)
+    kf <- function(x, k, R) 1 * ((min(x) <= k) | (max(x) >= 
+                                                    R + 1L - k))
+    c(k, p, sum(apply(rmat, 1L, kf, k, R))/(R + 1))
+  }
+  kfun <- function(x, k1, k2) sort(x, partial = sort(c(k1, 
+                                                       k2)))[c(k1, k2)]
+  index = 1L:ncol(mat)
+  if (length(index) < 2L) 
+    stop("This function for curves")
+  rmat <- apply(mat, 2L, rank)
+  R <- nrow(mat)
+  if (length(level) == 1L) 
+    level <- rep(level, 2L)
+  k.pt <- floor((R + 1) * (1 - level[1L])/2 + 1e-10)
+  k.pt <- c(k.pt, R + 1 - k.pt)
+  err.pt <- emperr(rmat, k = k.pt[1L])
+  ov <- emperr(rmat, k = 1)
+  ee <- err.pt
+  al <- 1 - level[2L]
+  if (ov[3L] > al) 
+    overall_found = FALSE
+  else {
+    continue <- !(ee[3L] < al)
+    while (continue) {
+      kk <- ov[1L] + round((ee[1L] - ov[1L]) * (al - ov[3L])/(ee[3L] - 
+                                                                ov[3L]))
+      if (kk == ov[1L]) 
+        kk <- kk + 1
+      else if (kk == ee[1L]) 
+        kk <- kk - 1
+      temp <- emperr(rmat, k = kk)
+      if (temp[3L] > al) 
+        ee <- temp
+      else ov <- temp
+      continue <- !(ee[1L] == ov[1L] + 1)
+    }
+  }
+  k.ov <- c(ov[1L], R + 1 - ov[1L])
+  err.ov <- ov[-1L]
+  out <- apply(mat, 2L, kfun, k.pt, k.ov)
+  if (overall_found){
+    out = out[4:3, ]
+  }else
+  {
+    out = out[1:2, ]
+  }
+  return(out)
+}
+
 
 
 #########################
@@ -269,7 +399,7 @@ c2weights<-function(cIM)
 #' 
 #' @name verbAggrData
 #' @docType data
-#' @format A data set with 316 rows and 25 columns.
+#' @format A data set with 316 rows and 26 columns.
 #' @keywords datasets
 NULL
 
@@ -299,18 +429,7 @@ NULL
 #' @keywords datasets
 NULL
 
-###########################################
-#' Item properties in the PISA 2012 example
-#' 
-#' A data set of item properties in the PISA 2012 example (see the
-#' help screen for function add_booklet)
-#' 
-#' 
-#' @name PISA_item_class
-#' @docType data
-#' @format A data set with 109 rows and 6 columns.
-#' @keywords datasets
-NULL
+
 
 
 

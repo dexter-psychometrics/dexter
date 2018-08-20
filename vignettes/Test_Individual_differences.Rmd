@@ -20,11 +20,11 @@ library(dexter)
 library(dplyr)
 ```
 
-Educational and psychological testing is all about individual differences. Using an instrument, we try our best to place an individual with respect to others depending on their level of extroversion, depression, or mastery of English.
+Educational and psychological testing is all about individual differences. Using a measuring instrument, we try our best to place an individual with respect to others depending on their level of extroversion, depression, or mastery of English.
 
-What if there are no individual differences at all? We would find ourselves in the unenviable position of having no Snark to hunt for, no ghosts to bust. __Dexter__ includes a function, `individual_differences`, to check whether the response data are consistent with the hypothesis of no individual differences in true ability.
+What if there are no individual differences at all? Classical test theory defines reliability as the ratio of the variance of the true scores to the variance of the observed scores [e.g., @BechgerMarisVerstralen2003]. The observed scores will have some chance variance, so reliability is 0 in that case. We have provided an IRT analogue with function `individual_differences`, to check whether the response data are consistent with the hypothesis of no individual differences in true ability.
 
-Here is a simple function to simulate a matrix of response data from the Rasch model, in the long shape expected by dexter. We use it to generate responses to 20 items with uniformly distributed difficulties from 2000 persons having all the same true ability of 0.5: 
+First, a simple function to simulate a matrix of response data from the Rasch model, in the long shape expected by dexter. We use it to generate responses to 20 items with uniformly distributed difficulties from 2000 persons having all the same true ability of 0.5: 
 
 ```{r}
 sim_Rasch = function(theta, delta) {

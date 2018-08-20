@@ -44,9 +44,9 @@ Nevertheless, a simple model is quite useful in practice. Profile analysis can c
 in this case by indicating how a test-taker, conditional on her/his test score, 
 performs on a number of pre-specified domains, e.g. in case of a mathematics test 
 the domains could be numbers, algebra and geometry or in case of a digital test the domains could be animated versus
- unanimated items. This can be done by comparing the achieved score on a domain with the expected score, given the test score.
+ non-animated items. This can be done by comparing the achieved score on a domain with the expected score, given the test score.
 }
 \references{
 Verhelst, N. D. (2012). Profile analysis: a closer look at the PISA 2000 reading data. 
-Scandinavian Journal of Educational Research, 56 (3), 315 – 332.
+Scandinavian Journal of Educational Research, 56 (3), 315-332.
 }

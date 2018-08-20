@@ -4,17 +4,15 @@
 \alias{get_responses}
 \title{Selecting data}
 \usage{
-get_responses(dataSrc, predicate = NULL, columns = c("person_id", "item_id",
-  "item_score"), env = NULL)
+get_responses(dataSrc, predicate = NULL, columns = c("person_id",
+  "item_id", "item_score"))
 }
 \arguments{
 \item{dataSrc}{a dexter project database or data.frame}
 
 \item{predicate}{an expression to select data on}
 
-\item{columns}{the columns you wish to select, can include all columns in the project, see: \code{\link{get_variables}}}
-
-\item{env}{optionally, an environment to evaluate the expression in}
+\item{columns}{the columns you wish to select, can include any column in the project, see: \code{\link{get_variables}}}
 }
 \value{
 a data.frame of responses

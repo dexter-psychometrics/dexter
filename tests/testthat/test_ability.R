@@ -1,12 +1,13 @@
+context('check ability')
+
 library(dplyr)
 library(purrr)
 
 expect_no_error = function(object, info=NULL) expect_error(object, regexp=NA, info=info)
 
-context('check ability')
+
 
 test_that('inconsistencies between data and parms are handled correctly',{
-
   db = open_project('../verbAggression.db')
   
   f1 = fit_enorm(db)
@@ -83,8 +84,8 @@ test_that('different estimation methods of ability converge on a large dataset',
       test = est %>% 
         select(one_of(pair)) %>%
         filter_all( all_vars(is.finite(.)))
-      
-      hh = summary(lm(test[[1]] ~ test[[2]]))
+      # some are exactly equal
+      hh = suppressWarnings(summary(lm(test[[1]] ~ test[[2]])))
       
       expect_true(hh$r.squared > 0.98, 
                   info = paste('lm theta ',pair[1], '~', pair[2], paste0('expect r.squared > .99, found:',hh$r.squared )))

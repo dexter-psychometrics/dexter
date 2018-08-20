@@ -6,8 +6,7 @@
 #' 
 #' @param dataSrc a dexter project database or data.frame
 #' @param predicate an expression to select data on
-#' @param columns the columns you wish to select, can include all columns in the project, see: \code{\link{get_variables}}
-#' @param env optionally, an environment to evaluate the expression in
+#' @param columns the columns you wish to select, can include any column in the project, see: \code{\link{get_variables}}
 #' @return a data.frame of responses
 #' @details 
 #' Many functions in Dexter accept a data source and a predicate. Predicates are extremely flexible 
@@ -39,10 +38,11 @@
 #' correct = fit_enorm(data)
 #' 
 #' }}
-get_responses = function(dataSrc, predicate=NULL, columns=c('person_id','item_id','item_score'), env=NULL)
+get_responses = function(dataSrc, predicate=NULL, columns=c('person_id','item_id','item_score'))
 {
-  if(is.null(env)) env = caller_env() 
-  as.data.frame(get_responses_(dataSrc, eval(substitute(quote(predicate))), columns=columns, env=env)) 
+  env = caller_env() 
+  qtpredicate = eval(substitute(quote(predicate)))
+  as.data.frame(get_responses_(dataSrc, qtpredicate, columns=columns, env=env)) 
 }
 
 get_responses_ = function(dataSrc, qtpredicate=NULL, columns=c('person_id','item_id','item_score'), env=NULL)
@@ -306,7 +306,11 @@ get_resp_data = function(dataSrc, qtpredicate=NULL, extra_columns=NULL, extra_de
     } 
   }
   
-  out = list(x = x, design = arrange(design, .data$booklet_id, .data$item_id), summarised = summarised)
+  out = list(x = mutate(x, booklet_id = as.character(.data$booklet_id)), 
+             design = design %>%
+               mutate(booklet_id=as.character(.data$booklet_id)) %>%
+               arrange(.data$booklet_id, .data$item_id), 
+             summarised = summarised)
   class(out) = append('dx_resp_data', class(out))
   
   return(out)

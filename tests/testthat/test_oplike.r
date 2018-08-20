@@ -1,8 +1,4 @@
-
-# look here: https://stats.stackexchange.com/questions/63891/is-r-output-reliable-specially-irt-package-ltm/95324#95324
-
-
-context('oplike')
+context('test oplike')
 
 
 test_that('start_new_project_from_oplm',
@@ -41,14 +37,16 @@ test_that('start_new_project_from_oplm',
                                      responses_start = 19,
                                      use_discrim=TRUE)
     },'booklet id')
-    # zou moeten werken
+    expect_error({
     db = start_new_project_from_oplm(dbname=':memory:',
                                      scr_path='../skip_on_cran/duits/DUITS.scr',
                                      dat_path='../skip_on_cran/duits/DUITS.DAT',
                                      booklet_position = c(3,4),
                                      responses_start = 19,
-                                     use_discrim=TRUE)
+                                     use_discrim=TRUE)},
+    'too short')
     
+    # to do, add test with proper oplm file
     
   } 
 })

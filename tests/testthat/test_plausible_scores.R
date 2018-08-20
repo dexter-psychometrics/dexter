@@ -1,7 +1,9 @@
+context('test plausible_scores')
+
 library(dplyr)
 
 
-context('Check plausible_scores')
+
 
 test_that('plausible scores works',{
   skip_on_cran()
@@ -42,5 +44,7 @@ test_that('plausible scores works',{
     inner_join(responses %>% group_by(person_id, booklet_id) %>% summarise(sumScore = sum(item_score)), by='person_id')
   
   expect_true(cor(ps$PS_keep_true, ps$sumScore) > cor(ps$PS1, ps$sumScore))
+  
+  
   
 })

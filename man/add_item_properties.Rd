@@ -4,33 +4,28 @@
 \alias{add_item_properties}
 \title{Add item properties to a project}
 \usage{
-add_item_properties(db, item_properties, default_values = list())
+add_item_properties(db, item_properties = NULL, default_values = NULL)
 }
 \arguments{
 \item{db}{A handle to the dexter project database, e.g. the output of \code{start_new_project}
 or \code{open_project}}
 
-\item{item_properties}{A data frame containing the item properties. See details.}
+\item{item_properties}{A data frame containing a column item_id (matching item_id's already defined in the project)
+and 1 or more other columns with item properties (e.g. item_type, subject)}
 
-\item{default_values}{a list where the names are the names of item_properties and the values specify defaults.
-The defaults will be used as the value for an item for which the property is not specified yet, 
-for example when you add new items using \code{\link{touch_rules}}.
-Default_values for an item property will only be processed
-for new item properties. It is not possible to change default values at a later time.}
+\item{default_values}{a list where the names are item_properties and the values are defaults.
+The defaults will be used wherever the item property is unknown.}
 }
 \value{
 nothing
 }
 \description{
-Add or change item properties in a dexter project
+Add, change or define item properties in a dexter project
 }
 \details{
 When entering response data in the form of a rectangular person x item
 table, it is easy to provide person properties but practically impossible
 to provide item properties. This function provides a possibility to do so.
-The order of the rows and columns in the data frame is not important but
-there must be a column called \code{item_id} containing the item id's
-exactly as entered before.
 
 Note that is is not possible to add new items with this function, 
 use \code{\link{touch_rules}} if you want to add new items to your project.

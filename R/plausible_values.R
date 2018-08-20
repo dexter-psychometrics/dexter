@@ -3,18 +3,18 @@
 ##########################################
 #' Draw plausible values
 #'
-#' Draws plausible values based on sum scores
+#' Draws plausible values based on test scores
 #'
 #'
 #' @param dataSrc Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score
 #' @param parms An object returned by function \code{fit_enorm} and containing
 #' parameter estimates. If parms is given the function provides plausible values conditional on the 
-#' item paramaters. These are considered known. If parms = NULL, the user is given 
-#' plausible values marginalized over the posterior distribution of the item parameters. 
+#' item parameters; i.e., these are considered known and might be based on a different data set. 
+#' If parms = NULL, the user is given plausible values marginalized over the posterior distribution of the item parameters. 
 #' In plain words, this means that the uncertainty of the item parameters is taken into account.
 #' @param predicate an expression to filter data. If missing, the function will use 
 #' all data in dataSrc
-#' @param covariates name or a vector of names of the variables to group the population, used to update the prior.
+#' @param covariates name or a vector of names of the variables to group the populations used to improve the prior.
 #' A covariate must be a discrete person covariate (e.g. not a float) that indicates nominal categories, e.g. gender or school
 #' If dataSrc is a data.frame, it must contain the covariate.
 #' @param nPV Number of plausible values to draw per person.
@@ -22,25 +22,27 @@
 #' recognised automatically), the number of the random draw (iteration) to use 
 #' in generating the PV. If NULL, all draws will be averaged; that is, the posterior means are used for the item parameters.
 #' If outside range, the last iteration will be used.
-#' @param asOPLM As a courtesy to the user who has an unhealthy habit to look at parameters or latent stuff, this option normalizes
-#' the item parameter as in OPLM output. Only used when there are no fixed pameters to determine the origin.
+#' @param asOPLM As a courtesy to the OPLM user, this option normalizes the item parameter as in OPLM output. 
+#' Is inactive when there are fixed pameters because their values determine the normalization.
 #' @return A data.frame with columns booklet_id, person_id, sumScore and nPV plausible values
 #' named PV1...PVn.
 #' 
 #' @references 
 #' Marsman, M., Maris, G., Bechger, T. M., and Glas, C.A.C. (2016) What can we learn from plausible values? 
-#' Psychometrika. 2016; 81: 274–289. 
+#' Psychometrika. 2016; 81: 274-289. See also the vignette.
 #' 
 #' @examples
-#' \dontrun{
-#' db = start_new_project(verbAggrRules, "verbAggression.db", 
+#' db = start_new_project(verbAggrRules, ":memory:", 
 #'    covariates=list(gender="<unknown>"))
 #' add_booklet(db, verbAggrData, "agg")
 #' add_item_properties(db, verbAggrProperties)
+#' 
 #' f=fit_enorm(db)
-#' par(mfrow=c(1,2))
 #' pv_M=plausible_values(db,f,(mode=="Do")&(gender=="Male"))
 #' pv_F=plausible_values(db,f,(mode=="Do")&(gender=="Female"))
+#' 
+#' par(mfrow=c(1,2))
+#' 
 #' plot(ecdf(pv_M$PV1), 
 #'    main="Do: males versus females", xlab="Ability", col="red")
 #' lines(ecdf(pv_F$PV1), col="green")
@@ -57,7 +59,6 @@
 #'    lty=1, col=c('green', 'red'), bty='n', cex=.75)
 #'    
 #' close_project(db)    
-#' }
 #' 
 plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL, nPV=1, use_draw=NULL, asOPLM=TRUE)
 {
@@ -83,9 +84,17 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
     r = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, extra_columns=covariates, env=env)
     parms = fit_enorm_(r, method = 'Bayes', nIterations = nIter_enorm) 
     r = get_resp_data(r, summarised=TRUE, extra_columns=covariates)
-    if (nPV==1) warning("The PVs are produced with one sample of item parameters from their posterior. 
-                        You may want more iterations; i.e., more PVs and average them.")
   } 
+
+  x = r$x
+  if(nrow(x) == 0) stop('No data to analyse')
+  
+  # join design with the params
+  design = r$design %>%
+    left_join(parms$inputs$ssI, by='item_id') %>% 
+    arrange(.data$booklet_id, .data$first)
+  
+  if(any(is.na(design$first))) stop('Some of your items are without parameters')
   
   ### Normalize as in OPLM
   if (asOPLM && !parms$inputs$has_fixed_parms)
@@ -101,16 +110,6 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
       }
     }
   }
-  
-  x = r$x
-  if(nrow(x) == 0) stop('no data to analyse')
-  
-  # join design with the params
-  design = r$design %>%
-    left_join(parms$inputs$ssI, by='item_id') %>% 
-    arrange(.data$booklet_id, .data$first)
-  
-  if(any(is.na(design$first))) stop('some of your items are without parameters')
   
   if (parms_given && !use_b_matrix)
   {
