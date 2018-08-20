@@ -95,8 +95,18 @@ profile_tables = function(parms, domains, item_property, design = NULL)
   
   
   if(is.null(design))
-    design = parms$inputs$design
-  #design = lapply(parms$inputs$bkList, function(bk) tibble(booklet_id=bk$booklet,item_id=bk$items)) %>% bind_rows()
+  {
+    if(is.null(parms$inputs$design))
+    {
+      if(inherits(parms,'mst_enorm'))
+        message('Computing non-mst profile_tables over an mst design, did you mean to use profile_tables_mst?')
+      design = lapply(parms$inputs$bkList, function(bk) tibble(booklet_id=bk$booklet,item_id=bk$items)) %>% bind_rows()
+    } else
+    {
+      design = parms$inputs$design
+    }
+  }  
+
   
   if(!'booklet_id' %in% colnames(design)) design$booklet_id = 'all_items'
   # what if domains not a superset of design?
