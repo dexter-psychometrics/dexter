@@ -1,5 +1,16 @@
 ## ----setup, include=FALSE------------------------------------------------
-knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+opts_chunk$set(echo = TRUE,dev='CairoPNG')
+
+par_hook = function(before, options, envir)
+{
+  if(before)
+  {
+    do.call(par, options$par)
+  }
+}
+knit_hooks$set(par = par_hook)
+
 library(dexter)
 library(dplyr)
 
@@ -16,21 +27,20 @@ sim_Rasch = function(theta, delta) {
 
 simulated = sim_Rasch(rep(0.5, 2000), runif(20, -2, 2))
 
-## ---- fig.align='center', fig.width=7------------------------------------
+## ---- fig.align='center', fig.width=7,par=list(mfrow=c(1,2))-------------
 ss= simulated %>% 
   group_by(person_id) %>% 
   summarise(sumscore=sum(item_score)) 
-par(mfrow=c(1,2))
+
 hist(ss$sumscore, main='', xlab='sumScore')
 plot(ecdf(ss$sumscore), bty='l', main='ecdf', xlab='sumScore' )
 mm = fit_inter(simulated)
 
-## ---- fig.align='center', fig.width=7------------------------------------
+## ---- fig.align='center', fig.width=7,par=list(mfrow=c(1,2))-------------
 mm = fit_inter(simulated)
-par(mfrow=c(1,1))
+
 plot(mm, show.observed = TRUE, 
-     items = c('i1','i2'),
-     nr=1, nc=2)
+     items = c('i1','i2'))
 
 ## ---- fig.align='center', fig.height=4, fig.width=4----------------------
 dd = individual_differences(simulated,degree=10)

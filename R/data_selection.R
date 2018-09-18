@@ -187,6 +187,11 @@ get_resp_data = function(dataSrc, qtpredicate=NULL, extra_columns=NULL, extra_de
   ######### data.frame or database ##########
   
   bkl_safe = is_bkl_safe(dataSrc, qtpredicate) 
+  if(inherits(dataSrc,'data.frame'))
+  {
+    dataSrc = mutate_if(dataSrc, is.factor, as.character)
+    dataSrc$item_score = as.integer(dataSrc$item_score)
+  }
 
   if(!inherits(dataSrc,'data.frame') || 'booklet_id' %in% colnames(dataSrc))
   {

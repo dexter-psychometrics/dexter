@@ -143,9 +143,9 @@ plot(m, 'S1DoCurse', summate=FALSE)
 
 On the other hand, we can represent scores on subtests as super-items and analyse these as normal items (function `fit_domains`). For example, treating the four frustrating situations in the verbal aggression example as domains, we get:
 
-```{r}
+```{r,par=list(mfrow=c(2,2))}
 mSit = fit_domains(db, item_property= "situation")
-plot(mSit, nr=2,nc=2)
+plot(mSit)
 ```
 
 So far, we have been exploring the data, booklet per booklet, making sure that there are no obvious issues, that item quality is acceptable, and the model we intend to use for calibration fits the data reasonably well. The actual estimation of the calibration model, over all booklets concurrently, is done with function `fit_enorm`:

@@ -61,7 +61,8 @@ probability_to_pass = function(dataSrc, ref_items, pass_fail, design = NULL, pre
   ##
  
   qtpredicate = eval(substitute(quote(predicate)))
-  respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, env=caller_env())
+  env=caller_env()
+  respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, env=env)
   
   ref_items = tibble(item_id = unique(ref_items))
   if(nrow(ref_items %>% anti_join(respData$design, by = 'item_id')) > 0)

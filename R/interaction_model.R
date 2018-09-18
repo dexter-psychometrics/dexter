@@ -32,12 +32,12 @@
 fit_inter = function(dataSrc, predicate = NULL)
 {
   qtpredicate = eval(substitute(quote(predicate)))
-
-  respData = get_resp_data(dataSrc, qtpredicate, env = caller_env())
+  env = caller_env()
+  respData = get_resp_data(dataSrc, qtpredicate, env = env)
 
   if(nrow(respData$x)==0) stop('no responses to analyse')
 
-  # make sure we have an intersection
+  # test if we have complete data, otherwise make a rectangular matrix by throwing away items
   if(length(unique(respData$design$booklet_id)) > 1)
   {
     items = Reduce(intersect, split(respData$design$item_id, respData$design$booklet_id))
@@ -54,64 +54,64 @@ fit_inter = function(dataSrc, predicate = NULL)
       ungroup()
   }
 
-  if(is.null(qtpredicate)){ grpName = 'All'} else{ grpName = as.character(qtpredicate)}
-
-  # add 0 scores if necessary
-  ssScoreLev = respData$x %>%
+  # statistics per item-score combination
+  # if the score 0 does not occur for an item, it is added with sufI=0 and sufC=0
+  ssIS = respData$x %>%
     group_by(.data$item_id, .data$item_score) %>%
-    summarise(sufI=n(), sufC=sum(.data$item_score * .data$sumScore)) %>%
+    summarise(sufI=n(), sufC_ = sum(.data$item_score * .data$sumScore)) %>%
     ungroup() %>%
-    full_join(tibble(item_id=respData$design$item_id, item_score=0), by = c("item_id","item_score")) %>%
+    full_join(tibble(item_id=respData$design$item_id, item_score=0L), by = c("item_id","item_score")) %>%
+    mutate(sufI = coalesce(.data$sufI, 0L), sufC_ = coalesce(.data$sufC_,0L)) %>%
     arrange(.data$item_id, .data$item_score)
 
-  ssScoreLev[is.na(ssScoreLev)] = 0
-
-  ssItemLev = ssScoreLev %>%
+  # statistics per item
+  ssI = ssIS %>%
     group_by(.data$item_id) %>%
-    summarise(nCat = n(), N = sum(.data$sufI), sufC = sum(.data$sufC)) %>%
-    mutate(first = cumsum(.data$nCat) - .data$nCat + 1, last = cumsum(.data$nCat))  %>%
+    summarise(nCat = n(), sufC = sum(.data$sufC_), item_maxscore = max(.data$item_score)) %>%
     ungroup() %>%
+    mutate(first = cumsum(.data$nCat) - .data$nCat + 1L, last = cumsum(.data$nCat))  %>%
     arrange(.data$item_id)
 
+  # mean item score and weight (as n responses) for each individual test score
+  # used for plotting
   plt = respData$x %>%
     group_by(.data$item_id, .data$sumScore) %>%
     summarise(meanScore = mean(.data$item_score), N = n()) %>%
     ungroup()
 
-  maxTotScore = sum(tapply(ssScoreLev$item_score, ssScoreLev$item_id, max))
+  # theoretical max score on the test
+  maxTestScore = sum(ssI$item_maxscore)
 
-  totalLev = plt[plt$item_id==plt$item_id[1],] %>%
-    right_join(tibble(sumScore=0:maxTotScore), by="sumScore")
+  # scoretab from 0:maxscore (including unachieved and impossible scores)
+  scoretab = respData$x %>%
+    distinct(.data$person_id, .keep_all=TRUE) %>%
+    group_by(.data$sumScore) %>%
+    summarise(N=n()) %>%
+    ungroup() %>%
+    right_join(tibble(sumScore=0L:maxTestScore), by="sumScore") %>%
+    mutate(N=coalesce(.data$N, 0L)) %>%
+    arrange(.data$sumScore)
+  
 
-  totalLev$N[is.na(totalLev$N)] = 0
-
-  ss = list(group=grpName, il=ssItemLev, sl=ssScoreLev, tl=totalLev, plt=plt)
-
-  # changed because I don't like this, if estimation throws an error,
-  # this function should throw one too, not return a mostly useless object
-  #result = try(EstIM(ss))
-  #if (inherits(result, "try-error")) result=NULL
-
-  result = EstIM(ss)
+  result = EstIM(first = ssI$first, last = ssI$last, nCat = ssI$nCat, a = ssIS$item_score, 
+                 sufI = ssIS$sufI, sufC = ssI$sufC, scoretab = scoretab$N)
 
   # add the regressions, convenient for plotting
-  #if (!is.null(result))
-  #{
-    C = rep(1:nrow(ss$il), ss$il$nCat)
-    ctrRM=ittotmat(result$bRM, result$cRM[C], ss$sl$item_score, ss$il$first, ss$il$last)
-    ctrIM=ittotmat(result$bIM, result$cIM[C], ss$sl$item_score, ss$il$first, ss$il$last)
-    mm = sweep(model.matrix(~0+ss$sl$item_id), 1, ss$sl$item_score, '*')
-    itrRM = as.data.frame(crossprod(mm, ctrRM))
-    itrIM = as.data.frame(crossprod(mm, ctrIM))
-    row.names(itrRM) = row.names(itrIM) = ss$il$item_id
-    regs = list(ctrRM, ctrIM, itrRM, itrIM)
-    names(regs) = c('ctrRM','ctrIM','itrRM','itrIM')
-  #} else {
-  #  regs = NULL
-  #}
-  outpt = list(est=result, ss=ss, regs=regs)
-  class(outpt) = append("rim",class(outpt))
-  outpt
+
+  C = rep(1:nrow(ssI), ssI$nCat)
+  
+  ctrRM = ittotmat(result$bRM, result$cRM[C], ssIS$item_score, ssI$first, ssI$last)
+  ctrIM = ittotmat(result$bIM, result$cIM[C], ssIS$item_score, ssI$first, ssI$last)
+  mm = sweep(model.matrix(~0 + ssIS$item_id), 1, ssIS$item_score, '*')
+  itrRM = as.data.frame(crossprod(mm, ctrRM))
+  itrIM = as.data.frame(crossprod(mm, ctrIM))
+  row.names(itrRM) = row.names(itrIM) = ssI$item_id
+
+  output = list(est = result, 
+                inputs = list(ssI = ssI, ssIS = ssIS, plt = plt, scoretab=scoretab), 
+                regs = list(ctrRM = ctrRM, ctrIM = ctrIM, itrRM = itrRM, itrIM = itrIM))
+  class(output) = append("rim", class(output))
+  output
 }
 
 
@@ -151,10 +151,11 @@ fit_inter = function(dataSrc, predicate = NULL)
 fit_domains = function(dataSrc, item_property, predicate = NULL)
 {
   qtpredicate = eval(substitute(quote(predicate)))
-
-  respData = get_resp_data(dataSrc, qtpredicate, extra_columns=item_property, env=caller_env())
+  env = caller_env()
+  respData = get_resp_data(dataSrc, qtpredicate, extra_columns=item_property, env = env)
   if(nrow(respData$x) == 0) stop('no data to analyse')
 
+  # test if we have complete data, otherwise make a rectangular matrix by throwing away items
   if(length(unique(respData$design$booklet_id)) > 1)
   {
     items = Reduce(intersect, split(respData$design$item_id, respData$design$booklet_id))
@@ -168,6 +169,7 @@ fit_domains = function(dataSrc, item_property, predicate = NULL)
       semi_join(respData$design, by='item_id')
   }
 
+  # adapt the respdata object by making new polytomous items based on the domains
   respData$x = respData$x %>%
     group_by(.data$person_id, .data[[!!item_property]]) %>%
     summarise(item_score=sum(.data$item_score)) %>%
@@ -180,21 +182,11 @@ fit_domains = function(dataSrc, item_property, predicate = NULL)
 
   respData$design = tibble(booklet_id = 'b', item_id = unique(respData$x$item_id))
 
+  # call fit_inter on the adapted data
   fit_inter(respData)
 }
 
-draw_curtains = function(qnt)
-{
- if(!is.null(qnt))
- {
-   usr = graphics::par('usr')
-   graphics::rect(usr[1], usr[3], qnt[1], usr[2], col="#EEEEEE", border=NA,xpd=FALSE,lwd=0)
-   graphics::rect(qnt[2], usr[3], usr[2], usr[4], col="#EEEEEE", border=NA,xpd=FALSE,lwd=0)
-   # rect will sometimes cover the axis (redrawing the axis would probably solve this too)
-   abline(h=usr[3])
-   abline(v=usr[1])
- }
-}
+
 
 ##########################################
 #' A plot method for the interaction model
@@ -210,10 +202,6 @@ draw_curtains = function(qnt)
 #' one for the Rasch model and the other for the interaction model, with all items
 #' overlayed; otherwise, one plot for each item with the two models overlayed. Ignored
 #' if summate is FALSE. Default is FALSE
-#' @param nc An integer between 1 and 3. Number of columns when putting mutiple plots
-#' on the same page. Default is 1. May be ignored or adjusted if it does not make sense.
-#' @param nr An integer between 1 and 3. Number of rows when putting mutiple plots
-#' on the same page. Default is 1. May be ignored or adjusted if it does not make sense.
 #' @param curtains 100*the tail probability of the sum scores to be shaded. Default is 10.
 #' Set to 0 to have no curtains shown at all.
 #' @param show.observed If TRUE, the observed proportion correct at each sum score
@@ -225,9 +213,9 @@ draw_curtains = function(qnt)
 #' by prefixing them with a dollar sign, e.g. plot(m, main='item: $item_id')
 #' @method plot rim
 #'
-plot.rim <- function(x, items=NULL, summate=TRUE, overlay=FALSE,
-                     nc=1, nr=1, curtains=10, show.observed=FALSE, ...){
-  allItems = x$ss$il$item_id
+plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
+                     curtains=10, show.observed=FALSE, ...){
+  allItems = x$inputs$ssI$item_id
   if(!is.null(items))
   {
     if(length(setdiff(items, allItems)) > 0) stop(paste('item(s):', paste0(setdiff(items, allItems), collapse=', '), 'not found'))
@@ -237,18 +225,25 @@ plot.rim <- function(x, items=NULL, summate=TRUE, overlay=FALSE,
   }
   user.args = list(...)
 
+  if(any(c('nr','nc') %in% names(user.args)))
+  {
+    warning('Arguments `nr` and `nc` have been deprecated and are ignored, you can achieve the desired ',
+            'result by using par(mfrow=c(nr,nc)).')
+    user.args[['nc']] = NULL
+    user.args[['nr']] = NULL
+  }
+  
   qua = curtains/200
   qnt=NULL
   if(qua>0 && qua<.5) {
-    qnt = quantile(rep(as.integer(x$ss$tl$sumScore), x$ss$tl$N), c(qua,1-qua))
+    qnt = quantile(rep(as.integer(x$inputs$scoretab$sumScore), x$inputs$scoretab$N), c(qua,1-qua))
   }
 
   npic = length(items)
-  if (length(items)==1) nr=nc=1
-  if (overlay & !summate) overlay=FALSE
+
+  if (overlay && !summate) overlay=FALSE
   if (overlay) {
     # only summate possible
-    if (nr*nc==2) graphics::layout(matrix(1:2,nr,nc)) else graphics::layout(1)
     # do the Rasch model
     #
     z = x$regs$itrRM
@@ -263,7 +258,7 @@ plot.rim <- function(x, items=NULL, summate=TRUE, overlay=FALSE,
     plot.args$main = fstr(plot.args$main, list(model='Rasch'))
     plot.args$sub = fstr(plot.args$sub, list(model='Rasch'))
 
-    do.call(graphics::plot, plot.args)
+    do.call(plot, plot.args)
     draw_curtains(qnt)
     
     for (i in 1:npic) graphics::lines(0:maxScore,z[i,]) # the actual lines
@@ -286,10 +281,10 @@ plot.rim <- function(x, items=NULL, summate=TRUE, overlay=FALSE,
     plot.args$main = fstr(plot.args$main, list(model='Interaction'))
     plot.args$sub = fstr(plot.args$sub, list(model='Interaction'))
 
-    do.call(graphics::plot, plot.args)
+    do.call(plot, plot.args)
     draw_curtains(qnt)
     
-    for (i in 1:npic) graphics::lines(0:maxScore,z[i,]) # the actual lines
+    for (i in 1:npic) graphics::lines(0:maxScore, z[i,]) # the actual lines
     lx = sample(0:maxScore, npic, replace = FALSE) # label the lines
     for (i in 1:npic) {
       graphics::points(lx[i], z[i,lx[i]+1], co="white", cex=1.6, pch=19)
@@ -300,8 +295,7 @@ plot.rim <- function(x, items=NULL, summate=TRUE, overlay=FALSE,
 
   } else {
     # not overlay: do many plots
-    ly = my_layout(npic, nr, nc)
-    graphics::layout(matrix(1:(ly$nr*ly$nc), byrow=TRUE, ncol=ly$nc))
+    
     if (summate) {
       # for each item in turn, do both models (with summation), and plot
       zI = x$regs$itrIM
@@ -318,12 +312,12 @@ plot.rim <- function(x, items=NULL, summate=TRUE, overlay=FALSE,
         plot.args$main = fstr(plot.args$main, list(item_id=i))
         plot.args$sub = fstr(plot.args$sub, list(item_id=i))
 
-        do.call(graphics::plot, plot.args)
+        do.call(plot, plot.args)
 
         draw_curtains(qnt)
         if(show.observed) {
-          plt = x$ss$plt[x$ss$plt$item_id==i,]
-          graphics::points(plt$sumScore,plt$meanScore,col="coral",pch=20)
+          plt = filter(x$inputs$plt, .data$item_id == i)
+          graphics::points(plt$sumScore, plt$meanScore, col="coral",pch=20)
         }
         graphics::lines(0:maxScore, zI[row.names(zI)==i,], col="gray80", lwd=3)
         graphics::lines(0:maxScore, zR[row.names(zR)==i,])
@@ -335,7 +329,9 @@ plot.rim <- function(x, items=NULL, summate=TRUE, overlay=FALSE,
       maxScore = ncol(zR)-1
       # for each item in turn, similar but possibly multiline and coloured
       for (i in items) {
-        prb = zI[x$ss$il$first[x$ss$il$item_id==i]:x$ss$il$last[x$ss$il$item_id==i],]
+        ssI = filter(x$inputs$ssI, .data$item_id==i)
+        prb = zI[ssI$first : ssI$last, ]
+        
         pte = bty(nrow(prb), alpha=.6)
         #pte = qcolors(nrow(prb))
 
@@ -353,7 +349,7 @@ plot.rim <- function(x, items=NULL, summate=TRUE, overlay=FALSE,
         for (j in 1:nrow(prb)) {
           graphics::lines(0:maxScore, prb[j,], col=pte[j], lwd=3)
         }
-        prb = zR[x$ss$il$first[x$ss$il$item_id==i]:x$ss$il$last[x$ss$il$item_id==i],]
+        prb = zR[ssI$first : ssI$last,]
         pte = bty(nrow(prb))
         for (j in 1:nrow(prb)) {
           graphics::lines(0:maxScore, prb[j,], col=pte[j])
@@ -361,7 +357,7 @@ plot.rim <- function(x, items=NULL, summate=TRUE, overlay=FALSE,
       } # eol items
       
     } # eo not summate
-    if(nc>1 || nr>1) par(mfrow=c(1,1))
+    
   } # eo not overlay
 }
 
@@ -369,7 +365,7 @@ plot.rim <- function(x, items=NULL, summate=TRUE, overlay=FALSE,
 
 print.rim <- function(x, ...){
   res = paste0('Parameters for the Rasch and Interaction Model\n\nitems: ',
-               paste0(pull(x$ss$il,"item_id"), collapse = ' '),
+               paste0(pull(x$inputs$ssI,"item_id"), collapse = ', '),
                '\n\n# use plot() for plotting the Rasch and Interaction Model or coef() for retreiving the parameters\n')
   cat(res)
   invisible(res)
@@ -380,17 +376,17 @@ print.rim <- function(x, ...){
 coef.rim = function(object, ...) 
 {
   x = object
-  first=x$ss$il$first
-  last =x$ss$il$last
-  dRM=x$est$bRM[-first]
-  dRM=-log(dRM/dRM[1])
-  dIM=x$est$bIM[-first]
-  dIM=-log(dIM/dIM[1])
-  OPCML_RM=toOPLM(x$ss$sl$item_score, x$est$bRM, first, last)
+  first = x$inputs$ssI$first
+  last  = x$inputs$ssI$last
+  dRM = x$est$bRM[-first]
+  dRM = -log(dRM/dRM[1])
+  dIM = x$est$bIM[-first]
+  dIM = -log(dIM/dIM[1])
+  OPCML_RM = toOPLM(x$inputs$ssIS$item_score, x$est$bRM, first, last)
   
-  IS = tibble(item_id = x$ss$sl$item_id[-first], item_score = x$ss$sl$item_score[-first],
+  IS = tibble(item_id = x$inputs$ssIS$item_id[-first], item_score = x$inputs$ssIS$item_score[-first],
               beta_rasch = as.vector(OPCML_RM$delta), beta_IM = dIM)
-  I = tibble(item_id = x$ss$il$item_id, sigma = log(x$est$cIM), SE_sigma= x$est$se.c, fit_IM=x$est$fit.stats)
+  I = tibble(item_id = x$inputs$ssI$item_id, sigma = log(x$est$cIM), SE_sigma= x$est$se.c, fit_IM=x$est$fit.stats)
   
   inner_join(IS,I,by='item_id') %>% arrange(.data$item_id, .data$item_score) %>% as.data.frame()
 }

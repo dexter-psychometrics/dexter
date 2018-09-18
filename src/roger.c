@@ -62,25 +62,30 @@ void sampleNRM(double *theta, double *b, int *a, int *i, int *first, int *last, 
 }
 
 // sample test-scores: This routine is adapted for use with b_0 and a_0.
-void sampleNRM2(double *theta, double *b, int *a, int *first, int *last, int *nI, int *m, int *score)
+void sampleNRM2(double *theta, double *b, int *a, int *first, int *last, int *nI_, int *m_,  int *maxA_, int *score)
 {
-  double *p=NULL, u;
-  int k=0,maxS=0;
-  GetRNGstate(); // get seed
-  for (int i=0;i<nI[0];i++) {if ((last[i]-first[i]+2)>maxS) {maxS=(last[i]-first[i]+2);}}
-  void *_p = realloc(p, ((maxS+1) * sizeof(double)));
-  p=(double*)_p;
+
+  double u;
+  int maxA = *maxA_, m = *m_, nI = *nI_;
+  int k=0;
+  double p[maxA+3];
+  double lookup[maxA+1];
   
-  for (int pers=0;pers<m[0];pers++)
+  GetRNGstate(); // get seed
+  
+  lookup[0] = 1.0;
+
+  for (int pers=0;pers<m;pers++)
   {
     score[pers]=0;
-    for (int i=0;i<nI[0];i++)
+	for(int i=1;i<=maxA;i++){ lookup[i] = exp(i*theta[pers]);}
+    for (int i=0;i<nI;i++)
     {
-      p[0]=b[first[i]]*exp(a[first[i]]*theta[pers]); 
+      p[0]=b[first[i]]; //*exp(a[first[i]]*theta[pers]); 
       k=1;
       for (int j=first[i]+1;j<=last[i];j++) // note the +1
       {
-        p[k]=p[k-1]+b[j]*exp(a[j]*theta[pers]);
+        p[k]=p[k-1]+b[j]*lookup[a[j]];
         k++;
       }
       u=p[k-1]*runif(0,1);
@@ -90,8 +95,8 @@ void sampleNRM2(double *theta, double *b, int *a, int *first, int *last, int *nI
     }
   }
   PutRNGstate(); // put seed
-  free(p);
 }
+
 
 void PV0(double *b, int *a, int *first, int *last, double *mu, double *sigma, int *score, int *pop, int *nP,int *nI, int *nPop, double *theta)
 {
@@ -264,12 +269,12 @@ void PVrecycle(double *b, int *a, int *first, int *last, double *mu, double *sig
         while (u>p[k]) {k++;}
         if (k>0) {x+=a[first[i]+k];} // note that -1 has been deleted
     }
-	  if(scoretb[x] > 0)
-	  {
+	if(scoretb[x] > 0)
+	{
 		  theta[cscoretb[x] - scoretb[x]] = atheta;
 		  scoretb[x]--;
 		  nP--;
-	  }
+	}
   }
   PutRNGstate(); // put seed
 }

@@ -1,5 +1,5 @@
 ## ----setup, include=FALSE------------------------------------------------
-knitr::opts_chunk$set(echo = TRUE) #
+knitr::opts_chunk$set(echo = TRUE, dev='CairoPNG') #
 library(dexter)
 library(calibrate)
 library(dplyr)

@@ -262,10 +262,9 @@ update_pv_prior<-function(pv, pop, mu, sigma)
 # @param p  vector of group membership probabilities
 # @param mu     current means of each group
 # @param sigma  current standard deviation of each group
-# @param pop    vector of population indexes. Currently not used
 #
 # @return       a sample of p, mu and sigma
-update_pv_prior_mixnorm = function (pv, p, mu, sigma, pop) {
+update_pv_prior_mixnorm = function (pv, p, mu, sigma) {
   n = length(pv)
   z = rep(0, n)
   nj = c(0,0); 
@@ -352,7 +351,9 @@ pv = function(x, design, b, a, nPV, from = 20, by = 5, prior.dist = c("normal", 
   {
     which.pv = seq(from,(from-by)*(from>by)+by*nPV,by=by)
     nIter=max(which.pv)
-    if (nrow(b)<nIter) stop(paste("at least", as.character(nIter), "samples of item parameters needed in function pv"))
+    if (nrow(b)<nIter){
+      stop(paste("at least", as.character(nIter), "samples of item parameters needed in function pv"))
+    }
     out_pv=matrix(0,length(x$sumScore),nPV)
  
     apv=1
@@ -420,7 +421,8 @@ pv = function(x, design, b, a, nPV, from = 20, by = 5, prior.dist = c("normal", 
        do({
          bkID = .$booklet_id[1]
          popnbr = .data$pop[1]
-         out_pv = pv_recycle(b, a, design[[bkID]]$first, design[[bkID]]$last, .$sumScore, nPV, priors$mu[popnbr], priors$sigma[popnbr])
+         out_pv = pv_recycle(b, a, design[[bkID]]$first, design[[bkID]]$last, .$sumScore, 
+                             nPV, priors$mu[popnbr], priors$sigma[popnbr])
          data.frame(.$person_id, .$sumScore, as.data.frame(out_pv), stringsAsFactors = FALSE)
         }) %>%
        ungroup() %>%
@@ -478,6 +480,7 @@ rscore <- function(theta,b,a,first,last, cntr=NULL, use_b_matrix=FALSE)
   m=length(theta)
   nI=length(first)
   x=rep(0,m)
+  mxa = max(a[last])
   tmp=.C("sampleNRM2",
          as.double(theta),
          as.double(b),
@@ -486,7 +489,8 @@ rscore <- function(theta,b,a,first,last, cntr=NULL, use_b_matrix=FALSE)
          as.integer(last-1),
          as.integer(nI),
          as.integer(m),
-         as.integer(x))[[8]]
+         as.integer(mxa),
+         as.integer(x))[[9]]
   return(tmp)
 }
 
@@ -761,17 +765,17 @@ theta_score_distribution <- function(b,a,first,last,scoretab)
 ## Score-by-score table. Currently using mean_ElSym
 ########################################################
 # @param m        a rim object produced by fit_inter (but not yet documented anywhere what that looks like)
-# @param AB       list: two mutually exclusive subsets of items as indexes of m$ss$il
+# @param AB       list: two mutually exclusive subsets of items as indexes first/last/etc.
 # @param model    Character: Indicates which model is used: "Rasch" or "IM"
 # @return         A list with tbl being a score-by-score matrix of probabilities:
 #                 P(X^A_+=s_a, X^B_+=s_b|X_+=s) where s=s_a+s_b
 # @details        NA's indicate that a total scores was not possible given the weights
 SSTable <- function(m, AB, model) {
   if (model=="IM") {ic=m$est$cIM; b=m$est$bIM} else {ic=m$est$cRM; b=m$est$bRM}
-  first = m$ss$il$first
-  last =  m$ss$il$last
-  C = rep(1:nrow(m$ss$il), m$ss$il$nCat)
-  a = m$ss$sl$item_score
+  first = m$inputs$ssI$first
+  last =  m$inputs$ssI$last
+  C = rep(1:nrow(m$inputs$ssI), m$inputs$ssI$nCat)
+  a = m$inputs$ssIS$item_score
   ic = ic[C]
   A = AB[[1]]
   B = AB[[2]]
@@ -992,14 +996,16 @@ ittotmat <- function(b,c,a,first,last)
 #     se.c:   Standard error of interaction parameter
 # fit.stat: log(cIM)/se.c. Wald statistic normally distributed under Rasch model
 #########################################################################
-EstIM  <- function(ss) {
-  first = ss$il$first
-  last = ss$il$last
-  a = ss$sl$item_score
-  sufI = ss$sl$sufI
-  sufC = ss$il$sufC
-  C = rep(1:nrow(ss$il), ss$il$nCat)
-  scoretab = ss$tl$N
+#EstIM  <- function(ss) {
+EstIM  <- function(first,last, nCat, a, sufI, sufC, scoretab) {
+  #first = ss$il$first
+  #last = ss$il$last
+  #a = ss$sl$item_score
+  #sufI = ss$sl$sufI
+  #sufC = ss$il$sufC
+  #C = rep(1:nrow(ss$il), ss$il$nCat)
+  #scoretab = ss$tl$N
+  C = rep(1:length(first), nCat)
   
   m=sum(scoretab) ##
   nI=length(last)
@@ -1105,7 +1111,7 @@ EstIM  <- function(ss) {
     if (converged<1) scale=1
   }
   
-  return(list(group=ss$group,bRM=bRM,cRM=cRM,bIM=b,cIM=ic,se.c=sqrt(var.ic),HRM=HRM, fit.stats=log(ic)/sqrt(var.ic)))
+  return(list(bRM=bRM,cRM=cRM,bIM=b,cIM=ic,se.c=sqrt(var.ic),HRM=HRM, fit.stats=log(ic)/sqrt(var.ic)))
 }
 
 
@@ -1113,6 +1119,11 @@ EstIM  <- function(ss) {
 ##################################################### calibrate incomplete designs: 
 # CML
 # Bayes
+# Note: if you wish to use mean_Elsym. Replace g=elsym(b, a, booklet[[bl]]$first[-ii], booklet[[bl]]$last[-ii]) by
+#   g = mean_ElSym(b, a, booklet[[bl]]$first[-ii], booklet[[bl]]$last[-ii])
+#   lg1 = length(g) - 1
+#   g = g*choose(lg1, 0:lg1)
+
 #####################################################
 
 #### Bayes
@@ -1137,17 +1148,18 @@ calibrate_Bayes = function(itemList, booklet, sufI, b, a, first, last, nIter, fi
     for (bl in 1:nb)
     {
       # data augmentation
-      g = mean_ElSym(b, a, booklet[[bl]]$first, booklet[[bl]]$last)
-      lg1 = length(g) - 1
-      scale_g=choose(lg1, 0:lg1)
-      z[bl] = rgamma(1, shape=booklet[[bl]]$m, rate=sum(g*scale_g*booklet[[bl]]$lambda))
+      g=elsym(b, a, booklet[[bl]]$first, booklet[[bl]]$last)
+      z[bl] = rgamma(1, shape=booklet[[bl]]$m, 
+                        rate=sum(g*booklet[[bl]]$lambda))
       # update lambda
       idx = which(g != 0.0)
-      booklet[[bl]]$lambda[idx] = rgamma(length(idx), shape=booklet[[bl]]$scoretab[idx]+0.1, rate=(g*scale_g*z[bl])[idx]) # 1.1
+      booklet[[bl]]$lambda[idx] = rgamma(length(idx), shape=booklet[[bl]]$scoretab[idx]+0.1, 
+                                                      rate=(g*z[bl])[idx]) # 1.1
       booklet[[bl]]$lambda[-idx] = 0.0
       # scale lambda such that g*lambda~scoretab
-      booklet[[bl]]$lambda[idx] = booklet[[bl]]$m*booklet[[bl]]$lambda[idx]/sum(g*scale_g*booklet[[bl]]$lambda)
-      z[bl] = rgamma(1, shape=booklet[[bl]]$m, rate=sum(g*scale_g*booklet[[bl]]$lambda))
+      booklet[[bl]]$lambda[idx] = booklet[[bl]]$m*booklet[[bl]]$lambda[idx]/sum(g*booklet[[bl]]$lambda)
+      z[bl] = rgamma(1, shape=booklet[[bl]]$m, 
+                        rate=sum(g*booklet[[bl]]$lambda))
     }
     for (i in 1:n)
     {
@@ -1155,17 +1167,16 @@ calibrate_Bayes = function(itemList, booklet, sufI, b, a, first, last, nIter, fi
       for (bl in itemList[[i]])
       {
         ii = which(booklet[[bl]]$first==first[i])
-        g = mean_ElSym(b, a, booklet[[bl]]$first[-ii], booklet[[bl]]$last[-ii])
-        lg1 = length(g) - 1
-        scale_g=choose(lg1, 0:lg1)
+        g = elsym(b, a, booklet[[bl]]$first[-ii], booklet[[bl]]$last[-ii])
         for (j in first[i]:last[i])
         {
-          if (a[j] == 0) y[j]=y[j]+z[bl]*sum(g*scale_g*head(booklet[[bl]]$lambda,-a[last[i]]))
-          if ((a[j] != a[last[i]])&(a[j]!=0)) y[j]=y[j]+z[bl]*sum(g*scale_g*head(tail(booklet[[bl]]$lambda,-a[j]),-(a[last[i]]-a[j])))
-          if (a[j] == a[last[i]]) y[j]=y[j]+z[bl]*sum(g*scale_g*tail(booklet[[bl]]$lambda,-a[j]))
+          if (a[j] == 0) y[j]=y[j]+z[bl]*sum(g*head(booklet[[bl]]$lambda,-a[last[i]]))
+          if ((a[j] != a[last[i]])&(a[j]!=0)) y[j]=y[j]+z[bl]*sum(g*head(tail(booklet[[bl]]$lambda,-a[j]),-(a[last[i]]-a[j])))
+          if (a[j] == a[last[i]]) y[j]=y[j]+z[bl]*sum(g*tail(booklet[[bl]]$lambda,-a[j]))
         }
       }
-      b[first[i]:last[i]] = rgamma(1+last[i]-first[i],shape=sufI[first[i]:last[i]]+1.1,rate=y[first[i]:last[i]]) #1.1
+      b[first[i]:last[i]] = rgamma(1+last[i]-first[i],shape=sufI[first[i]:last[i]]+1.1,
+                                                      rate=y[first[i]:last[i]]) #1.1
     }
     # identify
     for (i in 1:n)
@@ -1242,24 +1253,26 @@ calibrate_CML <- function(booklet, sufI, a, first, last, nIter, fixed_b=NULL) {
       converged=(max(abs(sufI-EsufI))/nn<1e-04)
       setTxtProgressBar(pb, value=iter)
     }
+    ie_iter=iter
     if (!converged) warning(paste('Implicit Equations not Converged in',as.character(nIter),"iterations"))
     
         ### identification ###
+    
     # within items
     for (i in 1:ni)
     {
       range=first[i]:last[i]
       b[range]=b[range]/b[first[i]]
     }
-    # between items. Note if ref_cat is allowed to be something else then 2 has to adapt toOPLM and toDexter
     ref_cat=2
-    b[-first] = b[-first]/b[ref_cat]
+    #b[-first] = b[-first]/b[ref_cat]
+  
     
               ###  NR  ###
     H=matrix(0,length(a),length(a))
     converged=FALSE
     nr_iter=0
-    scale=3
+    scale=1
     while ((!converged)&(nr_iter<max_nr_iter))
     {
       iter=iter+1
@@ -1314,6 +1327,7 @@ calibrate_CML <- function(booklet, sufI, a, first, last, nIter, fixed_b=NULL) {
       converged=(max(abs(sufI[update_set]-EsufI[update_set]))/nn<1e-04)
       setTxtProgressBar(pb, value=iter)
     }
+    ie_iter=iter
     if (!converged) warning(paste('Implicit Equations not Converged in',as.character(nIter),"iterations"))
     
     for (i in 1:ni)
@@ -1325,7 +1339,7 @@ calibrate_CML <- function(booklet, sufI, a, first, last, nIter, fixed_b=NULL) {
     H=matrix(0,length(a),length(a))
     converged=FALSE
     nr_iter=0
-    scale=2
+    scale=1
     while ((!converged)&(nr_iter<max_nr_iter))
     {
       iter=iter+1
@@ -1362,7 +1376,8 @@ calibrate_CML <- function(booklet, sufI, a, first, last, nIter, fixed_b=NULL) {
   for (bl in 1:nb) lx[[bl]]=est_lambda(b,a,booklet[[bl]]$first,booklet[[bl]]$last,booklet[[bl]]$scoretab)
   
   OPCML_out=toOPLM(a, b, first, last, H=H, fixed_b=fixed_b)
-  return(list(b=b, H=H, beta.cml=OPCML_out$delta, acov.cml=OPCML_out$cov_delta, lambda=lx, n_iter=iter))
+  return(list(b=b, H=H, beta.cml=OPCML_out$delta, acov.cml=OPCML_out$cov_delta, 
+              lambda=lx, n_iter=iter, nr_iter = nr_iter, ie_iter=ie_iter))
 }
 
 ## Get the score distribution of a booklet from fit_enorm

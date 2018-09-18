@@ -63,8 +63,9 @@
 plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL, nPV=1, use_draw=NULL, asOPLM=TRUE)
 {
   qtpredicate = eval(substitute(quote(predicate)))
+  env=caller_env()
   plausible_values_(dataSrc, parms, qtpredicate=qtpredicate, covariates=covariates, nPV=nPV, 
-                    use_draw=use_draw, asOPLM=asOPLM, env=caller_env()) %>%
+                    use_draw=use_draw, asOPLM=asOPLM, env=env) %>%
     as.data.frame()
 }
 

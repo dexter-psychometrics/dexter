@@ -22,7 +22,8 @@ tia_tables <- function(dataSrc, predicate = NULL, type=c('raw','averaged','compa
   type = match.arg(type)
   
   qtpredicate = eval(substitute(quote(predicate)))
-  x = get_resp_data(dataSrc, qtpredicate, env=caller_env(), summarised=FALSE)$x
+  env=caller_env()
+  x = get_resp_data(dataSrc, qtpredicate, env=env, summarised=FALSE)$x
   
   # if dataSrc is a db and no predicate then resp_data$design also contains the item_position, might be useful
   

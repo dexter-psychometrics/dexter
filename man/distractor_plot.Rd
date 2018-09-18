@@ -4,8 +4,8 @@
 \alias{distractor_plot}
 \title{Distractor plot}
 \usage{
-distractor_plot(dataSrc, item, predicate = NULL, nc = 1, nr = 1,
-  legend = TRUE, curtains = 10, ...)
+distractor_plot(dataSrc, item, predicate = NULL, legend = TRUE,
+  curtains = 10, ...)
 }
 \arguments{
 \item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, response, item_score
@@ -17,12 +17,6 @@ is not known. Each plot contains a non-parametric regression of each possible
 response on the total score.}
 
 \item{predicate}{An optional expression to subset data, if NULL all data is used}
-
-\item{nc}{An integer between 1 and 3. Number of columns when putting mutiple plots
-on the same page. Default is 1. May be ignored or adjusted if it does not make sense.}
-
-\item{nr}{An integer between 1 and 3. Number of rows when putting mutiple plots
-on the same page. Default is 1. May be ignored or adjusted if it does not make sense.}
 
 \item{legend}{logical, whether to include the legend. default is TRUE}
 

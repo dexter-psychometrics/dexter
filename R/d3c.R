@@ -7,7 +7,7 @@
 #'
 #' @param export_name path to a new 3DC database
 #' @return a handle to the 3DC sqlite database
-#' @details The data driven direct consensus (3DC) method of standard setting  is described in Keuning et. al. (2017).
+#' @details The data driven direct consensus (3DC) method of standard setting is invented by Gunter Maris and described in Keuning et. al. (2017).
 #' To easily apply this procedure, we advise to use the free digital 3DC application. This application 
 #' can be downloaded from the Cito website, see the 
 #' \href{http://www.cito.com/our-expertise/implementation/3dc}{3DC application download page}. 
@@ -253,7 +253,7 @@ add_test3DC = function(db3dc, parms, design, test_id, standards, mu, sigma,
 plot3DC = function(db3dc, test_id=NULL, ...)
 {
   where = ''
-  if(!is.null(test_id)) where = paste0('WHERE test_id IN(',paste0(sql_quote(test_id), collapse=','),')')
+  if(!is.null(test_id)) where = paste0('WHERE test_id IN(',paste0(sql_quote(test_id,"'"), collapse=','),')')
   
   plot.args = list(...)
   

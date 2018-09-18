@@ -1,6 +1,5 @@
 
 
-
 ##########################################
 #' Profile analysis
 #'
@@ -63,8 +62,8 @@ profiles = function(dataSrc, parms, item_property, predicate=NULL)
     if(!item_property %in% dbListFields(dataSrc,'dxitems'))
       stop(paste0('There is no item_property with name `',item_property,'` in your project'))
   }
-  
-  respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, env=caller_env(), 
+  env=caller_env()
+  respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, env=env, 
                            extra_columns = item_property, extra_design_columns = item_property)
   
   respData$x %>%

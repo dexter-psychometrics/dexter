@@ -100,7 +100,7 @@ iTIA <- function(db) {
     lapply(ourItems, function(i){
       lo = matrix_layout(nrow(filter(respData$design, .data$item_id==i)))
       # renderPlot automatically delays execution
-      output[[paste0("plot", i)]] = renderPlot(distractor_plot(respData,i,nr=lo[1],nc=lo[2]))
+      output[[paste0("plot", i)]] = renderPlot({par(mfrow=lo);distractor_plot(respData,i)})
       observeEvent(input[[paste0("btn", i)]], {
         toggleModal(session, paste0("myModal", i), "open")
       })
@@ -110,9 +110,10 @@ iTIA <- function(db) {
       # we delay execution of fit_inter until the moment the plot is requested
       delayedAssign('mo', fit_inter(respData %>% filter(.data$booklet_id==i)))
       #mo = fit_inter(respData %>% filter(.data$booklet_id==i))
-      output[[paste0("plot", i)]] = renderPlot(
-        plot(mo, overlay=TRUE, nc=2)
-      )
+      output[[paste0("plot", i)]] = renderPlot({
+        par(mfrow=c(1,2))
+        plot(mo, overlay=TRUE)
+      })
       observeEvent(input[[paste0("btn", i)]], {
         toggleModal(session, paste0("myModal", i), "open")
       })
@@ -231,7 +232,7 @@ iModels <- function(db, booklet) {
         renderPlot(plot(models, item=i,
                         summate=input$summate,
                         overlay=FALSE,
-                        nc=1, nr=1, curtains=10,
+                        curtains=10,
                         show.observed=input$show
         ))
       observeEvent(input[[paste0("btn", i)]], {

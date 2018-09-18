@@ -15,7 +15,18 @@ img{ border:none;}
 </style>
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+opts_chunk$set(echo = TRUE,dev='CairoPNG')
+
+par_hook = function(before, options, envir)
+{
+  if(before)
+  {
+    do.call(par, options$par)
+  }
+}
+knit_hooks$set(par = par_hook)
+
 library(dexter)
 library(dplyr)
 ```
@@ -42,11 +53,11 @@ simulated = sim_Rasch(rep(0.5, 2000), runif(20, -2, 2))
 
 Computing the sum scores and examining their distribution, we find nothing conspicuous:
 
-```{r, fig.align='center', fig.width=7}
+```{r, fig.align='center', fig.width=7,par=list(mfrow=c(1,2))}
 ss= simulated %>% 
   group_by(person_id) %>% 
   summarise(sumscore=sum(item_score)) 
-par(mfrow=c(1,2))
+
 hist(ss$sumscore, main='', xlab='sumScore')
 plot(ecdf(ss$sumscore), bty='l', main='ecdf', xlab='sumScore' )
 mm = fit_inter(simulated)
@@ -54,12 +65,11 @@ mm = fit_inter(simulated)
 
 We can also examine the various item-total regressions produced by function `fit_inter`. For example, here are the plots for the first two items:
 
-```{r, fig.align='center', fig.width=7}
+```{r, fig.align='center', fig.width=7,par=list(mfrow=c(1,2))}
 mm = fit_inter(simulated)
-par(mfrow=c(1,1))
+
 plot(mm, show.observed = TRUE, 
-     items = c('i1','i2'),
-     nr=1, nc=2)
+     items = c('i1','i2'))
 ```
 
 The curtains that eliminate the 5% smallest and 5% largest sum scores are drawn somewhat narrow but, apart from that, all regressions look nice. It appears that, by just looking at the response data, we are not in a very good position to judge whether there are any true individual differences in ability. To help with that, dexter offers a function, `individual_differences`:  

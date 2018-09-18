@@ -58,9 +58,9 @@ plot(m, "S1DoScold", show.observed=TRUE)
 ## ------------------------------------------------------------------------
 plot(m, 'S1DoCurse', summate=FALSE)
 
-## ------------------------------------------------------------------------
+## ----par=list(mfrow=c(2,2))----------------------------------------------
 mSit = fit_domains(db, item_property= "situation")
-plot(mSit, nr=2,nc=2)
+plot(mSit)
 
 ## ---- results='hide'-----------------------------------------------------
 parms = fit_enorm(db)

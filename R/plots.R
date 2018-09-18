@@ -38,6 +38,19 @@ qcolors = function(n, pal='Set1')
 }
 
 
+draw_curtains = function(qnt)
+{
+  if(!is.null(qnt))
+  {
+    usr = graphics::par('usr')
+    graphics::rect(usr[1], usr[3], qnt[1], usr[2], col="#EEEEEE", border=NA,xpd=FALSE,lwd=0)
+    graphics::rect(qnt[2], usr[3], usr[2], usr[4], col="#EEEEEE", border=NA,xpd=FALSE,lwd=0)
+    # rect will sometimes cover the axis (redrawing the axis would probably solve this too)
+    abline(h=usr[3])
+    abline(v=usr[1])
+  }
+}
+
 
 
 ###################################################
@@ -53,10 +66,6 @@ qcolors = function(n, pal='Set1')
 #' is not known. Each plot contains a non-parametric regression of each possible
 #' response on the total score.
 #' @param predicate An optional expression to subset data, if NULL all data is used
-#' @param nc An integer between 1 and 3. Number of columns when putting mutiple plots
-#' on the same page. Default is 1. May be ignored or adjusted if it does not make sense.
-#' @param nr An integer between 1 and 3. Number of rows when putting mutiple plots
-#' on the same page. Default is 1. May be ignored or adjusted if it does not make sense.
 #' @param legend logical, whether to include the legend. default is TRUE
 #' @param curtains 100*the tail probability of the sum scores to be shaded. Default is 10.
 #' Set to 0 to have no curtains shown at all.
@@ -68,12 +77,7 @@ qcolors = function(n, pal='Set1')
 #' with a sprintf style format string, e.g. 
 #' \code{distractor_plot(db, main='item: $item_id', sub='Item rest correlation: $rir:.2f')}
 #' 
-distractor_plot <- function(dataSrc, item, predicate=NULL, nc=1, nr=1, legend=TRUE, curtains=10, ...){  
-  
-  old_par = par(no.readonly = TRUE)
-  
-  on.exit({par(old_par)})
-  
+distractor_plot <- function(dataSrc, item, predicate=NULL, legend=TRUE, curtains=10, ...){  
   
   qtpredicate = eval(substitute(quote(predicate)))
   
@@ -92,7 +96,6 @@ distractor_plot <- function(dataSrc, item, predicate=NULL, nc=1, nr=1, legend=TR
   respData = get_resp_data(dataSrc, qtpredicate = qtpredicate, extra_columns='response', env=env, summarised=FALSE) %>%
     filter(.data$item_id == item, .recompute_sumscores = FALSE )
   
-  #respData$x$response = factor(respData$x$response)
 
   if (nrow(respData$design) == 0) stop(paste("Item", item, "not found in dataSrc."))
   
@@ -104,6 +107,14 @@ distractor_plot <- function(dataSrc, item, predicate=NULL, nc=1, nr=1, legend=TR
                              '$item_id in booklet $booklet_id')
   
   user.args = list(...)
+  
+  if(any(c('nr','nc') %in% names(user.args)))
+  {
+    warning('Arguments `nr` and `nc` have been deprecated and are ignored, you can achieve the desired ',
+               'result by using par(mfrow=c(nr,nc)).')
+    user.args[['nc']] = NULL
+    user.args[['nr']] = NULL
+  }
 
   rsp_counts = respData$x %>%
     group_by(.data$booklet_id, .data$response, .data$item_score, .data$sumScore) %>%
@@ -126,22 +137,18 @@ distractor_plot <- function(dataSrc, item, predicate=NULL, nc=1, nr=1, legend=TR
     summarise(pvalue = mean(.data$item_score)/max_score, 
               rit = cor(.data$item_score, .data$sumScore), 
               rir = cor(.data$item_score, .data$sumScore - .data$item_score),
-              n_book = n()) %>%
+              rng = max(.data$sumScore) - min(.data$sumScore),
+              n=n()) %>%
     ungroup() %>%
     inner_join(respData$design, by='booklet_id') %>%
     arrange(.data$booklet_id)
     
 
-  npic = nrow(stats)
-  ly = my_layout(npic, nr, nc)
-  graphics::layout(matrix(1:(ly$nr * ly$nc), byrow = TRUE, 
-                          ncol = ly$nc))
-  
   rsp_counts = split(rsp_counts, rsp_counts$booklet_id)
 
-  # n>1 is bugfix, density needs at least two values
+  # rng>1 is bugfix, density needs at least two distinct values
   stats %>%
-    filter( .data$n_book > 1 ) %>%
+    filter( .data$rng > 0 ) %>%
     rowwise() %>%
     do({
       st = as.list(.)
@@ -189,9 +196,9 @@ distractor_plot <- function(dataSrc, item, predicate=NULL, nc=1, nr=1, legend=TR
      
         })
       
-      if(legend)
+      if(legend && length(lgnd$resp)>0)
       {
-        graphics::legend("right", legend = as.character(lgnd$resp), 
+        graphics::legend("topleft", legend = as.character(lgnd$resp), 
                          lty = 1, col = lgnd$col, cex = 0.8,lwd=2, box.lty = 0)
       }
       tibble()
@@ -252,8 +259,9 @@ profile_plot <- function(dataSrc, item_property, covariate, predicate = NULL, mo
   }
   
   qtpredicate = eval(substitute(quote(predicate)))
+  env = caller_env()
   respData = get_resp_data(dataSrc, qtpredicate, extra_columns = covariate, 
-                           extra_design_columns=item_property, env = caller_env()) 
+                           extra_design_columns=item_property, env = env) 
   
   # make sure we have an intersection
   if(length(unique(respData$design$booklet_id)) > 1)
@@ -286,42 +294,50 @@ profile_plot <- function(dataSrc, item_property, covariate, predicate = NULL, mo
   # fit model
   models = by(respData$x, respData$x[[covariate]], function(rsp)
   {
-    ssIS = rsp %>% group_by(.data$item_id, .data$item_score) %>%
-      summarise(sufI=n(), sufC=sum(.data$item_score * .data$sumScore)) %>%
-      ungroup()
+    # statistics per item-score combination
+    # if the score 0 does not occur for an item, it is added with sufI=0 and sufC=0
     
-    ssIS = ssIS %>% 
-      full_join(tibble(item_id = unique(ssIS$item_id), item_score = 0L), by=c('item_id','item_score')) %>%
+    ssIS = rsp %>%
+      group_by(.data$item_id, .data$item_score) %>%
+      summarise(sufI=n(), sufC_ = sum(.data$item_score * .data$sumScore)) %>%
+      ungroup() %>%
+      full_join(tibble(item_id=respData$design$item_id, item_score=0L), by = c("item_id","item_score")) %>%
+      mutate(sufI = coalesce(.data$sufI, 0L), sufC_ = coalesce(.data$sufC_,0L)) %>%
       arrange(.data$item_id, .data$item_score)
     
-    ssIS[is.na(ssIS)] = 0
-    
-    ssI = ssIS %>% 
+    # statistics per item
+    ssI = ssIS %>%
       group_by(.data$item_id) %>%
-      summarise(nCat = n(), N = sum(.data$sufI), sufC = sum(.data$sufC), mx = max(.data$item_score)) %>%
+      summarise(nCat = n(), sufC = sum(.data$sufC_), item_maxscore = max(.data$item_score)) %>%
       ungroup() %>%
-      arrange(.data$item_id) %>% 
-      mutate(first = cumsum(.data$nCat) - .data$nCat + 1L, last = cumsum(.data$nCat))
+      mutate(first = cumsum(.data$nCat) - .data$nCat + 1L, last = cumsum(.data$nCat))  %>%
+      arrange(.data$item_id)
     
-
-    ssT = rsp %>% 
-      group_by(.data$sumScore) %>% 
-      summarise(N=n_distinct(.data$person_id)) %>%
+    
+    # theoretical max score on the test
+    maxTestScore = sum(ssI$item_maxscore)
+    
+    # scoretab from 0:maxscore (including unachieved and impossible scores)
+    scoretab = rsp %>%
+      distinct(.data$person_id, .keep_all=TRUE) %>%
+      group_by(.data$sumScore) %>%
+      summarise(N=n()) %>%
       ungroup() %>%
-      right_join(tibble(sumScore=0:sum(ssI$mx)), by='sumScore') %>%
+      right_join(tibble(sumScore=0L:maxTestScore), by="sumScore") %>%
+      mutate(N=coalesce(.data$N, 0L)) %>%
       arrange(.data$sumScore)
     
-    ssT[is.na(ssT)] = 0
     
-    ss = list(il = ssI, sl = ssIS, tl = ssT)
-    list(est=EstIM(ss), ss=ss)
+    list(est = EstIM(first=ssI$first, last=ssI$last, nCat=ssI$nCat, a=ssIS$item_score, 
+                     sufI=ssIS$sufI, sufC=ssI$sufC, scoretab = scoretab$N),
+         inputs = list(ssI = ssI, ssIS = ssIS))
   })
   
   
   tt = lapply(models, function(x)
   {
-    A = c(1:nrow(x$ss$il))[x$ss$il$item_id %in% respData$design[respData$design[[item_property]]==props[1],]$item_id]
-    B = c(1:nrow(x$ss$il))[x$ss$il$item_id %in% respData$design[respData$design[[item_property]]==props[2],]$item_id]
+    A = c(1:nrow(x$inputs$ssI))[x$inputs$ssI$item_id %in% respData$design[respData$design[[item_property]]==props[1],]$item_id]
+    B = c(1:nrow(x$inputs$ssI))[x$inputs$ssI$item_id %in% respData$design[respData$design[[item_property]]==props[2],]$item_id]
     SSTable(x, AB = list(A,B), model = model)
   })
   
@@ -333,7 +349,7 @@ profile_plot <- function(dataSrc, item_property, covariate, predicate = NULL, mo
   
   default.args = list(asp=1, main="Profile plot", xlab=props[1], 
                       ylab=props[2],xlim=c(0,maxA),ylim=c(0,maxB),bty='l',xaxs="i")
-  do.call(graphics::plot, 
+  do.call(plot, 
           merge_arglists(user.args, 
                          default=default.args,
                          override=list(x=c(0,maxA), y=c(0,maxB),type="n")))

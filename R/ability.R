@@ -63,8 +63,8 @@ ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP"), prior=
   method <- match.arg(method)
   prior = match.arg(prior) 
   qtpredicate = eval(substitute(quote(predicate)))
-  
-  respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, env=caller_env())
+  env = caller_env()
+  respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, env=env)
   
   if(nrow(respData$x)==0) stop('no data to analyse')
   
@@ -92,8 +92,7 @@ ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP"), prior=
 
 
 #' @rdname ability
-ability_tables = function(parms, design = NULL, method = c("MLE","EAP"), prior=c("normal", "Jeffreys"), use_draw = NULL, 
-                          npv=500, mu=0, sigma=4, standard_errors = TRUE, asOPLM=TRUE) #smooth=FALSE,
+ability_tables = function(parms, design = NULL, method = c("MLE","EAP"), prior=c("normal", "Jeffreys"), use_draw = NULL, npv=500, mu=0, sigma=4, standard_errors = TRUE, asOPLM=TRUE) #smooth=FALSE,
 {
 
   method = match.arg(method)

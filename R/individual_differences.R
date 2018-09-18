@@ -28,7 +28,8 @@
 individual_differences <- function(dataSrc, predicate = NULL, degree=7)
 {
   qtpredicate = eval(substitute(quote(predicate)))
-  respData = get_resp_data(dataSrc, qtpredicate, env = caller_env()) 
+  env = caller_env()
+  respData = get_resp_data(dataSrc, qtpredicate, env = env) 
   
   # make sure we have an intersection
   if(length(unique(respData$design$booklet_id)) > 1)

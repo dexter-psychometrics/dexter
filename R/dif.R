@@ -4,14 +4,15 @@
 PairDIF_ <- function(par1,par2,cov1,cov2)
 {
   labs=rownames(par1)
-  D=kronecker(par2,t(par2),FUN="-")-kronecker(par1,t(par1),FUN="-") 
+  DR=kronecker(par2,t(par2),FUN="-")-kronecker(par1,t(par1),FUN="-") 
   var1=diag(cov1)
   var2=diag(cov2)
   S=(kronecker(var1,t(var1),FUN="+")-2*cov1)+(kronecker(var2,t(var2),FUN="+")-2*cov2)
   diag(S)=1
-  D=D/sqrt(S)
+  D=DR/sqrt(S)
   colnames(D)=labs; rownames(D)=labs
-  return(D)
+  colnames(DR)=labs; rownames(DR)=labs
+  return(list(D=D, Delta_R=DR))
 }
 
 ## produces a statistics for overall-DIF
@@ -97,8 +98,8 @@ DIF = function(dataSrc, person_property, predicate=NULL)
   }
   
   columns = c('person_id','item_id','item_score', person_property)
-  
-  respData = get_responses_(dataSrc, qtpredicate, columns = columns, env = caller_env()) 
+  env = caller_env()
+  respData = get_responses_(dataSrc, qtpredicate, columns = columns, env = env) 
   
   if(nrow(respData) == 0) stop('no data to analyse')
   
@@ -118,7 +119,7 @@ DIF = function(dataSrc, person_property, predicate=NULL)
   if(nrow(problems) > 0)
   {
     problems = tibble(item_id = unique(problems$item_id))
-    warning(paste('the following items do not have the same score categories over both person_propertys and',
+    warning(paste('the following items do not have the same score categories over both person_properties and',
                   'have been removed from the analysis:', paste0(problems$item_id,collapse=', ')))
     respData = lapply(respData, function(x) x %>% anti_join(problems, by = 'item_id'))
   }
@@ -134,16 +135,15 @@ DIF = function(dataSrc, person_property, predicate=NULL)
   DIF_stats = OverallDIF_ (models[[1]]$est$beta.cml, models[[2]]$est$beta.cml, 
                            models[[1]]$est$acov.cml, models[[2]]$est$acov.cml)
   
-  D = PairDIF_(models[[1]]$est$beta.cml, models[[2]]$est$beta.cml, 
-               models[[1]]$est$acov.cml, models[[2]]$est$acov.cml)
+  DIF_mats = PairDIF_(models[[1]]$est$beta.cml, models[[2]]$est$beta.cml, 
+                      models[[1]]$est$acov.cml, models[[2]]$est$acov.cml)
   
-
   items = common_scores %>%
     filter(.data$item_score > 0) %>%
     arrange(.data$item_id, .data$item_score)
 
   ## 5. Report D and DIF_stats and inputs
-  ou = list(DIF_overall = DIF_stats, DIF_pair = D, 
+  ou = list(DIF_overall = DIF_stats, DIF_pair = DIF_mats$D, Delta_R = DIF_mats$Delta_R, 
             group_labels = names(respData), items = items)
   class(ou) = append('DIF_stats', class(ou))
   return(ou)
@@ -220,8 +220,9 @@ plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, ...)
   ColorLevels <- seq(min(x$DIF_pair), max(x$DIF_pair), length=length(ColorRamp))
   
   # Reverse Y axis
-  yLabels <- rev(yLabels)
-  DIF_pair <- DIF_pair[nrow(DIF_pair) : 1,]
+  # yLabels <- rev(yLabels)
+   xLabels <- rev(xLabels)
+   DIF_pair <- DIF_pair[nrow(DIF_pair) : 1,]
   
   # Data Map
   oldpar = par(mar = c(6,8,2.5,2))

@@ -78,7 +78,7 @@ check_arg = function(x, type, name = deparse(substitute(x)), nullable = FALSE, .
   } else if(type %in% c('numeric','double'))
   {
     if(!is.numeric(x))
-      stop(paste0("Argument'",name, "' must be numeric"))
+      stop(paste0("Argument '",name, "' must be numeric"))
     
   } else if(!inherits(x, type))
   {

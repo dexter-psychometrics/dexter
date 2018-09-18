@@ -5,7 +5,7 @@
 \title{A plot method for the interaction model}
 \usage{
 \method{plot}{rim}(x, items = NULL, summate = TRUE, overlay = FALSE,
-  nc = 1, nr = 1, curtains = 10, show.observed = FALSE, ...)
+  curtains = 10, show.observed = FALSE, ...)
 }
 \arguments{
 \item{x}{An object produced by function \code{fit_inter}}
@@ -19,12 +19,6 @@ response option separately; default is TRUE.}
 one for the Rasch model and the other for the interaction model, with all items
 overlayed; otherwise, one plot for each item with the two models overlayed. Ignored
 if summate is FALSE. Default is FALSE}
-
-\item{nc}{An integer between 1 and 3. Number of columns when putting mutiple plots
-on the same page. Default is 1. May be ignored or adjusted if it does not make sense.}
-
-\item{nr}{An integer between 1 and 3. Number of rows when putting mutiple plots
-on the same page. Default is 1. May be ignored or adjusted if it does not make sense.}
 
 \item{curtains}{100*the tail probability of the sum scores to be shaded. Default is 10.
 Set to 0 to have no curtains shown at all.}

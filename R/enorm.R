@@ -30,8 +30,8 @@ fit_enorm = function(dataSrc, predicate = NULL, fixed_params = NULL, method=c("C
   qtpredicate = eval(substitute(quote(predicate)))
   check_arg(dataSrc, 'dataSrc')
   check_arg(nIterations, 'integer', .length=1)
-  
-  fit_enorm_(dataSrc, qtpredicate = qtpredicate, fixed_params = fixed_params, method=method, nIterations=nIterations, env=caller_env())
+  env=caller_env()
+  fit_enorm_(dataSrc, qtpredicate = qtpredicate, fixed_params = fixed_params, method=method, nIterations=nIterations, env=env)
 }
 
 
@@ -73,7 +73,7 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
     summarise(sufI=n(), sufC=sum(.data$item_score * .data$sumScore)) %>% 
     ungroup()
   
-  # mean item score per booklet score, can possibly be removed
+
   plt = x %>% 
     group_by(.data$booklet_id, .data$item_id, .data$sumScore) %>% 
     summarise(meanScore=mean(.data$item_score), N=n()) %>% 
@@ -92,12 +92,19 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
     ungroup()
   
   
-  stb = plt %>%
-    distinct(.data$booklet_id, .data$sumScore, .data$N) %>%
+  # stb = plt %>%
+  #   distinct(.data$booklet_id, .data$sumScore, .data$N) %>%
+  #   right_join(allScores, by=c('booklet_id','sumScore')) %>%
+  #   mutate(N=coalesce(.data$N, 0L)) %>%
+  #   arrange(.data$booklet_id, .data$sumScore)
+  
+
+  stb = distinct(x,.data$person_id,.data$booklet_id,.keep_all=T) %>%
+    group_by(.data$booklet_id, .data$sumScore) %>%
+    summarize(N=n()) %>%
     right_join(allScores, by=c('booklet_id','sumScore')) %>%
     mutate(N=coalesce(.data$N, 0L)) %>%
     arrange(.data$booklet_id, .data$sumScore)
-  
 
   ssIS = ssBIS %>% 
     group_by(.data$item_id, .data$item_score) %>%
@@ -179,15 +186,17 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
     {
       # transform the oplmlike fixed params to the parametrization dexter uses internally
       
-      #some cleaning and checking
-      fixed_params = fixed_params %>% 
-        mutate(item_id=as.character(.data$item_id), item_score = as.integer(.data$item_score))
       
       if(length(setdiff(c('item_id','item_score','beta'),colnames(fixed_params))) > 0)
       {
         stop(paste('fixed_params does not contain required column(s):',
                    paste0(setdiff(c('item_id','item_score','beta'),colnames(fixed_params)),collapse=',')))
       }
+      #some cleaning and checking
+      fixed_params = fixed_params %>% 
+        mutate(item_id=as.character(.data$item_id), item_score = as.integer(.data$item_score))
+      
+      
       # check for missing categories in fixed_params
       # missing categories in data are presumably not a problem
       missing_cat = ssIS %>% 
@@ -304,8 +313,6 @@ enorm_exp = Vectorize(
     nm/dnm
   },
   vectorize.args = 'theta')
-
-
 
 #' Plot for the extended nominal Response model
 #' 
@@ -478,4 +485,125 @@ coef.prms = function(object, ...)
 }
 
 
+#' Information function
+#' 
+#' returns test or item information function for a single item or an arbitrary group of items or all items
+#' 
+#' @param parms object produced by fit_enorm
+#' @param items vector of one or more item_id's. If NULL and booklet is also NULL, all items in parms are used
+#' @param booklet id of a single booklet (i.e. the test information function), if items is not NULL this is ignored
+#' @param which.draw only used if calibration method was Bayes, the number of the random draw. If NULL, the mean 
+#' beta parameter will be used
+#' @param asOPLM Report abilities on a scale defined by the OPLM normalization. Only when no values 
+#' in parms have been fixed
+#' 
+#' @return a function which accepts a vector of theta's and returns an equal length vector 
+#' with the information estimate
+#' 
+#' @examples
+#' 
+#' db = start_new_project(verbAggrRules,':memory:')
+#' add_booklet(db,verbAggrData, "agg")
+#' p = fit_enorm(db)
+#' 
+#' # plot information function for single item
+#' 
+#' ifun = information(p, "S1DoScold")
+#' 
+#' plot(ifun,from=-4,to=4)
+#' 
+#' # compare test information function to the population ability distribution
+#' 
+#' ifun = information(p, booklet="agg")
+#' 
+#' pv = plausible_values(db,p)
+#' 
+#' op = par(no.readonly=TRUE)
+#' par(mar = c(5,4,2,4))
+#' 
+#' plot(ifun,from=-4,to=4, xlab='theta', ylab='test information')
+#' 
+#' par(new=TRUE)
+#' 
+#' plot(density(pv$PV1), col='green', axes=FALSE,xlab=NA, ylab=NA,main=NA)
+#' axis(side=4)
+#' mtext(side = 4, line = 2.5, 'density (green)')
+#' 
+#' par(op)
+#' close_project(db)
+#' 
+information = function(parms, items=NULL, booklet=NULL, which.draw=NULL, asOPLM=TRUE)
+{
+  if(is.null(items) && is.null(booklet))
+  {
+    fl = parms$inputs$ssI
+  } else if(!is.null(items))
+  {
+    items = unique(items)
+    
+    if(length(setdiff(items,parms$inputs$ssI$item_id))>0)
+    {
+      message('unknown items:')
+      print(sort(setdiff(items,parms$inputs$ssI$item_id)))
+      stop('Some items were not found, see output')
+    }
+    
+    fl = parms$inputs$ssI %>% 
+      semi_join(tibble(item_id=items),by='item_id') %>% 
+      arrange(.data$first)
+    
+  } else
+  {
+    booklet = as.character(booklet)
+    check_arg(booklet,'character',.length=1)
+    
+    fl = parms$inputs$design %>%
+      filter(.data$booklet_id==booklet) %>%
+      inner_join(parms$inputs$ssI, by='item_id') %>%
+      arrange(.data$first)
+    if(nrow(fl)==0)
+      stop(paste0('booklet `',booklet,'` not found'))
+  }
+  
+  # take care of parameterization
+  if (asOPLM && !parms$inputs$has_fixed_parms)
+  {
+    ff = toOPLM(parms$inputs$ssIS$item_score, parms$est$b, parms$inputs$ssI$first, parms$inputs$ssI$last)
+    if (parms$inputs$method=="CML"){
+      parms$est$b = toDexter(parms$est$beta.cml, ff$a, ff$first, ff$last, re_normalize = FALSE)$est$b
+    }else
+    {
+      for (i in 1:nrow(parms$est$b))
+      {
+        parms$est$b[i,] = toDexter(parms$est$beta.cml[i,], ff$a, ff$first, ff$last, re_normalize = FALSE)$est$b
+      }
+    }
+  }
+  
+  
+  if(is.matrix(parms$est$b))
+  {
+    if(is.null(which.draw))
+    {
+      parms$est$b = colMeans(parms$est$b)
+    } else
+    {
+      if(which.draw<1 || which.draw > nrow(parms$est$b))
+        stop('parameter `which.draw` out of range')
+      parms$est$b = as.vector(parms$est$b[which.draw,])
+    }
+  }
+  
+  out = function(theta)
+  {
+    check_arg(theta,'numeric')
+    if(any(is.na(theta) | is.nan(theta) | is.infinite(theta)))
+      stop('theta may not contain infinite/nan/NA values')  
+    IJ_(parms$est$b,parms$inputs$ssIS$item_score,fl$first, fl$last, theta)$I
+  }
+  class(out) = append('inf_func',class(out))
+  out
+}
+
+print.inf_func = function(x,...) cat('Information function I(theta)\n')
 

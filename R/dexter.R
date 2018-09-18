@@ -601,7 +601,7 @@ add_response_data = function(db, data, auto_add_unknown_rules = FALSE, missing_v
                     VALUES(:person_id, :booklet_id, :item_id, :response);', 
               data)
   })
-  cat(paste(n,'responses imported.'))
+  cat(paste(n,'responses imported.\n'))
   
 }
 
@@ -890,7 +890,8 @@ get_persons = function(db){
 #' 
 get_testscores = function(dataSrc, predicate=NULL) {
   qtpredicate = eval(substitute(quote(predicate)))
-  get_resp_data(dataSrc, qtpredicate, env=caller_env(), summarised=TRUE)$x %>%
+  env = caller_env()
+  get_resp_data(dataSrc, qtpredicate, env=env, summarised=TRUE)$x %>%
     select(.data$person_id, .data$booklet_id, test_score=.data$sumScore) %>%
     as.data.frame()
 }
@@ -1007,10 +1008,12 @@ design_as_network = function(dataSrc, predicate = NULL, weights=c("items","respo
   {
     if(w == 'items')
     {
-      design = get_resp_data(dataSrc, qtpredicate, env=caller_env())$design
+	  env=caller_env()
+      design = get_resp_data(dataSrc, qtpredicate, env=env)$design
     } else
     {
-      design = get_resp_data(dataSrc, qtpredicate, env=caller_env())$x  %>%
+	  env=caller_env()
+      design = get_resp_data(dataSrc, qtpredicate, env=env)$x  %>%
         group_by(.data$booklet_id, .data$item_id) %>%
         summarise(n_persons = n()) %>%
         ungroup()

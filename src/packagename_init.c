@@ -21,7 +21,7 @@ extern void PV(void *, void *, void *, void *, void *, void *, void *, void *, v
 extern void PVrecycle(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void PVMix(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void sampleNRM(void *, void *, void *, void *, void *, void *, void *, void *);
-extern void sampleNRM2(void *, void *, void *, void *, void *, void *, void *, void *);
+extern void sampleNRM2(void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void recyclePV(void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void recyclePV2(void *, void *, void *, void *, void *, void *, void *, void *, void *);
 extern void recyclePVaA(void *, void *, void *, void *, void *, void *, void *, void *, void *, void *);
@@ -46,7 +46,7 @@ static const R_CMethodDef CEntries[] = {
   {"recyclePV2", (DL_FUNC) &recyclePV2,  9},    
   {"recyclePVaA",(DL_FUNC) &recyclePVaA,10},      
   {"sampleNRM",  (DL_FUNC) &sampleNRM,   8},
-  {"sampleNRM2", (DL_FUNC) &sampleNRM2,  8},
+  {"sampleNRM2", (DL_FUNC) &sampleNRM2,  9},
   {NULL, NULL, 0}
 };
 
