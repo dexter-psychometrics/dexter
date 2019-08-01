@@ -1,0 +1,109 @@
+---
+output:
+  md_document:
+    variant: markdown_github
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+
+```{r, echo = FALSE}
+library(knitr)
+
+opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+
+# Dexter
+
+Dexter is an R package for psychometric analysis of data from educational and psychological tests. Dexter typically works with project database files saved on disk. 
+
+## Installation
+
+```{r, eval=FALSE}
+install.packages('dexter')
+```
+
+If you encounter a bug, please post a minimal reproducible example on [github](https://github.com/jessekps/dexter/issues). We post news and examples on a [blog](http://dexterities.netlify.com), it's also the place for general questions.
+
+## Example
+
+
+```{r, results='hide', message=FALSE}
+library(dexter)
+# start a project and fill it with data
+# verbAggrRules and verbAggrData are example datasets provided with dexter
+
+db = start_new_project(verbAggrRules, "verbAggression.db")
+add_booklet(db, verbAggrData, booklet_id = "verb_agg")
+
+# Classical test theory
+tia = tia_tables(db)
+
+tia$testStats
+```
+
+
+
+
+```{r, echo=FALSE}
+kable(tia$testStats, digits=3,table.attr='class="myTable"')
+```
+
+```{r, eval=FALSE}
+head(tia$itemStats)
+```
+
+```{r, echo=FALSE}
+kable(head(tia$itemStats), digits=3)
+```
+
+
+```{r, results='hide'}
+# IRT, extended nominal response model
+f = fit_enorm(db)
+
+head(coef(f))
+```
+
+```{r, echo=FALSE}
+kable(head(coef(f)))
+```
+
+```{r, results='hide'}
+# ability estimates per person
+abl = ability(db, parms = f)
+head(abl)
+```
+
+```{r, echo=FALSE}
+kable(head(abl))
+```
+
+```{r, results='hide'}
+# ability estimates without item S1DoScold
+abl2 = ability(db, parms = f, item_id != "S1DoScold")
+
+# plausible values
+
+pv = plausible_values(db, parms = f, nPV = 5)
+head(pv)
+```
+
+```{r, echo=FALSE}
+kable(head(pv))
+```
+
+
+```{r, include=FALSE}
+close_project(db)
+```
+## Contributing
+
+Contributions are welcome but please check with us first about what you would like to contribute.
+
+

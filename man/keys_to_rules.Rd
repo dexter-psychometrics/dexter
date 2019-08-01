@@ -7,8 +7,8 @@
 keys_to_rules(keys, include_NA_rule = FALSE)
 }
 \arguments{
-\item{keys}{A data frame containing columns \code{item_id}, \code{nOptions}, and
-\code{key} (the spelling is important). See details.}
+\item{keys}{A data frame containing columns \code{item_id}, \code{noptions}, and
+\code{key} See details.}
 
 \item{include_NA_rule}{whether to add an option 'NA' (which is scored 0) to each item}
 }
@@ -21,13 +21,11 @@ scoring rules from the keys to the correct responses
 }
 \details{
 This function might be useful in setting up the scoring rules when all items
-are multiple-choice and scored as 0/1. (Hint: Because the order in which the
-scoring rules is not important, one can use the function to generate rules for
-many MC items and then append per hand the rules for a few complex items.)
+are multiple-choice and scored as 0/1. 
 
-The input data frame must contain the exact name of each item, the number
+The input data frame must contain the exact id of each item, the number
 of options, and the key. If the keys are all integers, it will be assumed that
-responses are coded as 1 through nOptions. If they are all uppercase letters,
+responses are coded as 1 through noptions. If they are all  letters,
 it is assumed that responses are coded as A,B,C,... All other cases result
 in an error.
 }

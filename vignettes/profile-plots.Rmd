@@ -27,7 +27,7 @@ div.crop img{
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, dev='CairoPNG')
 library(dexter)
 library(latticeExtra)
 fq = c(10,12,30,20,40,24,15,18,14)
@@ -85,10 +85,10 @@ function (n, h = 11, c. = c(80, 5), l = c(35, 95), power = 0.6,
 
 The function `profile_plot` in package dexter produces plots like the following one based on the verbal aggression dataset:
 
-```{r, figProf, echo=FALSE, results="hide",fig.height=4,fig.width=4,fig.align='center'}
+```{r, figProf, echo=FALSE, results="hide",fig.height=4,fig.width=4,fig.align='center',message=FALSE}
 # fig.align='center' does not work anymore when you specify any css styles
 # therefore the: display:block;margin: 0 auto;
-db = start_new_project(verbAggrRules, ":memory:", covariates=list(gender="<unknown>"))
+db = start_new_project(verbAggrRules, ":memory:", person_properties=list(gender="unknown"))
 add_booklet(db, verbAggrData, "agg")
 add_item_properties(db, verbAggrProperties)
 profile_plot(db, item_property='mode', covariate='gender', booklet_id=='agg')
@@ -248,4 +248,5 @@ Note that the profile plots got their name from their similarity to *profile ana
 close_project(db)
 ```
 
-#References
+
+## References

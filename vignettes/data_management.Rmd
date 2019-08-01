@@ -1,10 +1,10 @@
 ---
-title: "Data management in dexter"
+title: "Data  in dexter"
 author: "Jesse Koops"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Data management in dexter}
+  %\VignetteIndexEntry{Data in dexter}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -13,36 +13,127 @@ vignette: >
 img{ border:none;}
 </style>
 
-**Dexter** is intended as a fairly comprehensive system for managing and analyzing data from administrations of educational and psychological tests. The more advanced psychometric routines are buttressed by a solid data base management system and various functions allowing users to examine items and tests, detect and correct possible issues.
-
-The data base that works under the hood is created automatically as data is imported into dexter. It remains virtually invisible to the users unless they are interested in it, in which case they can access it via dbplyr, RSQlite, or directly in various SQL tools. Generally, dexter scales well with respect to both the size of the problem and the degree of complexity and flexibility desired.
-
-We begin with a brief review of how to start a dexter project and add data.
-
-
 ```{r, message=FALSE}
-library(dplyr)
 library(dexter)
-
-db = start_new_project(verbAggrRules, "verbAggression.db", 
-                       covariates = list(gender="<unknown>"))
+library(dplyr)
+library(tidyr)
 ```
 
-The new project is actually a SQLite data base, which is created, initialized, and saved to the file, "verbAggression.db". In this example, we add Gender as a person covariate with a default value of `"<unknown>"`.
 
-The data set, `verbAggrData`, contains only one booklet, which we add to the project with:
+**Dexter** is intended as a fairly comprehensive system for managing and analyzing data from administrations of educational and psychological tests. Functions that perform an analysis in dexter all have an argument `dataSrc`. This argument is overloaded, which means it can have multiple formats. These are:
+
+1. the traditional data.matrix where the columns are items and the rows are persons. Each cell contains a scored response and structural missing values are coded as NA. This format is typically expected by all IRT packages in R.
+
+2. long format data with (at least) the columns: person_id, item_id, item_score. Each row reflects a single response by a particular person to a particular item. There are no NA values; if a person did not respond to an item there is just no row for that particular person-item combination
+
+3. a dexter project database
+
+Of these options, the first is the most well known but options 2 and 3 provide a lot more flexibility. Additionally, option 3 allows you to keep your data in a persistent, rich and well structured format which is very helpful if data comes in over a longer (time) period and generally makes working with - potentially high stakes - data both safer and easier.
+
+We will illustrate this with the verbal aggression dataset. First, as a data.matrix
+
+```{r,results='hide'}
+dm.aggr = verbAggrData %>%
+  select(-anger, -gender) %>%
+  data.matrix()
+
+f.dm = fit_enorm(dm.aggr)
+```
+
+Then in long format
+
+```{r,results='hide'}
+long.aggr = verbAggrData %>%
+  mutate(person_id=row_number()) %>%
+  gather(key='item_id', value='item_score', -gender, -anger, -person_id)
+
+f.long = fit_enorm(long.aggr)
+```
+
+Finally, we use a project database
+
+```{r,results='hide',message=FALSE}
+db = start_new_project(verbAggrRules, ':memory:', 
+                       person_properties = list(gender=character(), anger=integer()))
+
+add_booklet(db, verbAggrData, booklet_id='vansteelandt')
+
+f.db = fit_enorm(db)
+```
+
+It will surprise no one that the results in these cases are equal.
 
 ```{r}
-add_booklet(db, x=verbAggrData, booklet_id="agg")
+identical(coef(f.dm), coef(f.long))
+identical(coef(f.long), coef(f.db))
 ```
 
-Had we not declared `gender` as a person covariate, the column would have been ignored, as it is not among the test items declared in `rules`.  Dexter will work happily with data that does not include any person identification, in which case it will automatically create a `person_id` variable. However, there is an advantage to have your own `person_id` column in the data frames you enter. Dexter will treat this column as a key, which prevents you from accidentally entering the same data again by running `add_booklet(db, verbAggrData, "agg")` a second time.
+<!-- to do: is is possible to document classes, see DBIConnection -->
 
-We can also add item properties. This data set comes from an experimental design with three factors, which can be added to the data base with: 
+# Databases
+
+According to wikipedia, a database is an organised collection of data. Not all R users are familiar with the use of databases. In R, as in most other languages, interaction with a databases is done via a _connection object_. The connection object provides access to the database, e.g. it can be used to read data from the database or send data to the database.
+
+A database has to live somewhere, this depends on the type of databases and can be in memory, in a single file or many files in a single or multiple directories or even distributed across multiple computers. Wherever it lives, the connection object provides access to the data via a common interface, usually SQL<to do: link>. 
+
+The database system used by dexter is _SQLite_ as can be seen when we print the connection object we created above. 
+
+```{r}
+db
+```
+
+SQLite stores it's databases in a single file, which is often convenient. A connection to the database can be established through the dexter functions `start_new_project`, which sets up the relevant database structure and creates a new database or `open_project` which opens an existing project. Both functions need the path to a database file. Note that when we started a new project above we used the string `':memory:'` instead of a proper path. This is a special name which creates an _in memory_ database, which is convenient to do in a vignette. <!-- to do: update error messages when people accidentally provide a string -->
+
+If you use a database, which we wholeheartedly recommend, you have to provide that connection object to each functions in dexter that adds to, changes or reads data. For example, we provided the connection object (db) to the function `add_booklet` above, so that response data for the booklet (verbAggrData) could be added to the database.
+
+```{r,eval=F}
+add_booklet(db, verbAggrData, booklet_id='vansteelandt')
+```
+
+
+## Item & person properties
+
+A database is a nice way to organize and store your data but there are other benefits. One is that you can easily enrich your data with person and item properties. Person properties can be added using the function `add_person_properties` or, together with response data, using the function `add_booklet`. If we look in the _verbAggrData_ example data set, we see that it contains two person properties, namely _gender_ and a score on a different questionnaire <!-- to do: update help for dataset -->, the anger <!-- to do: anger something --> scale. It is not unusual for data to come in this format, therefore add_booklet recognizes and imports any columns in the data it recognizes as person properties. Of course, it is necessary that dexter knows about  <!-- to do: why not specify the pp properties to add_booklet, more logical than in start_new_project --> these columns.
+
+```{r,eval=F}
+db = start_new_project(verbAggrRules, ':memory:', 
+                       person_properties = list(gender=character(), anger=integer()))
+
+add_booklet(db, verbAggrData, booklet_id='vansteelandt')
+```
+
+We can also add item properties for any item already known in the database (i.e. scoring rules must already be defined for these items). In this case we have item properties in _verbAggrProperties_
+
+```{r}
+head(verbAggrProperties)
+```
+
+We can add them as follows (note that the first argument is the _database connection object_):
 
 ```{r}
 add_item_properties(db, verbAggrProperties)
 ```
+
+With or data thus enriched, we can use the person and item properties in our analysis, for example in the profile plot:
+
+```{r}
+profile_plot(db, 'mode', 'gender')
+
+```
+
+Note that the profile_plot function knows how to use the item property _mode_ and the person property _gender_ from the database. More information about the use and interpretation of profile plots can be found in the vignette <to do: link>.
+
+## Predicates
+
+All data analysis functions accept an optional argument called `predicate` which is used for data selection. In this predicate you can use any variable defined in the project. This includes person and item properties and things dexter knows about by default. To see which variables are available, use:
+
+```{r}
+get_variables(db)
+
+```
+
+
+
 
 ### A note about names
 
@@ -50,9 +141,6 @@ Due to the fact that we use an SQL database as a backend, the names of all item 
 
 Of course this only applies to column names, values have no such restrictions.
 
-### Working without a database
-
-Many functions in dexter accept an argument `dataSrc`. A `dataSrc` can be either a dexter project database or a data.frame or a tibble, in long format, containing at least the columns `person_id`, `item_id`, `item_score` and, for a limited number of functions, `response`. See the help files for details.
 
 
 
@@ -120,14 +208,16 @@ For consistency, predicates also work when the `dataSrc` argument is a data.fram
 
 Because the `predicate` is passed to the functions that use it independently, one can do strange things like estimate an IRT model from the test responses of females, and use it to score the tests of males. 
 
-Another risk with subsetting is that it may destroy the connectedness of the design. The user can check against this with function `design_is_connected`. 
+Another risk with subsetting is that it may destroy the connectedness of the design. The user can check against this with the function `design_info` (which also offers other useful information about the design).
 
 ```{r, eval=FALSE}
 # assuming an item property called `cefr_level` exists in the project
-design = design_as_network(db, booklet_id %in% c('bookletA','bookletX','bookletY') & cefr_level == 'B1')
-design_is_connected(design)
+design = design_info(db, booklet_id %in% c('bookletA','bookletX','bookletY') & cefr_level == 'B1')
+design$connected
 ## [1] TRUE
 ```
+
+
 
 Even though predicates offer a lot of flexibility, there are some limitations due to the fact that they only work on the individual response level. The typical case that can not be solved by using a predicate, is to omit a whole booklet or person based on some of their responses, but fortunately there is a relatively easy way to get around that limitation. 
 
@@ -156,6 +246,6 @@ par = fit_enorm(data)
 
 
 
-```{r, show=FALSE}
+```{r, include=FALSE}
 close_project(db)
 ```

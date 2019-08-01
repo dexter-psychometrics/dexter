@@ -11,7 +11,7 @@ add_response_data(db, data, auto_add_unknown_rules = FALSE,
   missing_value = "NA")
 }
 \arguments{
-\item{db}{A handle to the database, i.e. the output of \code{start_new_project}
+\item{db}{a connection to a dexter database, i.e. the output of \code{start_new_project}
 or \code{open_project}}
 
 \item{x}{A data frame containing the responses and, optionally,
@@ -75,13 +75,11 @@ Note that responses are always treated as strings (in both functions), and \code
 values are transformed to the string \code{"NA"}.
 }
 \examples{
-\dontrun{
-db = start_new_project(verbAggrRules, "verbAggression.db", 
+db = start_new_project(verbAggrRules, ":memory:", 
                        person_properties=list(gender="unknown"))
 head(verbAggrData)
 add_booklet(db, verbAggrData, "agg")      
 
 close_project(db)
-}
 
 }

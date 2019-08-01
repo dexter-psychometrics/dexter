@@ -7,7 +7,7 @@
 fit_inter(dataSrc, predicate = NULL)
 }
 \arguments{
-\item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score}
+\item{dataSrc}{Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score}
 
 \item{predicate}{An optional expression to subset data, if NULL all data is used}
 }
@@ -20,22 +20,20 @@ Estimate the parameters of the Interaction model and the Rasch model
 }
 \details{
 Unlike the Rasch model, the interaction model cannot be computed
-concurrently for a whole design of test forms. This function fits the
-Rasch model and the interaction model on a complete rectangular array of
-responses. This typically consist of responses to items in one booklet but can also consist of
-the intersection (common items) of two or more booklets. If the intersection is empty
+concurrently for a whole design of test forms. This function therefore fits the
+Rasch model and the interaction model on complete data. 
+This typically consist of responses to items in one booklet but can also consist of
+the intersection (common items) in two or more booklets. If the intersection is empty
 (no common items for all persons), the function will exit with an error message.
 }
 \examples{
-\dontrun{
-db = start_new_project(verbAggrRules, "verbAggression.db")
+db = start_new_project(verbAggrRules, ":memory:")
 add_booklet(db, verbAggrData, "agg")
 
 m = fit_inter(db, booklet_id=='agg')
 plot(m, "S1DoScold", show.observed=TRUE)
 
 close_project(db)
-}
 
 
 }

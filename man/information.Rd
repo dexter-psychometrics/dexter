@@ -2,30 +2,46 @@
 % Please edit documentation in R/enorm.R
 \name{information}
 \alias{information}
-\title{Information function}
+\alias{expected_score}
+\alias{r_score}
+\alias{variance_score}
+\title{Functions of theta}
 \usage{
-information(parms, items = NULL, booklet = NULL, which.draw = NULL,
-  asOPLM = TRUE)
+information(parms, items = NULL, booklet_id = NULL,
+  which.draw = NULL)
+
+expected_score(parms, items = NULL, booklet_id = NULL,
+  which.draw = NULL)
+
+r_score(parms, items = NULL, booklet_id = NULL, which.draw = NULL)
+
+variance_score(parms, items = NULL, booklet_id = NULL,
+  which.draw = NULL)
 }
 \arguments{
-\item{parms}{object produced by fit_enorm}
+\item{parms}{object produced by fit_enorm or a data.frame with columns item_id, item_score and, 
+depending on parametrization, a column named beta/delta, eta or b}
 
-\item{items}{vector of one or more item_id's. If NULL and booklet is also NULL, all items in parms are used}
+\item{items}{vector of one or more item_id's. If NULL and booklet_id is also NULL, all items in parms are used}
 
-\item{booklet}{id of a single booklet (i.e. the test information function), if items is not NULL this is ignored}
+\item{booklet_id}{id of a single booklet (e.g. the test information function), if items is not NULL this is ignored}
 
-\item{which.draw}{only used if calibration method was Bayes, the number of the random draw. If NULL, the mean 
+\item{which.draw}{the number of the random draw (only applicable if calibration method was Bayes). If NULL, the mean 
 beta parameter will be used}
-
-\item{asOPLM}{Report abilities on a scale defined by the OPLM normalization. Only when no values 
-in parms have been fixed}
 }
 \value{
-a function which accepts a vector of theta's and returns an equal length vector 
-with the information estimate
+Each function returns a new function which accepts a vector of theta's. These return the following values: 
+\describe{
+\item{information}{an equal length vector with the information estimate at each value of theta.}
+\item{expected_score}{an equal length vector with the expected score at each value of theta}
+\item{r_score}{a matrix with length(theta) rows and one column for each item containing simulated scores based on theta. 
+To obtain test scores, use rowSums on this matrix}
+\item{var_score}{conditional score variance}
+}
 }
 \description{
-returns test or item information function for a single item or an arbitrary group of items or all items
+returns information function, expected score function or score simulation function 
+for a single item, an arbitrary group of items or all items
 }
 \examples{
 
@@ -54,7 +70,7 @@ par(new=TRUE)
 
 plot(density(pv$PV1), col='green', axes=FALSE,xlab=NA, ylab=NA,main=NA)
 axis(side=4)
-mtext(side = 4, line = 2.5, 'density (green)')
+mtext(side = 4, line = 2.5, 'population density (green)')
 
 par(op)
 close_project(db)

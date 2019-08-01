@@ -1,7 +1,6 @@
 context('Check fit_enorm')
 
 library(dplyr)
-library(purrr)
 
 expect_no_error = function(object) expect_error(object, regexp=NA)
 
@@ -56,19 +55,21 @@ test_that('calibration of verbal aggression dataset matches oplm results, with f
   expect_lt(
     mean((coef(fx) %>%
             inner_join(oplm_params, by=c('item_id','item_score')) %>%
-            mutate(difference=abs(SE_b-se.b)))$difference),
+            mutate(difference=abs(SE_beta-se.b)))$difference),
     1e-3)
   
-  # # check that Bayesian is reasonably close.
-  fx = fit_enorm(db, fixed_params=oplm_params %>% filter(is_fixed), method='Bayes')
+  #check that Bayesian is reasonably close.
+  fxb = fit_enorm(db, fixed_params=oplm_params %>% filter(is_fixed), method='Bayes')
   
-  # not yet gotten a proper value from timo
-  # expect_lt(as.data.frame(fx) %>%
-  #            inner_join(oplm_params, by=c('item_id','item_score')) %>%
-  #             mutate(difference = abs(mean_beta - beta)) %>%
-  #             pull(difference) %>%
-  #             mean(),
-  #           1e-15)
+  # this is a simulation based test so result differ each time
+  # but typical value between 0.01-0.015, never observed higher than 0.05
+  expect_lt(coef(fxb) %>%
+              inner_join(oplm_params, by=c('item_id','item_score')) %>%
+               mutate(difference = abs(mean_beta - beta)) %>%
+               filter(!is_fixed) %>%
+               pull(difference) %>%
+               mean(),
+             0.1)
   
   # check that omitting some score category gives correct output and an error
   # mentioning the correct item

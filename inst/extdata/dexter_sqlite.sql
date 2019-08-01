@@ -8,7 +8,7 @@ CREATE TABLE dxItems(
 CREATE TABLE dxScoring_rules(
 	item_id VARCHAR(100) NOT NULL,
 	response VARCHAR(100) NOT NULL,
-	item_score INTEGER NOT NULL, -- might add text, like 'missing', etc.
+	item_score INTEGER NOT NULL,
 	
 	PRIMARY KEY (item_id, response),
 	FOREIGN KEY (item_id) REFERENCES dxItems(item_id) ON UPDATE CASCADE ON DELETE CASCADE
@@ -47,7 +47,7 @@ CREATE TABLE dxAdministrations(
 	person_id VARCHAR(100) NOT NULL,
 	booklet_id VARCHAR(100) NOT NULL,
 	
-	PRIMARY KEY (booklet_id, person_id),
+	PRIMARY KEY (person_id,booklet_id),
 
 	FOREIGN KEY (person_id) REFERENCES dxPersons(person_id) ON UPDATE CASCADE ON DELETE CASCADE,
 	FOREIGN KEY (booklet_id) REFERENCES dxBooklets(booklet_id) ON UPDATE CASCADE ON DELETE CASCADE
@@ -59,9 +59,9 @@ CREATE TABLE dxResponses(
 	item_id VARCHAR(100) NOT NULL,
 	response VARCHAR(100) NOT NULL,
 	
-	PRIMARY KEY (booklet_id, person_id, item_id),
+	PRIMARY KEY (person_id, booklet_id, item_id),
 	
-	FOREIGN KEY (booklet_id, person_id) REFERENCES dxAdministrations(booklet_id, person_id) ON UPDATE CASCADE ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED,
+	FOREIGN KEY (person_id,booklet_id) REFERENCES dxAdministrations(person_id,booklet_id) ON UPDATE CASCADE ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED,
 	FOREIGN KEY (booklet_id, item_id) REFERENCES dxBooklet_design(booklet_id, item_id) ON UPDATE CASCADE ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED,
 	FOREIGN KEY (item_id, response) REFERENCES dxScoring_rules(item_id, response) ON UPDATE CASCADE ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED
 	-- foreign key constraints deferred for speed

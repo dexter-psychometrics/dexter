@@ -5,16 +5,16 @@
 \title{Profile plot}
 \usage{
 profile_plot(dataSrc, item_property, covariate, predicate = NULL,
-  model = "IM", x = NULL, ...)
+  model = c("IM", "RM"), x = NULL, ...)
 }
 \arguments{
-\item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: 
+\item{dataSrc}{Data source: a connection to a dexter database or a data.frame with columns: 
 person_id, item_id, item_score and the item_property and the covariate of interest.}
 
 \item{item_property}{The name of the item property defining the domains. 
 The item property should have exactly two distinct values in your data}
 
-\item{covariate}{name of the person property/covariate used to create the groups. 
+\item{covariate}{name of the person property used to create the groups. 
 There will be one line for each distinct value.}
 
 \item{predicate}{An optional expression to filter data, if NULL all data is used}
@@ -26,9 +26,6 @@ the data better or at least as good as the Rasch model.}
 \item{x}{Which value of the item_property to draw on the x axis, if NULL, one is chosen automatically}
 
 \item{...}{further arguments to plot, many have useful defaults}
-}
-\value{
-Nothing interesting
 }
 \description{
 Profile plot
@@ -48,14 +45,13 @@ groups and are matched on the test score. This provides a content-driven way to
 investigate differential item functioning.
 }
 \examples{
-\dontrun{
-db = start_new_project(verbAggrRules, "verbAggression.db", covariates=list(gender="<unknown>"))
+db = start_new_project(verbAggrRules, ":memory:", 
+                         person_properties=list(gender="unknown"))
 add_booklet(db, verbAggrData, "agg")
 add_item_properties(db, verbAggrProperties)
 profile_plot(db, item_property='mode', covariate='gender')
 
 close_project(db)
-}
 
 
 }

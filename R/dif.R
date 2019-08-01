@@ -1,13 +1,13 @@
 
 
 ## produces a matrix of statistics for pairwise DIF
-PairDIF_ <- function(par1,par2,cov1,cov2)
+PairDIF_ <- function(beta1,beta2,acov.beta1,acov.beta2)
 {
-  labs=rownames(par1)
-  DR=kronecker(par2,t(par2),FUN="-")-kronecker(par1,t(par1),FUN="-") 
-  var1=diag(cov1)
-  var2=diag(cov2)
-  S=(kronecker(var1,t(var1),FUN="+")-2*cov1)+(kronecker(var2,t(var2),FUN="+")-2*cov2)
+  labs=rownames(beta1)
+  DR=kronecker(beta2,t(beta2),FUN="-")-kronecker(beta1,t(beta1),FUN="-") 
+  var1=diag(acov.beta1)
+  var2=diag(acov.beta2)
+  S=(kronecker(var1,t(var1),FUN="+")-2*acov.beta1)+(kronecker(var2,t(var2),FUN="+")-2*acov.beta2)
   diag(S)=1
   D=DR/sqrt(S)
   colnames(D)=labs; rownames(D)=labs
@@ -16,60 +16,31 @@ PairDIF_ <- function(par1,par2,cov1,cov2)
 }
 
 ## produces a statistics for overall-DIF
-OverallDIF_ <- function(par1,par2, cov1,cov2)
+OverallDIF_ <- function(beta1,beta2, acov1,acov2)
 {
   r=1
-  nI=length(par1)
-  beta=par1-par2
-  Sigma=cov1+cov2
-  DIF_test=mahalanobis(beta[-r],rep(0,(nI-1)),Sigma[-r,-r])
+  nI=length(beta1)
+  d_beta=beta1-beta2
+  Sigma=acov1+acov2
+  DIF_test=mahalanobis(d_beta[-r],rep(0,(nI-1)),Sigma[-r,-r])
   DIF_p=pchisq(DIF_test,(nI-1),lower.tail=FALSE)
   return(list(stat=DIF_test,df=nI-1, p=DIF_p))
 }
 
-###
-
-
-#################################
-bty = function (n, h = c(265, 75), c. = c(61, 66),
-                l = c(25, 73), power = c(0.7, 1.742),
-                fixup = TRUE, gamma = NULL, alpha = 1, ...)
-{
-  if (!is.null(gamma))
-    warning("'gamma' is deprecated and has no effect")
-  if (n < 1L)
-    return(character(0L))
-  h <- rep(h, length.out = 2L)
-  c <- rep(c., length.out = 2L)
-  l <- rep(l, length.out = 2L)
-  power <- rep(power, length.out = 2L)
-  rval <- seq(1, 0, length = n)
-  rval <- hex(polarLUV(L = l[2L] - diff(l) * rval^power[2L],
-                       C = c[2L] - diff(c) * rval^power[1L], H = h[2L] - diff(h) *
-                         rval), fixup = fixup, ...)
-  if (!missing(alpha)) {
-    alpha <- pmax(pmin(alpha, 1), 0)
-    alpha <- format(as.hexmode(round(alpha * 255 + 1e-04)),
-                    width = 2L, upper.case = TRUE)
-    rval <- paste(rval, alpha, sep = "")
-  }
-  return(rval)
-}
-
-
-
+# to do: not refer to oplm in help
+# to do: coef for dif_stats?
 
 #' Exploratory test for Differential Item Functioning
 #'
 #'
-#' @param dataSrc Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score
+#' @param dataSrc Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score
 #' @param predicate An optional expression to subset data, if NULL all data is used
 #' @param person_property Defines groups of persons to calculate DIF
 #' @return An object of class \code{DIF_stats} holding statistics for
 #' overall-DIF and a matrix of statistics for DIF in the relative position of
 #' item-category parameters in the regular parameterization used e.g., by OPLM.
 #' @details 
-#' Tests for equality of relative item difficulties category locations across groups.
+#' Tests for equality of relative item/category difficulties across groups.
 #' Supplements the confirmatory approach of the profile plot
 #' 
 #' @references 
@@ -77,74 +48,72 @@ bty = function (n, h = c(265, 75), c. = c(61, 66),
 #' Psychometrika. Vol. 80, no. 2, 317-340.
 #' 
 #' @examples
-#' \dontrun{
-#' db = start_new_project(verbAggrRules, "verbAggression.db", person_propertys=list(gender='unknown'))
+#' db = start_new_project(verbAggrRules, ":memory:", person_properties=list(gender='unknown'))
 #' add_booklet(db, verbAggrData, "agg")
 #' dd = DIF(db,person_property="gender")
 #' print(dd)
 #' plot(dd)
+#' str(dd)
 #' 
 #' close_project(db)
-#' }
 #' 
 DIF = function(dataSrc, person_property, predicate=NULL) 
 {
-
+  
   qtpredicate = eval(substitute(quote(predicate)))
+  env = caller_env()
+  
+  check_dataSrc(dataSrc)
+  check_string(person_property)
   
   if(!inherits(dataSrc,'data.frame'))
-  {
     person_property = tolower(person_property)
-  }
+
+  respData = get_resp_data(dataSrc, qtpredicate, extra_columns = person_property, env = env) 
+
+  respData$x[[person_property]] = ffactor(as.character(respData$x[[person_property]]))
   
-  columns = c('person_id','item_id','item_score', person_property)
-  env = caller_env()
-  respData = get_responses_(dataSrc, qtpredicate, columns = columns, env = env) 
-  
-  if(nrow(respData) == 0) stop('no data to analyse')
-  
-  respData[[person_property]] = as.character(respData[[person_property]])
-  
-  # split into list
-  respData = split(respData, respData[[person_property]])
-  
-  if(length(respData)!=2)
+  if(nlevels(respData$x[[person_property]]) != 2)
     stop('The person_property needs to have two unique values in your data to calculate DIF')
   
-  common_scores = Reduce(dplyr::intersect, lapply(respData, function(x) x[,c('item_id','item_score')]))
-  problems = Reduce(dplyr::union,
-                    lapply(respData,
-                           function(data) dplyr::setdiff(data[,c('item_id','item_score')],common_scores)))
+  item_scores = respData$x %>%
+    distinct(.data[[person_property]], .data$item_id, .data$item_score) %>%
+    count(.data$item_id, .data$item_score)
   
-  if(nrow(problems) > 0)
+  if(!all(item_scores$n==2))
   {
-    problems = tibble(item_id = unique(problems$item_id))
-    warning(paste('the following items do not have the same score categories over both person_properties and',
-                  'have been removed from the analysis:', paste0(problems$item_id,collapse=', ')))
-    respData = lapply(respData, function(x) x %>% anti_join(problems, by = 'item_id'))
+    message('The following items do not have the same score categories over both person_properties and\n',
+            'have been removed from the analysis:')
+    
+    remove = item_scores %>%
+      filter(.data$n<2) %>%
+      distinct(.data$item_id)
+    
+    print(remove$item_id)
+    
+    respData = respData %>%
+      anti_join(remove, by='item_id', .recompute_sumscores = TRUE)
   }
-
+  
   ## 2. Estimate models with fit_enorm using CML
-  models = lapply(respData, fit_enorm)
-  #models = list(fit_enorm_(respData[[1]],env=as.environment(list())), 
-  #              fit_enorm_(respData[[2]],env=as.environment(list())))
+  models = by(respData, person_property, fit_enorm)
   
-
-
   ## 4. Call overallDIF_ and PairDIF_
-  DIF_stats = OverallDIF_ (models[[1]]$est$beta.cml, models[[2]]$est$beta.cml, 
-                           models[[1]]$est$acov.cml, models[[2]]$est$acov.cml)
+  DIF_stats = OverallDIF_ (models[[1]]$est$beta, models[[2]]$est$beta, 
+                           models[[1]]$est$acov.beta, models[[2]]$est$acov.beta)
   
-  DIF_mats = PairDIF_(models[[1]]$est$beta.cml, models[[2]]$est$beta.cml, 
-                      models[[1]]$est$acov.cml, models[[2]]$est$acov.cml)
+  DIF_mats = PairDIF_(models[[1]]$est$beta, models[[2]]$est$beta, 
+                      models[[1]]$est$acov.beta, models[[2]]$est$acov.beta)
   
-  items = common_scores %>%
+  items = models[[1]]$inputs$ssIS %>%
     filter(.data$item_score > 0) %>%
-    arrange(.data$item_id, .data$item_score)
-
+    select(.data$item_id, .data$item_score) %>%
+    arrange(.data$item_id, .data$item_score) %>%
+    mutate(item_id=as.character(.data$item_id))
+  
   ## 5. Report D and DIF_stats and inputs
   ou = list(DIF_overall = DIF_stats, DIF_pair = DIF_mats$D, Delta_R = DIF_mats$Delta_R, 
-            group_labels = names(respData), items = items)
+            group_labels = names(models), items = items)
   class(ou) = append('DIF_stats', class(ou))
   return(ou)
 }
@@ -156,10 +125,12 @@ print.DIF_stats <- function(x, ...)
   tmp = specify_decimal(x$DIF_overall$p,3)
   if (tmp=="0.000") tmp="< 0.0006"
   cat(paste0("Test for DIF:"," Chi-square = ", as.character(round(x$DIF_overall$stat, digits=3)),
-               ", df = ", 
-               as.character(x$DIF_overall$df),
-               ", p = ", tmp))  
+             ", df = ", 
+             as.character(x$DIF_overall$df),
+             ", p = ", tmp))  
 }
+
+
 
 #' plot method for DIF
 #' 
@@ -234,8 +205,8 @@ plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, ...)
                          default = default.args))
   
   
-  axis(1, at=1:length(yLabels), labels=yLabels, las= 3, cex.axis=0.6, hadj=1,padj=1)
-  axis(2, at=1:length(xLabels), labels=xLabels, las=1, cex.axis=0.6, hadj=1,padj=1)
+  axis(1, at=1:length(yLabels), labels=yLabels, las= 3, cex.axis=0.6, hadj=1,padj=0.5)
+  axis(2, at=1:length(xLabels), labels=xLabels, las=1, cex.axis=0.6, hadj=1,padj=0.5)
   
   #Color Scale
   par(mar=c(6,3,2,2))

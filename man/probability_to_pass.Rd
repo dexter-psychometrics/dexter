@@ -8,11 +8,11 @@ probability_to_pass(dataSrc, ref_items, pass_fail, design = NULL,
   predicate = NULL, similar_groups = TRUE)
 }
 \arguments{
-\item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score and booklet_id}
+\item{dataSrc}{Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score and booklet_id}
 
 \item{ref_items}{vector with id's of items in the reference set, they must all occur in dataSrc}
 
-\item{pass_fail}{pass-fail score on the reference set}
+\item{pass_fail}{pass-fail score on the reference set, the lowest score with which one passes}
 
 \item{design}{A data.frame with columns booklet_id (if multiple booklets) and item_id defining the target test booklet(s), 
 if NULL (default) this will be derived from the dataSrc and the probability to pass will be computed 

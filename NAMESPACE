@@ -1,86 +1,124 @@
-useDynLib(dexter, .registration = TRUE)
-import(RSQLite)
-importFrom(shiny,checkboxInput,plotOutput,actionButton,renderPlot,observeEvent,reactive,shinyApp,addResourcePath)
-importFrom(shinyBS, bsModal, toggleModal)
-importFrom(DT, renderDataTable, dataTableOutput)
-importFrom('shinydashboard', 'dashboardSidebar','sidebarMenu','menuItem','dashboardBody','tabItems','tabItem','dashboardPage','dashboardHeader')
-import(dplyr)
-importFrom("dbplyr","sql_quote","translate_sql_","partial_eval")
-importFrom("DBI","dbExecute", "dbDisconnect")
-importFrom("rlang","caller_env",".data","eval_tidy")
-importFrom("fastmatch","fmatch")
-importFrom("tidyr", "gather", "spread", "fill")
-importFrom("tibble","add_column")
-importFrom("colorspace", "hex", "polarLUV")
-importFrom("stats", "complete.cases", "cor", "quantile","var",
+useDynLib(dexter, .registration=TRUE)
+importFrom(Rcpp, "evalCpp")
+importFrom(RcppArmadillo, "armadillo_version")
+import(dplyr, except="sql")
+importFrom(RSQLite, "SQLite")
+importFrom(DBI,"dbExecute", "dbGetQuery","dbDisconnect", "dbConnect", "dbListFields",
+            "dbCommit","dbRollback","dbBegin", "dbReadTable", "dbExistsTable") 
+importFrom(rlang,"caller_env",".data","eval_tidy","duplicate","env_has")
+importFrom(tidyr, "gather", "spread", "fill")
+importFrom(stats, "complete.cases", "cor", "quantile","var",
             "sd", "weighted.mean", "as.formula", "density",
-            "cov", "mahalanobis", "model.matrix", "pchisq",
+            "cov", "mahalanobis", "model.matrix", "pchisq","rchisq",
             "rgamma", "runif", "setNames", 'rnorm',"chisq.test",
            "smooth.spline", "coef", "lm", "predict", "dnorm", "qnorm")
-importFrom("graphics", "plot", "axis", "image", "layout", "par", "lines", "text","legend","abline","segments","arrows","points")
-importFrom("grDevices", "rainbow", "colorRampPalette")
-importFrom("methods", "is", "new")
-importFrom("purrr", "map","map_df")
-importFrom("rprintf","rprintf")
-importFrom("utils", "str", "head", "person", "setTxtProgressBar", "tail",
+importFrom(graphics, "plot", "axis", "image", "layout", "par", "lines", 
+           "text","legend","abline","segments","arrows","points", "rect","clip")
+importFrom(grDevices, "rainbow","colorRampPalette","col2rgb","rgb")
+importFrom(methods, "is", "new")
+importFrom(utils, "str", "head", "person", "setTxtProgressBar", "tail",
              "txtProgressBar","modifyList")
-importFrom(RColorBrewer, brewer.pal, brewer.pal.info)
-importFrom(shiny,checkboxInput,plotOutput,actionButton,renderPlot,observeEvent,reactive,shinyApp)
-#importFrom(lsei, pnnls)
+
+
+# dexter.R
 export(start_new_project)
 export(open_project)
 export(close_project)
 export(add_booklet)
 export(add_response_data)
-export(fit_inter)
-export(fit_enorm)
 export(get_testscores)
-export(tia_tables)
 export(keys_to_rules)
 export(add_item_properties)
-export(get_item_properties)
 export(add_person_properties)
-export(get_person_properties)
 export(get_persons)
 export(get_design)
+export(design_info)
 export(get_booklets)
 export(get_items)
+export(get_variables)
 export(get_rules)
-export(fit_domains)
-export(profile_plot)
-export(distractor_plot)
-export(design_as_network)
-export(design_is_connected)
-export(plausible_values)
-export(ability)
-export(information)
-S3method(plot,rim)
-S3method(print,rim)
-S3method(coef,rim)
+export(touch_rules) # nobody gets this name, to do: change
+
+#data_selection.R
+export(get_responses)
+
+#oplike.R
+export(start_new_project_from_oplm)
+export(read_oplm_par)
+
+#enorm.R
+export(fit_enorm)
+
 S3method(print,prms)
 S3method(coef,prms)
 S3method(plot,prms)
-export(iModels)
-export(iTIA)
-export(plot3DC)
-export(add_test3DC)
-export(create3DC)
-export(start_new_project_from_oplm)
-export(touch_rules)
-export(get_responses)
-export(get_variables)
-export(DIF)
-export(read_oplm_par)
-S3method(plot,DIF_stats)
-S3method(print,DIF_stats)
-export(individual_differences)
-S3method(plot,tind)
-S3method(print,tind)
+
+export(information)
+export(expected_score)
+export(r_score)
+export(variance_score)
+
+S3method(print,inf_func)
+S3method(print,exp_func)
+S3method(print,sim_func)
+S3method(print,var_func)
+
+#ability.R
+export(ability)
 export(ability_tables)
+
+#plausible_values.R
+export(plausible_values)
+
+#plausible_scores.R
 export(plausible_scores)
+
+
+#interaction_model.R
+export(fit_inter)
+export(fit_domains)
+
+S3method(plot,rim)
+S3method(print,rim)
+S3method(coef,rim)
+
+#profile_analysis.R
 export(profiles)
 export(profile_tables)
+
+#plots.R
+export(profile_plot)
+export(distractor_plot)
+
+#dif.R
+export(DIF)
+S3method(plot, DIF_stats)
+S3method(print, DIF_stats)
+
+#equating.R
 export(probability_to_pass)
 S3method(plot,p2pass)
 S3method(coef,p2pass)
-S3method(print,inf_func)
+S3method(print,p2pass)
+
+#individual_differences.R
+export(individual_differences)
+S3method(plot,tind)
+S3method(print,tind)
+
+#tia.R
+export(tia_tables)
+
+#standards.R
+
+export(standards_3dc)
+export(standards_db)
+S3method(plot,sts_par)
+S3method(coef,sts_par)
+
+
+#resp_data.R
+export(get_resp_data)
+
+
+

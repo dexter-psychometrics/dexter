@@ -7,7 +7,7 @@
 DIF(dataSrc, person_property, predicate = NULL)
 }
 \arguments{
-\item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score}
+\item{dataSrc}{Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score}
 
 \item{person_property}{Defines groups of persons to calculate DIF}
 
@@ -22,19 +22,18 @@ item-category parameters in the regular parameterization used e.g., by OPLM.
 Exploratory test for Differential Item Functioning
 }
 \details{
-Tests for equality of relative item difficulties category locations across groups.
+Tests for equality of relative item/category difficulties across groups.
 Supplements the confirmatory approach of the profile plot
 }
 \examples{
-\dontrun{
-db = start_new_project(verbAggrRules, "verbAggression.db", person_propertys=list(gender='unknown'))
+db = start_new_project(verbAggrRules, ":memory:", person_properties=list(gender='unknown'))
 add_booklet(db, verbAggrData, "agg")
 dd = DIF(db,person_property="gender")
 print(dd)
 plot(dd)
+str(dd)
 
 close_project(db)
-}
 
 }
 \references{

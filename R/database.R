@@ -2,29 +2,16 @@
 
 dbRunScript = function(db, fn)
 {
-  # run sql script included in the package
-  # The R dbi api does not provide for execution of scripts.
-  # A usual method to get around this is to split the input script on ;
-  # however, there are numerous exceptions where this would not work (e.g. strings, triggers)
-  # the kludge is to use a custom split string in our sql scripts, which is:
-  # --#split#--
-
   fn = system.file("extdata", fn, package = "dexter", mustWork = TRUE)
 
   script = strsplit(paste0(readLines(fn, warn = FALSE), collapse='\n'),'--#split#--')[[1]]
   
   for (statement in script)
-  {
-    dbExecute(db,statement)
-  }
+    dbExecute(db, statement)
 }
 
 
-dbExists = function(db, query, data)
-{
-  nrow(dbGetQuery(db, query, data)) > 0
-}
-
+dbExists = function(db, query, data) (nrow(dbGetQuery(db, query, data)) > 0)
 
 dbCheck_reserved_colnames = function(nm)
 {
@@ -43,80 +30,85 @@ dbCheck_reserved_colnames = function(nm)
   }
 }
   
-  
-
 
 dbUniquePersonIds = function(db,n)
 {
+  # to do: other dbms
   if(is(db, 'SQLiteConnection'))
   {
     last = dbGetQuery(db,
-                      "SELECT coalesce(MAX(CAST(substr(person_id,4) AS INTEGER)),0) AS n FROM dxPersons 
-                        WHERE substr(person_id,1,3)='dxP' AND
-                            upper(substr(person_id,4)) = lower(substr(person_id,4));")
-  } 
-  else if(is(db, 'PostgreSQLConnection')) 
+                      "SELECT substr(person_id,4) AS n FROM dxPersons 
+                        WHERE substr(person_id,1,3)='dx_' 
+                          ORDER BY person_id DESC LIMIT 1;")
+  } else if(is(db, 'PostgreSQLConnection')) 
   {
-    last = dbGetQuery(db,"SELECT MAX(CAST(substring(person_id from 4) AS INTEGER)) 
-                          FROM dxPersons WHERE person_id ~ '^dxP\\d+$';")
+    # to do:test
+    last = dbGetQuery(db,"SELECT substring(person_id from 4) AS n FROM dxPersons 
+                            WHERE person_id ~ '^dx_\\d+$'
+                              ORDER BY person_id DESC LIMIT 1;")
   }
  
-  if (nrow(last)==0) { last = 0}  else {last = last[1,1]}
+  if (nrow(last)==0) { last = 0L}  else {last = as.integer(last[1,1])}
   
-  return(paste0('dxP',c((last+1):(last+n))))
+  return(sprintf('dx_%07i',(1:n) + last))
 }
 
-project_CreateTables = function(db, covariates=NULL)
+project_CreateTables = function(db, person_properties=NULL)
 {
   if(is(db, 'SQLiteConnection'))
   {
     dbRunScript(db,"dexter_sqlite.sql")
-  } else if(is(db, 'PostgreSQLConnection')) 
+  } else
   {
-    stop('Postgres is not supported yet')
-    #dbRunScript(db,"dexter_standard.sql")
-    #dbRunScript(db,"dexter_pgsql_triggers.sql")
-  } else {stop('unsupported database')}
+    # to do: test on postgres
+    dbRunScript(db,"dexter_standard.sql")
+  } 
   
-  if (!is.null(covariates))
+  if (!is.null(person_properties))
   {
     # do some cleaning to make sure these are acceptable column names
-    names(covariates) = dbValid_colnames(names(covariates))
-    covariates[['person_id']] = NULL
-    for(col in names(covariates))
+    names(person_properties) = dbValid_colnames(names(person_properties))
+    person_properties[['person_id']] = NULL
+    for(col in names(person_properties))
     {
-      dbExecute(db, paste0("ALTER TABLE dxPersons ADD COLUMN ",col,sql_col_def(covariates[[col]],is.default=TRUE),';'))
+      dbExecute(db, paste0("ALTER TABLE dxPersons ADD COLUMN ",col,sql_col_def(person_properties[[col]],is.default=TRUE),';'))
     }
   }
 }
 
 sql_data_type = function(value)
 {
-  if(inherits(value,'Date')) return(' DATE ')
-  else if(inherits(value,'factor')) return(' TEXT ')
-  else if(inherits(value,'POSIXlt') || inherits(value,'POSIXt')) return(' DATETIME ')
-  else if(typeof(value) == 'integer') return(' INTEGER ')
-  else if(is.numeric(value)) return(' DOUBLE PRECISION ')
-  else return(" TEXT ")
+  if(is.date(value))    return(' DATE ')
+  if(is.factor(value))  return(' TEXT ')
+  if(is.time(value))    return(' DATETIME ')
+  if(is.integer(value)) return(' INTEGER ')
+  if(is.numeric(value)) return(' DOUBLE PRECISION ')
+  " TEXT "
 }
+
 
 sql_col_def = function(value, is.default=FALSE, db=NULL)
 {
   dt = sql_data_type(value)
-  if(!is.default)
-  {
+  
+  if(!is.default || length(value)==0)
     return(dt) 
-  } else if(is.numeric(value))
-  {
-    return(paste(dt,'DEFAULT',ifelse(is.na(value) || is.null(value),'NULL',value)))
-  } else
-  {
-    return(paste(dt,'DEFAULT',sql_quote(as.character(value),"'")))
-  }
+  
+  if(is.date(value))
+    return(paste0(dt," DEFAULT '",format(value, "%Y-%m-%d"),"'"))
+  
+  if(is.time(value))
+    return(paste0(dt," DEFAULT '",format(value, "%Y-%m-%d %H:%M:%S"),"'"))
+
+  if(is.numeric(value))
+    return(paste(dt,'DEFAULT',if.else(is.na(value) || is.null(value),'NULL',value)))
+  
+  paste(dt,'DEFAULT',sql_quote(as.character(value),"'"))
+  
 }
 
 
-dbValid_colnames <- function(vec)
+dbValid_colnames = function(vec)
 {
    gsub('^(?=\\d)','c',gsub('[^0-9a-z_]','_',tolower(vec)), perl=TRUE)
 }

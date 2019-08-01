@@ -7,14 +7,15 @@
 \usage{
 ability(dataSrc, parms, predicate = NULL, method = c("MLE", "EAP"),
   prior = c("normal", "Jeffreys"), use_draw = NULL, npv = 500,
-  mu = 0, sigma = 4, standard_errors = FALSE, asOPLM = TRUE)
+  mu = 0, sigma = 4, standard_errors = FALSE,
+  merge_within_person = FALSE)
 
 ability_tables(parms, design = NULL, method = c("MLE", "EAP"),
   prior = c("normal", "Jeffreys"), use_draw = NULL, npv = 500,
-  mu = 0, sigma = 4, standard_errors = TRUE, asOPLM = TRUE)
+  mu = 0, sigma = 4, standard_errors = TRUE)
 }
 \arguments{
-\item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score}
+\item{dataSrc}{Data source: a connection to a dexter database or a data.frame with columns or a data.frame with columns: person_id, item_id, item_score}
 
 \item{parms}{An object returned by \code{\link{fit_enorm}} and containing
 parameter estimates}
@@ -38,9 +39,10 @@ If outside range, the last iteration will be used.}
 
 \item{sigma}{Standard deviation of the normal prior}
 
-\item{standard_errors}{If true standard-errors are produced.}
+\item{standard_errors}{If true standard-errors are produced}
 
-\item{asOPLM}{Report abilities on a scale defined by the OPLM normalization. Only when no values in parms have been fixed}
+\item{merge_within_person}{for persons who were administered multiple booklets, 
+whether to provide just one abilty value (TRUE) or one per booklet(FALSE)}
 
 \item{design}{A data.frame with columns item_id and optionally booklet_id. If design is NULL
 the score transformation table will be computed based on the test design 
@@ -49,8 +51,8 @@ transformation table will be based on all items found in the design.}
 }
 \value{
 \describe{
-  \item{ability}{a data.frame with columns: booklet_id, person_id, sumScore, theta and optionally se (standard error) }
-  \item{ability_tables}{a data.frame with columns: booklet_id, sumScore, theta and optionally se (standard error)}
+  \item{ability}{a data.frame with columns: booklet_id, person_id, booklet_score, theta and optionally se (standard error) }
+  \item{ability_tables}{a data.frame with columns: booklet_id, booklet_score, theta and optionally se (standard error)}
 }
 }
 \description{
@@ -69,9 +71,9 @@ f = fit_enorm(db)
 aa = ability_tables(f,method="MLE",standard_errors=FALSE)
 bb = ability_tables(f,method="EAP",standard_errors=FALSE)
 cc = ability_tables(f,method="EAP",prior="Jeffreys", standard_errors=FALSE)
-plot(bb$sumScore, bb$theta, xlab="test-score", ylab="ability est.", pch=19, cex=0.7)
-points(aa$sumScore, aa$theta, col="red", pch=19, cex=0.7)
-points(aa$sumScore, cc$theta, col="green", pch=19, cex=0.7)
+plot(bb$booklet_score, bb$theta, xlab="test-score", ylab="ability est.", pch=19, cex=0.7)
+points(aa$booklet_score, aa$theta, col="red", pch=19, cex=0.7)
+points(aa$booklet_score, cc$theta, col="green", pch=19, cex=0.7)
 legend("topleft", legend = c("EAP normal prior", "EAP Jeffreys prior", "MLE"), bty = "n",
         lwd = 1, cex = 0.7, col = c("black", "green", "red"), lty=c(0,0,0), pch = c(19,19,19))
 

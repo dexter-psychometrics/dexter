@@ -1,12 +1,12 @@
 
-
+# to do: example
 ##########################################
 #' Profile analysis
 #'
 #' Expected and observed domain scores, conditional on the test score, per person or test score. 
 #' Domains are specified as categories of items using item_properties.
 #'
-#' @param dataSrc a dexter project db handle or a data.frame with columns: person_id, item_id, item_score, 
+#' @param dataSrc a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score, 
 #' an arbitrarily named column containing an item property and optionally booklet_id
 #' @param parms An object returned by \code{\link{fit_enorm}} 
 #' @param predicate An optional expression to subset data in dataSrc, if NULL all data is used
@@ -18,10 +18,10 @@
 #' 
 #' @return 
 #' \describe{
-#' \item{profiles}{a data.frame with columns person_id, booklet_id, sumScore, 
-#' -item_property-, domain_score, expected_domain_score}
-#' \item{profile_tables}{a data.frame with columns booklet_id, sumScore, 
-#' -item_property-, expected_domain_score }
+#' \item{profiles}{a data.frame with columns person_id, booklet_id, booklet_score, 
+#' <item_property>, domain_score, expected_domain_score}
+#' \item{profile_tables}{a data.frame with columns booklet_id, booklet_score, 
+#' <item_property>, expected_domain_score }
 #' }
 #' @details 
 #' When using a unidimensional IRT Model like the extended nominal response model in 
@@ -38,151 +38,168 @@
 #' Scandinavian Journal of Educational Research, 56 (3), 315-332.
 #' 
 #' 
+#
+# to do: allow rim as parms
 profiles = function(dataSrc, parms, item_property, predicate=NULL)
 {
   qtpredicate = eval(substitute(quote(predicate)))
+  env = caller_env()
   
+  check_dataSrc(dataSrc)
+  check_parms(parms)
+  check_string(item_property)
+
+
+  if(inherits(dataSrc, 'DBIconnection'))
+    item_property = dbValid_colnames(item_property)
   
-  if(!inherits(parms,'prms'))
-    stop('argument `parms` should be a parameters object resulting from fit_enorm')
+  # to do: is there an error if extra column is not available?
+  respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, env=env, 
+                           extra_columns = item_property, 
+                           parms_check=parms$inputs$ssIS[,c('item_id','item_score')])
   
-  if(inherits(dataSrc, 'data.frame'))
+  if(!is.integer(respData$x[[item_property]]))
+    respData$x[[item_property]] = ffactor(respData$x[[item_property]])
+
+  # check for valid item property
+  if(!inherits(dataSrc, 'DBIConnection') || !item_property %in% dbListFields(dataSrc,'dxitems'))
   {
-    if(!item_property %in% colnames(dataSrc))
-      stop(paste0('dataSrc should include a column `',item_property,'`'))
-    
-    idom = distinct(dataSrc, .data$item_id, .data[[!item_property]])
+    idom = distinct(respData$x, .data$item_id, .data[[item_property]])
     
     if(nrow(idom) > nrow(distinct(idom, .data$item_id)))
-      stop('Each item may only have a single item property')
+      stop('Each item must have a unique item property')
+  } 
+  
+  
+  if(inherits(dataSrc,'DBIConnection'))
+  {
+    domains = dbGetQuery(dataSrc, paste("SELECT item_id,", item_property, "FROM dxItems;"))
+    domains$item_id = ffactor(domains$item_id, levels = levels(respData$x$item_id))
+    domains = filter(domains, !is.na(.data$item_id))
+    if(!is.integer(domains[[item_property]]))
+      domains[[item_property]] = ffactor(domains[[item_property]])
   } else
   {
-    item_property = tolower(item_property)
+    domains = distinct(respData$x, .data$item_id, .data[[item_property]])
     
-    if(!item_property %in% dbListFields(dataSrc,'dxitems'))
-      stop(paste0('There is no item_property with name `',item_property,'` in your project'))
+    if(nrow(domains) > n_distinct(domains$item_id))
+      stop("some items belong to multiple domains, this is not allowed")
   }
-  env=caller_env()
-  respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, env=env, 
-                           extra_columns = item_property, extra_design_columns = item_property)
   
-  respData$x %>%
-    group_by(.data$person_id, .data$booklet_id, .data$sumScore, .data[[!!item_property]]) %>%
-    summarise(domain_score = sum(.data$item_score)) %>%
-    ungroup() %>%
+  design = respData$design
+  
+  respData = respData %>%
+    polytomize(item_property, protect_x=!inherits(dataSrc,'DBIConnection')) 
+  
+  out = respData$x %>%
     inner_join(
-        profile_tables(parms = parms, design = respData$design, 
-                       domains=distinct(respData$design, .data$item_id, .data[[!!item_property]]),
+        profile_tables_(parms = parms, design = design,
+                       domains = domains,
                        item_property = item_property),
-        by = c('booklet_id','sumScore',item_property)) %>%
+        by = c('booklet_id','booklet_score',item_id = item_property)) %>%
+    mutate_if(is.factor, as.character) %>%
     as.data.frame()
-
+  
+  colnames(out)[colnames(out)=='item_id'] = item_property
+  colnames(out)[colnames(out)=='item_score'] = 'domain_score'
+  
+  out
 }
   
 #' @rdname profiles
 profile_tables = function(parms, domains, item_property, design = NULL)
 {
-  if(!inherits(parms,'prms'))
-    stop('argument `parms` should be a parameters object resulting from fit_enorm')
-  if(!inherits(domains,'data.frame'))
-    stop('argument domains should be a data.frame')
-  if(!'item_id' %in% colnames(domains))
-    stop('domains should include a column `item_id`')
-  if(!item_property %in% colnames(domains))
-    stop(paste0('domains should include a column `',item_property,'`'))
+  check_parms(parms)
+  check_string(item_property)
+  check_df(domains, c('item_id', item_property))
+  check_df(design, 'item_id', nullable=TRUE)
+  
+
   if(length(unique(domains$item_id)) < nrow(domains))
     stop('column domains$item_id must be unique')
-  
   
   if(is.null(design))
   {
     if(is.null(parms$inputs$design))
     {
+      # to do: check mst vignettes, if this is not used, better make it an error
       if(inherits(parms,'mst_enorm'))
         message('Computing non-mst profile_tables over an mst design, did you mean to use profile_tables_mst?')
-      design = lapply(parms$inputs$bkList, function(bk) tibble(booklet_id=bk$booklet,item_id=bk$items)) %>% bind_rows()
+      design = lapply(parms$inputs$bkList, function(bk) tibble(booklet_id=bk$booklet,item_id=bk$items)) %>% 
+        bind_rows()
+      
+      design$item_id = ffactor(design$item_id)
     } else
     {
       design = parms$inputs$design
     }
   }  
+  
+  domains$item_id = ffactor(as.character(domains$item_id), levels = levels(design$item_id))
+  
+  if(all(is.na(domains$item_id)))
+    stop("none of the item id's in domains occurs in your parameters")
+  
+  if(anyNA(domains$item_id))
+  {
+    warning("some item_id's in domains do not occur in your parameters, these have been removed. 
+            You can use coef(parms) to see which items are in your parameters")
+    domains = filter(domains, !is.na(.data$item_id))
+  }
 
   
-  if(!'booklet_id' %in% colnames(design)) design$booklet_id = 'all_items'
-  # what if domains not a superset of design?
+  if(!'booklet_id' %in% colnames(design)) 
+    design$booklet_id = 'all_items'
+  # to do: what if domains not a superset of design? empty property?
   
+
+  profile_tables_(parms, domains, item_property, design) %>%
+    mutate_if(is.factor, as.character) %>%
+    as.data.frame()
+}
+
+profile_tables_ = function(parms, domains, item_property, design)
+{
+  
+  if(!is.factor(domains$item_id))
+    domains$item_id = ffactor(as.character(domains$item_id), levels = levels(design$item_id))
   
   design = design %>% 
     select(.data$booklet_id, .data$item_id) %>%
-    inner_join(domains, by='item_id') %>%
-    mutate(dcat = dense_rank(.data[[!!item_property]]))
+    inner_join(domains[,c('item_id',item_property)], by='item_id') %>%
+    mutate(dcat = dense_rank(.data[[item_property]]))
   
-  dcat = distinct(design, .data[[!!item_property]], dcat )
+  dcat = distinct(design, .data[[item_property]], dcat )
   
-    parms$inputs$ssI %>% 
-      mutate(i = row_number()) %>%
-      inner_join(design, by='item_id') %>%
-      group_by(.data$booklet_id) %>%
-      do(
+  b = if.else(parms$inputs$method == "Bayes", colMeans(parms$est$b), parms$est$b)
+  a = parms$inputs$ssIS$item_score
+
+  first = parms$inputs$ssI$first
+  last = parms$inputs$ssI$last
+  
+  parms$inputs$ssI %>% 
+    mutate(i = row_number()) %>%
+    inner_join(design, by='item_id') %>%
+    group_by(.data$booklet_id) %>%
+    do(
         {
-          prof_lmx = E_profile_enorm(parms, split(.$i, .$dcat))
+          prof_lmx = E_profile(b,a,first,last, split(.$i, .$dcat))
           
-          lapply(prof_lmx$E_RM, function(mtx)
+          lapply(prof_lmx, function(mtx)
           {
             tibble(dcat=1:ncol(mtx), expected_domain_score = mtx[1,] )}
           ) %>%
-            bind_rows(.id='sumScore') %>%
-            mutate(sumScore = as.integer(.data$sumScore)-1L) %>%
+            bind_rows(.id='booklet_score') %>%
+            mutate(booklet_score = as.integer(.data$booklet_score)-1L) %>%
             inner_join(dcat, by='dcat')
         }
       ) %>%
       ungroup() %>%
-      select(-dcat) %>%
-      as.data.frame()
-
-}
-
-# prms is enorm params
-# A is a vector of lists containing mutually exclusive subsets (indexes in ssI)
-# TO DO; consider possibilities of Bayesian parms
-E_profile_enorm <- function(prms, A)
-{
-  nSub=length(A)
-  if (prms$inputs$method == "Bayes") prms$est$b = colMeans(prms$est$b)
-  Msc = sum(prms$inputs$ssIS$item_score[prms$inputs$ssI[sort(unlist(A)),]$last])
-  Msc_sub = rep(0,nSub)
-  
-  AA=vector("list",2)
-  E_RM = matrix(0, nSub, Msc+1)
-  for (j in 1:nSub)
-  {
-    AA[[1]] = A[[j]]
-    AA[[2]] = unlist(A[setdiff(1:nSub,j)])
-    hh_RM = SSTable_ENORM(prms$est$b, prms$inputs$ssIS$item_score, prms$inputs$ssI$first, prms$inputs$ssI$last, AA)$tbl
-
-    Msc_sub[j] = nrow(hh_RM)-1
-    for (i in 1:nrow(hh_RM))
-    {
-      for (h in 1:ncol(hh_RM))
-      {
-        s = i+h-1
-        sA = i-1
-        E_RM[j,s] = E_RM[j,s] + sA*hh_RM[i,h]
-      }
-    }
-  }
-  Etab_RM = vector("list", Msc+1)
-  for (i in 1:length(Etab_RM))
-  {
-    Etab_RM[[i]] = matrix(0,2,nSub)
-    Etab_RM[[i]][1,] = E_RM[,i]
-    Etab_RM[[i]][2,] = Msc_sub - E_RM[,i]
-  }
-  return(list(E_RM=Etab_RM))
+      select(-dcat)
 }
 
 
-  
+
 # A profile is a table with two rows (earned, not earned) and number of columns
 # equal to the number of subsets. As in Norman's Cito brochure.
 
@@ -191,162 +208,48 @@ E_profile_enorm <- function(prms, A)
 # subsets defined by the indices of items
 # prms is produced by fit_inter
 # output is list of profiles for each total score. For score s take E_RM[[s+1]]
-E_profile <- function(prms, A)
+
+# first and last are reduced to only the items occurring in A
+# NA categories can be applied by removing them from A as well as first and last
+E_profile = function(b, a, first, last, A, cIM=NULL)
 {
-  nSub=length(A)
-  Msc = sum(prms$ss$sl$item_score[prms$ss$il$last])
-  Msc_sub = rep(0,nSub)
+  nSub = length(A)
   
-  AA=vector("list",2)
-  E_RM = matrix(0, nSub, Msc+1)
-  E_IM = matrix(0, nSub, Msc+1)
+  items = unlist(A)
+  Msc = sum(a[last[items]])
+  Msc_sub = integer(nSub)
+  
+  
+  E = matrix(0, nSub, Msc+1)
   for (j in 1:nSub)
   {
-    AA[[1]] = A[[j]]
-    AA[[2]] = unlist(A[setdiff(1:nSub,j)])
-    hh_RM = SSTable(prms,AA,"RM")$tbl
-    hh_IM = SSTable(prms,AA,"IM")$tbl
-    Msc_sub[j] = nrow(hh_RM)-1
-    for (i in 1:nrow(hh_RM))
+    hh = SSTable(b, a, first, last, AB=list(A[[j]], setdiff(items, A[[j]])), cIM=cIM)
+      
+    Msc_sub[j] = nrow(hh) - 1L
+    for (i in 1:nrow(hh))
     {
-      for (h in 1:ncol(hh_RM))
+      for (h in 1:ncol(hh))
       {
-        s=i+h-1
-        sA=i-1
-        E_RM[j,s] = E_RM[j,s] + sA*hh_RM[i,h]
-        E_IM[j,s] = E_IM[j,s] + sA*hh_IM[i,h] 
+        s = i + h - 1L
+        sA = i - 1
+        E[j,s] = E[j,s] + sA * hh[i,h]
       }
-    }
+    }   
   }
-  Etab_RM = vector("list", Msc+1)
-  Etab_IM = vector("list", Msc+1)
-  for (i in 1:length(Etab_RM))
+  Etab = vector("list", Msc+1)
+  for (i in 1:length(Etab))
   {
-    Etab_RM[[i]] = matrix(0,2,nSub)
-    Etab_RM[[i]][1,] = E_RM[,i]
-    Etab_RM[[i]][2,] = Msc_sub - E_RM[,i]
-    Etab_IM[[i]] = matrix(0,2,nSub)
-    Etab_IM[[i]][1,] = E_IM[,i]
-    Etab_IM[[i]][2,] = Msc_sub - E_IM[,i]
+    Etab[[i]] = matrix(0,2,nSub)
+    Etab[[i]][1,] = E[,i]
+    Etab[[i]][2,] = Msc_sub - E[,i]
   }
-  return(list(E_RM = Etab_RM, E_IM = Etab_IM))
+  
+  Etab
 }
+
 
 # Chi-square disctance between observed and expected
 profile_dist <-function(obs, expt)
 {
   return(sum((obs-expt)^2/expt))
 }
-
-r_profile <- function(b, a, c, A, first, last, score, model)
-{
-  x_scores = rep(0,length(A))
-  Ei=1:length(first)
-  s=score
-  it=1
-  if (model=="IM")
-  {
-    logb=log(b)
-    logc=log(c)
-    while ((s>0)&(it<=length(first)))
-    {
-      eta = exp(logb + (a * s) * logc)
-      g = elsym(eta, a, first[Ei], last[Ei])
-      gi = elsym(eta, a, first[Ei[-1]], last[Ei[-1]])
-      pi = rep(0,last[it]-first[it]+1)
-      k=1
-      for (j in first[it]:last[it]) 
-      {
-        idx = s + 1 - a[j]
-        if ((idx > 0) & (idx <= length(gi))) 
-        {
-          pi[k] = exp(log(eta[j]) + log(gi[idx]) - log(g[s + 1]))
-        }
-        k=k+1
-      }
-      resp = sample(a[first[it]:last[it]], 1 , prob=pi)
-      which_set=which(unlist(lapply(A,function(x) it%in%x)))
-      x_scores[which_set]=x_scores[which_set]+resp
-      s = s - a[first[it]:last[it]][resp+1]
-      it = it + 1
-      Ei = Ei[-1]
-    }
-  }else
-  {
-    while ((s>0)&(it<=length(first)))
-    {
-      g = elsym(b, a, first[Ei], last[Ei])
-      gi = elsym(b, a, first[Ei[-1]], last[Ei[-1]])
-      pi = rep(0,last[it]-first[it]+1)
-      k=1
-      for (j in first[it]:last[it]) 
-      {
-        idx = s + 1 - a[j]
-        if ((idx > 0) & (idx <= length(gi))) 
-        {
-          pi[k] = exp(log(b[j]) + log(gi[idx]) - log(g[s + 1]))
-        }
-        k=k+1
-      }
-      resp = sample(a[first[it]:last[it]], 1 , prob=pi)
-      which_set=which(unlist(lapply(A,function(x) it%in%x)))
-      x_scores[which_set]=x_scores[which_set]+resp
-      s = s - a[first[it]:last[it]][resp+1]
-      it = it + 1
-      Ei = Ei[-1]
-    }
-  }
-  
-  ## make profile
-  Msc_sub = unlist(lapply(A,function(x) sum(a[last[x]])))
-  sim_tab = matrix(0,2,length(A))
-  sim_tab[1,] = x_scores
-  sim_tab[2,] = Msc_sub - x_scores
-  
-  return(sim_tab)
-}
-
-# For all profiles defined by A, the probabilities given total-score
-# under ENORM. Currently only CML
-enum_prof <-function(prms, A, sums=FALSE)
-{
-  nA = length(A)
-  Msc = rep(0,nA)
-  a = prms$inputs$ssIS$item_score
-  b = prms$est$b
-  first = prms$inputs$ssI$first
-  last = prms$inputs$ssI$last
-  for (i in 1:length(A)) Msc[i] = sum(a[last[A[[i]]]])
-  indx = unlist(A, use.names = FALSE)
-  lg = log(elsym(b, a, first[indx], last[indx]))
-  P = array(0,Msc+1)
-  SM = P
-  for (i in 1:length(A))
-  {
-    prefix <- paste(rep(",", i - 1), collapse = "")
-    suffix <- paste(rep(",", nA - i), collapse = "")
-    lgA = log(elsym(b, a, first[A[[i]]], last[A[[i]]]))
-    for (j in 0:Msc[i])
-    {
-      expr <- paste("P[", paste(prefix, j+1, suffix, sep = ""), "] <-",
-                    "P[", paste(prefix, j+1, suffix, sep = ""), "]+lgA[j+1]", sep = "")
-      eval(parse(text = expr))
-      expr <- paste("SM[", paste(prefix, j+1, suffix, sep = ""), "] <-",
-                    "SM[", paste(prefix, j+1, suffix, sep = ""), "]+j", sep = "")
-      eval(parse(text = expr))
-    }
-  }
-  for (i in 0:sum(Msc))
-  {
-    indx = which(SM==i, arr.ind = T, useNames = F)
-    P[indx] = P[indx] - lg[i+1] 
-  }
-  if (!sums){
-    return(exp(P))
-  }else
-  {
-    return(list(P=exp(P), SM=SM))
-  }
-}
-
-

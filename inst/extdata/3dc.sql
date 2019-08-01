@@ -24,7 +24,7 @@ CREATE TABLE Clusters(
     test_id VARCHAR(100) NOT NULL,
     cluster_nbr INTEGER NOT NULL,
     cluster_score INTEGER NOT NULL,
-    test_score_est INTEGER NOT NULL, -- estimated test score based on cluster score
+    test_score_est REAL NOT NULL, -- estimated test score based on cluster score
       
     PRIMARY KEY (test_id, cluster_nbr, cluster_score),      
     FOREIGN KEY (test_id, cluster_nbr) REFERENCES Clusters(test_id, cluster_nbr) ON UPDATE CASCADE ON DELETE CASCADE

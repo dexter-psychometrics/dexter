@@ -1,126 +1,252 @@
 # common utility functions and datasets
 
+# to do: better progressbars that can be turned off for vignettes
 
-# kind of fit a monotone B-spline
-# a is an object containing Timo's EAPs, output of ability_tables
-# monosm = function(a){
-#   nss = nrow(a)
-#   if (nrow(a)<4) return(a$theta) # no smoothing if too short
-#   x = a$sumScore
-#   y = a$theta
-#   typical_no_knots = 15
-#   typical_order = 5
-#   nik = min(nss, typical_no_knots)
-#   order = typical_order
-#   innerknots = seq(x[1], x[nss], length=nik)
-#   multiplicities = rep(1, nik-2)
-#   lowend = x[1]
-#   highend = x[nss]
-#   innerknots = innerknots[2:(nik-1)]
-#   knots = extendPartition (innerknots, multiplicities, order,
-#                            lowend, highend)$knots
-#   h = bsplineBasis (x, knots, order)
-#   g = rowSums(h) - t(apply (h, 1, cumsum))
-#   g = cbind (1, g)
-#   u = pnnls (g, x, 1)$x
-#   v = g%*%u
-#   return(v)
+.onUnload = function (libpath) {
+  library.dynam.unload("dexter", libpath)
+}
+
+
+# .onLoad = function(libname, pkgname) {
+#   op = options()
+#   if(!'dexter.elsymmean' %in% names(op))
+#     options(dexter.elsymmean=FALSE)
+#   invisible()
 # }
+
+is.date = function(x) inherits(x, "Date")
+is.time = function(x) inherits(x,'POSIXt')
+
+# add named column(s) to the end of a data.frame
+add_column = function(df, ...)
+{
+  dots = list(...)
+  if(is.null(names(dots)) || any(names(dots) == ''))
+     stop('arguments must be named')
+  
+  for(nm in names(dots))
+  {
+    vec = dots[[nm]]
+    stopifnot(length(vec)==1 || nrow(df) == length(vec))
+    df[[nm]] = vec
+  }
+  
+  df
+}
+
+# scores is data.frame item_id, item_score, assumed that 0 is present
+all_trivial_scores = function(scores)
+{
+  length(Reduce(function(a,b){out = as.vector(outer(a,b,'+')); if(!anyDuplicated(out)) out else NULL}, 
+                split(scores$item_score, scores$item_id))
+  ) > 0
+}
+
+
+# format string with named arguments
+
+# txt: format string with named arguments prefixed by a dollar sign, formatting can be done with postfixing with : 
+# arglist: list with named arguments to interpolate in the format string. Use only alphanumerical characters in the names
+
+# return: 
+# formatted string
+
+# examples
+
+# fstr('$bla, $b',list(bla='some string'))
+# fstr('$bla:.1f, $b',list(bla=3.2423))
+#
+fstr = function(txt, arglist)
+{
+  if(length(txt) != 1 || length(arglist)==0 || is.null(txt) || !grepl('$',txt,fixed=TRUE)) 
+    return(txt)
+
+  txt = gsub('%','%%',txt,fixed=TRUE)
+  
+  spr_args = list()
+  txt_copy = txt
+  matches = gregexpr('\\$[a-z]\\w*(\\:[\\.\\d]*[ifscega])?', txt, ignore.case = TRUE, perl=TRUE)[[1]]
+  matches_end = attr(matches, 'match.length') + matches - 1L
+  for(i in seq_along(matches))
+  {
+    matched_str = substring(txt, matches[i], matches_end[i])
+    matched_tpl = unlist(strsplit(matched_str,':',fixed=TRUE))
+    matched_name = substring(matched_tpl[1],2)
+    # text can come after a match if match not ends in :
+    if(length(matched_tpl) == 1 && !(matched_name %in% names(arglist)))
+    {
+      l = -1
+      m = NULL
+      for(nm in names(arglist))
+      {
+        if(startsWith(matched_name, nm) && nchar(nm) > l)
+        {
+          l = nchar(nm)
+          m = nm
+        }
+      }
+      if(!is.null(m))
+      {
+        matched_name = m
+        matched_str = paste0('$',m)
+      }
+    }
+    
+    if(matched_name %in% names(arglist))
+    {
+      arg = arglist[[matched_name]]
+      if(length(matched_tpl) == 2)
+      {
+        txt_copy = sub(matched_str, paste0('%',matched_tpl[2]) ,txt_copy, fixed=TRUE)
+      } else
+      {
+        arg = as.character(arg)
+        txt_copy = sub(matched_str, '%s' ,txt_copy, fixed=TRUE)
+      }
+      spr_args = append(spr_args, arg) 
+    }
+  }
+  
+  do.call(sprintf, append(txt_copy, spr_args))
+}
+
 
 # differs in result from ntile in taking weights and in never putting equal values in different bins
 # take care that if the nbr of distinct values is close to n, this will lead to very unequal sized bins
 weighted_ntile = function(x, weights, n)
 {
   
-  rn = tibble(x=x,w=weights,ord=1L:length(x)) %>%
+  dat = tibble(x=x, w=weights, ord=1:length(x)) %>%
     arrange(.data$x) %>%
     mutate(rn=cumsum(.data$w)-.data$w) %>%
-    arrange(.data$ord) %>%
-    pull(.data$rn)
+    arrange(.data$ord) 
   
-  len = sum(weights)
-  as.integer(floor(n * rn/len + 1))
+  as.integer(floor(n * dat$rn/sum(dat$w) + 1))
 }
 
-# other option, less memory efficient and does split equal values
-# weighted_ntile2 = function(x, weights, n)
-# {
-#   x = rep(x,weights)
-#   ntile(x,n)[cumsum(weights)-weights+1]
-# }
 
+# non vectorized version of ifelse
+if.else = function(test, yes, no)
+{
+  if(isTRUE(test)) return(yes)
+  no
+}
 
-# does basic argument type and attribute checks with error messages
+#  basic argument type and attribute checks with error messages
 # to do:
 # one of multiple possible types
-
-check_arg = function(x, type, name = deparse(substitute(x)), nullable = FALSE, .length = NA )
+check_dataSrc = function(x)
 {
-  if(is.null(x))
+  if(inherits(x, 'dx_resp_data'))
+     return(NULL)
+  
+  if(is.matrix(x))
   {
-    if(!nullable)
-      stop(paste0("Argument'",name, "' may not be NULL"))
-    
+    if(!mode(x) %in% c('numeric','integer'))
+      stop('dataSrc must be a matrix of positive numbers, a data.frame or a database connection')
+    return(NULL)
+  } 
+  
+  if(inherits(x, 'data.frame'))
+  {
+    if(length(setdiff(c('person_id','item_id','item_score'), colnames(x)))>0)
+      stop("dataSrc must containt the columns: 'person_id','item_id','item_score'")
     return(NULL)
   }
-  
-  if(type == 'dataSrc')
-  {
-    if(!(inherits(x, 'dx_resp_data') || inherits(x, 'data.frame') || inherits(x, 'DBIConnection')))
-    {
-      stop(paste0("Argument'",name, "' must be of type 'DBIConnection' or 'data.frame'"))
-    }
-  } else if(type == 'integer')
-  {
-    if(!is.numeric(x) || x%%1 != 0)
-      stop(paste0("Argument'",name, "' must be an integer value"))
-    
-  } else if(type %in% c('numeric','double'))
-  {
-    if(!is.numeric(x))
-      stop(paste0("Argument '",name, "' must be numeric"))
-    
-  } else if(!inherits(x, type))
-  {
-      stop(paste0("Argument'",name, "' must be of type '", type, "'"))
-  }
-  
-  if(!is.na(.length) && length(x) != .length)
-    stop(paste0("Argument'",name, "' must have length ", .length))
+  if(inherits(x, 'DBIConnection'))
+    return(NULL)
+     
+  if(length(x)== 1 && is.character(x) && file.exists(x))
+      stop('dataSrc is a string but must be a database connection, data.frame or matrix. ',
+           'Did you forget to do: `open_project"',x,'")`?', call.=FALSE)
+ 
+  stop("dataSrc must be of type 'DBIConnection', 'data.frame' or 'matrix'")
 }
 
+
+check_num = function(x, type=c('numeric','integer'), name = deparse(substitute(x)), 
+                     nullable = FALSE, .length = NULL, .min=NULL )
+{
+  if(nullable && is.null(x))
+    return(NULL)
+  
+  type = match.arg(type)
+  if(!is.numeric(x))
+    stop("Argument '",name, "' must be ", type)
+  
+  if(type=='integer' && !(is.integer(x) || all(x %% 1 == 0)))
+     stop("Argument '",name, "' must be an integer")
+
+  if(!is.null(.length) && length(x) != .length )  
+    stop("Argument '",name, "' must have length ", .length)
+  
+  if(!is.null(.min) && any(x<.min))
+    stop("Argument '",name, "' must be >= ", .min)
+}
+
+check_string = function(x, name = deparse(substitute(x)), nullable = FALSE)
+{
+  if(nullable && is.null(x))
+    return(NULL)
+  
+  if(!is.character(x) && length(x)!=1)
+    stop("Argument '",name, "' must be a string of length 1")
+}
+
+
+check_df = function(x, columns=NULL, n_rows=NULL, name = deparse(substitute(x)), nullable=FALSE)
+{
+  if(nullable && is.null(x))
+    return(NULL)
+  
+  if(!inherits(x, 'data.frame'))
+    stop("Argument'",name, "' must be a data.frame")
+  
+  missing_col = setdiff(columns, colnames(x))
+  
+  if(!is.null(columns) && length(missing_col>0))
+    stop('column(s): ', paste0('`', missing_col, '`',collapse=', '),' must be present in ', name)
+  
+  if(!is.null(n_rows) && NROW(x)!=n_rows)
+    stop(name, 'must have', n_rows, 'rows')
+  
+}
+
+check_parms = function(x, name = deparse(substitute(x)), nullable=FALSE)
+{
+  if(nullable && is.null(x))
+    return(NULL)
+  if(!inherits(x,'prms'))
+    stop(name,' must be an object of type `prms`')
+}
+
+check_list = function(x, name = deparse(substitute(x)), nullable=FALSE)
+{
+  if(nullable && is.null(x))
+    return(NULL)
+  if(!inherits(x,'list'))
+    stop(name,' must be a list')
+}
 
 dropNulls = function (x) 
 {
   x[!vapply(x, is.null, FUN.VALUE = logical(1))]
 }
 
-# each time counter is read using $get, it increases by one
-counter = setRefClass('counter',
-  fields=list(x='numeric'), 
-  methods=list(
-    initialize = function(...)
-    {
-      callSuper(..., x=0)
-    },
-    get=function()
-    { 
-      x <<- x+1;
-      return(x)
-    }))
+
+
+
 
 # use for forwarding arguments to e.g. plot function
 merge_arglists = function(args, default = NULL, override = NULL)
 {
-  if(is.null(default))
-    default = list()
+  if(!is.null(default))
+    args = modifyList(default, args)
   
-  if(is.null(override))
-    override = list()
-  
-  res = modifyList(default, args)
-  res = modifyList(res, override)
-  res
+  if(!is.null(override))
+    args = modifyList(args, override)
+
+  args
 }
 
 
@@ -135,6 +261,33 @@ df_identical = function(a, b)
   b = b %>% mutate_if(is.factor, as.character)
   
   return(all(a == b[,colnames(a)]))
+}
+
+is_connected = function(design)
+{
+  bkl = sort(unique(design$booklet_id))
+  nbk = length(bkl)
+  if(nbk == 1) 
+    return(TRUE)
+  
+  ds = design %>% 
+    inner_join(rename(design, booklet2 = 'booklet_id'), by = 'item_id') %>%
+    distinct(.data$booklet_id, .data$booklet2) 
+  
+  adjm = matrix(0L, nrow = nbk, ncol = nbk, dimnames = list(bkl, bkl))
+  adjm[as.matrix(ds)] = 1L
+  
+  visited = vector(length = nbk)
+  
+  dfs = function(start)
+  {
+    if(visited[start]) return(0L)
+    visited[start] <<- TRUE
+    vapply((1:ncol(adjm))[adjm[,start]>0], dfs, 0L)
+    0L
+  } 
+  dfs(1L)
+  return(all(visited))
 }
 
 ### Greatest Common Divisor via Euclid's algorithm
@@ -185,32 +338,9 @@ GCD_ <-function (x)
   return(g)
 }
 
-possible_scores <- function(a,first,last)
-{
-  y=a[first[1]:last[1]]
-  for (i in 2:length(first))
-  {
-    y=sort(unique(as.vector((outer(y,a[first[i]:last[i]],'+')))))
-  }
-  return(y)
-}
-
 
 first_last2indx = function(first,last) unlist(apply(data.frame(first,last),1,function(x) x[1]:x[2]))
 
-# internal utility function
-# @parameter ssI: ssI as found in parms object
-# @parameter design: data.frame with a column item_id
-# we assume design is valid(i.e. doesn't contain items not existing in ssI)
-# @return ssI like in parms but for a single booklet
-subset_ssI = function(ssI, design)
-{	
-  # I see no need to recompute nCat, since it's already there in ssI
-  ssI %>%
-    semi_join(design, by='item_id') %>%
-    arrange(.data$item_id) %>%
-    mutate(first = cumsum(.data$nCat) - .data$nCat + 1,last = cumsum(.data$nCat))	 
-}
 
 
 # highest posterior density interval
@@ -237,62 +367,14 @@ hpd=function(x, conf=0.95, print=TRUE)
 # Frequencies P(x operator i) for i in min_max[1]:min_max[2]
 # where operator can be ==, <, <=, etc.
 # is min_max=NULL the range is min(x):max(x)
-my_freq = function(x, min_max=NULL, operator=c("==", "<", "<=", ">", ">="))
+my_freq = function(x, min_max = min(x):max(x), operator = c("==", "<", "<=", ">", ">=","!="))
 {
-  operator = match.arg(operator)
-  if (!operator%in%c("==", "<", "<=", ">", ">=")) stop("wrong operator in my_freq")
+  if(!is.function(operator))
+    operator = get(match.arg(operator))
   
-  if (is.null(min_max)){
-    rng = min(x):max(x)
-  }else
-  {
-    rng = min_max[1]:min_max[2]
-  }
-  
-  out = NULL
-  if (operator=="==")
-  {
-    for (i in rng)
-    {
-      out = c(out,sum(x==i))
-    }
-  }
-  
-  if (operator=="<")
-  {
-    for (i in rng)
-    {
-      out = c(out,sum(x<i))
-    }
-  }
-  
-  if (operator=="<=")
-  {
-    for (i in rng)
-    {
-      out = c(out,sum(x<=i))
-    }
-  }
-  
-  if (operator==">")
-  {
-    for (i in rng)
-    {
-      out = c(out,sum(x>i))
-    }
-  }
-  
-  if (operator==">=")
-  {
-    for (i in rng)
-    {
-      out = c(out,sum(x>=i))
-    }
-  }
-  
-  out = out/length(x)
-  names(out) = as.character(rng)
-  return(out)
+  out = sapply(min_max, function(i) {sum(operator(x, i))} )/length(x)
+  names(out) = min_max
+  out
 }
 
 geo_mean = function(x)
@@ -331,6 +413,7 @@ c2weights<-function(cIM)
 # Example: test information for each of ncol ability values is calculated for nrow samples of 
 # item parameters from posterior.
 ########
+#TO DO: protect against NA's
 conf_env = function(mat, level = 0.95) 
 {
   overall_found = TRUE
@@ -343,8 +426,7 @@ conf_env = function(mat, level = 0.95)
                                                     R + 1L - k))
     c(k, p, sum(apply(rmat, 1L, kf, k, R))/(R + 1))
   }
-  kfun <- function(x, k1, k2) sort(x, partial = sort(c(k1, 
-                                                       k2)))[c(k1, k2)]
+  kfun <- function(x, k1, k2) sort(x, partial = sort(c(k1, k2)))[c(k1, k2)]
   index = 1L:ncol(mat)
   if (length(index) < 2L) 
     stop("This function for curves")
@@ -388,48 +470,20 @@ conf_env = function(mat, level = 0.95)
   return(out)
 }
 
-
-
-#########################
-#' Verbal aggression data
-#' 
-#' A data set of self-reported verbal behaviour in different frustrating
-#' situations (Vansteelandt, 2000)
-#' 
-#' 
-#' @name verbAggrData
-#' @docType data
-#' @format A data set with 316 rows and 26 columns.
-#' @keywords datasets
-NULL
-
-###############################################
-#' Scoring rules for the verbal aggression data
-#' 
-#' A set of (trivial) scoring rules for the verbal 
-#' aggression data set
-#' 
-#' 
-#' @name verbAggrRules
-#' @docType data
-#' @format A data set with 72 rows and 3 columns (item_id, response, item_score).
-#' @keywords datasets
-NULL
-
-################################################
-#' Item properties in the verbal aggression data
-#' 
-#' A data set of item properties related to the verbal
-#' aggression data
-#' 
-#' 
-#' @name verbAggrProperties
-#' @docType data
-#' @format A data set with 24 rows and 5 columns.
-#' @keywords datasets
-NULL
-
-
-
-
+## Regular Block-Diagnal Matrix from List of matrices
+# Courtesy of C.Ladroue
+blockMatrixDiagonal<-function(...){  
+  matrixList<-list(...)
+  if(is.list(matrixList[[1]])) matrixList<-matrixList[[1]]
+  
+  dimensions<-sapply(matrixList,FUN=function(x) dim(x)[1])
+  finalDimension<-sum(dimensions)
+  finalMatrix<-matrix(0,nrow=finalDimension,ncol=finalDimension)
+  index<-1
+  for(k in 1:length(dimensions)){
+    finalMatrix[index:(index+dimensions[k]-1),index:(index+dimensions[k]-1)]<-matrixList[[k]]
+    index<-index+dimensions[k]
+  }
+  finalMatrix
+}
 

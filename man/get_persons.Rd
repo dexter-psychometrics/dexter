@@ -7,7 +7,7 @@
 get_persons(db)
 }
 \arguments{
-\item{db}{A handle to the database, i.e. the output of \code{start_new_project}
+\item{db}{a connection to a dexter database, e.g. the output of \code{start_new_project}
 or \code{open_project}}
 }
 \value{

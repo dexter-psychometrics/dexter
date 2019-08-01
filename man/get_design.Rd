@@ -9,7 +9,7 @@ get_design(db, format = c("long", "wide"), rows = c("booklet_id",
   "item_position"), fill = NA)
 }
 \arguments{
-\item{db}{A handle to the database, i.e. the output of \code{start_new_project}
+\item{db}{a connection to a dexter database, e.g. the output of \code{start_new_project}
 or \code{open_project}}
 
 \item{format}{return format, see below}

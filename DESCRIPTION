@@ -1,25 +1,39 @@
 Package: dexter
 Type: Package
 Title: Data Management and Analysis of Tests
-Version: 0.8.2
+Version: 1.0.0
 Author: Gunter Maris, Timo Bechger, Jesse Koops, Ivailo Partchev
 Maintainer: Ivailo Partchev <partchev@gmail.com>
 Description: A system for the management, assessment, and psychometric analysis of data from educational and psychological tests. 
-    Developed at Cito, The Netherlands, with subsidy from the Dutch Ministry of Education, Culture, and Science.
 License: GPL-3
 URL: http://dexterities.netlify.com
 BugReports: https://github.com/jessekps/dexter/issues
 Encoding: UTF-8
 LazyLoad: yes
 LazyData: yes
-Depends: R (>= 3.3), RSQLite (>= 2.0)
-Imports: DBI, tidyr (>= 0.8.0), tibble, colorspace, shiny, shinyBS,
-        shinydashboard, DT, fastmatch, purrr (>= 0.2.3), rlang (>=
-        0.2.0), dplyr (>= 0.7.4), dbplyr (>= 1.2.0), rprintf,
-        RColorBrewer, graphics, grDevices, methods, utils
-RoxygenNote: 6.1.0
-Suggests: knitr, rmarkdown, latticeExtra, testthat, calibrate, ggplot2,
-        Cairo
+Depends:
+    R (>= 3.4)
+Imports:
+    RSQLite (>= 2.0),
+    DBI (>= 1.0.0),
+    tidyr (>= 0.8.0),
+    rlang (>= 0.3.4),    
+    dplyr (>= 0.8.0),
+    Rcpp (>= 1.0.1),
+    RcppArmadillo (>= 0.9.3),
+    graphics,
+    grDevices,
+    methods,
+    utils
+LinkingTo: Rcpp, RcppArmadillo
+RoxygenNote: 6.1.1
+Suggests:
+    knitr,
+    rmarkdown,
+    latticeExtra,
+    testthat,
+    calibrate,
+    ggplot2,
+    Cairo,
+    colorspace
 VignetteBuilder: knitr
-NeedsCompilation: yes
-Packaged: 2018-09-18 12:30:51 UTC; jessek

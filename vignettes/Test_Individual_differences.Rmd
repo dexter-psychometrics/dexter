@@ -16,7 +16,7 @@ img{ border:none;}
 
 ```{r setup, include=FALSE}
 library(knitr)
-opts_chunk$set(echo = TRUE,dev='CairoPNG')
+opts_chunk$set(echo = TRUE, dev='CairoPNG')
 
 par_hook = function(before, options, envir)
 {
@@ -35,32 +35,21 @@ Educational and psychological testing is all about individual differences. Using
 
 What if there are no individual differences at all? Classical test theory defines reliability as the ratio of the variance of the true scores to the variance of the observed scores [e.g., @BechgerMarisVerstralen2003]. The observed scores will have some chance variance, so reliability is 0 in that case. We have provided an IRT analogue with function `individual_differences`, to check whether the response data are consistent with the hypothesis of no individual differences in true ability.
 
-First, a simple function to simulate a matrix of response data from the Rasch model, in the long shape expected by dexter. We use it to generate responses to 20 items with uniformly distributed difficulties from 2000 persons having all the same true ability of 0.5: 
+First, we simulate a matrix of response data from the Rasch model. We simulate responses to 20 items with uniformly distributed difficulties for 2000 persons having all the same true ability of 0.5: 
 
 ```{r}
-sim_Rasch = function(theta, delta) {
-  n = length(theta)
-  m = length(delta)
-  data.frame(
-    person_id = rep(paste0('p',1:n), m),
-    item_id = rep(paste0('i',1:m), each=n),
-    item_score = as.integer(rlogis(n*m, outer(theta, delta, "-")) > 0)
-  )
-}
+items = tibble(item_id=paste0('i',1:20), item_score=1, delta=runif(20, -2, 2))
+sim_Rasch = r_score(items)
 
-simulated = sim_Rasch(rep(0.5, 2000), runif(20, -2, 2))
+theta = rep(0.5, 2000)
+simulated = sim_Rasch(theta)
 ```
 
 Computing the sum scores and examining their distribution, we find nothing conspicuous:
 
 ```{r, fig.align='center', fig.width=7,par=list(mfrow=c(1,2))}
-ss= simulated %>% 
-  group_by(person_id) %>% 
-  summarise(sumscore=sum(item_score)) 
-
-hist(ss$sumscore, main='', xlab='sumScore')
-plot(ecdf(ss$sumscore), bty='l', main='ecdf', xlab='sumScore' )
-mm = fit_inter(simulated)
+hist(rowSums(simulated), main='', xlab='sumScore')
+plot(ecdf(rowSums(simulated)), bty='l', main='ecdf', xlab='sumScore' )
 ```
 
 We can also examine the various item-total regressions produced by function `fit_inter`. For example, here are the plots for the first two items:
@@ -75,7 +64,7 @@ plot(mm, show.observed = TRUE,
 The curtains that eliminate the 5% smallest and 5% largest sum scores are drawn somewhat narrow but, apart from that, all regressions look nice. It appears that, by just looking at the response data, we are not in a very good position to judge whether there are any true individual differences in ability. To help with that, dexter offers a function, `individual_differences`:  
 
 ```{r, fig.align='center', fig.height=4, fig.width=4}
-dd = individual_differences(simulated,degree=10)
+dd = individual_differences(simulated)
 plot(dd)
 ```
 
@@ -89,12 +78,12 @@ print(dd)
 
 Thus, we find a p-value of `r round(dd$est$test$p.value,digits=2)` for the hypothesis that there are no individual differences.
 
-What about real data?  **Dexter** comes with a well-known example preinstalled, the verbal aggression data [@VanData] analysed in great detail in [@boeck] and many others. 243 females and 73 males have assessed on a 3-point scale ('yes', 'perhaps', or 'no') how likely they are to become verbally aggressive in four different frustrating situations
+What about real data?  **Dexter** comes with a well-known example preinstalled, the verbal aggression data [@VanData] analysed in great detail in [@boeck] and many others. 243 females and 73 males have answered on a 3-point scale ('yes', 'perhaps', or 'no') how likely they are to become verbally aggressive in four different frustrating situations
 
 ```{r, fig.align='center', fig.height=4, fig.width=4}
-db2 = start_new_project(verbAggrRules, "verbAggression.db")
-add_booklet(db2, verbAggrData, "data")
-dd = individual_differences(db2, booklet_id=="data")
+db = start_new_project(verbAggrRules, ":memory:")
+add_booklet(db, verbAggrData, "data")
+dd = individual_differences(db, booklet_id=="data")
 plot(dd)
 ```
 
@@ -102,7 +91,7 @@ This is quite different now, and the chi-squared test is highly significant.
 
 
 ```{r, show=FALSE}
-close_project(db2)
+close_project(db)
 ```
 
-#References
+## References

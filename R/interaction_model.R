@@ -4,127 +4,124 @@
 #' Estimate the parameters of the Interaction model and the Rasch model
 #'
 #'
-#' @param dataSrc Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score
+#' @param dataSrc Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score
 #' @param predicate An optional expression to subset data, if NULL all data is used
 #' @return An object of class \code{rim} holding results
 #' for the Rasch model and the interaction model.
 #' @details Unlike the Rasch model, the interaction model cannot be computed
-#' concurrently for a whole design of test forms. This function fits the
-#' Rasch model and the interaction model on a complete rectangular array of
-#' responses. This typically consist of responses to items in one booklet but can also consist of
-#' the intersection (common items) of two or more booklets. If the intersection is empty
+#' concurrently for a whole design of test forms. This function therefore fits the
+#' Rasch model and the interaction model on complete data. 
+#' This typically consist of responses to items in one booklet but can also consist of
+#' the intersection (common items) in two or more booklets. If the intersection is empty
 #' (no common items for all persons), the function will exit with an error message.
 #'
 #' @seealso \code{\link{plot.rim}}, \code{\link{fit_domains}}
 #'
 #' @examples
-#' \dontrun{
-#' db = start_new_project(verbAggrRules, "verbAggression.db")
+#' db = start_new_project(verbAggrRules, ":memory:")
 #' add_booklet(db, verbAggrData, "agg")
 #'
 #' m = fit_inter(db, booklet_id=='agg')
 #' plot(m, "S1DoScold", show.observed=TRUE)
 #'
 #' close_project(db)
-#' }
 #'
 #'
 fit_inter = function(dataSrc, predicate = NULL)
 {
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
-  respData = get_resp_data(dataSrc, qtpredicate, env = env)
+  check_dataSrc(dataSrc)
+  fit_inter_(dataSrc, qtpredicate, env, regs=TRUE)
+}
 
-  if(nrow(respData$x)==0) stop('no responses to analyse')
+fit_inter_ = function(dataSrc, qtpredicate = NULL, env=NULL, regs=TRUE)
+{
+  
+  respData = get_resp_data(dataSrc, qtpredicate, env = env, retain_person_id=FALSE) %>%
+	  intersection()
 
-  # test if we have complete data, otherwise make a rectangular matrix by throwing away items
-  if(length(unique(respData$design$booklet_id)) > 1)
-  {
-    items = Reduce(intersect, split(respData$design$item_id, respData$design$booklet_id))
-    if(length(items)==0) stop(paste('The intersection of responses in your data is empty.',
-                                    'The interaction model cannot be computed concurrently for a whole design of test forms.',
-                                    'See the help for more information'))
+  if(nrow(respData$x)==0) 
+    stop('no responses to analyse')
 
-    respData$design = tibble(booklet_id='b', item_id = items)
-
-    respData$x = respData$x %>%
-      semi_join(respData$design, by='item_id') %>%
-      group_by(.data$person_id) %>%
-      mutate(sumScore = sum(.data$item_score), booklet_id = 'b') %>%
-      ungroup()
-  }
-
-  # statistics per item-score combination
-  # if the score 0 does not occur for an item, it is added with sufI=0 and sufC=0
-  ssIS = respData$x %>%
-    group_by(.data$item_id, .data$item_score) %>%
-    summarise(sufI=n(), sufC_ = sum(.data$item_score * .data$sumScore)) %>%
-    ungroup() %>%
-    full_join(tibble(item_id=respData$design$item_id, item_score=0L), by = c("item_id","item_score")) %>%
-    mutate(sufI = coalesce(.data$sufI, 0L), sufC_ = coalesce(.data$sufC_,0L)) %>%
-    arrange(.data$item_id, .data$item_score)
-
-  # statistics per item
+  ss = get_sufStats_im(respData)
+  ssIS = ss$ssIS
+  plt = ss$plt
+  
   ssI = ssIS %>%
     group_by(.data$item_id) %>%
-    summarise(nCat = n(), sufC = sum(.data$sufC_), item_maxscore = max(.data$item_score)) %>%
+    summarise(nCat = n(), sufC = sum(.data$sufC_), item_maxscore = max(.data$item_score), 
+              item_minscore = min(.data$item_score)) %>%
     ungroup() %>%
     mutate(first = cumsum(.data$nCat) - .data$nCat + 1L, last = cumsum(.data$nCat))  %>%
     arrange(.data$item_id)
+  
+  if(any(ssI$nCat<2))
+  {
+    message('The following items have no score variation:')
+    ssI %>%
+      filter(.data$nCat<2) %>%
+      pull(.data$item_id) %>%
+      as.character() %>%
+      print()
+    stop("data contains items without score variation")
+  }
 
-  # mean item score and weight (as n responses) for each individual test score
-  # used for plotting
-  plt = respData$x %>%
-    group_by(.data$item_id, .data$sumScore) %>%
-    summarise(meanScore = mean(.data$item_score), N = n()) %>%
-    ungroup()
-
+  if(any(ssI$item_minscore>0))
+  {
+    message('The following items have no zero score category:')
+    ssI %>%
+      filter(.data$item_minscore>0) %>%
+      pull(.data$item_id) %>%
+      as.character() %>%
+      print()
+    stop("data contains items without zero score category")
+  }
+  
   # theoretical max score on the test
   maxTestScore = sum(ssI$item_maxscore)
 
-  # scoretab from 0:maxscore (including unachieved and impossible scores)
-  scoretab = respData$x %>%
-    distinct(.data$person_id, .keep_all=TRUE) %>%
-    group_by(.data$sumScore) %>%
-    summarise(N=n()) %>%
-    ungroup() %>%
-    right_join(tibble(sumScore=0L:maxTestScore), by="sumScore") %>%
+  # scoretab, include unachieved and impossible scores
+  scoretab = plt %>%
+    select(.data$booklet_score, .data$N) %>%
+    distinct(.data$booklet_score, .keep_all=TRUE) %>%
+    right_join(tibble(booklet_score=0L:maxTestScore), by="booklet_score") %>%
     mutate(N=coalesce(.data$N, 0L)) %>%
-    arrange(.data$sumScore)
+    arrange(.data$booklet_score)
+  
+  if(all_trivial_scores(ssIS))
+    warning("every score can be reached in only one way, no data reduction possible")
   
 
-  result = EstIM(first = ssI$first, last = ssI$last, nCat = ssI$nCat, a = ssIS$item_score, 
-                 sufI = ssIS$sufI, sufC = ssI$sufC, scoretab = scoretab$N)
+  est = EstIM(first = ssI$first, last = ssI$last, nCat = ssI$nCat, a = ssIS$item_score, 
+                 sufI = ssIS$sufI, sufC = ssI$sufC, scoretab = scoretab$N, regs=regs)
 
-  # add the regressions, convenient for plotting
-
-  C = rep(1:nrow(ssI), ssI$nCat)
+  if(regs)
+  {
+    # add the regressions, used for plotting
+    mm = sweep(model.matrix(~0 + as.character(ssIS$item_id)), 1, ssIS$item_score, '*')
+    est$itrRM = as.data.frame(crossprod(mm, est$ctrRM))
+    est$itrIM = as.data.frame(crossprod(mm, est$ctrIM))
+    row.names(est$itrRM) = row.names(est$itrIM) = as.character(ssI$item_id)
+  }
   
-  ctrRM = ittotmat(result$bRM, result$cRM[C], ssIS$item_score, ssI$first, ssI$last)
-  ctrIM = ittotmat(result$bIM, result$cIM[C], ssIS$item_score, ssI$first, ssI$last)
-  mm = sweep(model.matrix(~0 + ssIS$item_id), 1, ssIS$item_score, '*')
-  itrRM = as.data.frame(crossprod(mm, ctrRM))
-  itrIM = as.data.frame(crossprod(mm, ctrIM))
-  row.names(itrRM) = row.names(itrIM) = ssI$item_id
-
-  output = list(est = result, 
-                inputs = list(ssI = ssI, ssIS = ssIS, plt = plt, scoretab=scoretab), 
-                regs = list(ctrRM = ctrRM, ctrIM = ctrIM, itrRM = itrRM, itrIM = itrIM))
+  output = list(est = est, 
+                inputs = list(ssI = ssI, ssIS = ssIS, plt = plt, scoretab = scoretab))
   class(output) = append("rim", class(output))
   output
 }
 
+#to do: check fit_inter plot in test_vignettes
 
 
-
-
+# to do: this function has not been tested in ages
 
 #' Estimate the Rasch and the Interaction model per domain
 #'
 #' Estimate the parameters of the Rasch model and the Interaction model
 #'
 #'
-#' @param dataSrc Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score
+#' @param dataSrc Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score
 #' @param predicate An optional expression to subset data, if NULL all data is used
 #' @param item_property The item property defining the
 #' domains (subtests)
@@ -150,45 +147,22 @@ fit_inter = function(dataSrc, predicate = NULL)
 #'
 fit_domains = function(dataSrc, item_property, predicate = NULL)
 {
+  # to do: no unit test for this function yet
+  
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
-  respData = get_resp_data(dataSrc, qtpredicate, extra_columns=item_property, env = env)
-  if(nrow(respData$x) == 0) stop('no data to analyse')
 
-  # test if we have complete data, otherwise make a rectangular matrix by throwing away items
-  if(length(unique(respData$design$booklet_id)) > 1)
-  {
-    items = Reduce(intersect, split(respData$design$item_id, respData$design$booklet_id))
-    if(length(items)==0) stop(paste('The intersection of responses in your data is empty.',
-                                    'The interaction model cannot be computed concurrently for a whole design of test forms.',
-                                    'See the help for more information'))
+  respData = get_resp_data(dataSrc, qtpredicate, extra_columns = item_property, env = env, retain_person_id=FALSE) %>%
+	  intersection() %>%
+    polytomize(item_property, protect_x = !inherits(dataSrc,'DBIconnection')) %>%
+    fit_inter_()
 
-    respData$design = tibble(booklet_id='b', item_id = items)
-
-    respData$x = respData$x %>%
-      semi_join(respData$design, by='item_id')
-  }
-
-  # adapt the respdata object by making new polytomous items based on the domains
-  respData$x = respData$x %>%
-    group_by(.data$person_id, .data[[!!item_property]]) %>%
-    summarise(item_score=sum(.data$item_score)) %>%
-    ungroup() %>%
-    group_by(.data$person_id) %>%
-    mutate(sumScore = sum(.data$item_score)) %>%
-    ungroup() %>%
-    rename(item_id = .data[[!!item_property]]) %>%
-    add_column(booklet_id='b')
-
-  respData$design = tibble(booklet_id = 'b', item_id = unique(respData$x$item_id))
-
-  # call fit_inter on the adapted data
-  fit_inter(respData)
 }
 
 
 
-##########################################
+# to do: check if rename from regs to est influences mst plot
+
 #' A plot method for the interaction model
 #'
 #' Plot the item-total regressions fit by the interaction (or Rasch) model
@@ -214,7 +188,7 @@ fit_domains = function(dataSrc, item_property, predicate = NULL)
 #' @method plot rim
 #'
 plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
-                     curtains=10, show.observed=FALSE, ...){
+                     curtains=10, show.observed=TRUE, ...){
   allItems = x$inputs$ssI$item_id
   if(!is.null(items))
   {
@@ -236,7 +210,7 @@ plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
   qua = curtains/200
   qnt=NULL
   if(qua>0 && qua<.5) {
-    qnt = quantile(rep(as.integer(x$inputs$scoretab$sumScore), x$inputs$scoretab$N), c(qua,1-qua))
+    qnt = quantile(rep(as.integer(x$inputs$scoretab$booklet_score), x$inputs$scoretab$N), c(qua,1-qua))
   }
 
   npic = length(items)
@@ -246,7 +220,7 @@ plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
     # only summate possible
     # do the Rasch model
     #
-    z = x$regs$itrRM
+    z = x$est$itrRM
     z = z[row.names(z) %in% items,]
     maxScore = ncol(z)-1
 
@@ -261,15 +235,15 @@ plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
     do.call(plot, plot.args)
     draw_curtains(qnt)
     
-    for (i in 1:npic) graphics::lines(0:maxScore,z[i,]) # the actual lines
+    for (i in 1:npic) lines(0:maxScore,z[i,]) # the actual lines
     lx = sample(0:maxScore, npic, replace = FALSE) # label the lines
     for (i in 1:npic) {
-      graphics::points(lx[i], z[i,lx[i]+1], co="white", cex=1.6, pch=19)
-      graphics::text(lx[i], z[i,lx[i]+1], items[i], co=1, cex=.6)
+      points(lx[i], z[i,lx[i]+1], co="white", cex=1.6, pch=19)
+      text(lx[i], z[i,lx[i]+1], items[i], co=1, cex=.6)
     }
     # do the Interaction model
     #
-    z = x$regs$itrIM
+    z = x$est$itrIM
     z = z[row.names(z) %in% items,]
     maxScore = ncol(z)-1
 
@@ -284,11 +258,11 @@ plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
     do.call(plot, plot.args)
     draw_curtains(qnt)
     
-    for (i in 1:npic) graphics::lines(0:maxScore, z[i,]) # the actual lines
+    for (i in 1:npic) lines(x$est$possible_scores, z[i,x$est$possible_scores+1L])
     lx = sample(0:maxScore, npic, replace = FALSE) # label the lines
     for (i in 1:npic) {
-      graphics::points(lx[i], z[i,lx[i]+1], co="white", cex=1.6, pch=19)
-      graphics::text(lx[i], z[i,lx[i]+1], items[i], co=1, cex=.6)
+      points(lx[i], z[i,lx[i]+1], col="white", cex=1.6, pch=19)
+      text(lx[i], z[i,lx[i]+1], items[i], col=1, cex=.6)
     }
     
     # end of overlay
@@ -298,8 +272,8 @@ plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
     
     if (summate) {
       # for each item in turn, do both models (with summation), and plot
-      zI = x$regs$itrIM
-      zR = x$regs$itrRM
+      zI = x$est$itrIM
+      zR = x$est$itrRM
       maxScore = ncol(zR)-1
       for (i in items) {
         mxY = max(zR[row.names(zR)==i,],na.rm=TRUE)
@@ -317,23 +291,24 @@ plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
         draw_curtains(qnt)
         if(show.observed) {
           plt = filter(x$inputs$plt, .data$item_id == i)
-          graphics::points(plt$sumScore, plt$meanScore, col="coral",pch=20)
+          points(plt$booklet_score, plt$meanScore, col="coral",pch=20)
         }
-        graphics::lines(0:maxScore, zI[row.names(zI)==i,], col="gray80", lwd=3)
-        graphics::lines(0:maxScore, zR[row.names(zR)==i,])
+        # to do: possible scores also for not summate
+        lines(x$est$possible_scores, zI[row.names(zI)==i,x$est$possible_scores+1L], col="gray80", lwd=3)
+        lines(x$est$possible_scores, zR[row.names(zR)==i,x$est$possible_scores+1L])
       }
       
     } else {
-      zI = x$regs$ctrIM
-      zR = x$regs$ctrRM
+      zI = x$est$ctrIM
+      zR = x$est$ctrRM
       maxScore = ncol(zR)-1
       # for each item in turn, similar but possibly multiline and coloured
       for (i in items) {
         ssI = filter(x$inputs$ssI, .data$item_id==i)
         prb = zI[ssI$first : ssI$last, ]
         
-        pte = bty(nrow(prb), alpha=.6)
-        #pte = qcolors(nrow(prb))
+        
+        pte = lighten(qcolors(nrow(prb)),.6)
 
         plot.args = merge_arglists(user.args,
                                    default=list(main='Item $item_id',xlab="Test score",
@@ -347,12 +322,12 @@ plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
 
         draw_curtains(qnt)
         for (j in 1:nrow(prb)) {
-          graphics::lines(0:maxScore, prb[j,], col=pte[j], lwd=3)
+          lines(0:maxScore, prb[j,], col=pte[j], lwd=3)
         }
         prb = zR[ssI$first : ssI$last,]
-        pte = bty(nrow(prb))
+        pte = qcolors(nrow(prb))
         for (j in 1:nrow(prb)) {
-          graphics::lines(0:maxScore, prb[j,], col=pte[j])
+          lines(0:maxScore, prb[j,], col=pte[j])
         }
       } # eol items
       
@@ -361,18 +336,15 @@ plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
   } # eo not overlay
 }
 
-
-
 print.rim <- function(x, ...){
-  res = paste0('Parameters for the Rasch and Interaction Model\n\nitems: ',
-               paste0(pull(x$inputs$ssI,"item_id"), collapse = ', '),
+  res = paste0('Parameters for the Rasch and Interaction Model', 
                '\n\n# use plot() for plotting the Rasch and Interaction Model or coef() for retreiving the parameters\n')
   cat(res)
   invisible(res)
 }
 
 
-# TODO: reparameterize pars for IM
+# TO DO: reparameterize pars for IM
 coef.rim = function(object, ...) 
 {
   x = object
@@ -382,10 +354,10 @@ coef.rim = function(object, ...)
   dRM = -log(dRM/dRM[1])
   dIM = x$est$bIM[-first]
   dIM = -log(dIM/dIM[1])
-  OPCML_RM = toOPLM(x$inputs$ssIS$item_score, x$est$bRM, first, last)
+  report_RM = toOPLM(x$inputs$ssIS$item_score, x$est$bRM, first, last)
   
   IS = tibble(item_id = x$inputs$ssIS$item_id[-first], item_score = x$inputs$ssIS$item_score[-first],
-              beta_rasch = as.vector(OPCML_RM$delta), beta_IM = dIM)
+              beta_rasch = as.vector(report_RM$beta), beta_IM = dIM)
   I = tibble(item_id = x$inputs$ssI$item_id, sigma = log(x$est$cIM), SE_sigma= x$est$se.c, fit_IM=x$est$fit.stats)
   
   inner_join(IS,I,by='item_id') %>% arrange(.data$item_id, .data$item_score) %>% as.data.frame()

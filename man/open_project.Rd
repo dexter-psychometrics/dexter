@@ -4,15 +4,13 @@
 \alias{open_project}
 \title{Open an existing project}
 \usage{
-open_project(db_name = "dexter.db", convert_old = NULL)
+open_project(db_name = "dexter.db")
 }
 \arguments{
 \item{db_name}{The name of the data base to be opened.}
-
-\item{convert_old}{Ignored, this argument will be removed in a future version.}
 }
 \value{
-A handle to the dexter project database.
+a datbase connection object
 }
 \description{
 Opens a database created by function \code{start_new_project}

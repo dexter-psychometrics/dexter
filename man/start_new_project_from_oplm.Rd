@@ -35,7 +35,7 @@ discrimination parameters of the items}
 \item{format}{not used, at the moment only the compressed format is supported.}
 }
 \value{
-a handle to the data base.
+a database connection object.
 }
 \description{
 Creates a dexter project database and fills it with response data based on a .dat and .scr file

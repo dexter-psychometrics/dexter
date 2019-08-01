@@ -7,7 +7,7 @@
 add_item_properties(db, item_properties = NULL, default_values = NULL)
 }
 \arguments{
-\item{db}{A handle to the dexter project database, e.g. the output of \code{start_new_project}
+\item{db}{a connection to a dexter database, e.g. the output of \code{start_new_project}
 or \code{open_project}}
 
 \item{item_properties}{A data frame containing a column item_id (matching item_id's already defined in the project)

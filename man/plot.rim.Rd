@@ -5,7 +5,7 @@
 \title{A plot method for the interaction model}
 \usage{
 \method{plot}{rim}(x, items = NULL, summate = TRUE, overlay = FALSE,
-  curtains = 10, show.observed = FALSE, ...)
+  curtains = 10, show.observed = TRUE, ...)
 }
 \arguments{
 \item{x}{An object produced by function \code{fit_inter}}

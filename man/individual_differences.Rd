@@ -4,17 +4,15 @@
 \alias{individual_differences}
 \title{Test individual differences}
 \usage{
-individual_differences(dataSrc, predicate = NULL, degree = 7)
+individual_differences(dataSrc, predicate = NULL)
 }
 \arguments{
-\item{dataSrc}{Data source: a dexter project db handle or a data.frame}
+\item{dataSrc}{Data source: a connection to a dexter database or a data.frame}
 
 \item{predicate}{An optional expression to subset data, if NULL all data are used.}
-
-\item{degree}{The degree of a polynomial used to smooth observed score distribution.}
 }
 \value{
-an object of type tind. Printing the object  will show test results. 
+An object of type tind. Printing the object will show test results. 
 Plotting it will produce a plot of expected and observed score frequencies. 
 The former under the hypothesis that there are no individual differences.
 }
@@ -26,8 +24,8 @@ This function uses a score distribution to test whether there are individual
 differences in ability. First, it estimates ability based on the score distribution. Then, 
 the observed distribution is compared to the one expected from the single estimated ability.
 The data are typically from one booklet but can also consist of 
-the intersection (i.e., the common items) of two or more booklets. If the intersection is empty 
-(no common items for all persons), the function will exit with an error message.
+the intersection (i.e., the common items) of two or more booklets. If the intersection is empty
+(i.e., no common items for all persons), the function will exit with an error message.
 }
 \examples{
 \dontrun{

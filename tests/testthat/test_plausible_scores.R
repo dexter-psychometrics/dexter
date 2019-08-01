@@ -41,9 +41,9 @@ test_that('plausible scores works',{
   ps = plausible_scores(responses) %>% 
     rename(PS_keep_true = 'PS1') %>%
     inner_join(plausible_scores(responses, keep.observed = FALSE), by= 'person_id') %>%
-    inner_join(responses %>% group_by(person_id, booklet_id) %>% summarise(sumScore = sum(item_score)), by='person_id')
+    inner_join(responses %>% group_by(person_id, booklet_id) %>% summarise(booklet_score = sum(item_score)), by='person_id')
   
-  expect_true(cor(ps$PS_keep_true, ps$sumScore) > cor(ps$PS1, ps$sumScore))
+  expect_true(cor(ps$PS_keep_true, ps$booklet_score) > cor(ps$PS1, ps$booklet_score))
   
   
   

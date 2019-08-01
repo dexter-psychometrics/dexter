@@ -7,7 +7,7 @@
 fit_domains(dataSrc, item_property, predicate = NULL)
 }
 \arguments{
-\item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score}
+\item{dataSrc}{Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score}
 
 \item{item_property}{The item property defining the
 domains (subtests)}

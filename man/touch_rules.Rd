@@ -7,7 +7,7 @@
 touch_rules(db, rules)
 }
 \arguments{
-\item{db}{handle to a Dexter project database}
+\item{db}{a connection to a dexter project database}
 
 \item{rules}{A data frame with columns \code{item_id}, \code{response}, and \code{item_score}.
 The order is not important but spelling is. Any other columns will be ignored. See details}
@@ -19,7 +19,6 @@ item_id: id of the problematic item
 less_than_two_scores: if TRUE, the item has only one distinct score
 duplicated_responses: if TRUE, the item contains two or more identical response categories
 min_score_not_zero: if TRUE, the minimum score of the item was not 0
-Please note that the sanity check is done for the items you change
 }
 \description{
 Having to alter or add a scoring rule is occasionally necessary, e.g. in case of a key error. 

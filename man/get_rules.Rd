@@ -7,7 +7,7 @@
 get_rules(db)
 }
 \arguments{
-\item{db}{handle to a Dexter project database}
+\item{db}{a connection to a Dexter database}
 }
 \value{
 data.frame of scoring rules containing columns: item_id, response, item_score

@@ -10,7 +10,7 @@ profiles(dataSrc, parms, item_property, predicate = NULL)
 profile_tables(parms, domains, item_property, design = NULL)
 }
 \arguments{
-\item{dataSrc}{a dexter project db handle or a data.frame with columns: person_id, item_id, item_score, 
+\item{dataSrc}{a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score, 
 an arbitrarily named column containing an item property and optionally booklet_id}
 
 \item{parms}{An object returned by \code{\link{fit_enorm}}}
@@ -27,10 +27,10 @@ item_property must match a known item property. If datasrc is a data.frame, item
 }
 \value{
 \describe{
-\item{profiles}{a data.frame with columns person_id, booklet_id, sumScore, 
--item_property-, domain_score, expected_domain_score}
-\item{profile_tables}{a data.frame with columns booklet_id, sumScore, 
--item_property-, expected_domain_score }
+\item{profiles}{a data.frame with columns person_id, booklet_id, booklet_score, 
+<item_property>, domain_score, expected_domain_score}
+\item{profile_tables}{a data.frame with columns booklet_id, booklet_score, 
+<item_property>, expected_domain_score }
 }
 }
 \description{

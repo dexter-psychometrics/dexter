@@ -1,10 +1,7 @@
-    #########################################
-    #                                       #
-    ###   Functions used for equating  ######
-    #                                       #
-    #########################################
-    
 
+# to do: example    
+# to do: parm design, describe what it is for and only then what it should look like
+# parm design migfht also accept a vector of item id's?    
 #' The probability to pass on a reference test given a score on a new booklet
 #' 
 #' Given response data that form a connected design,
@@ -13,9 +10,9 @@
 #' Note that this function is computationally intensive and can take a long time to run, especially when computing the
 #' probability to pass for multiple target booklets. 
 #'
-#' @param dataSrc Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score and booklet_id
+#' @param dataSrc Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score and booklet_id
 #' @param ref_items vector with id's of items in the reference set, they must all occur in dataSrc
-#' @param pass_fail pass-fail score on the reference set
+#' @param pass_fail pass-fail score on the reference set, the lowest score with which one passes
 #' @param predicate An optional expression to subset data in dataSrc, if NULL all data is used
 #' @param design A data.frame with columns booklet_id (if multiple booklets) and item_id defining the target test booklet(s), 
 #' if NULL (default) this will be derived from the dataSrc and the probability to pass will be computed 
@@ -54,41 +51,50 @@
 #'    
 probability_to_pass = function(dataSrc, ref_items, pass_fail, design = NULL, predicate = NULL, similar_groups = TRUE)
 {
+  check_dataSrc(dataSrc)
+  check_num(pass_fail, 'integer', .min=0)
+  check_df(design, 'item_id', nullable=TRUE)
+  
+  
   # optionally these can become extra parameters
   est_method = "Bayes"
-  nIterations = 500 ## number over which we average
+  nIterations = 1000 ## number over which we average
   include_theta = TRUE
   ##
  
   qtpredicate = eval(substitute(quote(predicate)))
-  env=caller_env()
+  env = caller_env()
   respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, env=env)
   
-  ref_items = tibble(item_id = unique(ref_items))
-  if(nrow(ref_items %>% anti_join(respData$design, by = 'item_id')) > 0)
-  {
-    stop('One or more of your reference items does not occur in your dataSrc')
-  }
+  ref_items = tibble(item_id = ffactor(unique(ref_items), levels=levels(respData$design$item_id)))
   
+  if(anyNA(ref_items$item_id))
+    stop('One or more of your reference items does not occur in your dataSrc')
+
   if(is.null(design))
   {
     design = respData$design
   } else
   {
-    if(nrow(anti_join(design, respData$design, by = 'item_id')) > 0) 
+    design$item_id = ffactor(as.character(design$item_id), levels = levels(respData$design$item_id))
+    if(anyNA(design$item_id))
       stop('One or more items in design does not occur in your dataSrc ')
     
     if(!('booklet_id' %in% colnames(design))) 
-      design$booklet_id = 'target booklet'
+      design$booklet_id = 'target items'
   }
   
   # Use all available data to estimate the item parameters
-  f = fit_enorm(respData, method=est_method, nIterations = 5*nIterations)
+  f = fit_enorm_(respData, method=est_method, nIterations = 5*nIterations)
   
   # Now reduce data 
   items_rel = union(ref_items$item_id, design$item_id)
-  bkl_rel = respData$design %>% inner_join(tibble(item_id=items_rel),by='item_id') %>% distinct(.data$booklet_id)
-  respData = semi_join(respData, bkl_rel, by='booklet_id')
+  bkl_rel = respData$design %>% 
+    mutate(item_id = as.character(.data$item_id)) %>%
+    inner_join(tibble(item_id=items_rel),by='item_id') %>% 
+    distinct(.data$booklet_id)
+  
+  respData = semi_join(respData, bkl_rel, by='booklet_id') #on booklet, so no recompute sumscores
   
   ref_ssI = f$inputs$ssI %>% 
     semi_join(ref_items, by = 'item_id') %>% 
@@ -98,11 +104,15 @@ probability_to_pass = function(dataSrc, ref_items, pass_fail, design = NULL, pre
   ref_last = pull(ref_ssI, 'last')
   
   # Get mean and sd of ability in sample
-  ab=ability(respData, f, method="ML", asOPLM = FALSE) 
-  new_mu = mean(ab$theta[is.finite(ab$theta)])
-  new_sigma = sd(ab$theta[is.finite(ab$theta)])
+  #ab = ability(respData, f, method="MLE") 
+  #new_mu = mean(ab$theta[is.finite(ab$theta)])
+  #new_sigma = sd(ab$theta[is.finite(ab$theta)])
+  pv = plausible_values(respData, f)
+  new_mu = mean(pv$PV1)
+  new_sigma = sd(pv$PV1)
   
-  bkl = unique(pull(design,'booklet_id'))
+  
+  bkl = unique(design$booklet_id)
   bk_results = lapply(bkl, function(booklet)
   {
     dsg = filter(design, .data$booklet_id == booklet)
@@ -112,13 +122,12 @@ probability_to_pass = function(dataSrc, ref_items, pass_fail, design = NULL, pre
     
     new_first = pull(ssI,'first')
     new_last = pull(ssI,'last')
-    
-    if ((similar_groups)|(booklet=='target booklet'))
+    scores = 0:sum(a[new_last])
+    # to do: spurious equal booklet names??
+    if (similar_groups || booklet=='target booklet')
     {
-      p_new = plausible_scores(respData, parms=f, items = pull(dsg, 'item_id')) %>%
-        group_by(.data$PS1) %>%
-        summarise(n = as.integer(n())) %>%
-        ungroup() %>%
+      p_new = plausible_scores(respData, parms=f, items = design$item_id) %>%
+        count(.data$PS1) %>%
         full_join(tibble(PS1 = as.integer(0:sum(a[ssI$last]))), by='PS1') %>%
         mutate(n = coalesce(n,0L)/sum(n, na.rm=TRUE)) %>%
         pull(.data$n)
@@ -149,14 +158,18 @@ probability_to_pass = function(dataSrc, ref_items, pass_fail, design = NULL, pre
         if (include_theta)
         {
           ref_theta = theta_MLE(b[iter,],a, ref_first, ref_last)$theta[pass_fail+1]
-          eq_score[tel] = min(which(theta_MLE(b[iter,],a, new_first, new_last)$theta >= ref_theta))-1 
+          suppressWarnings({eq_score[tel] = min(which(theta_MLE(b[iter,],a, new_first, new_last)$theta >= ref_theta))-1 })
+          if(is.infinite(eq_score[tel])) browser()
         }
-        spv = recycle_pv(b[iter,], a, new_first, new_last, npv=1, mu=new_mu, sigma=new_sigma)
-        prf = apply(spv,1, function(x)pscore(x,b[iter,],a,ref_first,ref_last)) 
-        probs[,tel] = apply(prf, 2, function(x)sum(x[ref_range]))
+        spv = pv_recycle(b[iter,], a, new_first, new_last, scores, npv=1, mu=new_mu, sigma=new_sigma)
+        #spv = recycle_pv(b[iter,], a, new_first, new_last, npv=1, mu=new_mu, sigma=new_sigma)
+        #prf = apply(spv,1, function(x)pscore(x,b[iter,],a,ref_first,ref_last)) 
+        prf = pscore(spv, b[iter,],a,ref_first,ref_last)
+        probs[,tel] = apply(prf, 2, function(x) sum(x[ref_range]))
         tel=tel+1
         setTxtProgressBar(pb, value=tel)
       }
+      close(pb)
     } else
     {
       probs = matrix(0,sum(a[new_last])+1,nIterations)
@@ -164,27 +177,23 @@ probability_to_pass = function(dataSrc, ref_items, pass_fail, design = NULL, pre
       ref_theta = theta_MLE(b,a,ref_first,ref_last)$theta[pass_fail+1]
       eq_score = min(which(theta_MLE(b,a,new_first,new_last)$theta >= ref_theta))-1 
       
-      tel=1
-      pb = txtProgressBar(min=0, max=nIterations)
+      spv = pv_recycle(b, a, new_first, new_last, scores, npv=nIterations, mu=new_mu, sigma=new_sigma)
       for (iter in 1:nIterations)
       {
-        spv = recycle_pv(b, a, new_first, new_last, npv=1, mu=new_mu, sigma=new_sigma)
-        prf = apply(spv,1, function(x)pscore(x,b,a,ref_first,ref_last)) 
-        probs[,tel] = apply(prf, 2, function(x)sum(x[ref_range]))
-        tel=tel+1  
-        setTxtProgressBar(pb, value=tel)
+        prf = pscore(spv[,iter], b, a, ref_first, ref_last)
+        probs[,iter] = apply(prf, 2, function(x) sum(x[ref_range]))
       }
     }
-    close(pb)
+
     
-    p_pass_given_new = rowMeans(probs) #unlist(rowMeans(probs), use.names = F)
+    p_pass_given_new = rowMeans(probs) 
     ## additional
     tp = rev(cumsum(rev(p_pass_given_new*p_new)))/rev(cumsum(rev(p_new)))
     tp_rate = rev(cumsum(rev(p_pass_given_new*p_new)))/tp[1]
     tn = rev(cumsum(rev((1-p_pass_given_new)*p_new)))/rev(cumsum(rev(p_new)))
     fp_rate =  rev(cumsum(rev((1-p_pass_given_new)*p_new)))/tn[1]
     
-    # this output format seems somewhat inefficient as 3 data.frames all share a column
+    # to do: this output format seems somewhat inefficient as 3 data.frames all share a column
     # might make it 1 df?
     
     list(prob_to_pass = 
@@ -206,7 +215,7 @@ probability_to_pass = function(dataSrc, ref_items, pass_fail, design = NULL, pre
 
 print.p2pass = function(x,...)
 {
-  cat(paste('Equating information for', length(x$boklets),
+  cat(paste('Equating information for', length(x$booklets),
               'booklets. Use `coef()` to extract the statistics or `plot()` to',
               'plot the probabilty to pass and sensitivity/specificity.\n'))
   invisible(x)
@@ -240,7 +249,7 @@ coef.p2pass = function(object, ...)
     bind_rows(.id = 'booklet_id') %>%
     as.data.frame()
 }
-
+# to do: do we also want the roc plot?
 ##########################################
 #' A plot method for probability_to_pass
 #'
@@ -266,9 +275,6 @@ plot.p2pass = function(x, ..., booklet_id=NULL, what = c('both','equating','sens
     bk_results = x$booklets
   }
   
-  if(what=='both') 
-    op = par(mfrow=c(1,2))
-
   for(bkl in names(bk_results))
   {
     if(what != 'sens/spec')
@@ -311,8 +317,6 @@ plot.p2pass = function(x, ..., booklet_id=NULL, what = c('both','equating','sens
     }
   }
   
-  if(what=='both') 
-    par(op)
   invisible(NULL)
 }
 

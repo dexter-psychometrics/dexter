@@ -7,7 +7,7 @@
 #' at item and test level
 #'
 #'
-#' @param dataSrc Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score
+#' @param dataSrc Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score
 #' @param predicate An optional expression to subset data, if NULL all data is used
 #' @param type How to present the item level statistics: \code{raw} for each test booklet 
 #' separately, \code{averaged} averaged over the test booklet in which the item is included,
@@ -18,78 +18,72 @@
 #' \item{testStats}{a data frame of statistics at test level} 
 #' \item{itemStats}{a data frame of statistics at item level}.
 #'
-tia_tables <- function(dataSrc, predicate = NULL, type=c('raw','averaged','compared')) {
+tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compared')) {
   type = match.arg(type)
+  check_dataSrc(dataSrc)
   
   qtpredicate = eval(substitute(quote(predicate)))
   env=caller_env()
-  x = get_resp_data(dataSrc, qtpredicate, env=env, summarised=FALSE)$x
+  respData = get_resp_data(dataSrc, qtpredicate, env=env, summarised=FALSE)
   
-  # if dataSrc is a db and no predicate then resp_data$design also contains the item_position, might be useful
+  if(nrow(respData$x) == 0) 
+    stop('no data to analyse')
   
-  if(nrow(x) == 0) stop('no data to analyse')
+  ti = get_sufStats_tia(respData) %>%
+    mutate(pvalue=.data$meanScore/.data$maxScore)
   
-  maxScores = x %>%
-    group_by(.data$item_id) %>%
-    summarise(maxScore=max(.data$item_score)) %>%
-    ungroup()
-
-  # suppressed warnings since it will be obvious in the tables from the cor=NA and sd=0
-  ti = x %>%
-     group_by(.data$booklet_id,.data$item_id) %>%
-     summarise(meanScore=mean(.data$item_score),
-               sdScore=sd(.data$item_score),
-               rit = suppressWarnings(cor(.data$item_score, .data$sumScore)),
-               rir = suppressWarnings(cor(.data$item_score, .data$sumScore - .data$item_score)),
-               n=n()) %>%
-     ungroup() %>%
-     inner_join(maxScores, by='item_id') %>%
-     mutate(pvalue=.data$meanScore/.data$maxScore)
-  
-
-  itemStats = switch(type,
-                     raw={
-                       ti %>% select(.data$booklet_id, .data$item_id, .data$meanScore, .data$sdScore, .data$maxScore, .data$pvalue, .data$rit, .data$rir, .data$n)
-                     },
-                     averaged={
-                       ti %>% 
-                         group_by(.data$item_id) %>%
-                         summarise( nBooklets=n(),
-                                    meanScore=weighted.mean(.data$meanScore, w=.data$n, na.rm=TRUE),
-                                    sdScore=weighted.mean(.data$sdScore, w=.data$n, na.rm=TRUE),
-                                    maxScore = max(.data$maxScore),
-                                    pvalue=weighted.mean(.data$pvalue, w=.data$n, na.rm=TRUE),
-                                    rit=weighted.mean(.data$rit, w=.data$n, na.rm=TRUE),
-                                    rir=weighted.mean(.data$rir, w=.data$n, na.rm=TRUE),
-                                    n=sum(.data$n, na.rm=TRUE)
-                                    ) 
-                     },
-                     compared={
-                       list(
-                         pvalue = ti %>% 
-							select(.data$booklet_id,.data$item_id,.data$pvalue) %>% 
-                            spread(key=.data$booklet_id, value=.data$pvalue),
-                         
-                         rit = ti %>% 
-							select(.data$booklet_id,.data$item_id,.data$rit) %>% 
-                            spread(key=.data$booklet_id,value=.data$rit),
-                         
-                         rir = ti %>% 
-							select(.data$booklet_id,.data$item_id,.data$rir) %>% 
-                            spread(key=.data$booklet_id,value=.data$rir)
-                       )
-                     }
+  if(type=='raw')
+  {
+    itemStats = select(ti, .data$booklet_id, .data$item_id, .data$meanScore, .data$sdScore, 
+                           .data$maxScore, .data$pvalue, .data$rit, .data$rir, .data$n) %>%
+      mutate_if(is.factor, as.character)
+    
+  } else if(type=='averaged')
+  {
+    itemStats = ti %>% 
+      group_by(.data$item_id) %>%
+      summarise( nBooklets=n(),
+                 meanScore=weighted.mean(.data$meanScore, w=.data$n),
+                 sdScore=weighted.mean(.data$sdScore, w=.data$n),
+                 maxScore = max(.data$maxScore),
+                 pvalue=weighted.mean(.data$pvalue, w=.data$n),
+                 rit=weighted.mean(.data$rit, w=.data$n, na.rm=TRUE),
+                 rir=weighted.mean(.data$rir, w=.data$n, na.rm=TRUE),
+                 n=sum(.data$n)) %>%
+      ungroup() %>%
+      mutate_if(is.factor, as.character)
+  } else
+  {
+    ti = mutate_if(ti, is.factor, as.character)
+    itemStats = list(
+      pvalue = ti %>% 
+        select(.data$booklet_id,.data$item_id,.data$pvalue) %>% 
+        spread(key=.data$booklet_id, value=.data$pvalue),
+      
+      rit = ti %>% 
+        select(.data$booklet_id,.data$item_id,.data$rit) %>% 
+        spread(key=.data$booklet_id,value=.data$rit),
+      
+      rir = ti %>% 
+        select(.data$booklet_id,.data$item_id,.data$rir) %>% 
+        spread(key=.data$booklet_id,value=.data$rir)
     )
+  }
+  if(anyNA(ti$rit))
+    warning("Items without score variation have been removed from the test statistics")
+
   testStats = ti %>%
+    filter(complete.cases(.data$rit)) %>%
     group_by(.data$booklet_id) %>% 
-    filter(complete.cases(.data$sdScore)) %>%
     summarise(nItems=n(),
               alpha=.data$nItems/(.data$nItems-1)*(1-sum(.data$sdScore^2) / sum(.data$rit * .data$sdScore)^2 ),
               meanP=mean(.data$pvalue),
               meanRit=mean(.data$rit),
               meanRir=mean(.data$rir),
               maxTestScore=sum(.data$maxScore),
-              N=max(.data$n)) 
+              N=max(.data$n)) %>%
+    ungroup() %>%
+    mutate_if(is.factor, as.character)
   
   list(itemStats=as.data.frame(itemStats), testStats=as.data.frame(testStats))
 }

@@ -35,13 +35,14 @@ knit_hooks$set(par = par_hook)
 We believe that, at least in high-stakes tests, the scoring rules should be explicit, and that the psychometric model should be developed from the scoring rules, not vice versa. Correspondingly, a **dexter** project starts with the user supplying the scoring rules for all items in the test. These must be given as a data containing, in any order, three columns named _exactly_ `item_id`, `response`, and `item_score`. An example is provided with the package:
 
 ```{r, message=FALSE}
+library(dplyr)
 library(dexter)
 head(verbAggrRules, 10)
 ```
 
 These are the scoring rules for the verbal aggression data [@VanData] analysed in great detail in [@boeck] and many others. 243 females and 73 males have assessed on a 3-point scale ('yes', 'perhaps', or 'no') how likely they are to become verbally aggressive in four different frustrating situations. Two of these situations are caused by the respondent, and in the others the blame is on others. Above we show the first 10 of 24*3=72 lines listing all possible response categories for the 24 items: column `response` contains the strings that will represent each response in the data, and `item_score` shows the score that will be given to each response.
 
-In **dexter**, item scores are always integers, and the lowest score for each item is always 0. However, the integers need not be contiguous: for example, 0,1,4 are admissible scores for an item. The verbal aggression data does not come from a cognitive test, so the item scores are the same as the responses. This approach can be used with open items scores externally (typically, by human markers). With closed questions, responses and scores will differ. Keeping them separate allows for extra flexibility -- for example, it is easy to correct a misspecified key. Missing value codes may be listed explicitly and assigned scores. Any responses found in the data but not in the scoring rules will automatically be assigned a score of 0.  
+In **dexter**, item scores are always integers, and the lowest score for each item is always 0. However, the integers need not be contiguous: for example, 0,1,4 are admissible scores for an item. The verbal aggression data does not come from a cognitive test, so the item scores are the same as the responses. This approach can be used with open items scored externally (typically, by human markers). With closed questions, responses and scores will differ. Keeping them separate allows for extra flexibility -- for example, it is easy to correct a misspecified key. Missing value codes may be listed explicitly and assigned scores. Any responses found in the data but not in the scoring rules will automatically be assigned a score of 0.  
 
 With the scoring rules defined, a new **dexter** project is created with:
 
@@ -59,7 +60,7 @@ add_booklet(db, verbAggrData, "agg")
 
 The first argument is the data base connection created with `start_new_project`, the second is the data frame with the data (in our case, supplied with the package), and the third one is a short name by which the booklet will be known to **dexter**. If the test involves more than one booklet, we simply call the function several times to enter them one after the other.
 
-All column names that have an exact match in the `item_id` column of the scoring rules table will be treated as test items, and all columns declared as covariates in `start_new_project` will be input and treated as such. Columns that do not have a match in either the scoring rules or in the covariates list will be ignored. As already mentioned, all item responses not explicitly listed in the scoring rules will be given a score of 0. The output of function, `add_booklet` is a detailed report with all these guesses and decisions listed. _It is very important to read this report carefully._ 
+All column names that have an exact match in the `item_id` column of the scoring rules table will be treated as test items, and all columns declared as person_properties in `start_new_project` will be input and treated as such. Columns that do not have a match in either the scoring rules or in the person properties will be ignored. The user can choose if t responses not declared in the scoring rules should generate an error or should be added with a score of 0. The output of function, `add_booklet` is a list containing the names of the columns imported as items and the names of the columns imported as person_properties. 
 
 In addition to the person properties provided with the booklets, users can also provide an arbitrary number of item properties. These are supplied as a data frame, one column per item property, and including an item ID column called exactly `item_id`. The verbal aggression data is organized in a design where three kinds of behaviour are considered in two modes with regard to four different frustrating situations that can be blamed on the self or on others. We input these facets of the design as item properties in the following way:
 
@@ -73,18 +74,16 @@ The first argument is the data base connection created with `start_new_project`,
 head(verbAggrProperties)
 ```
 
-Of course, the `item_id` must be exactly as specified in the scoring rules. The function returns a detailed report about any items not matched in the database, or items present in the database but not given item properties.
-
-Functions like `get_booklets`, `get_items`, `get_item_properties`, and `get_person_properties` help users keep track of what has been entered in the database:
+Of course, the `item_id` must be exactly as specified in the scoring rules. Functions like `get_booklets`, `get_items` and `get_persons` help users keep track of what has been entered in the database:
 
 ```{r}
 get_booklets(db)
 get_items(db)
-get_item_properties(db)
-get_person_properties(db)
+get_persons(db) %>% 
+  glimpse()
 ```
 
-All analyses are available through R syntax, which makes it easy to automate repeated analyses or program customized reports. Two interactive functions, `iTIA` and `iModels`, provide a graphical interface to some of the most common practical operations in examining the data. A more comprehensive graphical interface for **dexter** is available as a separate add-on package, **dextergui**. In this vignette, we concentrate on command language.  
+All analyses are available through R syntax, which makes it easy to automate repeated analyses or program customized reports. A comprehensive graphical interface for **dexter** is available as a separate add-on package, **dextergui**. In this vignette, we concentrate on command language.  
 
 The analysis of test data usually starts with some data exploration, largely drawn from the tool chest of classical test theory. We call it TIA, short for 'test and item analysis'. The statistics are produced with function `tia_tables` and saved in an object:
 
@@ -154,13 +153,24 @@ So far, we have been exploring the data, booklet per booklet, making sure that t
 parms = fit_enorm(db)
 ```
 
-The default estimation method is conditional maximum likelihood (CML), which is usually quite fast. As an alternative, we have provided a reasonably fast Gibbs sampler:
+The default estimation method is conditional maximum likelihood (CML). The alternative is to use a Gibbs sampler (Bayesian Claibration).
 
 ```{r, results='hide'}
 parms_gibbs = fit_enorm(db, method='Bayes')
 ```
 
-The function returns a parameters object, which can be passed to the functions that estimate person parameters. Currently, there are two of them: `ability`, which produces maximum likelihood (MLE) and Bayes expected a posteriori (EAP) estimators with different priors, and `plausible_values`. Being able to choose between a frequentist or a Bayesian approach to the estimation of either the item parameters or the person parameters enables the user to consider various sources of uncertainty.
+The function returns a parameters object, which has `plot` and `coef` methods.
+
+```{r, eval=F}
+head(coef(parms_gibbs))
+```
+
+
+```{r, echo=F}
+kable(head(coef(parms_gibbs)), digits=3)
+```
+
+The parameters object can be passed to the functions that estimate person parameters. For example `ability`, which produces maximum likelihood (MLE) and Bayes expected a posteriori (EAP) estimators with different priors, and `plausible_values`. Being able to choose between a frequentist or a Bayesian approach to the estimation of either the item parameters or the person parameters enables the user to consider various sources of uncertainty.
 
 Plausible values are most often used for characterizing and comparing populations. For the verbal aggression example, we get:  
 
@@ -194,5 +204,5 @@ close_project(db)
 ```
 
 
-#References
+## References
 

@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
-src/*.o
-src/*.so
-src/*.dll
+*.o
+*.so
+*.dll
+/revdep/.cache.rds

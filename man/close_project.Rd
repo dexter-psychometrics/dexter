@@ -7,7 +7,7 @@
 close_project(db)
 }
 \arguments{
-\item{db}{a Dexter project db handle}
+\item{db}{connection to a dexter database}
 }
 \description{
 This is just an alias for \code{DBI::dbDisconnect(db)}, included for completeness

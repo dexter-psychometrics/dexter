@@ -4,15 +4,15 @@
 \alias{distractor_plot}
 \title{Distractor plot}
 \usage{
-distractor_plot(dataSrc, item, predicate = NULL, legend = TRUE,
-  curtains = 10, ...)
+distractor_plot(dataSrc, item_id, predicate = NULL, legend = TRUE,
+  curtains = 10, col = NULL, ...)
 }
 \arguments{
-\item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, response, item_score
+\item{dataSrc}{Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, response, item_score
 and optionally booklet_id}
 
-\item{item}{The ID of the item to plot. A separate plot will be produced
-for each booklet that contains the item, or an error message if the item ID
+\item{item_id}{The ID of the item to plot. A separate plot will be produced
+for each booklet that contains the item, or an error message if the item_id
 is not known. Each plot contains a non-parametric regression of each possible
 response on the total score.}
 
@@ -22,6 +22,8 @@ response on the total score.}
 
 \item{curtains}{100*the tail probability of the sum scores to be shaded. Default is 10.
 Set to 0 to have no curtains shown at all.}
+
+\item{col}{vector of colors to use for plotting}
 
 \item{...}{further arguments to plot.}
 }

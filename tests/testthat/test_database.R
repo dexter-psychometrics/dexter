@@ -113,7 +113,7 @@ test_that('adding person and item properties',
   expect_error({add_item_properties(db,tibble(a=1,b=2))},'item_id')
   
   # item id "1" does not exist
-  expect_output({add_item_properties(db,tibble(Item_id=1,b=2))}, '0 items')
+  expect_output({add_item_properties(db,tibble(item_id=1,b=2))}, '0 items')
   
   expect_output({add_item_properties(db,tibble(item_id='S4DoCurse', BlAme='society', news='olds'))},
                 '2 item properties? for 1 items? added or updated', perl=TRUE)

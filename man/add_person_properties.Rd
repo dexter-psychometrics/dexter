@@ -5,10 +5,10 @@
 \title{Add person properties to a project}
 \usage{
 add_person_properties(db, person_properties = NULL,
-  default_values = list())
+  default_values = NULL)
 }
 \arguments{
-\item{db}{A handle to the dexter project database, e.g. the output of \code{start_new_project}
+\item{db}{a connection to a dexter database, e.g. the output of \code{start_new_project}
 or \code{open_project}}
 
 \item{person_properties}{A data frame containing a column person_id and 1 or more other columns with 

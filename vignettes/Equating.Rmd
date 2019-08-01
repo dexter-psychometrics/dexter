@@ -7,7 +7,6 @@ output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Equating in Dexter}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 <style>
@@ -15,8 +14,8 @@ img{ border:none;}
 </style>
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, dev='CairoPNG') #
-library(dexter)
+knitr::opts_chunk$set(echo = TRUE, dev='CairoPNG') 
+
 library(calibrate)
 library(dplyr)
 library(ggplot2)
@@ -114,11 +113,11 @@ As a start, we produce a scatter plot of the scores:
 
 ```{r echo=FALSE, message=FALSE, results='hide', fig.align='center', fig.height=4, fig.width=4}
 library(dexter)
-db = start_new_project(verbAggrRules, "verbAggression.db")
+db = start_new_project(verbAggrRules, ":memory:")
 add_booklet(db, verbAggrData, "data")
 ts = get_testscores(db, item_position<15) %>%
   inner_join(get_testscores(db, item_position>=15), by='person_id') %>%
-  rename(ref_test= 'test_score.y', new_test = 'test_score.x')
+  rename(ref_test= 'booklet_score.y', new_test = 'booklet_score.x')
 #plot(ts$new_test, ts$ref_test, ylab="ref. test score", xlab="new test score", cex=0.8, pch=16)
 #abline(h=10, lty=2, col="green")
 ggplot(ts, aes(x = new_test, y = ref_test)) +
@@ -145,6 +144,7 @@ The blue dashed line is the percentage of true positives. Among other things, it
 
 Since the same respondents have taken both tests, it is straightforward to determine the sensitivity and specificity of the new test for each pass-fail score:
 
+<!-- to do: might decide against showing some of this code, pictures themselves are important for the story, not the code-->
 ```{r, fig.align='center', fig.height=5, fig.width=5}
 specificity = sensitivity = rep(0, 29)
 for (i in seq_along(0:28)){
@@ -168,13 +168,40 @@ abline(0,1,lty=2, col="grey")
 Other packages and functions may produce prettier plots --- but can they do it without complete data?
 
 ```{r, echo=FALSE}
-dbDisconnect(db)
-unlink("verbAggression.db")
+close_project(db)
+
 ```
 
 ## Incomplete Data
 
 It is more involved, but practically more useful, to calculate sensitivity and specificity even though the two tests have not been both administered to the same persons. We first simulate a complete data set with responses to 60 items. Then, we select the first 500 persons and 40 items to represent the reference test, and the remaining 200 persons and items 21 through 60 to represent the target test. Note that the two respondent groups are sampled from two different ability populations and cannot be considered as equivalent.  
+
+
+```{r, eval=F, include=F}
+# alternatief voor gesimuleerde data, misschine code laten zien?
+nP = 700
+nI = 60
+theta = c(rnorm(500, 0,2), rnorm(nP-500, 0.5,2))
+delta = runif(nI,-1,1)
+items = sprintf('%02i',1:nI)
+
+sim_func = r_score(data.frame(item_id=items, item_score=1, delta=delta))
+
+data = sim_func(theta)
+
+data[1:500, 41:60] = NA
+data[501:nP, 1:20] = NA
+
+ref_items = items[1:40]
+target_items = items[21:60]
+
+
+pp = probability_to_pass(data, 
+                         ref_items = ref_items, pass_fail = 23,
+                         design = data.frame(item_id=target_items))
+
+
+```
 
 ```{r, echo=FALSE, message=FALSE, results='hide'}
 nP = 700
@@ -192,7 +219,7 @@ We create a new `dexter` project, and we add the two booklets. We assume that th
 
 ```{r, echo=FALSE, message=FALSE, results='hide'}
 rules = data.frame(item_id=rep(paste0('i',1:60), each=2), response=rep(c(0,1),60), item_score=rep(c(0,1),60))
-db_sm = start_new_project(rules, db="sim_inc")
+db_sm = start_new_project(rules, ":memory:")
 add_booklet(db_sm, x=x1, "bk1")
 add_booklet(db_sm, x=x2, "bk2")
 ref_items = paste0("i",1:40)
@@ -212,10 +239,9 @@ ou_e = probability_to_pass(db_sm, ref_items = ref_items,
 plot(ou_e, what="equating")
 ```
 
-Let the scores on the reference and new test be written, respectively, as $R_+$ and $N_+$, and let $\mathbf{x}$ denote the available data. We calculate $P(R_+ \geq c|N_+ = s, \mathbf{x})$, the probability that a person with a score of $s$ on the target test will pass. Simply stated, we calculate this probability by averaging over what could have happened on the basis of the available data. A technical appendix explains a bit more.
+Let the scores on the reference and new test be written, respectively, as $R_+$ and $N_+$, and let $\mathbf{x}$ denote the available data. We calculate $P(R_+ \geq c|N_+ = s, \mathbf{x})$, the probability that a person with a score of $s$ on the target test will pass. Simply stated, we calculate this probability by averaging over what could have happened on the basis of all available data. A technical appendix explains a bit more.
 
-A little extra in the plot are the horizontal red lines. These refer to the traditional ability-based pass-fail score obtained as follows: First, estimate an ability for each score on the reference and the new test. Then, determine the score on the new test corresponding to the smallest ability equal to or larger than the ability corresponding to the pass-fail score on the reference test. This will then be the pass-fail score in the new test. The horizontal lines are actually the probabilities of pass-fail scores thus obtained. While this is the usual procedure to equate a pass-fail score, we believe the procedure that we propose here is more informative. 
-
+A little extra in the plot are the vertical red lines. These refer to the traditional ability-based pass-fail score obtained as follows: First, estimate an ability for each score on the reference and the new test. Then, determine the score on the new test corresponding to the smallest ability equal to or larger than the ability corresponding to the pass-fail score on the reference test. This will then be the pass-fail score in the new test. The vertical lines are actually the probabilities of pass-fail scores thus obtained. By construction, such pass-fail scores correspond to the lowest scores giving a probability to pass equal or higher than 0.5. While this is the usual procedure to equate a pass-fail score, we believe the procedure that we propose here is more informative. 
 
 ## Sensitivity and specificity
 Having the probability to pass and the proportion of respondents, $P(N_+ = s)$, for all possible scores $s$, we can calculate sensitivity and specificity and plot them for each possible pass-fail score on the target test:
@@ -227,8 +253,8 @@ plot(ou_e, what='sens/spec')
 If sensitivity and specificity are equally important, the plot suggests `r which.min((1-ou_e$booklets[[1]]$properties$sensitivity)^2+ (1-ou_e$booklets[[1]]$properties$specificity)^2)-1` as a pass-fail score on the new test.
 
 ```{r, echo=FALSE, message=FALSE}
-dbDisconnect(db_sm)
-unlink("sim_inc")
+close_project(db_sm)
+
 ```
 
 ## Conclusion
@@ -265,7 +291,7 @@ To calculate a Monte-Carlo estimate, repeat:
 * sample a plausible value $\theta^* \sim f(\theta|N_+ = s, \mathbf{b}^*)$
 * calculate $P(R_+ \geq c|\theta^*,\mathbf{b}^*)$
 
-We do this as often as we can afford (currently, five hundred times), and we take the average as an estimate of $P(R_+ \geq c|\theta^*,\mathbf{b}^*)$.
+We do this as often as we can afford (currently, a thousant times), and we take the average as an estimate of $P(R_+ \geq c|\theta^*,\mathbf{b}^*)$.
 
 Sensitivity and specificity are calculated from the score distribution on the new-test and the probability to pass. The following code shows how:
 
@@ -280,5 +306,5 @@ Sensitivity and specificity are calculated from the score distribution on the ne
 ```
 
 
-#References
+## References
 

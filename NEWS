@@ -1,7 +1,58 @@
+# dexter 1.0.0
+
+## Breaking changes
+
+* the interface for the standard setting functions has changed, these functions have new names and different arguments
+
+* the name of the column 'sumScore', outputted by a number of functions, has changed to 'booklet_score'
+
+## other changes
+
+* in addition to a database or a long format data.frame, dataSrc may now also be a wide format data matrix 
+
+* fit_enorm, ability and plausible_values have an extra argument 'merge_booklets' (to do: temp name) which determines if a link over persons is used
+
+* plausible_values accepts a normal or a mixture prior
+
+* the dependency on dbplyr has been removed. This again allows the use of data.frame columns in predicates (since dbplyr 1.4, this caused error messages)
+
+* generally faster due to the excellent Rcpp and RcppArmadillo packages
+
+
+# dexter 0.8.5
+
+* new function `design_info()` returns extensive information about incomplete test designs. Functions `design_as_network()` and `design_is_connected()` are deprecated.
+
+* correction for a bug which caused NA's in plausible values for booklets with 1 respondent and nPV>1
+
+# dexter 0.8.4
+
+* Tiny changes for compatibility with dependencies
+
+# dexter 0.8.3
+
+* correction of a bug in 0.8.2 which caused coef.prms to fail with calibration method Bayes
+
+# dexter 0.8.2
+
+* new functions `information()` and `expected_score()` for tests and items in the ENORM.
+
+* change in the algorithm for MLE estimation method in ability and ability_tables. The new algorithm is
+  more precise so small changes in (the lower digits of) computed theta values may occur with respect 
+  to previous versions of dexter.
+  
+* corrected a bug in the reporting of standard errors for Bayesian estimation of the ENORM. The
+  SE's reported in previous versions of dexter were too high.
+  
+* corrected bug in plot for DIF (item labels were reversed) introduced in 0.8.0
+
+
 # dexter 0.8.1
 
 * significant speed increases in plausible_values, plausible_scores, ability and ability_tables
+
 * added plot method for the extended nominal response model
+
 * new function `add_response_data()` for importing normalized data
 
 # dexter 0.8.0

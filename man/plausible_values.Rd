@@ -5,10 +5,11 @@
 \title{Draw plausible values}
 \usage{
 plausible_values(dataSrc, parms = NULL, predicate = NULL,
-  covariates = NULL, nPV = 1, use_draw = NULL, asOPLM = TRUE)
+  covariates = NULL, nPV = 1, use_draw = NULL,
+  prior.dist = c("normal", "mixture"), merge_within_person = FALSE)
 }
 \arguments{
-\item{dataSrc}{Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score}
+\item{dataSrc}{Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score}
 
 \item{parms}{An object returned by function \code{fit_enorm} and containing
 parameter estimates. If parms is given the function provides plausible values conditional on the 
@@ -20,21 +21,22 @@ In plain words, this means that the uncertainty of the item parameters is taken 
 all data in dataSrc}
 
 \item{covariates}{name or a vector of names of the variables to group the populations used to improve the prior.
-A covariate must be a discrete person covariate (e.g. not a float) that indicates nominal categories, e.g. gender or school
+A covariate must be a discrete person property (e.g. not a float) that indicates nominal categories, e.g. gender or school
 If dataSrc is a data.frame, it must contain the covariate.}
 
 \item{nPV}{Number of plausible values to draw per person.}
 
-\item{use_draw}{When the ENORM was fitted with a Gibbs sampler (this is 
-recognised automatically), the number of the random draw (iteration) to use 
-in generating the PV. If NULL, all draws will be averaged; that is, the posterior means are used for the item parameters.
-If outside range, the last iteration will be used.}
+\item{use_draw}{When the ENORM was fitted with a Gibbs sampler (this is}
 
-\item{asOPLM}{As a courtesy to the OPLM user, this option normalizes the item parameter as in OPLM output. 
-Is inactive when there are fixed pameters because their values determine the normalization.}
+\item{prior.dist}{use a normal prior or a mixture of two normals
+recognised automatically), the number of the random draw (iteration) to use 
+in generating the PV. If NULL, all draws will be averaged; that is, the posterior means are used for the item parameters. If outside range, the last iteration will be used.}
+
+\item{merge_within_person}{for persons who were administered multiple booklets, 
+whether to provide just one plausible value (TRUE) or one per booklet(FALSE)}
 }
 \value{
-A data.frame with columns booklet_id, person_id, sumScore and nPV plausible values
+A data.frame with columns booklet_id, person_id, booklet_score and nPV plausible values
 named PV1...PVn.
 }
 \description{
@@ -42,7 +44,7 @@ Draws plausible values based on test scores
 }
 \examples{
 db = start_new_project(verbAggrRules, ":memory:", 
-   covariates=list(gender="<unknown>"))
+   person_properties=list(gender="<unknown>"))
 add_booklet(db, verbAggrData, "agg")
 add_item_properties(db, verbAggrProperties)
 

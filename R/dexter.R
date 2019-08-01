@@ -1,9 +1,26 @@
 
 utils::globalVariables(c("."))
 
-############################################
-######      exported functions        ######
-############################################
+
+# to do: all cases were functions accept booklets, items etc, convert to factors
+
+
+#' Dexter: data analyses for educational and psychological tests.
+#' 
+#' Dexter provides a comprehensive solution for managing and analyzing educational test data.
+#' 
+#' The main features are:
+#' 
+#' \itemize{
+#' \item project databases providing a structure for storing data about persons, items, responses and booklets.
+#' \item methods to assess data quality using Classical test theory and plots.
+#' \item CML calibration of the extended nominal response model and interaction model.
+#' }
+#' 
+#' To learn more about dexter, start with the vignettes: `browseVignettes(package="dexter")`  
+#' 
+"_PACKAGE"
+
 
 
 #' Start a new project
@@ -14,15 +31,15 @@ utils::globalVariables(c("."))
 #'
 #' @param rules A data frame with columns \code{item_id}, \code{response}, and \code{item_score}.
 #' The order is not important but spelling is. Any other columns will be ignored.
-#' @param db A connection to an existing sqlite database or a string specifying a filename
+#' @param db_name A connection to an existing sqlite database or a string specifying a filename
 #' for a new sqlite database to be created. If this name does not
 #' contain a path, the file will be created in the work
-#' directory. Any existing file with the same name will be overwritten.
+#' directory. Any existing file with the same name will be overwritten. For an in-memory database
+#' you can use the string \code{":memory:"}.
 #' @param person_properties An optional list of person properties. Names should correspond to person_properties intended to be used in the project.
 #' Values are used as default (missing) values. The datatype will also be inferred from the values.
 #' Known person_properties will be automatically imported when adding response data with \code{\link{add_booklet}}. 
-#' @param covariates Deprecated alias for person_properties.
-#' @return If the scoring rules pass a sanity check, a handle to the data base.
+#' @return a database connection object.
 #' @details This package only works with closed items (e.g. likert, MC or possibly short answer)
 #' it does not score any open items.
 #' The first step to creating a project is to import an exhaustive list of all items and
@@ -31,7 +48,7 @@ utils::globalVariables(c("."))
 #' Scores must be integers, and the minimum score for an item must be 0.
 #' When inputting data, all responses not specified in the rules can optionally be treated as
 #' missing and ultimately scored 0, but it is good style to include the missing
-#' responses in the list. NA values will be treated as the string 'NA'.
+#' responses in the list. NA values will be treated as the string "NA"'.
 #'
 #' @examples
 #'\donttest{
@@ -40,19 +57,16 @@ utils::globalVariables(c("."))
 #'                        person_properties = list(gender = "unknown"))
 #' }
 #' 
-start_new_project = function(rules, db="dexter.db", person_properties = NULL, covariates = person_properties) 
+start_new_project = function(rules, db_name="dexter.db", person_properties = NULL) 
 {
-  if(!is.null(covariates))
-  {
-    dbCheck_reserved_colnames(names(covariates))
+  
+  check_list(person_properties, nullable=TRUE)
+  check_string(db_name)
+  if(!is.null(person_properties))
+    {
+      dbCheck_reserved_colnames(names(person_properties))
   }
-  check_arg(person_properties, 'list', nullable=TRUE)
-  check_arg(covariates, 'list', nullable=TRUE)
-  check_arg(db, 'character', .length = 1)
-
-  # for backward compatibility we rename if necessary
-  colnames(rules)[colnames(rules)=='item'] = 'item_id'
-  colnames(rules)[colnames(rules)=='score'] = 'item_score'
+  check_df(rules, c("item_id", "response", "item_score"))
   
   rules = rules[, c("item_id", "response", "item_score")]
   rules$response = as.character(rules$response)
@@ -81,23 +95,24 @@ start_new_project = function(rules, db="dexter.db", person_properties = NULL, co
     stop('Scoring rules are not valid')
   } else 
   {
-    if (inherits(db,'character'))
+    if (inherits(db_name,'character'))
     {
-      if (file.exists(db)) file.remove(db)
-      db = dbConnect(SQLite(), db)
+      if (file.exists(db_name)) file.remove(db_name)
+      db = dbConnect(SQLite(), db_name)
     }
     dbTransaction(db,
     {
-      project_CreateTables(db, covariates)
+      project_CreateTables(db, person_properties)
       dbExecute(db,'INSERT INTO dxItems(item_id) VALUES(:id);', 
                       tibble(id=unique(rules$item_id)))
       dbExecute(db,
                 'INSERT INTO dxScoring_rules(item_id, response, item_score) 
                           VALUES(:item_id, :response, :item_score);', 
 				        select(rules, .data$item_id, .data$response, .data$item_score))
-    },on_error = function(e){dbDisconnect(db);stop(e)})
-    return(db)
+    },
+    on_error = function(e){dbDisconnect(db);stop(e)})
   }
+  db
 }
 
 
@@ -108,21 +123,21 @@ start_new_project = function(rules, db="dexter.db", person_properties = NULL, co
 #'
 #'
 #' @param db_name The name of the data base to be opened.
-#' @param convert_old 
-#' Ignored, this argument will be removed in a future version. 
-#' @return A handle to the dexter project database.
+#' @return a datbase connection object
 #'
-open_project = function(db_name="dexter.db", convert_old=NULL) {
-  
-  if (!file.exists(db_name)) stop("There is no such file")
+open_project = function(db_name="dexter.db") 
+{
+  check_string(db_name)
+  if (!file.exists(db_name)) 
+    stop("There is no such file")
     
   db = dbConnect(SQLite(), db_name)
-  dbExecute(db,'pragma foreign_keys=1;')
   if(!dbExistsTable(db,'dxItems'))
   {
     dbDisconnect(db)
     stop('Sorry, this does not appear to be a Dexter database.')
   }
+  dbExecute(db,'pragma foreign_keys=1;')
   return(db)
 }
 
@@ -130,7 +145,7 @@ open_project = function(db_name="dexter.db", convert_old=NULL) {
 #'
 #' This is just an alias for \code{DBI::dbDisconnect(db)}, included for completeness
 #'
-#' @param db a Dexter project db handle
+#' @param db connection to a dexter database
 #'
 close_project = function(db) dbDisconnect(db) 
 
@@ -142,52 +157,66 @@ close_project = function(db) dbDisconnect(db)
 #' scoring rules from the keys to the correct responses
 #'
 #'
-#' @param keys  A data frame containing columns \code{item_id}, \code{nOptions}, and
-#' \code{key} (the spelling is important). See details.
+#' @param keys  A data frame containing columns \code{item_id}, \code{noptions}, and
+#' \code{key} See details.
 #' @param include_NA_rule whether to add an option 'NA' (which is scored 0) to each item
 #' @return A data frame that can be used as input to \code{start_new_project}
 #' @details
 #' This function might be useful in setting up the scoring rules when all items
-#' are multiple-choice and scored as 0/1. (Hint: Because the order in which the
-#' scoring rules is not important, one can use the function to generate rules for
-#' many MC items and then append per hand the rules for a few complex items.)
+#' are multiple-choice and scored as 0/1. 
 #'
-#' The input data frame must contain the exact name of each item, the number
+#' The input data frame must contain the exact id of each item, the number
 #' of options, and the key. If the keys are all integers, it will be assumed that
-#' responses are coded as 1 through nOptions. If they are all uppercase letters,
+#' responses are coded as 1 through noptions. If they are all  letters,
 #' it is assumed that responses are coded as A,B,C,... All other cases result
 #' in an error.
 #'
 keys_to_rules = function(keys, include_NA_rule = FALSE) 
 {
-  # for backward compatibility we rename
-  colnames(keys)[colnames(keys)=='item'] = 'item_id'
-  
+  colnames(keys) = tolower(colnames(keys))
+  check_df(keys, c('item_id','noptions','key'))
   keys = mutate_if(keys, is.factor, as.character)
+  lwr = FALSE
   
-  if (is.numeric(keys$key)) ABC=FALSE else {
-    if (all(keys$key %in% LETTERS)) ABC=TRUE
-    else stop("You have inadmissible keys")
+  if (is.numeric(keys$key))
+  {
+    ABC=FALSE
+  } 
+  else 
+  {
+    if(all(keys$key %in% LETTERS))
+    {
+      ABC = TRUE
+    } else if(all(keys$key %in% letters))
+    {
+      ABC=TRUE
+      lwr=TRUE
+      keys$key = toupper(keys$key)
+    } else stop("You have inadmissible keys")
   }
   if (ABC) {
     m = match(keys$key, LETTERS)
-    if (any(m>keys$nOptions)) stop("You have out-of-range keys")
+    if (any(m>keys$noptions)) stop("You have out-of-range keys")
     r = keys %>% 
       group_by(.data$item_id) %>% 
       do({
-      y = tibble(response=LETTERS[1:.$nOptions[1]], item_score=0)
+      y = tibble(response=LETTERS[1:.$noptions[1]], item_score=0)
       y$item_score[match(.$key[1],LETTERS)] = 1
       y
     })
   } else {
-    if (any(keys$key>keys$nOptions)) stop("You have out-of-range keys")
+    if (any(keys$key>keys$noptions)) stop("You have out-of-range keys")
     r = keys %>% group_by(.data$item_id) %>% do({
-      y = tibble(response=1:.$nOptions[1], item_score=0)
+      y = tibble(response=1:.$noptions[1], item_score=0)
       y$item_score[.$key[1]] = 1
       y
     })
   }
   r = ungroup(r)
+  if(lwr)
+  {
+    r$response = tolower(r$response)
+  }
   
   if(include_NA_rule){
     r = bind_rows(r, tibble(item_id=unique(r$item_id), response='NA', item_score=0))
@@ -203,7 +232,7 @@ keys_to_rules = function(keys, include_NA_rule = FALSE)
 #' Having to alter or add a scoring rule is occasionally necessary, e.g. in case of a key error. 
 #' This function offers the possibility to do so and also allows you to add new items to your project
 #' 
-#' @param db handle to a Dexter project database
+#' @param db a connection to a dexter project database
 #' @param rules A data frame with columns \code{item_id}, \code{response}, and \code{item_score}.
 #' The order is not important but spelling is. Any other columns will be ignored. See details
 #' @return If the scoring rules pass a sanity check, a small summary of changes is printed and nothing is returned
@@ -212,8 +241,6 @@ keys_to_rules = function(keys, include_NA_rule = FALSE)
 #' less_than_two_scores: if TRUE, the item has only one distinct score
 #' duplicated_responses: if TRUE, the item contains two or more identical response categories
 #' min_score_not_zero: if TRUE, the minimum score of the item was not 0
-#' Please note that the sanity check is done for the items you change
-
 #' @details 
 #' The rules should contain all rules that you want to change or add. This means that in case of a key error
 #' in a single multiple choice question, you typically have to change two rules.
@@ -228,9 +255,7 @@ keys_to_rules = function(keys, include_NA_rule = FALSE)
 #' 
 touch_rules = function(db, rules)
 {
-  # for backward compatibility we rename if necessary
-  names(rules)[names(rules)=='item'] = 'item_id'
-  names(rules)[names(rules)=='score'] = 'item_score'
+  check_df(rules, c('item_id','response','item_score'))
   
   if(any(is.na(rules$item_id)) || any(is.na(rules$item_score)))
     stop("The item_id and item_score columns may not contain NA values")
@@ -310,7 +335,7 @@ touch_rules = function(db, rules)
 #' Add item response data in long or wide format
 #'
 #'
-#' @param db A handle to the database, i.e. the output of \code{start_new_project}
+#' @param db a connection to a dexter database, i.e. the output of \code{start_new_project}
 #' or \code{open_project}
 #' @param x A data frame containing the responses and, optionally,
 #' person_properties. The data.frame should have one row per respondent and the column names should 
@@ -363,22 +388,20 @@ touch_rules = function(db, rules)
 #' values are transformed to the string \code{"NA"}.
 #' 
 #' @examples 
-#' \dontrun{
-#' db = start_new_project(verbAggrRules, "verbAggression.db", 
+#' db = start_new_project(verbAggrRules, ":memory:", 
 #'                        person_properties=list(gender="unknown"))
 #' head(verbAggrData)
 #' add_booklet(db, verbAggrData, "agg")      
 #' 
 #' close_project(db)
-#' }
 #' 
 add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
   
+  check_df(x)
+  x = mutate_if(x, is.factor, as.character) 
   
-  x = x %>% mutate_if(is.factor, as.character) 
-  
-  covariates = intersect(dbListFields(db, 'dxPersons'), tolower(names(x)))
-  covariates = covariates[covariates != 'person_id']
+  person_properties = intersect(dbListFields(db, 'dxPersons'), tolower(names(x)))
+  person_properties = person_properties[person_properties != 'person_id']
   
   design = tibble(booklet_id = booklet_id, item_id = names(x), col_order=c(1:ncol(x))) %>%
     inner_join(dbGetQuery(db, "SELECT item_id FROM dxItems;"), by='item_id') %>%
@@ -458,19 +481,19 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
             
     # make this report before we mutilate the colnames  
     columns_ignored = setdiff(names(x), c(design$item_id,'person_id','item_id','booklet_id') )
-    columns_ignored = columns_ignored[!tolower(columns_ignored) %in% covariates]
+    columns_ignored = columns_ignored[!tolower(columns_ignored) %in% person_properties]
                   
-    # add covariates
-    if(length(covariates)>0)
+    # add person_properties
+    if(length(person_properties)>0)
     {
       colnames(x) = tolower(colnames(x))
-      dbExecute(db,paste0('UPDATE dxPersons SET ',paste0(covariates,'=:',covariates,collapse=','),' WHERE person_id=:person_id;'),
-                               x[,c(covariates,'person_id')])
+      dbExecute(db,paste0('UPDATE dxPersons SET ',paste0(person_properties,'=:',person_properties,collapse=','),' WHERE person_id=:person_id;'),
+                               x[,c(person_properties,'person_id')])
     }
   }) 
   
   out$items = design$item_id
-  out$person_properties = covariates
+  out$person_properties = person_properties
   if( length(columns_ignored) > 0)
     out$columns_ignored = columns_ignored
 
@@ -480,10 +503,10 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
 #' @rdname add_booklet 
 add_response_data = function(db, data, auto_add_unknown_rules = FALSE, missing_value = 'NA')
 {
-  data = ungroup(data)
   colnames(data) = tolower(colnames(data))
-  if(length(setdiff(c('item_id', 'person_id', 'response','booklet_id'), colnames(data))) > 0)
-    stop("The data argument must contain the columns: 'item_id', 'person_id', 'response','booklet_id'") 
+  check_df(data, c('item_id', 'person_id', 'response','booklet_id'))
+
+  data = ungroup(data)
   
   data$person_id = as.character(data$person_id)
   data$item_id = as.character(data$item_id)
@@ -491,7 +514,8 @@ add_response_data = function(db, data, auto_add_unknown_rules = FALSE, missing_v
   data$response = as.character(data$response)
   
   missing_value = as.character(missing_value)
-
+  check_string(missing_value)
+  
   unknown_items = distinct(data, .data$item_id) %>%
     anti_join(dbGetQuery(db, 'SELECT DISTINCT item_id FROM dxItems;'), by='item_id')
   
@@ -611,7 +635,7 @@ add_response_data = function(db, data, auto_add_unknown_rules = FALSE, missing_v
 #' Add, change or define item properties in a dexter project
 #'
 #'
-#' @param db A handle to the dexter project database, e.g. the output of \code{start_new_project}
+#' @param db a connection to a dexter database, e.g. the output of \code{start_new_project}
 #' or \code{open_project}
 #' @param item_properties A data frame containing a column item_id (matching item_id's already defined in the project)
 #'  and 1 or more other columns with item properties (e.g. item_type, subject)
@@ -643,6 +667,9 @@ add_item_properties = function(db, item_properties=NULL, default_values=NULL) {
   # for convenience we include the item_id as a property
   existing_item_properties = dbListFields(db, 'dxItems') 
   
+  check_df(item_properties, 'item_id', nullable=TRUE)
+  check_list(default_values, nullable=TRUE)
+  
   dbTransaction(db, 
   {
     if(!is.null(default_values))
@@ -666,15 +693,18 @@ add_item_properties = function(db, item_properties=NULL, default_values=NULL) {
     if(!is.null(item_properties))
     {
       colnames(item_properties) = dbValid_colnames(colnames(item_properties))
+      
       item_properties = item_properties %>%
         mutate(item_id = as.character(.data$item_id)) %>%
         mutate_if(is.factor, as.character) 
       
-     
-       # backwards compatibility
-      if(!('item_id' %in% colnames(item_properties)))
-        colnames(item_properties)[colnames(item_properties)=='item'] = 'item_id'
-      
+      if(inherits(db,'SQLiteConnection'))
+      {
+        item_properties = item_properties %>%
+          mutate_if(is.date, format, "%Y-%m-%d") %>%
+          mutate_if(is.time, format, "%Y-%m-%d %H:%M:%S")
+      }
+
       if(!('item_id' %in% colnames(item_properties)))
         stop('item_properties needs to have a column item_id')
       
@@ -707,7 +737,7 @@ add_item_properties = function(db, item_properties=NULL, default_values=NULL) {
 #' also be automatically imported with \code{\link{add_booklet}}
 #'
 #'
-#' @param db A handle to the dexter project database, e.g. the output of \code{start_new_project}
+#' @param db a connection to a dexter database, e.g. the output of \code{start_new_project}
 #' or \code{open_project}
 #' @param person_properties A data frame containing a column person_id and 1 or more other columns with 
 #' person properties (e.g. education_type, birthdate)
@@ -719,13 +749,15 @@ add_item_properties = function(db, item_properties=NULL, default_values=NULL) {
 #' can only be defined once for each person_property
 #' 
 #' @return nothing
-add_person_properties = function(db, person_properties = NULL, default_values = list())
+add_person_properties = function(db, person_properties = NULL, default_values = NULL)
 {
+  check_df(person_properties, 'person_id', nullable=TRUE)
+  check_list(default_values, nullable=TRUE)
   dbTransaction(db, 
   { 
     existing_props = dbListFields(db, 'dxPersons')
     
-    if(length(default_values) > 0)
+    if(!is.null(default_values))
     {
       names(default_values) = dbValid_colnames(names(default_values))
       
@@ -745,6 +777,14 @@ add_person_properties = function(db, person_properties = NULL, default_values = 
         stop('column person_id not found in person_properties')
       
       dbCheck_reserved_colnames(setdiff(colnames(person_properties), existing_props))
+      
+      if(inherits(db,'SQLiteConnection'))
+      {
+        person_properties = person_properties %>%
+          mutate_if(is.date, format, "%Y-%m-%d") %>%
+          mutate_if(is.time, format, "%Y-%m-%d %H:%M:%S")
+      }
+      
       
       lapply(setdiff(colnames(person_properties), existing_props), function(prop_name)
       {
@@ -772,7 +812,7 @@ add_person_properties = function(db, person_properties = NULL, default_values = 
 #' 
 #' Retrieve the scoring rules currently present in the dexter project db
 #' 
-#' @param db handle to a Dexter project database
+#' @param db a connection to a Dexter database
 #' @return data.frame of scoring rules containing columns: item_id, response, item_score
 #' 
 get_rules = function(db)
@@ -785,7 +825,7 @@ get_rules = function(db)
 #'
 #' Retrieve information about the booklets entered in the db so far
 #'
-#' @param db A handle to the database, i.e. the output of \code{start_new_project}
+#' @param db a connection to a dexter database, i.e. the output of \code{start_new_project}
 #' or \code{open_project}
 #' @return A data frame with columns: booklet_id, n_persons and n_items.
 #'
@@ -795,59 +835,42 @@ get_booklets = function(db) {
 }
 
 
-#' Item properties in a project
-#'
-#' Quickly glimpse the item properties defined in the project (if any).
-#'
-#' @param db A handle to the database, i.e. the output of \code{start_new_project}
-#' or \code{open_project}
-#' @return A tibble with columns: item_property, type and values. Values shows 
-#' unique values for your item properties, cut off if there are many.
-#'
-get_item_properties = function(db) {
-  data = dbGetQuery(db, 'SELECT * FROM dxItems;') 
-  if(nrow(data) > 0 && ncol(data) > 1)
-  {
-    data %>%
-      gather(key='item_property', value='value', -.data$item_id) %>%
-      group_by(.data$item_property) %>%
-      summarise(type = class(.data$value), values = paste(unique(.data$value), collapse=', ')) %>%
-      ungroup() %>%
-      mutate(values = if_else(nchar(.data$values) > 100, 
-                              paste0(substr(.data$values,1,100), '...'), 
-                              .data$values)) %>%
-      as.data.frame()
-  }
+
+
+#' Variables that are defined in the project
+#' 
+#' Inspect the variables defined in your dexter project and their datatypes
+#' 
+#' @param db a dexter project database
+#' @return a data.frame with name and type of the variables defined in your dexter project
+#' @details 
+#' The variables in Dexter consist of the item properties and person properties you specified
+#' and a number of reserved variables that are automatically defined like \code{response} and \code{booklet_id}.
+#' 
+#' Variables in Dexter are most useful when used in predicate expressions. A number of functions can 
+#' take a dataSrc argument and an optional predicate. Predicates are 
+#' a concise and flexible way to filter data for the different psychometric functions in Dexter.
+#' 
+#' The variables can also be used to retrieve data in \code{\link{get_responses}}
+#' 
+get_variables = function(db)
+{
+  lapply(c('dxItems','dxBooklets','dxBooklet_design','dxScoring_rules',
+           'dxPersons','dxAdministrations','dxResponses'),
+         function(tbl)
+         {
+           res = DBI::dbSendQuery(db,paste('SELECT * FROM',tbl,'WHERE 0=1;'))
+           r = DBI::dbColumnInfo(res)
+           DBI::dbClearResult(res)
+           r$originates = substring(tbl,3)
+           return(r)
+         }) %>% 
+    bind_rows() %>% 
+    distinct(.data$name,.keep_all=TRUE) %>%
+    filter(.data$name != 'testpart_nbr') %>%
+    arrange(.data$originates)
 }
 
-
-
-
-
-#' Person properties in a project
-#'
-#' Quickly glimpse the person properties defined in the project (if any).
-#'
-#' @param db A handle to the database, i.e. the output of \code{start_new_project}
-#' or \code{open_project}
-#' @return A tibble with columns: person_property, type and values. Values shows unique values for your person properties, cut off if there are many.
-#'
-get_person_properties = function(db) {
-  data = dbGetQuery(db, 'SELECT * FROM dxPersons;') 
-
-  if(nrow(data) > 0 && ncol(data) > 1)
-  {
-    data %>%
-      gather(key='person_property', value='value', -.data$person_id) %>%
-      group_by(.data$person_property) %>%
-      summarise(type = class(.data$value), values = paste(unique(.data$value), collapse=', ')) %>%
-      ungroup() %>%
-      mutate(values = if_else(nchar(.data$values) > 100, 
-                              paste0(substr(.data$values,1,100), '...'), 
-                              .data$values)) %>%
-      as.data.frame()
-  }
-}
 
 
 
@@ -857,7 +880,7 @@ get_person_properties = function(db) {
 #' so far together with the item properties
 #'
 #'
-#' @param db A handle to the database, i.e. the output of \code{start_new_project}
+#' @param db a connection to a dexter database, e.g. the output of \code{start_new_project}
 #' or \code{open_project}
 #' @return A data frame with column item_id and a column for each item property
 #'
@@ -872,7 +895,7 @@ get_items = function(db){
 #' so far together with their properties
 #'
 #'
-#' @param db A handle to the database, i.e. the output of \code{start_new_project}
+#' @param db a connection to a dexter database, e.g. the output of \code{start_new_project}
 #' or \code{open_project}
 #' @return A data frame with columns person_id and columns for each person_property
 #'
@@ -884,18 +907,22 @@ get_persons = function(db){
 #'
 #' Supplies the weighted sum of item scores for each person selected.
 #'
-#' @param dataSrc Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score
+#' @param dataSrc Data source: a connection to a dexter database or a data.frame with columns: person_id, booklet_id, item_score
 #' @param predicate An optional expression to filter data, if NULL all data is used
-#' @return A tibble with columns person_id, item_id, test_score
+#' @return A tibble with columns person_id, item_id, booklet_score
 #' 
-get_testscores = function(dataSrc, predicate=NULL) {
+get_testscores = function(dataSrc, predicate=NULL) 
+{
+  # to do: not tested
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
-  get_resp_data(dataSrc, qtpredicate, env=env, summarised=TRUE)$x %>%
-    select(.data$person_id, .data$booklet_id, test_score=.data$sumScore) %>%
+  
+  get_resp_data(dataSrc, qtpredicate, summarised=TRUE, env=env)$x %>%
+    mutate_if(is.factor, as.character) %>%
     as.data.frame()
 }
 
+# to do, metnion data matrix with dataSrc param help where applicable
 
 #' Test design
 #'
@@ -903,7 +930,7 @@ get_testscores = function(dataSrc, predicate=NULL) {
 #' so far by booklet and position in the booklet
 #'
 #'
-#' @param db A handle to the database, i.e. the output of \code{start_new_project}
+#' @param db a connection to a dexter database, e.g. the output of \code{start_new_project}
 #' or \code{open_project}
 #' @param format return format, see below
 #' @param rows variable that defines the rows, ignored if format='long'
@@ -950,141 +977,224 @@ get_design = function(db,
 
 
 
-
-#' Test design as network
+# to do: add a unit test
+# to do: recursive connection check can run out of the stack in extreme cases, make non-recursive throughout
+#' Information about the design
 #'
-#' Export the test design as an incidence matrix 
-#' and a weight matrix
+#' This function is useful to inspect incomplete designs
 #'
-#'
-#' @param dataSrc Data source: a dexter project db handle or a data.frame with columns: person_id, item_id, item_score
+#' @param dataSrc a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score
 #' @param predicate An optional expression to subset data, if NULL all data is used
-#' @param weights Weight the edges between booklets by the number of common 
-#' \code{"items"} or \code{"responses"} (default is items). 
-#' @return A list of  data frames: 
-#' \item{im}{incidence matrix}
-#' \item{wm}{weights matrix}
-#' \item{ibl}{incidence matrix of items in blocks}
-#' \item{blb}{incidence matrix of blocks in booklets}
-#' @details 
-#' The output of this function can be passed to packages for network analysis
-#' such as \code{igraph} or \code{qgraph}. We prefer to not load these 
-#' packages automatically as they are fairly large and rely on a number 
-#' of dependencies. 
-#' @examples
-#' \donttest{
-#' \dontrun{
-#' dsgn = design_as_network(db)
-#' # Check if design is connected
 #' 
-#' design_is_connected(dsgn)
-#' }}
-#'
-design_as_network = function(dataSrc, predicate = NULL, weights=c("items","responses")){
-  
-  # to do: the else catchall works but can be done more efficient in some cases. 
-  # it would also be nice to support a design data frame instead of a responses dataframe in some way
-  # maybe we can extend things yet further to do something with balanced designs and a priori designs
-  # Left all of this for a future update
-  
-  w = match.arg(weights)
+#' 
+#' @return
+#' a list with the following components
+#' \describe{
+#' \item{design}{a data.frame with columns booklet_id, item_id, item_position, n_persons} 
+#' \item{connected_booklets}{a data.frame with columns booklet_id, group; 
+#' booklets with the same `group` are connected to eachother.} 
+#' \item{connected}{TRUE/FALSE indicating whether the design is connected or not} 
+#' \item{testlets}{a data.frame with columns item_id and testlet; items within the same testlet 
+#' always occur together in a booklet} 
+#' \item{adj_matrix}{list of two adjacency matrices: *weighted_by_items* and *weighted_by_persons*; These matrices can be 
+#' useful in visually inspecting the design using a package like *igraph*}
+#' }
+#' 
+design_info = function(dataSrc, predicate = NULL)
+{
+  out = list()
   qtpredicate = eval(substitute(quote(predicate)))
+  env = caller_env()
+
+  check_dataSrc(dataSrc)
+
+  if(inherits(dataSrc,'dx_resp_data'))
+    dataSrc = dataSrc$x
   
-  if(is.null(qtpredicate) & inherits(dataSrc,'DBIConnection'))
+  if(inherits(dataSrc, 'data.frame'))
   {
-    if(w == 'items')
+    cn = colnames(dataSrc) = tolower(colnames(dataSrc))
+    
+    if(!('item_position' %in% cn))
+      dataSrc$item_position = 0L
+    
+    
+    if(length(intersect(c('person_id','item_id'),cn)) == 2)
     {
-      design = dbGetQuery(dataSrc, 'SELECT booklet_id, item_id FROM dxBooklet_design;')
+      if(!'item_score' %in% cn)
+        dataSrc$item_score = 0L
+      
+      out$design = get_resp_data(dataSrc, qtpredicate, env=env, extra_columns = 'item_position')$x %>%
+        count(.data$booklet_id, .data$item_id, .data$item_position, name='n_persons')
+    } else if(length(intersect(c('booklet_id','item_id'),cn)) == 2)
+    {
+      # we silently allow a design as input
+      out$design = dataSrc %>%
+        distinct(.data$booklet_id, .data$item_id, .keep_all=TRUE) %>%
+        select(.data$booklet_id, .data$item_id, .data$item_position)
+      
+      out$design$n_persons = NA_integer_
     } else
     {
-      # not entirely necessary to do a left join because booklet design can currently only be entered with respons data
-      # but we might want to separate that in the future to test for connectedness a priori
-      design = dbGetQuery(dataSrc, 
-                          'WITH pcount AS (SELECT booklet_id, item_id, COUNT(*) AS n FROM dxResponses GROUP BY booklet_id, item_id)
-                          SELECT booklet_id, item_id, COALESCE(n,0) AS n_persons
-                            FROM dxBooklet_design LEFT OUTER JOIN pcount USING(booklet_id, item_id);')
+      stop('dataSrc needs to contain columns person_id and item_id')
     }
+
+  } else if(inherits(dataSrc, 'DBIConnection'))
+  {
+    out$design = db_get_design(dataSrc, qtpredicate=qtpredicate, env=env)
   } else
   {
-    if(w == 'items')
-    {
-	  env=caller_env()
-      design = get_resp_data(dataSrc, qtpredicate, env=env)$design
-    } else
-    {
-	  env=caller_env()
-      design = get_resp_data(dataSrc, qtpredicate, env=env)$x  %>%
-        group_by(.data$booklet_id, .data$item_id) %>%
-        summarise(n_persons = n()) %>%
-        ungroup()
-    } 
+    stop("dataSrc must be of type 'DBIConnection' or 'data.frame'")
   }
+  # to do: design from matrix
+  out$design = arrange(out$design, .data$booklet_id, .data$item_position, .data$item_id)    
+    
+  if(nrow(out$design) == 0 )
+    stop("design is empty: no data selected")
+    
+  # connected parts
+  ds = out$design %>% 
+    inner_join(rename(out$design, booklet2 = 'booklet_id'), by = 'item_id') %>%
+    distinct(.data$booklet_id, .data$booklet2) 
   
-  if(length(unique(design$booklet_id)) < 2) stop("This makes sense only if you have at least two booklets")
+  bkl = sort(unique(out$design$booklet_id))
   
-  im = as.matrix(table(design$item_id, design$booklet_id))
-  wm = crossprod(im, im)
-  diag(wm) = 0
-  if (w=="responses") {
-    b = design %>% group_by(.data$booklet_id) %>% slice(1) %>% ungroup()
-    ww = outer(b$n_persons, b$n_persons, "+")
-    wm = wm*ww    
-  }
+  adjm = matrix(0L, nrow = length(bkl), ncol = length(bkl), dimnames = list(bkl, bkl))
+  adjm[as.matrix(ds)] = 1L
   
-  ## Design in terms of blocks of items; set of items that are always together in booklets
-  tmp=as.data.frame.array(im)
-  jj <- which(tmp==1,arr.ind=TRUE)
-  tmp[jj] = colnames(tmp)[jj[,"col"]]
-  blb=tmp[!duplicated(tmp), ]
-  blb[blb!=0]=1
-  rownames(blb)=1:nrow(blb)
-  tmp=apply(tmp,2,function(x)ifelse(x!=0,1,0))
-  ibl=data.frame(item_id =rownames(tmp), blok_id=0, stringsAsFactors=F) 
-  for (i in 1:nrow(blb)){
-    indx = as.numeric(which(apply(tmp,1,function(x) identical(as.numeric(x),as.numeric(blb[i,]))),arr.ind = TRUE, useNames = F))
-    ibl[indx,]$blok_id = i
-  }
-  list(im=im, wm=wm, ibl=ibl, blb=blb)
-}  
-
-#' Test if design is connected
-#'
-#' Use the output from design_as_network to check if your design is connected.
-#'
-#'
-#' @param design Output from design_as_network
-#' @return TRUE or FALSE
-#' @examples
-#' \donttest{
-#' \dontrun{
-#' # as an example, turn off some your booklets and see if you are
-#' # still left with a connected design
-#' 
-#' dsgn = design_as_network(db, !(booklet_id %in% c('b1','b3','b4')))
-#' 
-#' design_is_connected(dsgn)
-#' }
-#' }
-#'
-design_is_connected = function(design)
-{
-  # implementation of depth first search
-  d = design$wm
-  visited = rep(FALSE, ncol(d))
-  rownames(d) = c(1:nrow(d))
-  colnames(d) = c(1:nrow(d))
+  visited = vector(length = ncol(adjm))
+  grp = integer(ncol(adjm))
   dfs = function(start)
   {
-    start = as.integer(start)
-    if(visited[start]) return(0)
+    if(visited[start]) return(0L)
     visited[start] <<- TRUE
-    vapply(rownames(d)[d[,start]>0], dfs, 0)
-    0
+    vapply((1:ncol(adjm))[adjm[,start]>0], dfs, 0L)
+    0L
+  } 
+
+  while(!all(visited))
+  {
+    dfs(min(which(!visited)))
+    grp[grp == 0 & visited] = max(grp) + 1L
   }
-  dfs(1)
-  return(all(visited))
+  
+  out$connected_booklets = tibble(booklet_id = bkl, group = grp) %>% 
+    arrange(.data$group, .data$booklet_id) %>%
+    as.data.frame()
+
+  out$connected = (max(grp) == 1)
+  
+  #testlets
+  out$testlets = out$design %>%
+    mutate(bnr = dense_rank(.data$booklet_id)) %>%
+    group_by(.data$item_id) %>%
+    summarize(testlet = paste(sort(.data$bnr), collapse = ' ')) %>%
+    ungroup() %>%
+    mutate(testlet = dense_rank(.data$testlet)) %>%
+    arrange(.data$testlet, .data$item_id) %>%
+    as.data.frame()
+  
+  
+  # to do: I don't see why the diagonals should be zero, check in igraph if this matters
+  # network
+  out$adj_matrix = list()
+  
+  items = as.matrix(table(out$design$item_id, out$design$booklet_id))
+  out$adj_matrix$weighted_by_items = crossprod(items, items)
+  diag(out$adj_matrix$weighted_by_items) = 0
+  
+  b = out$design %>% 
+    distinct(.data$booklet_id, .keep_all=TRUE)
+  ww = outer(b$n_persons, b$n_persons, "+")
+  out$adj_matrix$weighted_by_persons = out$adj_matrix$weighted_by_items * ww    
+
+  out
 }
 
+
+
+# datasets
+
+
+
+#' Verbal aggression data
+#' 
+#' A data set of self-reported verbal behaviour in different frustrating
+#' situations (Vansteelandt, 2000)
+#' 
+#' 
+#' @name verbAggrData
+#' @docType data
+#' @format A data set with 316 rows and 26 columns.
+#' @keywords datasets
+NULL
+
+
+#' Scoring rules for the verbal aggression data
+#' 
+#' A set of (trivial) scoring rules for the verbal 
+#' aggression data set
+#' 
+#' 
+#' @name verbAggrRules
+#' @docType data
+#' @format A data set with 72 rows and 3 columns (item_id, response, item_score).
+#' @keywords datasets
+NULL
+
+
+#' Item properties in the verbal aggression data
+#' 
+#' A data set of item properties related to the verbal
+#' aggression data
+#' 
+#' 
+#' @name verbAggrProperties
+#' @docType data
+#' @format A data set with 24 rows and 5 columns.
+#' @keywords datasets
+NULL
+
+
+#' Rated data
+#' 
+#' A data set with rated data. A number of student performances are rated twice on several
+#' aspects by independent judges. The ratings are binary and have been summed following
+#' the theory discussed by Maris and Bechger (2006, Handbook of Statistics). Data are a
+#' small subset of data collected on the State Exam Dutch as a second language for Speaking. 
+#' 
+#' 
+#' 
+#' @name ratedData
+#' @docType data
+#' @format A data set with 75 rows and 15 columns.
+#' @keywords datasets
+NULL
+
+
+#' Scoring rules for the rated data
+#' 
+#' A set of (trivial) scoring rules for the rated data set
+#' 
+#' 
+#' @name ratedDataRules
+#' @docType data
+#' @format A data set with 42 rows and 3 columns (item_id, response, item_score).
+#' @keywords datasets
+NULL
+
+
+#' Item properties in the rated data
+#' 
+#' A data set of item properties related to the rated data. These are the aspects: 
+#' IH = content, WZ = word choice and phrasing, and WK = vocabulary.
+#' 
+#' 
+#' @name ratedDataProperties
+#' @docType data
+#' @format A data set with 14 rows and 2 columns: item_id and aspect
+#' @keywords datasets
+NULL
 
 
 
