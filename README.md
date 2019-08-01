@@ -97,7 +97,4 @@ head(pv)
 | verb\_agg   | dxP102     |        12|  -1.0434515|  -1.5317991|  -1.1518701|  -1.0103475|  -1.0057779|
 | verb\_agg   | dxP103     |         8|  -2.0467553|  -1.5357100|  -2.0598186|  -1.2366479|  -1.7367032|
 
-Contributing
-------------
 
-Contributions are welcome but please check with us first about what you would like to contribute.
