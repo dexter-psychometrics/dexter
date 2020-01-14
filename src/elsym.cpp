@@ -1,58 +1,16 @@
 #include <RcppArmadillo.h>
 
-
-
-/*
-* Notes
-*
-* omp.h and omp pragma's need to be encased in ifndef for Apple and other less able systems
-*
-* arma::vector is returned in R as a matrix with 1 column, need: [,1,drop=T] to make vectors again
-*
-* arguments of exported functions need the arma:: prefix otherwise not recognized in RcppExports
-*
-* get and put rngstate probably not necessary anymore, to do: check
-*
-* packagename_init.C is no longer necessary, automatically taken care of, use //[[Rcpp::export]]
-* to make a function available in R
-*
-*/
-
-
 using namespace arma;
 
 
 
-// some magic to easily switch between arma::vec and std::vec in order to use std::vector<long double> and arma::vec somewhat interchangably
-// to do: remove templates, always call elsym with long double, have version callable from r do a typecast
-void fill_zeros(arma::vec& v){ v.zeros();}
-void fill_zeros(std::vector<long double>& v){ std::fill(v.begin(), v.end(), 0); }
-
-// for use when type depends on input
-template <typename T>
-T VecDbl(const int sz)
-{
-	T v(sz, 0);
-	return v;
-}
-
-template <>
-vec VecDbl<vec>(const int sz)
-{
-    vec v(sz, fill::zeros);
-	return v;
-}
-
-
-
-// argument g can be either a std::vector<long double> or an arma::vec 
-template <typename V_TYPE>
-void ElSym(const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const int item1, const int item2, const int nI, const int mS,  V_TYPE& g) 
+void ElSym(const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const int item1, const int item2, const int nI, const int mS,  
+			std::vector<long double>& g) 
 {
   int Msc = 0, idx = 0; // start from column one
   
-  V_TYPE gg = VecDbl<V_TYPE>(2 * mS + 2);
-  fill_zeros(g);
+  std::vector<long double> gg(2 * mS + 2, 0);
+  std::fill(g.begin(),g.end(),0);
   gg[0] = 1;
 
   for (int i=0; i<nI; i++)
@@ -77,23 +35,28 @@ void ElSym(const arma::vec& b, const arma::ivec& a, const arma::ivec& first, con
 
 }
 
-// R cannot call templated functions
+
 //[[Rcpp::export]]
 void ElSym_C(const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const int item1, const int item2, const int nI, const int mS, arma::vec& g)
 {
-	ElSym(b,a,first,last,item1, item2,nI,mS,g);
+	std::vector<long double> gl(g.n_elem);
+	ElSym(b,a,first,last,item1, item2,nI,mS,gl);
+	g.zeros();
+	for(int s=0;s<=mS;s++)
+		g[s] = gl[s];
 } 
 
-// comput the gamma functions g1(-item1) and g2(-item1, -item2)
-template <typename V_TYPE>
-void ElSym12(const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const int item1, const int item2, const int nI, const int mS, V_TYPE& g1, V_TYPE& g2) 
+// compute the gamma functions g1(-item1) and g2(-item1, -item2)
+void ElSym12(const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const int item1, const int item2, const int nI, const int mS, 
+				std::vector<long double>& g1, std::vector<long double>& g2) 
 {
 	int Msc = 0, idx = 0; // start from column one
 	
 	  
-	V_TYPE gg = VecDbl<V_TYPE>(2 * mS + 2);
-	fill_zeros(g1);
-	fill_zeros(g2);
+	std::vector<long double> gg(2 * mS + 2,0);
+	std::fill(g1.begin(),g1.end(),0);
+	std::fill(g2.begin(),g2.end(),0);
+
 	gg[0] = 1;
 
 	for (int i=0; i<nI; i++)
@@ -158,8 +121,8 @@ arma::ivec possible_scores_C(const arma::ivec& a, const arma::ivec& first, const
 
 
 
-// to do: this one might need long doubles as well
-// to do: possible scores in itt elsymmean
+
+
 //[[Rcpp::export]]
 arma::mat ittotmat0_C(const arma::vec& b, const arma::ivec& a, const arma::vec& c, const arma::ivec& first, const arma::ivec& last, const arma::ivec& ps)
 {
@@ -175,7 +138,7 @@ arma::mat ittotmat0_C(const arma::vec& b, const arma::ivec& a, const arma::vec& 
  
 #pragma omp parallel
 	{ 
-		vec g(nscores), gi(nscores);
+		std::vector<long double> g(nscores), gi(nscores);
 		vec eta(npar);
 #pragma omp for	
 		for (int s = 0; s <= ms; s++)
@@ -227,7 +190,7 @@ void E_Hess(const vec& b, const ivec& a, const ivec& first, const ivec& last, in
 	
 	const ivec scoretab(ptr_scoretab, n_score, false, true);	  
 	  
-	std::vector<long double> g(mS+1, 0), gi(mS+1, 0), gk(mS+1, 0), gik(mS+1, 0);
+	std::vector<long double> g(mS+1), gi(mS+1), gk(mS+1), gik(mS+1);
 	
 	ElSym(b,a,first,last,i1,i2,nI,mS,g);
 
@@ -446,7 +409,7 @@ void NR_booklets(const arma::vec& b, const arma::ivec& a,
 
 // Bayesian calibration
 
-void elsym_helper(const vec& b, const ivec& a, int* ptr_first, int* ptr_last, const int item1, const int nI, const int mS, vec& g)
+void elsym_helper(const vec& b, const ivec& a, int* ptr_first, int* ptr_last, const int item1, const int nI, const int mS, std::vector<long double>& g)
 {
 	const ivec first(ptr_first, nI, false, true), last(ptr_last, nI, false, true);
 	
@@ -455,21 +418,23 @@ void elsym_helper(const vec& b, const ivec& a, int* ptr_first, int* ptr_last, co
 
 
 
-// for now assumes lambda out false, can be added later
-// fixed_b must be length b (i.e. what was b=NULL must now be b={NA,NA...}
-
 // [[Rcpp::export]]
-arma::mat calibrate_Bayes_C(const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, 
+Rcpp::List calibrate_Bayes_C(const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, 
 				 const arma::ivec& ib, const arma::ivec& bi, const arma::ivec& nbi, 
 				 const arma::ivec& nib,
 				 arma::ivec& bfirst, arma::ivec& blast,
-				 const arma::ivec& bnscore, const arma::ivec& m,
+				 const arma::ivec& bmax, const arma::ivec& m,
 				 const arma::ivec& sufI, const arma::ivec& bkscoretab,
-				 const arma::vec& b_in,  const arma::vec& fixed_b, const int nIter)
+				 const arma::vec& b_in,  const arma::vec& fixed_b, 
+				 const int from, const int step, const int ndraws,
+				 const double prior_eta=0.5,
+				 const double prior_rho=0.5,
+				 const int pgw=0)
 {
 
 	const bool free_calibration = all(fixed_b != fixed_b); // NA != NA
-
+	const int nIter = ndraws * step + from;
+	const int max_cat = max(last-first)+1;
 	// cumulatives for bookkeeping
 	const int nI = nbi.n_elem;
 	ivec cnbi(nI+1);
@@ -481,117 +446,129 @@ arma::mat calibrate_Bayes_C(const arma::ivec& a, const arma::ivec& first, const 
 	cnib(0) = 0;
 	cnib.tail(nB) = cumsum(nib);
 	
-	ivec cbnscore(nB+1);
-	cbnscore(0) = 0;	
-	cbnscore.tail(nB) = cumsum(bnscore);
+	ivec cbmax(nB+1);
+	cbmax[0] = 0;	
+	for(int k=0; k<nB; k++)
+		cbmax[k+1] = cbmax[k] + bmax[k]+1;
+	
 
-	const int max_bnscore = max(bnscore);
+	const int max_bscore = max(bmax);
 
 	// working variables
-	vec y(sufI.n_elem, fill::zeros), z(nB, fill::zeros);
-	vec bklambda(bkscoretab.n_elem, fill::ones);	
+	vec y(max_cat, fill::zeros), z(nB, fill::zeros);
+	vec bklambda(bkscoretab.n_elem, fill::ones);	// to do: fill 0 lijkt beter, onmogelijke scores?
+	mat bklambdax(ndraws, bkscoretab.n_elem);
 	
-	double f, tmp;	
-	int bkl;
-	vec g(max_bnscore);
-	vec fpwr(max_bnscore);
-	fpwr[0] = 1;
+	std::string pb(pgw+1, ' ');
+	
+	std::vector<long double> g(max_bscore+1);
+	vec pi_k(max_bscore+1, fill::zeros);
+	//vec fpwr(max_bscore+1);
+	//fpwr[0] = 1;
 	
 	// copy b
 	vec b(b_in.memptr(), b_in.n_elem);
+	mat bx(ndraws, b.n_elem);
 	
-	//output
-	mat bx(b.n_elem, nIter);
-	
-
+	//Gibbs
+	int row_index=0;
 	for (int iter=0; iter<nIter; iter++)
 	{
-		for (int bl=0; bl<nB; bl++)
+		for (int k=0; k<nB; k++)
 		{
+			elsym_helper(b,a, bfirst.memptr() + cnib[k], blast.memptr() + cnib[k], -1, nib[k], bmax[k], g);
 			
-			// data augmentation
-			elsym_helper(b,a, bfirst.memptr() + cnib[bl], blast.memptr() + cnib[bl], -1, nib[bl], bnscore[bl]-1, g);
-			z[bl] = R::rgamma(m[bl], 1.0/accu(g.subvec(0, bnscore[bl]-1) % bklambda.subvec(cbnscore[bl], cbnscore[bl+1]-1)));
+			long double sm = 0;
+			for (int s=0; s<=bmax[k];s++)
+			{
+			  if (g[s]>0){
+			    pi_k[s] = R::rgamma(bkscoretab[cbmax[k]+s]+0.1, 1.0);
+			    sm += pi_k[s];
+			  }
+			}
 			
-			// update lambda
-			for(int i=0; i<bnscore[bl];i++)
-				bklambda[cbnscore[bl] + i] = (g[i]>0) ? R::rgamma(bkscoretab[cbnscore[bl] + i] + 0.1, 1.0/(g[i]*z[bl])) : 0;
-
-			// scale lambda such that g*lambda~scoretab
-			tmp = accu(g.subvec(0, bnscore[bl]-1) % bklambda.subvec(cbnscore[bl], cbnscore[bl+1]-1));
-			for(int i=0; i<bnscore[bl];i++)
-				if(g[i]>0)
-					bklambda[cbnscore[bl] + i] = m[bl] * bklambda[cbnscore[bl] + i]/tmp; 
-
-			z[bl] = R::rgamma(m[bl], 1.0/accu(g.subvec(0, bnscore[bl]-1) % bklambda.subvec(cbnscore[bl], cbnscore[bl+1]-1)));
+			for (int s=0; s<=bmax[k];s++)
+			{
+			  if(g[s]>0)
+			  {
+			    pi_k[s] = pi_k[s]/sm;
+			    bklambda[cbmax[k]+s] = (pi_k[s]*m[k])/g[s];
+			  }
+			}
+			
+			z[k] = R::rgamma(m[k], 1.0/m[k]);
+			
 		}
 		// bayes_items
-		for(int i=0; i<nI;i++)
+		for (int i=0; i<nI;i++)
 		{
-			y.subvec(first[i], last[i]).zeros();		
-			for(int ib_indx=cnbi[i]; ib_indx < cnbi[i+1]; ib_indx++)
+			y.zeros();
+			for (int ib_indx=cnbi[i]; ib_indx<cnbi[i+1]; ib_indx++)
 			{
-				bkl = ib[ib_indx];
-				
-				g.zeros();
-				// need the number of the item in the present booklet				
-				elsym_helper(b,a, bfirst.memptr() + cnib[bkl], blast.memptr() + cnib[bkl], bi[ib_indx], nib[bkl], bnscore[bkl]-1, g);
-				
-				//first category
-				y[first[i]] += z[bkl] * accu(g.subvec(0, bnscore[bkl] - a[last[i]]-1) % bklambda.subvec(cbnscore[bkl], cbnscore[bkl+1] - a[last[i]]-1));
-				// middle categories, if any
-				for(int j=first[i]+1; j<last[i]; j++)
-				{			
-					y[j] += z[bkl] * accu(g.subvec(0, bnscore[bkl] - a[last[i]]-1) % bklambda.subvec(cbnscore[bkl]  + a[j], cbnscore[bkl+1] - a[last[i]] + a[j]-1));
-				}			
-				// last category (we assume each item has a zero score and at least one other score)
-				y[last[i]] += z[bkl] * accu(g.subvec(0, bnscore[bkl] - a[last[i]]-1) % bklambda.subvec(cbnscore[bkl]  + a[last[i]], cbnscore[bkl+1]-1));		
+				int k = ib[ib_indx];
+				elsym_helper(b, a, bfirst.memptr() + cnib[k], blast.memptr() + cnib[k], bi[ib_indx], nib[k], bmax[k], g);
+					
+				for (int s=0; s<=bmax[k]-a[last[i]]; s++)
+					for (int j=first[i]+1, c=0; j<=last[i]; j++,c++)
+						y[c] += z[k] * g[s] * bklambda[cbmax[k]+s+a[j]];			
 			}
-			
-			for(int j=first[i]; j<=last[i]; j++)
-				b[j] = R::rgamma(sufI[j] + 1.1, 1.0/y[j]);
-		}
 
-		// identify within items
-		for (int i=0; i<nI; i++)
-		{
-			for(int j=first[i]+1; j<=last[i]; j++)
-				b[j] /= b[first[i]];			
-			b[first[i]]=1;
+			for (int j=first[i]+1, c=0; j<=last[i]; j++,c++)
+				b[j] = R::rgamma(sufI[j] + prior_eta, 1/(y[c] + prior_rho));
 		}
+		
 
-    	// to do: differences in this last part don't seem to influence the outcome at all so not sure if correct, Timo to check the code
 		if (free_calibration)
 		{
-			f = b[1]; 
-			if(a[1] != 1)
-				for(int i=0; i<nI; i++)
-					for(int j = first[i]+1; j<= last[i]; j++)
-						b[j] /= pow(f, ((double)(a[j]))/a[1]);
+		  /*
+		  for(int i=0; i<nI; i++)
+		    for(int j = first[i]+1; j<= last[i]; j++)
+		      b[j] /= std::pow(b[1], ((double)(a[j]))/a[1]);
 
+			double log_ba = 0;
+			for(int i=0; i<nI; i++)
+				log_ba += std::log(b[last[i]])/a[last[i]];
+			double f = std::exp(log_ba/nI);
+	
+			for(int i=0; i<nI; i++)
+				for(int j = first[i]+1; j<= last[i]; j++)
+					b[j] /= f;
+		  
 			// Lambda
-			fpwr[1] = f;
-			for(int s=2; s < max_bnscore; s++)
-				fpwr[s] = fpwr[s-1] * f;
+			fpwr[1] = b[1];
+			for(int s=2; s <= max_bscore; s++)
+				fpwr[s] = fpwr[s-1] * b[1];
 			
-			for (int bl=0; bl<nB; bl++)
+			for (int k=0; k<nB; k++)
 			{	
-				bklambda.subvec(cbnscore[bl], cbnscore[bl+1]-1) %= fpwr.head(bnscore[bl]);
+				bklambda.subvec(cbmax[k], cbmax[k+1]-1) %= fpwr.head(bmax[k]+1);
 				
-				// to do ask Timo, I assume >0 works, R version has != 0 but that is a bit problematic in C
-				if (bklambda[cbnscore[bl]] > 0)
-					bklambda.subvec(cbnscore[bl], cbnscore[bl+1]-1) /= bklambda[cbnscore[bl]];
+				if (bklambda[cbmax[k]] > 0)
+					bklambda.subvec(cbmax[k], cbmax[k+1]-1) /= bklambda[cbmax[k]];
 			}
+		   */
 		}
 		else
 		{
 			b.elem(find_finite(fixed_b)) = fixed_b.elem(find_finite(fixed_b));
 		}
-		b.replace(datum::nan, 1); // deal with items that are not in data (this is currently impossible I think)
-		bx.col(iter) = b;
+		b.replace(datum::nan, 1); // na'tjes even gelaten, wil ze kunnen zien
+		if(iter >= from && (iter-from) % step == 0)
+		{
+			Rcpp::checkUserInterrupt();
+			bklambdax.row(row_index) = bklambda.t();
+			bx.row(row_index++) = b.t();
+			if(pgw>0)
+			{	
+				pb.replace((pgw * row_index) / ndraws, 1,  "=");
+				Rprintf("\r|%s| %3i%%", pb.c_str(), (100 * row_index) / ndraws);
+			}			
+		}
 	}
-	return bx.t();
+	return Rcpp::List::create(Rcpp::Named("b") = bx, Rcpp::Named("lambda") = bklambdax);
 }
+
+
 
 
 

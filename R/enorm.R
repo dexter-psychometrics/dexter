@@ -1,82 +1,6 @@
 
-# to do: reparametrization, delta in mirt for polytomous is different
-
-# mpar = lapply(cmirt, function(v)
-# {
-#   tibble(delta = -v[grepl("^d[^0]*$", colnames(v),perl=T)], item_score=1:length(delta))
-# }) %>%
-#   bind_rows(.id='item_id') %>%
-#   group_by(item_id) %>%
-#   mutate(delta = 2* delta - cumsum(delta)) %>%
-#   ungroup()
 
 
-# item_id, item_score, and b, eta of beta
-transform.df.parms = function(parms.df, out.format = c('b','beta','eta'), include.zero = TRUE)
-{
-  # start with many checks
-  out.format = match.arg(out.format)
-  colnames(parms.df) = tolower(colnames(parms.df))
-  
-  if('delta' %in% colnames(parms.df))
-    parms.df = rename(parms.df, beta = 'delta')
-  in.format = intersect(colnames(parms.df), c('b','beta','eta'))
-  
-  if(length(in.format) == 0)
-    stop('parameters must contain at least one of following columns: b, beta, eta')
-  
-  if(length(in.format)>1)
-  {
-    in.format = in.format[1]
-    message(paste0("Using '",in.format,"' as input parameter"))
-  }
-  
-  if(!all(c('item_id','item_score') %in% colnames(parms.df)))
-    stop('parameters must contain the columns: item_id, item_score')
-  
-  if(any(parms.df$item_score%%1 > 0))
-    stop("column 'item_score' must be integer valued")
-  
-  if(n_distinct(parms.df$item_id, parms.df$item_score) < nrow(parms.df))
-    stop('multiple parameters supplied for the same item and score')
-  
-  parms.df = parms.df %>% 
-    mutate(item_id = as.character(.data$item_id), item_score = as.integer(.data$item_score)) %>%
-    arrange(.data$item_id, .data$item_score)
-  
-  
-  mm = parms.df %>% 
-    group_by(.data$item_id) %>% 
-    summarise(min_score = min(.data$item_score), max_score = max(.data$item_score)) %>%
-    ungroup()
-  
-  in.zero = any(mm$min_score == 0)
-  
-  if(in.zero && any(mm$min_score) != 0)
-    stop("Either all items or none of the items should include a zero score parameter")
-  
-  if(any(mm$max_score == 0))
-    stop('All items should contain at least one non-zero score parameter')
-  
-  if(any(mm$min_score<0))
-    stop("Negative scores are not allowed")
-
-  if(in.format == 'b' && any(parms.df$b < 0))
-      stop("A 'b' parameter cannot be negative, perhaps you meant to include a 'beta' parameter?")
-  
-  fl = parms.df %>%
-    mutate(rn = row_number()) %>%
-    group_by(.data$item_id) %>% 
-    summarize(first = as.integer(min(.data$rn)), last = as.integer(max(.data$rn))) %>%
-    ungroup()
-  
-  args = list(first = fl$first, last = fl$last, parms.df = parms.df, 
-              out.zero = include.zero, in.zero = in.zero)
-  do.call(get(paste0(in.format,'2',out.format)), args)
-}
-
-
-# to do: print first 30 items without score variation, extremely annoying to get just a message
 
 ##########################################
 #' Fit the extended nominal response model
@@ -85,51 +9,71 @@ transform.df.parms = function(parms.df, out.format = c('b','beta','eta'), includ
 #' or a Gibbs sampler for Bayesian estimation.
 #'
 #'
-#' @param dataSrc Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score
+#' @param dataSrc a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score
 #' @param predicate An optional expression to subset data, if NULL all data is used
 #' @param fixed_params Optionally, a prms object from a previous analysis or 
-#' a data.frame with columns: item_id, item_score (omitting 0 score category) and beta. To facilitate the user in entering parameter values, we assume the parameterisation used by OPLM; in short, beta's are thresholds between categories. At this moment, it is not possible to fix some but not all categories of an item.
+#' a data.frame with parameters, see details.
 #' @param method If CML, the estimation method will be Conditional Maximum Likelihood;
 #' otherwise, a Gibbs sampler will be used to produce a sample from the posterior
 #' @param nIterations Number of Gibbs samples when estimation method is Bayes. The maximum 
 #' number of iterations when using CML.
-#' @param link_persons whether to merge different booklets administered to the same person, enabling linking over persons instead of just booklets.
+#' @param merge_within_persons whether to merge different booklets administered to the same person, enabling linking over persons as well as booklets.
 #' @return An object of type \code{prms}. The prms object can be cast to a data.frame of item parameters 
 #' using function `coef` or used directly as input for other Dexter functions.
+#' @details
+#' To support some flexibility in fixing parameters, fixed_params can be a dexter prms object of a data.frame.
+#' If a data.frame, it should contain the columns item_id, item_score and a difficulty parameter. Three types of parameters are supported:
+#' \describe{
+#' \item{delta/beta}{ thresholds between subsequent item categories }
+#' \item{eta}{item-category parameters} 
+#' \item{b}{exp(-eta)}
+#' }
+#' Each type corresponds to a different parametrization of the model. 
 #' 
 #' @references 
 #' Maris, G., Bechger, T.M. and San-Martin, E. (2015) A Gibbs sampler for the (extended) marginal Rasch model. 
 #' Psychometrika. 2015; 80(4): 859–879. 
 #' 
 #' @seealso functions that accept a prms object as input: \code{\link{ability}}, \code{\link{plausible_values}}, 
-#' \code{\link{plot.prms}}
+#' \code{\link{plot.prms}}, and \code{\link{plausible_scores}}
 #'
 fit_enorm = function(dataSrc, predicate = NULL, fixed_params = NULL, method=c("CML", "Bayes"), 
-                     nIterations=500, link_persons=FALSE)
+                     nIterations=1000, merge_within_persons=FALSE)
 {
   method = match.arg(method)
   check_dataSrc(dataSrc)
   check_num(nIterations, 'integer', .length=1, .min=1)
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
+ 
+  
+  
   fit_enorm_(dataSrc, qtpredicate = qtpredicate, fixed_params = fixed_params, 
-             method=method, nIterations=nIterations, env=env, link_persons=link_persons)
+             method=method, nIterations=nIterations, env=env, merge_within_persons=merge_within_persons)
 }
 
 
 fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c("CML", "Bayes"), 
-                      nIterations=500, env=NULL, link_persons=FALSE) 
+                      nIterations=500, env=NULL, merge_within_persons=FALSE,progress = show_progress()) 
 {
   method = match.arg(method)
   if(is.null(env)) env = caller_env()
   
+  
+  
+  if(progress) pg_start()
+  if(progress && is_db(dataSrc))
+    cat(' retrieving data...')
+  
   respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, env=env, retain_person_id=FALSE,
-                           merge_within_person = link_persons)
+                           merge_within_persons = merge_within_persons)
+  
+  if(progress && is_db(dataSrc))
+    cat('\r                          \r|')
   
   design = respData$design
-  if(nrow(respData$x) == 0) stop('no data to analyse')
   
-  # to do: I think we need tests with at least three items, fischer criterium
+  # to~do: I think we need tests with at least three items, fischer criterium
   if(nrow(design) == 1) 
     stop('There are responses to only one item in your selection, this cannot be calibrated.') 
   
@@ -140,12 +84,7 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
   ssIS = ss$ssIS
   plt = ss$plt
   
-  # to do: this should be tested in get_resp_data, it can really mess up the c code
-  if(min(ssIS$item_score)<0)
-    stop("item_scores must be positive numbers")
-  
   # bug in dplyr, min/max of integer in group_by becomes double
-  # to do: check where min/max is used elsewhere
   ssI  = ssIS %>% 
     mutate(rn = row_number()) %>%
     group_by(.data$item_id) %>%
@@ -154,7 +93,19 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
     arrange(.data$item_id)
   
   if(any(ssI$first == ssI$last)) 
-    stop('One or more items are without score variation') # to do, show which
+  {
+  	message('Items without score variation:')
+  	print(as.character(ssI$item_id[ssI$first == ssI$last]))
+  	stop('One or more items are without score variation')
+  }
+  if(any(ssIS$item_score[ssI$first] !=0))
+  {
+    # to do: check in interaction model
+    message('Items without a zero score category')
+    print(as.character(ssI$item_id[ssIS$item_score[ssI$first] !=0]))
+    stop('Minimum score for an item must be zero')
+  }
+  
   
   design = design %>%
     inner_join(ssI,by='item_id') %>%
@@ -177,20 +128,16 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
     do({tibble(booklet_score=0:.$maxTotScore)}) %>%
     ungroup()
   
-# to do: check if this is efficient for e.g. stex
   scoretab = plt %>%
     distinct(.data$booklet_id, .data$booklet_score,.data$N) %>%
     right_join(all_scores, by=c('booklet_id','booklet_score')) %>%
     mutate(N=coalesce(.data$N, 0L)) %>%
     arrange(.data$booklet_id, .data$booklet_score)
 
-  #to do: temp check, when this fails it is likely to be the merge over person problem (see stex data)
-  if(nrow(all_scores)!=nrow(scoretab))
-    stop("mistake in scoretab")
-  
+
   fixed_b = NULL
   has_fixed_parms = !is.null(fixed_params)
-  # to do: factors and bayes: warnings?
+
   ## deal with fixed parameters
   if(has_fixed_parms)
   {
@@ -208,7 +155,7 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
       fixed_params = transform.df.parms(fixed_params, out.format = 'b', include.zero = TRUE) 
     }  
     # avoid factor warnings and reduce
-    fixed_params$item_id = ffactor(fixed_params$item_id, levels=levels(design$item_id))
+    fixed_params$item_id = ffactor(as.character(fixed_params$item_id), levels=levels(design$item_id))
     fixed_params = filter(fixed_params,!is.na(.data$item_id)) 
     
     # check for missing categories in fixed_params, necessary?
@@ -234,7 +181,6 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
       arrange(.data$item_id,.data$item_score) %>%
       pull(.data$b)
     
-    # to do: this test fails for some reason
     if(!anyNA(fixed_b)) stop('nothing to calibrate, all parameters are fixed')
   }
   
@@ -245,7 +191,6 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
   } else 
   {
     result = calibrate_Bayes(scoretab=scoretab, design=design, sufI=ssIS$sufI, a=ssIS$item_score,
-                              b=exp(runif(nrow(ssIS), -1, 1)), 
                               first=ssI$first, last=ssI$last, nIter=nIterations, fixed_b=fixed_b)
   }
   
@@ -269,7 +214,7 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
 
 
 
-# to do: is there a better plot for calibrate bayes?
+# to~do: is there a better plot for calibrate bayes?
 #' Plot for the extended nominal Response model
 #' 
 #' The plot shows 'fit' by comparing the expected score based on the model (grey line)
@@ -278,40 +223,88 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
 #' 
 #' @param x object produced by fit_enorm
 #' @param item_id which item to plot, if NULL, one plot for each item is made
+#' @param dataSrc data source, see details
+#' @param predicate an expression to subset data in dataSrc
 #' @param nbins number of ability groups
 #' @param ci confidence interval for the error bars, between 0 and 1. 0 means no error bars.
 #' Default = 0.95 for a 95\% confidence interval
 #' @param ... further arguments to plot
 #' 
+#' @details
+#' The standard plot shows the fit against the sample on which the parameters were fitted. If
+#' dataSrc is provided, the fit is shown against the observed data in dataSrc. This may be useful 
+#' for plotting the fit in different subgroups as a visual test for item level DIF.
+#' 
 #' @method plot prms
 #' 
-# to do: make item_id everywhere, r's partial match will take care of `item`
-plot.prms = function(x,item_id=NULL, nbins=5, ci = .95, ...)
+plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci = .95, ...)
 {
-  if(is.null(x$inputs$plt))
-  {
-    if(inherits(x,'mst_enorm')) stop('Sorry, the plot method for enorm_mst will only be supported in dexterMST from version 0.1.1 onwards')
-    stop('Sorry, the plot method is only available for parameter objects produced with dexter 0.8.1 or later')
-  }
   check_num(nbins,'integer',.length=1, .min=2)
+  dots = list(...)
   
-  # if no item id provided plot them all
-  if(is.null(item_id))
-    item_id = x$inputs$ssI$item_id
 
-  # this was implemented back when ability_tables mle was kind of slow
-  # to do: can be removed in time (~jan 2020), plt can also be pre-processed to include theta
-  # remove infinite, et.c
-  if(is.null(x$abl_tables$mle))
-    x$abl_tables$mle = ability_tables(x, standard_errors=FALSE, method='MLE')
+  if(is.null(item_id))
+  {
+    if('items' %in% names(dots))
+    {
+      # common typo
+      item_id = dots$items
+      dots$items = NULL
+    } else
+    {
+      item_id = x$inputs$ssI$item_id
+    }
+  }
+  if(length(setdiff(item_id,x$inputs$ssI$item_id))>0)
+  {
+    message('The following items were not found in your parameters')
+    print(setdiff(setdiff(item_id,x$inputs$ssI$item_id)))
+    stop('unknown item',call.=FALSE)
+  }
+
+  if(!is.null(dataSrc))
+  {
+    check_dataSrc(dataSrc)
+    qtpredicate = eval(substitute(quote(predicate)))
+    env = caller_env()
+    respData = get_resp_data(dataSrc, qtpredicate, env=env, retain_person_id=FALSE,
+                             parms_check=filter(x$inputs$ssIS, .data$item_id %in% local(item_id)))
+    
+    if(length(setdiff(as.character(item_id), levels(respData$design$item_id)))>0)
+    {
+      message('The following items were not found in dataSrc')
+      print(setdiff(as.character(item_id), levels(x$design$item_id)))
+      stop('unknown item',call.=FALSE)
+    }
+    
+    x$abl_tables = list() # in dexmst it was briefly an environment
+    
+	  x$abl_tables$mle = suppressWarnings({inner_join(respData$design,x$inputs$ssI,by='item_id')}) %>%
+      group_by(.data$booklet_id) %>%
+      do({
+        est = theta_MLE(x$est$b, a=x$inputs$ssIS$item_score, .$first, .$last, se=FALSE)
+        theta = est$theta[2:(length(est$theta)-1)]
+        tibble(booklet_score=1:length(theta), theta = theta)
+      }) %>%
+      ungroup() 
+    
+    x$inputs$plt = get_sufStats_nrm(respData)$plt
+  }
   
+  #old dexterMST
+  if(is.null(x$abl_tables$mle))
+  {
+    x$abl_tables$mle = ability_tables(x,method='MLE', standard_errors=FALSE) %>%
+      filter(is.finite(.data$theta))
+  }
+  #many plots
   if(length(item_id) > 1)
   {
     return(invisible(
-      lapply(item_id, function(itm) plot(x, itm, nbins=nbins, ci=ci, ...))))
+      lapply(item_id, function(itm) do.call(plot, append(list(x=x, item_id=itm, nbins=nbins, ci=ci), dots)))))
   }
   # for dplyr
-  item_id_ = item_id
+  item_id_ = as.character(item_id)
   
   expf = expected_score(x, items = item_id)
 
@@ -323,7 +316,6 @@ plot.prms = function(x,item_id=NULL, nbins=5, ci = .95, ...)
   plt = x$inputs$plt %>%
     filter(.data$item_id==item_id_) %>%
     inner_join(x$abl_tables$mle, by=c('booklet_id','booklet_score')) %>%
-    filter(is.finite(.data$theta)) %>%
     mutate(abgroup = weighted_ntile(.data$theta, .data$N, n = nbins)) %>%
     group_by(.data$abgroup) %>%
     summarize(gr_theta = weighted.mean(.data$theta,.data$N), avg_score = weighted.mean(.data$meanScore,.data$N), n=sum(.data$N)) %>%
@@ -334,7 +326,7 @@ plot.prms = function(x,item_id=NULL, nbins=5, ci = .95, ...)
   rng = c(min(plt$gr_theta)-.5*rng/nbins,
           max(plt$gr_theta)+.5*rng/nbins)
   
-  plot.args = merge_arglists(list(...),
+  plot.args = merge_arglists(dots,
                              default=list(bty='l',xlab = expression(theta), ylab='score',main=item_id),
                              override=list(x = rng,y = c(0,max_score), type="n"))
   
@@ -371,7 +363,7 @@ plot.prms = function(x,item_id=NULL, nbins=5, ci = .95, ...)
   
   lines(plt$gr_theta,plt$avg_score)  
   points(plt$gr_theta, plt$avg_score, bg = if_else(plt$outlier, qcolors(1), 'transparent'), pch=21)
-  invisible(plt)
+  invisible(df_format(plt))
 }
 
 
@@ -395,7 +387,7 @@ print.prms = function(x, ...){
 #' extract enorm item parameters
 #' 
 #' @param object an enorm parameters object, generated by the function \code{\link{fit_enorm}}
-#' @param bayes_hpd_b width of Bayesian highest posterior density interval around mean_beta, 
+#' @param hpd width of Bayesian highest posterior density interval around mean_beta, 
 #'  value must be between 0 and 1, default is 0.95 
 #' @param ... further arguments to coef are ignored
 #'  
@@ -408,25 +400,9 @@ print.prms = function(x, ...){
 #' 
 #' 
 #' 
-coef.prms = function(object, bayes_hpd_b = 0.95, ...)
+coef.prms = function(object, hpd = 0.95, ...)
 {
-
-  
-  if(bayes_hpd_b <= 0 ||  bayes_hpd_b >= 1)
-    stop('args$bayes_hpd_b must be between 0 and 1')
-  
   x = object
-  
-  hpd=function(x, conf=bayes_hpd_b){
-    conf <- min(conf, 1-conf)
-    n <- length(x)
-    nn <- round( n*conf )
-    x <- sort(x)
-    xx <- x[ (n-nn+1):n ] - x[1:nn]
-    m <- min(xx)
-    nnn <- which(xx==m)[1]
-    return(c(l=x[ nnn ],r=x[ n-nn+nnn ]))
-  }
   
   if (x$inputs$method=="CML")
   {
@@ -434,34 +410,34 @@ coef.prms = function(object, bayes_hpd_b = 0.95, ...)
                     item_score=as.integer(x$inputs$ssIS$item_score[-x$inputs$ssI$first]),
                     beta=x$est$beta,
                     SE_beta=sqrt(diag(x$est$acov.beta)),stringsAsFactors=FALSE)
-  }
-  
-  if (x$inputs$method=="Bayes"){
+  } else
+  {
+    if(hpd <= 0 ||  hpd >= 1)
+      stop('hpd must be between 0 and 1')
     
-    
-    hh = t(apply(x$est$beta,2,hpd))
+    hh = t(apply(x$est$beta,2,hpdens, conf=hpd))
     atab=data.frame(item_id = x$inputs$ssIS$item_id[-x$inputs$ssI$first],
                     a = x$inputs$ssIS$item_score[-x$inputs$ssI$first],
                     mb = colMeans(x$est$beta),
                     sdb = apply(x$est$beta, 2, sd),
                     hpdl = hh[,1], hpdr=hh[,2],stringsAsFactors=FALSE)
     colnames(atab)=c("item_id" ,"item_score", "mean_beta", "SD_beta", 
-                     sprintf("%i_hpd_b_left", round(100 * bayes_hpd_b)),
-                     sprintf("%i_hpd_b_right", round(100 * bayes_hpd_b)))
+                     sprintf("%i_hpd_b_left", round(100 * hpd)),
+                     sprintf("%i_hpd_b_right", round(100 * hpd)))
   }
   atab$item_id = as.character(atab$item_id)
   rownames(atab) = NULL
-  return(atab)
+  df_format(atab)
 }
 
 
 #' Functions of theta
 #' 
-#' returns information function, expected score function or score simulation function 
+#' returns information function, expected score function, score distribution, or score simulation function 
 #' for a single item, an arbitrary group of items or all items
 #' 
-#' @param parms object produced by fit_enorm or a data.frame with columns item_id, item_score and, 
-#' depending on parametrization, a column named beta/delta, eta or b
+#' @param parms object produced by \code{\link{fit_enorm}} or a data.frame with columns item_id, item_score and, 
+#' depending on parametrization, a column named either beta/delta, eta or b
 #' @param items vector of one or more item_id's. If NULL and booklet_id is also NULL, all items in parms are used
 #' @param booklet_id id of a single booklet (e.g. the test information function), if items is not NULL this is ignored
 #' @param which.draw the number of the random draw (only applicable if calibration method was Bayes). If NULL, the mean 
@@ -473,8 +449,10 @@ coef.prms = function(object, bayes_hpd_b = 0.95, ...)
 #' \item{expected_score}{an equal length vector with the expected score at each value of theta}
 #' \item{r_score}{a matrix with length(theta) rows and one column for each item containing simulated scores based on theta. 
 #' To obtain test scores, use rowSums on this matrix}
-#' \item{var_score}{conditional score variance}
+#' \item{p_score}{a matrix with length(theta) rows and one column for each possible sumscore containing the probability of 
+#' the score given theta}
 #' }
+#' 
 #' @examples
 #' 
 #' db = start_new_project(verbAggrRules,':memory:')
@@ -500,7 +478,7 @@ coef.prms = function(object, bayes_hpd_b = 0.95, ...)
 #' 
 #' par(new=TRUE)
 #' 
-#' plot(density(pv$PV1), col='green', axes=FALSE,xlab=NA, ylab=NA,main=NA)
+#' plot(density(pv$PV1), col='green', axes=FALSE, xlab=NA, ylab=NA, main=NA)
 #' axis(side=4)
 #' mtext(side = 4, line = 2.5, 'population density (green)')
 #' 
@@ -525,14 +503,14 @@ r_score = function(parms, items=NULL, booklet_id=NULL, which.draw=NULL)
 }
 
 #' @rdname information
-variance_score = function(parms, items=NULL, booklet_id=NULL, which.draw=NULL)
+p_score = function(parms, items=NULL, booklet_id=NULL, which.draw=NULL)
 {
-  theta_function(parms, items=items, booklet=booklet_id, which.draw=which.draw, what='variance')
+  theta_function(parms, items=items, booklet=booklet_id, which.draw=which.draw, what='pmf')
 }
 
 
 theta_function = function(parms, items=NULL, booklet=NULL, which.draw=NULL, 
-                          what=c('information','expected','sim', 'variance'))
+                          what=c('information','expected','sim','pmf'))
 {
   what = match.arg(what)
   
@@ -541,7 +519,7 @@ theta_function = function(parms, items=NULL, booklet=NULL, which.draw=NULL,
   
   if(inherits(parms,'data.frame'))
   {
-    out = transform.df.parms(parms,'b',TRUE)
+    out = transform.df.parms(parms,'b',include.zero=TRUE)
     a = out$item_score
     b = out$b
     
@@ -556,7 +534,6 @@ theta_function = function(parms, items=NULL, booklet=NULL, which.draw=NULL,
     
   } else if(inherits(parms,'prms'))
   {
-    # to do: check if mst needs adjustment for this to work
     a = parms$inputs$ssIS$item_score
     b = parms$est$b
     if(is.matrix(b))
@@ -648,30 +625,24 @@ theta_function = function(parms, items=NULL, booklet=NULL, which.draw=NULL,
       res = rscore_item(theta,b=b,a=a,first = fl$first, last = fl$last)
       colnames(res) = fl$item_id
       res
-      
     }
     class(out) = append('sim_func',class(out))
-  } else if (what=="variance")
+  } else if(what=='pmf')
   {
-    max_score = sum(a[fl$last])
     out = function(theta)
     {
-      check_num(theta)
-      if(any(is.na(theta) | is.nan(theta))) 
-        stop('theta may not contain nan/NA values') 
-      
-      distr = pscore(theta,  b=b, a=a, first=fl$first, last=fl$last)
-      res = apply(distr, 2, function(x) sum((0:max_score)^2*x)-sum((0:max_score)*x)^2)
-      res
+      res = pscore(theta,b=b,a=a,first = fl$first, last = fl$last)
+      t(res)
     }
-    class(out) = append('var_func',class(out))
+    class(out) = append('pmf_func',class(out))
   }
   
   out
 }
 
-print.inf_func = function(x,...) cat('Information function I(theta)\n')
-print.exp_func = function(x,...) cat('Conditional expected score function E(X|theta)\n')
-print.sim_func = function(x,...)  cat('(x_i1, ..., x_in) ~ ENORM([theta])\n\tfunction (theta)\n')
-print.var_func = function(x,...) cat('Conditional score variance var(X|theta)\n')
+print.inf_func = function(x,...) cat('Information function: I(theta)\n')
+print.exp_func = function(x,...) cat('Conditional expected score function: E(X_i|theta)\n')
+print.sim_func = function(x,...) cat('function to simulate item scores: (x_i1, ..., x_ip) ~ ENORM(theta)\n')
+print.pmf_func = function(x,...) cat('Conditional score distribution function: P(x_+|theta)\n')
+
 

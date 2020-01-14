@@ -31,6 +31,56 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// ppoint
+std::string ppoint(SEXP x);
+RcppExport SEXP _dexter_ppoint(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(ppoint(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// fill_resp_matrix
+void fill_resp_matrix(const IntegerVector& person_id, const IntegerVector& item_id, const IntegerVector& item_score, arma::imat& out);
+RcppExport SEXP _dexter_fill_resp_matrix(SEXP person_idSEXP, SEXP item_idSEXP, SEXP item_scoreSEXP, SEXP outSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const IntegerVector& >::type person_id(person_idSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type item_id(item_idSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type item_score(item_scoreSEXP);
+    Rcpp::traits::input_parameter< arma::imat& >::type out(outSEXP);
+    fill_resp_matrix(person_id, item_id, item_score, out);
+    return R_NilValue;
+END_RCPP
+}
+// ds_connected_groups
+IntegerVector ds_connected_groups(const IntegerMatrix& a);
+RcppExport SEXP _dexter_ds_connected_groups(SEXP aSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const IntegerMatrix& >::type a(aSEXP);
+    rcpp_result_gen = Rcpp::wrap(ds_connected_groups(a));
+    return rcpp_result_gen;
+END_RCPP
+}
+// unequal_categories_C
+std::vector<int> unequal_categories_C(const IntegerVector& group_id, const IntegerVector& item_id, const IntegerVector& item_score, const int nit, const int max_score);
+RcppExport SEXP _dexter_unequal_categories_C(SEXP group_idSEXP, SEXP item_idSEXP, SEXP item_scoreSEXP, SEXP nitSEXP, SEXP max_scoreSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const IntegerVector& >::type group_id(group_idSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type item_id(item_idSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type item_score(item_scoreSEXP);
+    Rcpp::traits::input_parameter< const int >::type nit(nitSEXP);
+    Rcpp::traits::input_parameter< const int >::type max_score(max_scoreSEXP);
+    rcpp_result_gen = Rcpp::wrap(unequal_categories_C(group_id, item_id, item_score, nit, max_score));
+    return rcpp_result_gen;
+END_RCPP
+}
 // make_booklets
 List make_booklets(const IntegerVector& person_id, const IntegerVector& item_id, const IntegerVector& item_score, IntegerVector& booklet_id, IntegerVector& booklet_score, const bool merged);
 RcppExport SEXP _dexter_make_booklets(SEXP person_idSEXP, SEXP item_idSEXP, SEXP item_scoreSEXP, SEXP booklet_idSEXP, SEXP booklet_scoreSEXP, SEXP mergedSEXP) {
@@ -330,8 +380,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // calibrate_Bayes_C
-arma::mat calibrate_Bayes_C(const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const arma::ivec& ib, const arma::ivec& bi, const arma::ivec& nbi, const arma::ivec& nib, arma::ivec& bfirst, arma::ivec& blast, const arma::ivec& bnscore, const arma::ivec& m, const arma::ivec& sufI, const arma::ivec& bkscoretab, const arma::vec& b_in, const arma::vec& fixed_b, const int nIter);
-RcppExport SEXP _dexter_calibrate_Bayes_C(SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP ibSEXP, SEXP biSEXP, SEXP nbiSEXP, SEXP nibSEXP, SEXP bfirstSEXP, SEXP blastSEXP, SEXP bnscoreSEXP, SEXP mSEXP, SEXP sufISEXP, SEXP bkscoretabSEXP, SEXP b_inSEXP, SEXP fixed_bSEXP, SEXP nIterSEXP) {
+Rcpp::List calibrate_Bayes_C(const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const arma::ivec& ib, const arma::ivec& bi, const arma::ivec& nbi, const arma::ivec& nib, arma::ivec& bfirst, arma::ivec& blast, const arma::ivec& bmax, const arma::ivec& m, const arma::ivec& sufI, const arma::ivec& bkscoretab, const arma::vec& b_in, const arma::vec& fixed_b, const int from, const int step, const int ndraws, const double prior_eta, const double prior_rho, const int pgw);
+RcppExport SEXP _dexter_calibrate_Bayes_C(SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP ibSEXP, SEXP biSEXP, SEXP nbiSEXP, SEXP nibSEXP, SEXP bfirstSEXP, SEXP blastSEXP, SEXP bmaxSEXP, SEXP mSEXP, SEXP sufISEXP, SEXP bkscoretabSEXP, SEXP b_inSEXP, SEXP fixed_bSEXP, SEXP fromSEXP, SEXP stepSEXP, SEXP ndrawsSEXP, SEXP prior_etaSEXP, SEXP prior_rhoSEXP, SEXP pgwSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -344,14 +394,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::ivec& >::type nib(nibSEXP);
     Rcpp::traits::input_parameter< arma::ivec& >::type bfirst(bfirstSEXP);
     Rcpp::traits::input_parameter< arma::ivec& >::type blast(blastSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type bnscore(bnscoreSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type bmax(bmaxSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type m(mSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type sufI(sufISEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type bkscoretab(bkscoretabSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type b_in(b_inSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type fixed_b(fixed_bSEXP);
-    Rcpp::traits::input_parameter< const int >::type nIter(nIterSEXP);
-    rcpp_result_gen = Rcpp::wrap(calibrate_Bayes_C(a, first, last, ib, bi, nbi, nib, bfirst, blast, bnscore, m, sufI, bkscoretab, b_in, fixed_b, nIter));
+    Rcpp::traits::input_parameter< const int >::type from(fromSEXP);
+    Rcpp::traits::input_parameter< const int >::type step(stepSEXP);
+    Rcpp::traits::input_parameter< const int >::type ndraws(ndrawsSEXP);
+    Rcpp::traits::input_parameter< const double >::type prior_eta(prior_etaSEXP);
+    Rcpp::traits::input_parameter< const double >::type prior_rho(prior_rhoSEXP);
+    Rcpp::traits::input_parameter< const int >::type pgw(pgwSEXP);
+    rcpp_result_gen = Rcpp::wrap(calibrate_Bayes_C(a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, bkscoretab, b_in, fixed_b, from, step, ndraws, prior_eta, prior_rho, pgw));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -431,8 +486,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // ittotmat_C
-arma::mat ittotmat_C(const arma::vec& b, const arma::ivec& a, const arma::vec& c, const arma::ivec& first, const arma::ivec& last);
-RcppExport SEXP _dexter_ittotmat_C(SEXP bSEXP, SEXP aSEXP, SEXP cSEXP, SEXP firstSEXP, SEXP lastSEXP) {
+arma::mat ittotmat_C(const arma::vec& b, const arma::ivec& a, const arma::vec& c, const arma::ivec& first, const arma::ivec& last, const arma::ivec& ps);
+RcppExport SEXP _dexter_ittotmat_C(SEXP bSEXP, SEXP aSEXP, SEXP cSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP psSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -441,7 +496,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type c(cSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
-    rcpp_result_gen = Rcpp::wrap(ittotmat_C(b, a, c, first, last));
+    Rcpp::traits::input_parameter< const arma::ivec& >::type ps(psSEXP);
+    rcpp_result_gen = Rcpp::wrap(ittotmat_C(b, a, c, first, last, ps));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -541,6 +597,37 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// escore_wle
+double escore_wle(const double theta, const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const int nI, const int max_a);
+RcppExport SEXP _dexter_escore_wle(SEXP thetaSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP nISEXP, SEXP max_aSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const double >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
+    Rcpp::traits::input_parameter< const int >::type nI(nISEXP);
+    Rcpp::traits::input_parameter< const int >::type max_a(max_aSEXP);
+    rcpp_result_gen = Rcpp::wrap(escore_wle(theta, b, a, first, last, nI, max_a));
+    return rcpp_result_gen;
+END_RCPP
+}
+// theta_wle_sec
+arma::vec theta_wle_sec(const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last);
+RcppExport SEXP _dexter_theta_wle_sec(SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
+    rcpp_result_gen = Rcpp::wrap(theta_wle_sec(b, a, first, last));
+    return rcpp_result_gen;
+END_RCPP
+}
 // IJ_c
 void IJ_c(const arma::vec& theta, const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, arma::mat& I, arma::mat& J, arma::vec& logFi);
 RcppExport SEXP _dexter_IJ_c(SEXP thetaSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP ISEXP, SEXP JSEXP, SEXP logFiSEXP) {
@@ -577,10 +664,30 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// sampleIM
+arma::imat sampleIM(const arma::vec& bIM, const arma::vec& cIM, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const arma::ivec& scoretab);
+RcppExport SEXP _dexter_sampleIM(SEXP bIMSEXP, SEXP cIMSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP scoretabSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type bIM(bIMSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type cIM(cIMSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type scoretab(scoretabSEXP);
+    rcpp_result_gen = Rcpp::wrap(sampleIM(bIM, cIM, a, first, last, scoretab));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_dexter_fast_factor", (DL_FUNC) &_dexter_fast_factor, 2},
     {"_dexter_fast_factor_lev", (DL_FUNC) &_dexter_fast_factor_lev, 3},
+    {"_dexter_ppoint", (DL_FUNC) &_dexter_ppoint, 1},
+    {"_dexter_fill_resp_matrix", (DL_FUNC) &_dexter_fill_resp_matrix, 4},
+    {"_dexter_ds_connected_groups", (DL_FUNC) &_dexter_ds_connected_groups, 1},
+    {"_dexter_unequal_categories_C", (DL_FUNC) &_dexter_unequal_categories_C, 5},
     {"_dexter_make_booklets", (DL_FUNC) &_dexter_make_booklets, 6},
     {"_dexter_make_booklets_summed", (DL_FUNC) &_dexter_make_booklets_summed, 5},
     {"_dexter_make_booklets_summed_matrix", (DL_FUNC) &_dexter_make_booklets_summed_matrix, 3},
@@ -601,20 +708,23 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dexter_ittotmat0_C", (DL_FUNC) &_dexter_ittotmat0_C, 6},
     {"_dexter_E_booklets", (DL_FUNC) &_dexter_E_booklets, 7},
     {"_dexter_NR_booklets", (DL_FUNC) &_dexter_NR_booklets, 10},
-    {"_dexter_calibrate_Bayes_C", (DL_FUNC) &_dexter_calibrate_Bayes_C, 16},
+    {"_dexter_calibrate_Bayes_C", (DL_FUNC) &_dexter_calibrate_Bayes_C, 21},
     {"_dexter_H_im", (DL_FUNC) &_dexter_H_im, 12},
     {"_dexter_meanElSym", (DL_FUNC) &_dexter_meanElSym, 9},
     {"_dexter_E_booklets_mean", (DL_FUNC) &_dexter_E_booklets_mean, 7},
     {"_dexter_NR_booklets_mean", (DL_FUNC) &_dexter_NR_booklets_mean, 10},
-    {"_dexter_ittotmat_C", (DL_FUNC) &_dexter_ittotmat_C, 5},
+    {"_dexter_ittotmat_C", (DL_FUNC) &_dexter_ittotmat_C, 6},
     {"_dexter_ss_table_enorm_C", (DL_FUNC) &_dexter_ss_table_enorm_C, 8},
     {"_dexter_ss_table_im_C", (DL_FUNC) &_dexter_ss_table_im_C, 9},
     {"_dexter_sampleNRM2_test", (DL_FUNC) &_dexter_sampleNRM2_test, 5},
     {"_dexter_sampleNRM2_item", (DL_FUNC) &_dexter_sampleNRM2_item, 5},
     {"_dexter_Escore_C", (DL_FUNC) &_dexter_Escore_C, 5},
     {"_dexter_theta_mle_sec", (DL_FUNC) &_dexter_theta_mle_sec, 4},
+    {"_dexter_escore_wle", (DL_FUNC) &_dexter_escore_wle, 7},
+    {"_dexter_theta_wle_sec", (DL_FUNC) &_dexter_theta_wle_sec, 4},
     {"_dexter_IJ_c", (DL_FUNC) &_dexter_IJ_c, 8},
     {"_dexter_PVrecycle", (DL_FUNC) &_dexter_PVrecycle, 9},
+    {"_dexter_sampleIM", (DL_FUNC) &_dexter_sampleIM, 6},
     {NULL, NULL, 0}
 };
 

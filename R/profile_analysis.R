@@ -1,5 +1,5 @@
 
-# to do: example
+# to~do: example
 ##########################################
 #' Profile analysis
 #'
@@ -15,7 +15,7 @@
 #'  one of its column names. For profile_tables item_property must match a column name in \code{domains}.
 #' @param design data.frame with columns item_id and optionally booklet_id
 #' @param domains data.frame with column item_id and a column with name equal to \code{item_property} 
-#' 
+#' @param merge_within_persons whether to merge different booklets administered to the same person.
 #' @return 
 #' \describe{
 #' \item{profiles}{a data.frame with columns person_id, booklet_id, booklet_score, 
@@ -39,8 +39,8 @@
 #' 
 #' 
 #
-# to do: allow rim as parms
-profiles = function(dataSrc, parms, item_property, predicate=NULL)
+# to~do: allow rim as parms
+profiles = function(dataSrc, parms, item_property, predicate=NULL, merge_within_persons=FALSE)
 {
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
@@ -50,30 +50,20 @@ profiles = function(dataSrc, parms, item_property, predicate=NULL)
   check_string(item_property)
 
 
-  if(inherits(dataSrc, 'DBIconnection'))
+  if(is_db(dataSrc))
     item_property = dbValid_colnames(item_property)
   
-  # to do: is there an error if extra column is not available?
   respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, env=env, 
                            extra_columns = item_property, 
-                           parms_check=parms$inputs$ssIS[,c('item_id','item_score')])
+                           parms_check=parms$inputs$ssIS[,c('item_id','item_score')],
+                           merge_within_persons=merge_within_persons)
   
   if(!is.integer(respData$x[[item_property]]))
     respData$x[[item_property]] = ffactor(respData$x[[item_property]])
 
-  # check for valid item property
-  if(!inherits(dataSrc, 'DBIConnection') || !item_property %in% dbListFields(dataSrc,'dxitems'))
+  if(is_db(dataSrc) && item_property %in% dbListFields(dataSrc,'dxitems'))
   {
-    idom = distinct(respData$x, .data$item_id, .data[[item_property]])
-    
-    if(nrow(idom) > nrow(distinct(idom, .data$item_id)))
-      stop('Each item must have a unique item property')
-  } 
-  
-  
-  if(inherits(dataSrc,'DBIConnection'))
-  {
-    domains = dbGetQuery(dataSrc, paste("SELECT item_id,", item_property, "FROM dxItems;"))
+    domains = dbGetQuery(dataSrc, paste("SELECT item_id,", item_property, "FROM dxitems;"))
     domains$item_id = ffactor(domains$item_id, levels = levels(respData$x$item_id))
     domains = filter(domains, !is.na(.data$item_id))
     if(!is.integer(domains[[item_property]]))
@@ -89,7 +79,7 @@ profiles = function(dataSrc, parms, item_property, predicate=NULL)
   design = respData$design
   
   respData = respData %>%
-    polytomize(item_property, protect_x=!inherits(dataSrc,'DBIConnection')) 
+    polytomize(item_property, protect_x=!is_db(dataSrc)) 
   
   out = respData$x %>%
     inner_join(
@@ -98,7 +88,7 @@ profiles = function(dataSrc, parms, item_property, predicate=NULL)
                        item_property = item_property),
         by = c('booklet_id','booklet_score',item_id = item_property)) %>%
     mutate_if(is.factor, as.character) %>%
-    as.data.frame()
+    df_format()
   
   colnames(out)[colnames(out)=='item_id'] = item_property
   colnames(out)[colnames(out)=='item_score'] = 'domain_score'
@@ -122,7 +112,7 @@ profile_tables = function(parms, domains, item_property, design = NULL)
   {
     if(is.null(parms$inputs$design))
     {
-      # to do: check mst vignettes, if this is not used, better make it an error
+      #this is used in mst, so we keep it a warning instead of an error
       if(inherits(parms,'mst_enorm'))
         message('Computing non-mst profile_tables over an mst design, did you mean to use profile_tables_mst?')
       design = lapply(parms$inputs$bkList, function(bk) tibble(booklet_id=bk$booklet,item_id=bk$items)) %>% 
@@ -150,12 +140,10 @@ profile_tables = function(parms, domains, item_property, design = NULL)
   
   if(!'booklet_id' %in% colnames(design)) 
     design$booklet_id = 'all_items'
-  # to do: what if domains not a superset of design? empty property?
-  
 
   profile_tables_(parms, domains, item_property, design) %>%
     mutate_if(is.factor, as.character) %>%
-    as.data.frame()
+    df_format()
 }
 
 profile_tables_ = function(parms, domains, item_property, design)
@@ -163,6 +151,13 @@ profile_tables_ = function(parms, domains, item_property, design)
   
   if(!is.factor(domains$item_id))
     domains$item_id = ffactor(as.character(domains$item_id), levels = levels(design$item_id))
+  
+  if(length(setdiff(design$item_id, domains$item_id))>0)
+  {
+    message('items withou domains:')
+    print(as.character(setdiff(design$item_id, domains$item_id)))
+    stop('not all items in design are listed in domains')
+  }
   
   design = design %>% 
     select(.data$booklet_id, .data$item_id) %>%

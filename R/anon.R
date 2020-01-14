@@ -3,15 +3,14 @@
 # Computes likelihood and test information for internal use
 #
 # For a vector of thetas it returns:
-# l = a matrix (n of response cats * length of theta) of the likelihood or log-likelihood if log=TRUE
+# l = a matrix (nbr of response cats * length of theta) of the likelihood or log-likelihood if log=TRUE
 # I = a vector of the information function computed at each theta = sum(P'^2/PQ)
 # J = something sum(P'P"/PQ) 
 # The vector theta can be a set of quadrature points or 
 # estimates to compute their SE
 #
 # Note: can not deal with Inf or NA values in theta
-# to do: easily pararellisable over booklets, but is it worth the effort
-IJ_ = function(b,a,first, last, theta, log=FALSE)
+IJ_ = function(b, a, first, last, theta, log=FALSE)
 {
   nI = length(first)
   nT = length(theta)
@@ -21,9 +20,7 @@ IJ_ = function(b,a,first, last, theta, log=FALSE)
 
   a = as.integer(a)
   
-  
   IJ_c(theta, b, a, as.integer(first-1L), as.integer(last-1L), I, J,logFi)
-  # to do: check if dim logFi is changed
 
   scores = 0:sum(a[last])
   
@@ -102,7 +99,6 @@ pscore = function(theta, b, a, first, last)
   sweep(p,2,colSums(p),`/`)
 }
 
-
 # vector of 0,1 indicating if a score is possible. element 1 is score 0
 possible_scores = function(a, first, last)
   drop(possible_scores_C(as.integer(a), as.integer(first-1L), as.integer(last-1L)))
@@ -110,9 +106,7 @@ possible_scores = function(a, first, last)
 
 theta_MLE <- function(b,a,first,last, se=FALSE)
 {
-
   a = as.integer(a)
-
   theta = theta_mle_sec(b, a, as.integer(first-1L), as.integer(last-1L))[,1,drop=TRUE]
   
   sem = NULL
@@ -125,6 +119,25 @@ theta_MLE <- function(b,a,first,last, se=FALSE)
 
   return(list(theta = c(-Inf,theta,Inf), se=sem))
 }
+
+theta_WLE <- function(b,a,first,last, se=FALSE)
+{
+  a = as.integer(a)
+  theta = theta_wle_sec(b, a, as.integer(first-1L), as.integer(last-1L))[,1,drop=TRUE]
+  
+  sem = NULL
+  if (se)
+  {
+    # use r indexed first last for IJ
+    f = IJ_(b,a,first,last, theta)
+    sem =sqrt((f$I+(f$J/(2*f$I))^2)/f$I^2)
+  }
+  
+  return(list(theta = theta, se=sem))
+}
+
+
+
 
 ## EAP using Jeffrey's prior: aka propto sqrt(information)
 # Uses a weighted average to integrate over a grid defined by:
@@ -223,7 +236,7 @@ ittotmat0 = function(b,c,a,first,last,ps)
 #                 P(X^A_+=s_a, X^B_+=s_b|X_+=s) where s=s_a+s_b
 # @details        NA's indicate that a total scores was not possible given the weights
 # if cIM is not null, the interaction model will be used
-SSTable = function(b,a,first,last, AB,  cIM=NULL)
+SSTable = function(b, a, first, last, AB, cIM=NULL)
 {
   design = tibble(first = as.integer(first - 1L),
                   last = as.integer(last - 1L),
@@ -253,45 +266,43 @@ SSTable = function(b,a,first,last, AB,  cIM=NULL)
   }
 }
 
-
-
+# Polynomial smoothing of the log-lambda's
+smooth_log_lambda = function(log_lambda, degree, robust=TRUE)
+{
+  score_range = 0:(length(log_lambda)-1)
+  degree = min(degree, sum(!is.na(log_lambda)))
+  if (robust){
+    qr = lmsreg(log_lambda ~ poly(score_range, degree, raw=TRUE))
+  }else
+  {
+    qr = lm(log_lambda ~ poly(score_range, degree, raw=TRUE))
+  }
+  predict(qr, new=data.frame(score_range))
+}
 
 
 ## Get the score distribution of a booklet from fit_enorm
-#  If also gives you a smooth version based on a polynomial smoothing
-#  of the log-lambda's
-#  only for CML
-ENORM2ScoreDist <- function (b,a,lambda, first,last, scoretab, degree=7) 
+#  based on a polynomial smoothing of the log-lambda's
+#  Currently only implemented for CML
+# TO DO: Implement for Bayes.
+# Check e.g., plot(0:48,log(lambda),col="green"); lines(0:48,log_l_pr)
+# coeficients beta = as.numeric(qr$coefficients)[-1]
+# n.obs is the exact observed score distributions if CML
+ENORM2ScoreDist <- function(b, a, lambda, first, last, degree=2) 
 {
-  mx = sum(a[last])
-  score_range = 0:mx
   
-  log_l = log(lambda)
-  
-  degree = min(degree, sum(!is.na(log_l)))
-  qr = lm(log_l~poly(score_range, degree, raw=TRUE)) 
-  beta = as.numeric(qr$coefficients)[-1]
-  
-  lambda[is.na(lambda)]=0
+  log_l_pr = smooth_log_lambda(log(lambda), degree=degree)
+
   g = elsym(b,a,first,last)
-  sc_obs = vector("numeric", mx+1)
-  sc_sm = vector("numeric", mx+1)
-  num_obs = 0
-  num_sm = 0
-  for (s in 0:mx)
-  {
-    sc_obs[s+1] = g[s+1]*lambda[s+1]
-    sc_sm[s+1] = g[s+1]*exp(sum(beta*s^(1:degree)))
-    num_obs = num_obs+sc_obs[s+1]
-    num_sm = num_sm+sc_sm[s+1]
-  }
-  sc_obs = sc_obs/num_obs
-  sc_sm = sc_sm/num_sm
-  data.frame(score=score_range,
-             n.obs=sc_obs*sum(scoretab), 
-             n.smooth=sc_sm*sum(scoretab),
-             p.obs=sc_obs,
-             p.smooth=sc_sm)
+  lambda[is.na(lambda)] = 0
+  sc_obs = g*lambda
+  sc_sm = g*exp(log_l_pr)
+  
+  data.frame(score    = 0:sum(a[last]),
+             n.obs    = sc_obs, 
+             n.smooth = sc_sm,
+             p.obs    = sc_obs/sum(sc_obs),
+             p.smooth = sc_sm/sum(sc_sm))
 }
 
 

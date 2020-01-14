@@ -1,20 +1,54 @@
+# dexter 1.0.3
+
+* fixed bug that caused warnings in vignette compilation on apple computers
+
+* remove unit tests for Solaris as we have no way to test on solaris ourselves, in effect this means solaris is not supported anymore.
+
+# dexter 1.0.2
+
+* solved bug: accidental change of input data.frame in ability
+
+* solved bug: unnecessary error message when input parameters are data.frame
+
+# dexter 1.0.1
+
+* weighted likelihood estimate option in `ability()` and `ability_tables()`
+
+* added function `r_score_IM()` for simulation of item responses according to the interaction model
+
+* added function p_score which provides conditional score distributions
+
+* ability, plausible_values and plausible_scores accept a tidy data.frame of parameters
+
+* it is now possible to use `get()` in predicates
+
+* bugfix for mixed up plots in the interaction model when using a matrix dataSrc
+
+* bugfix: reinstated check for unobserved zero score categories in fit_enorm (check was accidentally removed in 1.0)
+
+* bugfix: uppercase letters in variable names in profile_plot work again
+
+
+
 # dexter 1.0.0
 
 ## Breaking changes
 
-* the interface for the standard setting functions has changed, these functions have new names and different arguments
+* the interfaces for the standard setting functions have changed, these functions have new names and different arguments
+
+* the interface for probability_to_pass has changed
 
 * the name of the column 'sumScore', outputted by a number of functions, has changed to 'booklet_score'
 
 ## other changes
 
-* in addition to a database or a long format data.frame, dataSrc may now also be a wide format data matrix 
+* dataSrc may now also be a wide format data matrix (in addition to a database or a long format data.frame)
 
-* fit_enorm, ability and plausible_values have an extra argument 'merge_booklets' (to do: temp name) which determines if a link over persons is used
+* fit_enorm, ability and plausible_values have an extra argument 'merge_within_persons' which determines if different booklets for the same person are combined
 
-* plausible_values accepts a normal or a mixture prior
+* plausible_values can use a normal or a mixture prior
 
-* the dependency on dbplyr has been removed. This again allows the use of data.frame columns in predicates (since dbplyr 1.4, this caused error messages)
+* the dependency on dbplyr has been removed. This again allows the use of data.frame columns in predicates (this caused error messages when using dbplyr 1.4+)
 
 * generally faster due to the excellent Rcpp and RcppArmadillo packages
 

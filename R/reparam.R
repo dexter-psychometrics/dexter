@@ -1,3 +1,161 @@
+
+# returns a simplified parms object mainly useful for person ability estimation
+# parms can be enorm prms or a parms object
+#
+# returns list: a, b, design (including first and last), items(including first and last)
+simplify_parms = function(parms, design=NULL, use_draw=NULL, collapse_b=FALSE)
+{
+  if(!is.null(design) && !('booklet_id' %in% colnames(design)))
+    design = mutate(design, booklet_id='all_items')
+  
+  check_df(design, 'item_id', nullable=TRUE)
+  if(inherits(parms, 'mst_enorm') && !'design' %in% names(parms$inputs))
+  {
+    if(is.null(design))
+      design = lapply(parms$inputs$bkList,function(bk) tibble(item_id=bk$items)) %>%
+        bind_rows(.id='booklet_id')
+    
+    parms = coef(parms)
+  }
+  
+  if(inherits(parms,'prms'))
+  {
+    a = parms$inputs$ssIS$item_score
+    if(parms$inputs$method=="CML"){
+      b = parms$est$b
+    } else if(!is.null(use_draw)) 
+    {
+      b = parms$est$b[min(nrow(parms$est$b),use_draw),]	
+    } else if(collapse_b)
+    {
+      b = colMeans(parms$est$b)  
+    } else 
+    {
+      b = parms$est$b
+    } 
+    if(is.null(design))
+    {
+      design = parms$inputs$design
+    } else
+    {
+      old_itm = design$item_id
+      design$item_id = ffactor(as.character(design$item_id), levels=parms$inputs$ssI$item_id)
+      if(anyNA(design$item_id))
+      {
+        message("the following item_id's in the data or design are not present in your parameters")
+        print(setdiff(as.character(old_itm), levels(parms$inputs$ssI$item_id)))
+        stop('items without parameters') 
+      }
+      design = inner_join(design, parms$inputs$ssI[,c('item_id','first','last')], by='item_id')
+    }
+  } else
+  {
+    parms = transform.df.parms(parms,'b',include.zero=TRUE)
+    parms$item_id = ffactor(as.character(parms$item_id))
+    a = parms$item_score
+    b = parms$b
+    
+    fl = parms %>%
+      mutate(rn=row_number()) %>%
+      group_by(.data$item_id) %>%
+      summarise(first=as.integer(min(.data$rn)), last=as.integer(max(.data$rn))) %>%
+      ungroup() 
+    
+    if(is.null(design))
+    {
+      design = mutate(fl, booklet_id='all_items')
+    } else
+    {
+      old_itm = design$item_id
+      design$item_id = ffactor(as.character(design$item_id), levels=levels(parms$item_id))
+      if(anyNA(design$item_id))
+      {
+        message("the following item_id's in the data or design are not present in your parameters")
+        print(setdiff(as.character(old_itm), levels(parms$item_id)))
+        stop('items without parameters') 
+      }
+      design = inner_join(design, fl, by='item_id')
+    }
+  }
+  
+  list(a=a,b=b,design=design)
+}
+
+
+
+# parms.df 
+# data.frame with columns item_id, item_score, and one of b, eta, beta/delta
+# it is assumed that parms.df comes from user, so includes checks
+#
+# returns data.frame in requested parametrization
+#
+transform.df.parms = function(parms.df, out.format = c('b','beta','eta'), include.zero = TRUE)
+{
+  # start with many checks
+  out.format = match.arg(out.format)
+  colnames(parms.df) = tolower(colnames(parms.df))
+  
+  if('delta' %in% colnames(parms.df))
+    parms.df = rename(parms.df, beta = 'delta')
+  in.format = intersect(colnames(parms.df), c('b','beta','eta'))
+  
+  if(length(in.format) == 0)
+    stop('parameters must contain  one of: b, beta, eta')
+  
+  if(length(in.format)>1)
+  {
+    in.format = in.format[1]
+    message(paste0("Using '",in.format,"' as input parameter"))
+  }
+  
+  if(!all(c('item_id','item_score') %in% colnames(parms.df)))
+    stop('parameters must contain the columns: item_id, item_score')
+  
+  if(any(parms.df$item_score%%1 > 0))
+    stop("column 'item_score' must be integer valued")
+  
+  if(n_distinct(parms.df$item_id, parms.df$item_score) < nrow(parms.df))
+    stop('multiple parameters supplied for the same item and score')
+  
+  parms.df = parms.df %>% 
+    mutate(item_id = as.character(.data$item_id), item_score = as.integer(.data$item_score)) %>%
+    arrange(.data$item_id, .data$item_score)
+  
+  
+  mm = parms.df %>% 
+    group_by(.data$item_id) %>% 
+    summarise(min_score = min(.data$item_score), max_score = max(.data$item_score)) %>%
+    ungroup()
+  
+  in.zero = any(mm$min_score == 0)
+  
+  if(in.zero && any(mm$min_score) != 0)
+    stop("Either all items or none of the items should include a zero score parameter")
+  
+  if(any(mm$max_score == 0))
+    stop('All items should contain at least one non-zero score parameter')
+  
+  if(any(mm$min_score<0))
+    stop("Negative scores are not allowed")
+  
+  if(in.format == 'b' && any(parms.df$b < 0))
+    stop("A 'b' parameter cannot be negative, perhaps you meant to include a 'beta' parameter?")
+  
+  fl = parms.df %>%
+    mutate(rn = row_number()) %>%
+    group_by(.data$item_id) %>% 
+    summarize(first = as.integer(min(.data$rn)), last = as.integer(max(.data$rn))) %>%
+    ungroup()
+  
+  args = list(first = fl$first, last = fl$last, parms.df = parms.df, 
+              out.zero = include.zero, in.zero = in.zero)
+  do.call(get(paste0(in.format,'2',out.format)), args)[,c('item_id','item_score',out.format)] %>%
+    arrange(.data$item_id)
+}
+
+
+
+
 #######################################################################
 ## Some functions to transform from one parameterization/Normalization to the other
 #######################################################################
@@ -134,7 +292,8 @@ b2eta_ <-function(a,b,first,last)
 
 ### Change parameterization and normalization to produce OPCML output
 ## assumes that the first parameter is the reference unless there are fixed parameters
-toOPLM = function(a, b, first, last, H=NULL, fixed_b=NULL)
+# TO DO: TB. Aanpassen zodat ook lambda wordt ge-renormaliseerd.
+toOPLM = function(a, b, first, last, H=NULL, fixed_b=NULL, lambda=NULL)
 {
   b_rn = b
   a_org = a

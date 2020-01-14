@@ -2,15 +2,18 @@
 % Please edit documentation in R/resp_data.R
 \name{get_resp_data}
 \alias{get_resp_data}
+\alias{get_resp_matrix}
 \title{Functions for developers}
 \usage{
 get_resp_data(dataSrc, qtpredicate = NULL, extra_columns = NULL,
   summarised = FALSE, env = NULL, protect_x = TRUE,
-  retain_person_id = TRUE, merge_within_person = FALSE,
+  retain_person_id = TRUE, merge_within_persons = FALSE,
   parms_check = NULL)
+
+get_resp_matrix(dataSrc, qtpredicate = NULL, env = NULL)
 }
 \arguments{
-\item{dataSrc}{data.frame, numeric matrix, dexter database or `dx_resp_data` object}
+\item{dataSrc}{data.frame, integer matrix, dexter database or `dx_resp_data` object}
 
 \item{qtpredicate}{quoted predicate}
 
@@ -24,27 +27,31 @@ get_resp_data(dataSrc, qtpredicate = NULL, extra_columns = NULL,
 
 \item{retain_person_id}{whether to retain the original person_id levels or just use arbitrary integers}
 
-\item{merge_within_person}{merge different booklets for the same person together}
+\item{merge_within_persons}{merge different booklets for the same person together}
 
 \item{parms_check}{data.frame of item_id, item_score to check for coverage of data}
 }
 \value{
-list of type `dx_resp_data` containing:
-when summarised=F
-  x: tibble(person_id, booklet_id, item_id, item_score, booklet_score <, extra_columns>)
-when summarised=T
-  x: tibble(person_id, booklet_id, booklet_score <, extra_columns>)
+\describe{
+\item{get_resp_data}{ returns a list with class `dx_resp_data` with elements
+\describe{
+\item{x}{
+when summarised is FALSE, a tibble(person_id, booklet_id, item_id, item_score, booklet_score [, extra_columns>]), sorted in such a way that
+  all rows pertaining to the same person-booklet are together
+  
+when summarised is TRUE, a tibble(person_id, booklet_id, booklet_score [, extra_columns])}
+\item{design}{
+  tibble(booklet_id, item_id), sorted
+  }}}
 
-design: tibble(booklet_id, item_id), sorted
+\item{get_resp_matrix}{returns a matrix of item scores as commonly used in other IRT packages, facilitating
+easy connection of your own package to the data management capabilities of dexter}
+}
 }
 \description{
-Regular users are advised not to use these functions.
-as incorrect use can easily crash your R-session or lead to unexpected results.
-}
-\details{
-These functions are meant for people wishing to develop their own models based
+These functions are meant for people who want to develop their own models based
 on the data management structure of dexter. Very little input checking is performed,
-the benefit is some extra speed over using regular dexter functions.
-
-Not all aspects of the interface are completely stable yet
+the benefit is some extra speed over using `get_responses`.
+Regular users are advised not to use these functions 
+as incorrect use can easily crash your R-session or lead to unexpected results.
 }

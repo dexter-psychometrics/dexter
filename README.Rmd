@@ -102,8 +102,6 @@ kable(head(pv))
 ```{r, include=FALSE}
 close_project(db)
 ```
-## Contributing
 
-Contributions are welcome but please check with us first about what you would like to contribute.
 
 

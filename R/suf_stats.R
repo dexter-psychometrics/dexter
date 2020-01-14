@@ -4,10 +4,12 @@
 get_sufStats_nrm = function(respData)
 {
   mx = max(respData$x$item_score)
+  if(is.na(mx))
+    stop('there is a problem with your response data or database')
   
   #if this happens to be more than the number of distinct items it does not matter much
   # do not use distinct(item_id), there may be gaps
-  nit = length(levels(respData$x$item_id)) 
+  nit = nlevels(respData$x$item_id)
   
   sufs = suf_stats_nrm(respData$x$booklet_id, respData$x$booklet_score, respData$x$item_id, respData$x$item_score,
                       nit, mx)
@@ -20,8 +22,8 @@ get_sufStats_nrm = function(respData)
 }
 
 
-# to do: unit test of this
-# # if the score 0 does not occur for an item, it is added with sufI=0 and sufC=0
+
+# 
 # ssIS = respData$x %>%
 #   group_by(.data$item_id, .data$item_score) %>%
 #   summarise(sufI=n(), sufC_ = sum(.data$item_score * .data$booklet_score)) %>%
@@ -35,6 +37,8 @@ get_sufStats_nrm = function(respData)
 #   summarise(meanScore = mean(.data$item_score), N = n()) %>%
 #   ungroup()
 
+# change in regard to above implementation is that zero scores are no longer added.
+# items without zero score category will now get an error in fit_inter
 get_sufStats_im = function(respData)
 {
   if(n_distinct(respData$design$booklet_id) != 1)
@@ -54,7 +58,7 @@ get_sufStats_im = function(respData)
   
   class(sufs$plt$item_id) = 'factor'
   levels(sufs$plt$item_id) = levels(respData$x$item_id)
-  # to do: mssing 0 score a problem?
+
   sufs
 }
 
@@ -74,6 +78,7 @@ get_sufStats_im = function(respData)
 
 get_sufStats_tia = function(respData)
 {
+  # take length of levels as protection for out of range indexing
   nb = length(levels(respData$design$booklet_id))
   nit = length(levels(respData$design$item_id))
   
@@ -90,3 +95,20 @@ get_sufStats_tia = function(respData)
         nb, nit,
         frst_item, respData$design$booklet_id, respData$design$item_id ) 
 }
+
+
+unequal_categories = function(respData, person_property)
+{
+  if(!is.factor(respData$x[[person_property]]) || nlevels(respData$x[[person_property]]) !=2)
+    stop('person_property needs to have two categories')
+  
+  itms = unequal_categories_C(respData$x[[person_property]], 
+                              respData$x$item_id, respData$x$item_score,
+                              nlevels(respData$x$item_id),max(respData$x$item_score))  
+
+  class(itms) = 'factor'
+  levels(itms) = levels(respData$x$item_id)
+  
+  itms
+}
+

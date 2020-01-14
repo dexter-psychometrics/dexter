@@ -7,7 +7,7 @@
 get_testscores(dataSrc, predicate = NULL)
 }
 \arguments{
-\item{dataSrc}{Data source: a connection to a dexter database or a data.frame with columns: person_id, booklet_id, item_score}
+\item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}
 
 \item{predicate}{An optional expression to filter data, if NULL all data is used}
 }
@@ -15,5 +15,5 @@ get_testscores(dataSrc, predicate = NULL)
 A tibble with columns person_id, item_id, booklet_score
 }
 \description{
-Supplies the weighted sum of item scores for each person selected.
+Supplies the sum of item scores for each person selected.
 }

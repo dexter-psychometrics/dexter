@@ -75,9 +75,9 @@ test_that('verbAgg abilities are monotone increasing', {
 ## tests on big datasets
 test_that('different estimation methods of ability converge on a large dataset',{
   skip_on_cran()
-  if(dir.exists('skip_on_cran'))
+  if(dir.exists('../skip_on_cran'))
   {
-    db = open_project('skip_on_cran/pisa/pisa_math.db')
+    db = open_project('../skip_on_cran/pisa/pisa_math.db')
     
     f = fit_enorm(db, booklet_id %in% c('1','3','4'))
 

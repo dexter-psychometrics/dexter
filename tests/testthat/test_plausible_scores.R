@@ -37,13 +37,13 @@ test_that('plausible scores works',{
               info=paste('expected correlation test_score and PS>0.65, found:',cor(sc_b2$PS1, sc_b2$test_score)))
   
   
-  # general test
+  # keep.observed should work
   ps = plausible_scores(responses) %>% 
     rename(PS_keep_true = 'PS1') %>%
     inner_join(plausible_scores(responses, keep.observed = FALSE), by= 'person_id') %>%
     inner_join(responses %>% group_by(person_id, booklet_id) %>% summarise(booklet_score = sum(item_score)), by='person_id')
   
-  expect_true(cor(ps$PS_keep_true, ps$booklet_score) > cor(ps$PS1, ps$booklet_score))
+  expect_gt(cor(ps$PS_keep_true, ps$booklet_score), cor(ps$PS1, ps$booklet_score)+.05)
   
   
   

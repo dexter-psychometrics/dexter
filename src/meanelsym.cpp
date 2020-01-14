@@ -12,8 +12,6 @@
 
 using namespace arma;
 
-// to do: elsym12
-
 
 //[[Rcpp::export]]
 void meanElSym(const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const int item1, const int item2, const int nI, const int mS, arma::vec& g) 
@@ -22,7 +20,7 @@ void meanElSym(const arma::vec& b, const arma::ivec& a, const arma::ivec& first,
   const int nscores = mS + 1;
   double cij;
   vec gg(2 * nscores, fill::zeros);
-  
+  g.zeros();
   gg[0]=1;
 
   for (int i=0;i<nI;i++)
@@ -30,7 +28,8 @@ void meanElSym(const arma::vec& b, const arma::ivec& a, const arma::ivec& first,
     if (i != item1 && i != item2)
     {
       n=Msc+a[last[i]];
-      for (int s=Msc;s>=0;s--) {gg[2*s+(1-idx)]=0;}
+      for (int s=Msc;s>=0;s--) 
+		gg[2*s+(1-idx)]=0;
       for (int s=0;s<=Msc;s++)
       {
         for (int j=first[i];j<=last[i];j++)
@@ -50,6 +49,65 @@ void meanElSym(const arma::vec& b, const arma::ivec& a, const arma::ivec& first,
 	g[s]=gg[2*s+idx];
 }
 
+void meanElSym12(const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const int item1, const int item2, const int nI, const int mS, arma::vec& g1, arma::vec& g2) 
+{
+	int Msc=0, n, idx = 0; // start from column one
+	const int nscores = mS + 1;
+	double cij;
+	vec gg(2 * nscores, fill::zeros);
+	g1.zeros();
+	g2.zeros();
+	gg[0]=1;
+
+	for (int i=0;i<nI;i++)
+	{
+		if (i != item1 && i != item2)
+		{
+			n=Msc+a[last[i]];
+			for (int s=Msc;s>=0;s--) 
+				gg[2*s+(1-idx)]=0;
+			for (int s=0;s<=Msc;s++)
+			 {
+				for (int j=first[i];j<=last[i];j++)
+				{
+				  if (b[j]>0)
+				  {
+					cij = exp(lbinom(Msc,s) - lbinom(n,s+a[j]));
+					gg[2*(s+a[j])+(1-idx)] += gg[2*s+idx]*b[j]*cij;
+				  }
+				}
+			}
+			Msc=n;
+			idx=1-idx; // swap columns
+		}
+	}
+	// store g2  
+	for (int s=0; s<=Msc; s++)
+		g2[s] = gg[2*s + idx];
+	
+	// 1 loop remaining to add item2 to g1
+	for (int s=Msc; s>=0; s--)
+		gg[2*s+(1-idx)] = 0;
+	
+	n = Msc+a[last[item2]];
+	
+	for (int s=Msc; s>=0; s--)
+		for (int j=first[item2]; j<=last[item2]; j++)
+			if (b[j]>0)
+			{
+				cij = exp(lbinom(Msc,s) - lbinom(n,s+a[j]));
+				gg[2*(s+a[j])+(1-idx)] += gg[2*s+idx]*b[j]*cij;
+			}
+
+	Msc += a[last[item2]];
+	idx = 1-idx;
+	
+	// store g1  
+	for (int s=0; s<=Msc; s++)
+		g1[s] = gg[2*s + idx];
+}
+
+
 
 // expect should bet set to zero by caller
 void Expect_mean(const vec& b, const ivec& a, int* ptr_first, int* ptr_last, int* ptr_scoretab, int nI, int n_score, vec& expect)
@@ -59,13 +117,12 @@ void Expect_mean(const vec& b, const ivec& a, int* ptr_first, int* ptr_last, int
   const ivec first(ptr_first, nI, false, true), last(ptr_last, nI, false, true);
   const ivec scoretab(ptr_scoretab, n_score, false, true);	 
   
-  vec g(n_score, fill::zeros), gi(n_score, fill::zeros);
+  vec g(n_score), gi(n_score);
   
   meanElSym(b,a,first,last,i1,i2,nI,mS,g);
   
   for (int item=0; item<nI; item++)
   {    
-	gi.zeros();
 	meanElSym(b,a,first,last,item,i2,nI,mS,gi);
     for (int j=first[item];j<=last[item];j++)
       for (int s=a[j];s<=mS;s++)
@@ -122,7 +179,6 @@ void E_Hess_mean(const vec& b, const ivec& a, const ivec& first, const ivec& las
 
 	for (int item=0;item<nI;item++)
 	{
-		gi.zeros(); 
 		meanElSym(b,a,first,last,item,i2,nI,mS,gi);
 		for (int j=(first[item]+1);j<=last[item];j++)
 		{
@@ -150,10 +206,8 @@ void E_Hess_mean(const vec& b, const ivec& a, const ivec& first, const ivec& las
 
 		  for (int k=(item+1);k<nI;k++) //deze loopt over alle volgende items
 		  {
-			gk.zeros();
-			gik.zeros(); 
-			meanElSym(b,a,first,last,k,i2,nI,mS,gk);
-			meanElSym(b,a,first,last,k,item,nI,mS,gik);
+			meanElSym12(b,a,first,last,k,item,nI,mS,gk,gik);
+			
 			for (int l=(first[k]+1);l<=last[k];l++)
 			{
 			  for (int s=0;s<=mS;s++)
@@ -266,50 +320,53 @@ void NR_booklets_mean(const arma::vec& b, const arma::ivec& a,
 }
 
 
-// to do: unit test, ittotmat0 equal to ittotmat, also for NR, expect
+// to~do: unit test, ittotmat0 equal to ittotmat, also for NR, expect
 //[[Rcpp::export]]
-arma::mat ittotmat_C(const arma::vec& b, const arma::ivec& a, const arma::vec& c, const arma::ivec& first, const arma::ivec& last)
+arma::mat ittotmat_C(const arma::vec& b, const arma::ivec& a, const arma::vec& c, const arma::ivec& first, const arma::ivec& last, const arma::ivec& ps)
 {
-  const int ms = accu(a(conv_to<uvec>::from(last)));
-  const int nI = last.n_elem;
-  const int npar = accu(last-first) + nI;
-  const int nscores = ms+1;
-  const int i1=-1, i2=-1;  
-  const vec logb = log(b);
-  const vec alogc = a % log(c);  
+	const int ms = accu(a(conv_to<uvec>::from(last)));
+	const int nI = last.n_elem;
+	const int npar = accu(last-first) + nI;
+	const int nscores = ms+1;
+	const int i1=-1, i2=-1;  
+	const vec logb = log(b);
+	const vec alogc = a % log(c);  
 
-  mat pi(npar,nscores,fill::zeros);
+	mat pi(npar,nscores,fill::zeros);
  
  
 #pragma omp parallel
 	{ 
-	vec g(nscores), gi(nscores);
-	vec eta(npar);
-	int k, indx, ni;
-	double lbinom_ms_s, log_g_s;
+		vec g(nscores), gi(nscores);
+		vec eta(npar);
+		int k, indx, ni;
+		double lbinom_ms_s, log_g_s;
 #pragma omp for	
-	  for (int s=0;s<=ms;s++)
-	  {
-		k=0; 
-		eta = exp(logb + s * alogc);
-		lbinom_ms_s = lbinom(ms, s);		
-		meanElSym(eta, a, first, last, i1, i2, nI, ms, g);
-		log_g_s = log(g[s]);
-		for (int it=0;it<nI;it++)
+		for (int s=0;s<=ms;s++)
 		{
-		  meanElSym(eta, a, first, last,  it, i2, nI, ms, gi);
-		  ni=ms-a[last[it]]; 
-		  for (int j=first[it];j<=last[it]; j++) 
-		  {
-			indx=s-a[j];
-			if ( (indx>=0)&&(indx<(nscores-a[last[it]])) )
+			if(ps[s] == 1)
 			{
-			  pi.at(k,s) = exp((log(eta[j]) + log(gi[indx]) - log_g_s) + (lbinom(ni,indx) - lbinom_ms_s));
-			} 
-			k++;
-		  }
+				k=0; 
+				eta = exp(logb + s * alogc);
+				lbinom_ms_s = lbinom(ms, s);		
+				meanElSym(eta, a, first, last, i1, i2, nI, ms, g);
+				log_g_s = log(g[s]);
+				for (int it=0;it<nI;it++)
+				{
+				  meanElSym(eta, a, first, last,  it, i2, nI, ms, gi);
+				  ni=ms-a[last[it]]; 
+				  for (int j=first[it];j<=last[it]; j++) 
+				  {
+					indx=s-a[j];
+					if ( (indx>=0)&&(indx<(nscores-a[last[it]])) )
+					{
+					  pi.at(k,s) = exp((log(eta[j]) + log(gi[indx]) - log_g_s) + (lbinom(ni,indx) - lbinom_ms_s));
+					} 
+					k++;
+				  }
+				}
+			}
 		}
-	  }
 	}
 	return pi;
 }

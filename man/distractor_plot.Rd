@@ -8,7 +8,7 @@ distractor_plot(dataSrc, item_id, predicate = NULL, legend = TRUE,
   curtains = 10, col = NULL, ...)
 }
 \arguments{
-\item{dataSrc}{Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, response, item_score
+\item{dataSrc}{a connection to a dexter database or a data.frame with columns: person_id, item_id, response, item_score
 and optionally booklet_id}
 
 \item{item_id}{The ID of the item to plot. A separate plot will be produced
@@ -32,7 +32,7 @@ Produce a diagnostic distractor plot for an item
 }
 \details{
 Customization of title and subtitle can be done by using the arguments main and sub. 
-These arguments can contain references to the variables item_id, booklet_id, item_position(only if dataSrc is a dexter db),
+These arguments can contain references to the variables item_id, booklet_id, item_position(if available),
 pvalue, rit and rir. References are made by prefixing these variables with a dollar sign. Variable names may be postfixed 
 with a sprintf style format string, e.g. 
 \code{distractor_plot(db, main='item: $item_id', sub='Item rest correlation: $rir:.2f')}

@@ -1,7 +1,6 @@
 context('test database')
 
 library(dplyr)
-library(tibble)
 library(DBI)
 library(RSQLite)
 

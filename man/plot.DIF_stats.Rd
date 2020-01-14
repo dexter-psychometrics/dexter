@@ -2,13 +2,13 @@
 % Please edit documentation in R/dif.R
 \name{plot.DIF_stats}
 \alias{plot.DIF_stats}
-\title{plot method for DIF}
+\title{plot method for pairwise DIF statistics}
 \usage{
 \method{plot}{DIF_stats}(x, items = NULL, itemsX = items,
-  itemsY = items, ...)
+  itemsY = items, alpha = 0.05, ...)
 }
 \arguments{
-\item{x}{object produced by DIF}
+\item{x}{object produced by \code{\link{DIF}}}
 
 \item{items}{character vector of item id's for a subset of the plot. Useful if you have many items. 
 If NULL all items are plotted.}
@@ -17,8 +17,15 @@ If NULL all items are plotted.}
 
 \item{itemsY}{character vector of item id's for the Y axis}
 
+\item{alpha}{significance level used to color the plot (two sided)}
+
 \item{...}{further arguments to plot}
 }
 \description{
-plot method for DIF
+plot method for pairwise DIF statistics
+}
+\details{
+Plotting produces an image of the matrix of pairwise DIF statistics. 
+The statistics are standard normal deviates and colored to distinguish significant from non-significant values.
+If there is no DIF, a proportion alpha will be significant be change.
 }

@@ -7,7 +7,7 @@
 DIF(dataSrc, person_property, predicate = NULL)
 }
 \arguments{
-\item{dataSrc}{Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score}
+\item{dataSrc}{a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score}
 
 \item{person_property}{Defines groups of persons to calculate DIF}
 
@@ -16,14 +16,16 @@ DIF(dataSrc, person_property, predicate = NULL)
 \value{
 An object of class \code{DIF_stats} holding statistics for
 overall-DIF and a matrix of statistics for DIF in the relative position of
-item-category parameters in the regular parameterization used e.g., by OPLM.
+item-category parameters in the beta-parameterization where they represent 
+locations on the ability scale where adjacent categories are equally likely. 
+If there is DIF, the function `plot` can be used to produce an image of the pairwise DIF statistics.
 }
 \description{
 Exploratory test for Differential Item Functioning
 }
 \details{
 Tests for equality of relative item/category difficulties across groups.
-Supplements the confirmatory approach of the profile plot
+Supplements the confirmatory approach of the profile plot.
 }
 \examples{
 db = start_new_project(verbAggrRules, ":memory:", person_properties=list(gender='unknown'))
@@ -39,4 +41,7 @@ close_project(db)
 \references{
 Bechger, T. M. and Maris, G (2015); A Statistical Test for Differential Item Pair Functioning. 
 Psychometrika. Vol. 80, no. 2, 317-340.
+}
+\seealso{
+A plot of the result is produced by the function \code{\link{plot.DIF_stats}}
 }

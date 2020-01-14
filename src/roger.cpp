@@ -3,7 +3,6 @@
 using namespace arma;
 
 
-// to do: vector/matrix creation may fail because of memory limitations, need a check to not crash R maybe. test
 
 // [[Rcpp::export]]
 arma::ivec sampleNRM2_test(	const arma::vec& theta, const arma::vec& b, const arma::ivec& a, 
@@ -86,6 +85,7 @@ arma::imat sampleNRM2_item(	const arma::vec& theta, const arma::vec& b, const ar
 
   return score;
 }
+
 
 
 
@@ -187,7 +187,7 @@ arma::vec theta_mle_sec(const arma::vec& b, const arma::ivec& a,
 	double dx;
 	
 	const int max_iter = 200;
-	const double acc = 1e-8; // this might be a little too small, to do: test with large tests with large a's
+	const double acc = 1e-8; // this might be a little too small but it seems to work
 
 	// secant	
 	for(int s=1; s<max_score; s++)
@@ -208,6 +208,103 @@ arma::vec theta_mle_sec(const arma::vec& b, const arma::ivec& a,
 	}
 	return theta;
 }
+
+
+// [[Rcpp::export]]
+double escore_wle(const double theta, const arma::vec& b, const arma::ivec& a, const arma::ivec& first,  const arma::ivec& last, const int nI, const int max_a)
+{
+	
+
+	const int max_ncat = max(last - first) + 1;
+	
+	std::vector<long double> Fij(max_ncat);
+	
+	long double I=0,J=0;
+
+
+	for(int i=0;i<nI;i++)
+	{
+		long double colsm = 0;	
+		for(int j = first[i],k=0; j<=last[i]; j++, k++)
+		{
+			Fij[k] = b[j] * exp(a[j] * theta);
+			colsm += Fij[k];
+		}
+
+		long double M1=0, M2=0, M3=0;
+		for(int j=first[i], k=0; j<=last[i];j++, k++)
+		{
+			long double M = Fij[k]/colsm;	
+			M1 += a[j] * M;
+			M2 += (a[j] * a[j]) * M;
+			M3 += (a[j] * a[j] * a[j]) * M;			
+		}
+			
+		I += M2 - M1*M1;
+		J += M3 - M1*(3.0*M2 - 2.0*M1*M1);
+	}
+	
+	return Escore_single(theta, b, a, first, last, nI, max_a) - (J/(2*I));
+}
+
+
+
+// Secant method used to find W-MLE of theta
+// gives an error for non-monotonicity 
+// [[Rcpp::export]]
+arma::vec theta_wle_sec(const arma::vec& b, const arma::ivec& a, 
+						const arma::ivec& first, const arma::ivec& last)
+{
+	const int n = first.n_elem;
+	const int maxA = max(a(conv_to<uvec>::from(last))); 
+	const int max_score = accu(a(conv_to<uvec>::from(last)));
+	
+	vec theta(max_score+1);
+	
+	double xl = 0, rts = -2;
+	double fl = escore_wle(xl, b, a, first, last, n, maxA),
+		   f = escore_wle(rts, b, a, first, last, n, maxA);
+	
+	double dx;
+	
+	const int max_iter = 200;
+	const double acc = 1e-8; // this might be a little too small but it seems to work
+
+	// secant	
+	for(int s=0; s<=max_score; s++)
+	{
+		for(int iter=0; iter<max_iter; iter++)
+		{
+			// protection against non-monotonicity
+			if((xl > rts) != (fl > f))
+			{
+				//printf("score: %i\nxl: %f > rts: %f\nfl: %f > f %f\n", s, xl, rts, fl, f);
+				//fflush(stdout);
+				Rcpp::stop("Warm WLE estimates do not converge");
+			}
+			
+			dx = (xl-rts) * (f-s)/(f-fl);
+			xl = rts;
+			fl = f;
+			rts += dx;
+			f = escore_wle(rts, b, a, first, last, n, maxA);						
+			if(std::abs(dx) < acc)
+				break;
+			
+		} 
+		theta[s] = rts;
+		rts += 0.1; // give rts a nudge, otherwise (f-s)/(f-fl) can overflow since f-fl is often very small
+		f = escore_wle(rts, b, a, first, last, n, maxA);
+	}
+	return theta;
+}
+
+
+
+
+	
+
+
 
 
 
@@ -265,6 +362,9 @@ void IJ_c(const arma::vec& theta, const arma::vec& b, const arma::ivec& a,
 
 	} 
 }
+
+
+
 
 
 
@@ -357,5 +457,93 @@ arma::vec PVrecycle(const arma::vec& b, const arma::ivec& a, const arma::ivec& f
   }
   return theta;
 }
+
+
+
+// [[Rcpp::export]]
+arma::imat sampleIM(const arma::vec& bIM, const arma::vec& cIM, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last,
+					const arma::ivec& scoretab)
+{
+	// scoretab must already be based on the sample and must include 0 scores even for impossible
+	const int nI = first.n_elem;
+	const int max_score = scoretab.n_elem - 1;
+	const int maxA = max(a(conv_to<uvec>::from(last))); 
+	const int nP = accu(scoretab);
+	const int maxsec = 200;
+	const double acc = 1e-8;
+	double theta = -2;
+	
+	vec logb = log(bIM), logc = log(cIM);
+	
+	vec b(&bIM[0], bIM.n_elem);
+
+	ivec cs_scoretab(max_score+1);
+	vec lookup(maxA+1);
+	vec p(maxA+3);
+	
+	imat out(nP, nI);	
+	
+	lookup[0] = 1;
+	
+	cs_scoretab[0] = 0;
+	for(int i=0; i<max_score; i++)
+		cs_scoretab[i+1] = scoretab[i] + cs_scoretab[i];
+
+	
+	for(int s=1; s<max_score; s++)
+	{
+		for(int i=0; i<nI; i++)
+			for (int j=first[i]+1; j<=last[i]; j++) 
+				b[j] = exp(logb[j] + s * a[j] * logc[i]);
+		
+		// derive theta
+		double xl = theta + 0.5;
+		double fl = Escore_single(xl, b, a, first, last, nI, maxA),
+				f = Escore_single(theta, b, a, first, last, nI, maxA);
+		// using secant
+		for(int iter=0; iter<maxsec; iter++)
+		{
+			double dx = (xl-theta) * (f-s)/(f-fl);
+			xl = theta;
+			fl = f;
+			theta += dx;
+			f = Escore_single(theta, b, a, first, last, nI, maxA);
+			if(std::abs(dx) < acc)
+				break;
+		}
+		
+		for(int i=1; i<=maxA; i++)
+			lookup[i] = exp(i*theta);
+				
+		int pi = cs_scoretab[s];
+		// sample
+		while(pi < cs_scoretab[s+1])
+		{
+			int score = 0;
+			for (int i=0;i<nI;i++)
+			{				
+				p[0] = b[first[i]]; 
+				int k = 1;				
+				for (int j=first[i]+1; j<=last[i]; j++) 
+				{
+					p[k] = p[k-1]+b[j]*lookup[a[j]];
+					k++;
+				}
+				double u = p[k-1]*R::runif(0,1);
+				k = 0;
+				while(u>p[k]) k++;
+				score += a[first[i]+k];
+				out.at(pi, i) = a[first[i]+k];
+				if(score > s )
+					break;
+			}
+			if(score == s)
+				pi++;	
+		}
+	}
+
+	return out;
+}
+
 
 

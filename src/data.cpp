@@ -1,14 +1,14 @@
-#include <Rcpp.h>
-
+#include <RcppArmadillo.h>
+#include <stack>
 using namespace Rcpp;
 
-// to do: test of lege data geen crash veroorzaakt
 
 // faster factor creation
 // http://gallery.rcpp.org/articles/fast-factor-generation
 
 template <int RTYPE>
-IntegerVector fast_factor_template( const Vector<RTYPE>& x, bool as_int ) {
+IntegerVector fast_factor_template( const Vector<RTYPE>& x, bool as_int ) 
+{
     Vector<RTYPE> levs = sort_unique(x);
     IntegerVector out = match(x, levs);
 	if(!as_int)
@@ -20,7 +20,8 @@ IntegerVector fast_factor_template( const Vector<RTYPE>& x, bool as_int ) {
 }
 
 template <int RTYPE>
-IntegerVector fast_factor_template( const Vector<RTYPE>& x, const Vector<RTYPE>& levs, bool as_int ) {
+IntegerVector fast_factor_template( const Vector<RTYPE>& x, const Vector<RTYPE>& levs, bool as_int ) 
+{
     IntegerVector out = match(x, levs);
 	if(!as_int)
 	{
@@ -31,7 +32,8 @@ IntegerVector fast_factor_template( const Vector<RTYPE>& x, const Vector<RTYPE>&
 }
 
 // [[Rcpp::export]]
-SEXP fast_factor( SEXP x, bool as_int) {
+SEXP fast_factor( SEXP x, bool as_int) 
+{
     switch( TYPEOF(x) ) {
     case INTSXP: return fast_factor_template<INTSXP>(x, as_int);
     case REALSXP: return fast_factor_template<REALSXP>(x, as_int);
@@ -41,7 +43,8 @@ SEXP fast_factor( SEXP x, bool as_int) {
 }
 
 // [[Rcpp::export]]
-SEXP fast_factor_lev( SEXP x, SEXP levs, bool as_int) {
+SEXP fast_factor_lev( SEXP x, SEXP levs, bool as_int) 
+{
     switch( TYPEOF(x) ) {
     case INTSXP: return fast_factor_template<INTSXP>(x, levs, as_int);
     case REALSXP: return fast_factor_template<REALSXP>(x, levs, as_int);
@@ -51,11 +54,91 @@ SEXP fast_factor_lev( SEXP x, SEXP levs, bool as_int) {
 }
 
 
-// to do: make_tuple ==> forward_as_tuple?
+// [[Rcpp::export]]
+std::string ppoint(SEXP x)
+{
+	return tfm::format("%p", x);
+}
 
 
-// http://dirk.eddelbuettel.com/code/rcpp/Rcpp-FAQ.pdf
-// dplyr vector visitor https://stackoverflow.com/questions/19823915/how-can-i-handle-vectors-without-knowing-the-type-in-rcpp
+// assumed there are no double responses
+// [[Rcpp::export]]
+void fill_resp_matrix(const IntegerVector& person_id, const IntegerVector& item_id, const IntegerVector& item_score, arma::imat& out)
+{
+	const int n = person_id.length();
+
+#pragma omp parallel for
+	for(int i=0; i<n; i++)
+	{
+		out.at(person_id[i]-1, item_id[i]-1) = item_score[i];
+	}
+}
+
+// [[Rcpp::export]]
+IntegerVector ds_connected_groups(const IntegerMatrix& a)
+{
+	const int n = a.ncol();	
+	IntegerVector group(n);
+	int g=0;
+	std::stack<int> st;
+
+	for(int j=0;j<n;j++)
+	{
+		if(group[j]==0)
+		{
+			st.push(j);
+			group[j] = ++g;
+			while(!st.empty())
+			{
+				int s = st.top();
+				st.pop();
+				for(int i=0;i<n;i++)
+				{
+					if(a(i,s)>0 && group[i]==0)
+					{
+						group[i]=g;
+						st.push(i);
+					}
+				}	
+			}
+		}
+	}
+	return group;
+}
+
+// needs two groups with values 1 and 2 in group_id
+// already tried parallel, practically no gain
+// [[Rcpp::export]]
+std::vector<int> unequal_categories_C(const IntegerVector& group_id, const IntegerVector& item_id, const IntegerVector& item_score, const int nit, const int max_score)
+{	
+	std::vector<int> scratch((nit+1)*(max_score+1),0);
+	
+	std::vector<int> out;
+	out.reserve(nit);
+	
+	const int nr = item_id.length();	
+	const int isz = max_score+1;
+	
+	for(int i=0;i<nr;i++)
+	{
+		if(scratch[item_id[i] * isz + item_score[i]] == group_id[i])
+			scratch[item_id[i] * isz + item_score[i]] = 3;
+		else if(scratch[item_id[i] * isz + item_score[i]] == 0)
+			scratch[item_id[i] * isz + item_score[i]] = 3 - group_id[i]; //2->1, 1->2
+	}	
+	
+	for(int i=1; i<=nit; i++)
+		for(int s=0; s<=max_score; s++)
+		{
+			if(scratch[i*isz+s] == 1 || scratch[i*isz+s] == 2)
+			{
+				out.push_back(i);
+				break;
+			}
+		}
+	out.shrink_to_fit();
+	return out;	
+}
 
 
 /* ******************************************************************************************* 
@@ -68,11 +151,17 @@ SEXP fast_factor_lev( SEXP x, SEXP levs, bool as_int) {
 * ********************************************************************************************/
 
 
-// outputs information about the new and old design, add booklet_id
-// additionally does group_by(person) %>% mutate(booklet_score=sum(item_score))
-// system.time({design_info = make_booklets(x$person_id, x$item_id, x$item_score,x$booklet_id, x$booklet_score)})
 
-template <bool not_merge>
+/* ********************************************************************************************
+/ the vector booklet_id is always overwritten (if not desirable, use a copy)
+/ In case of merge: all original booklet id's are lost (not mapped at all)
+/ In case of no merge: returned df map_booklet contains a map of new to old booklet id's
+/ 	booklets with different id's that have equal items are maintained as different booklets
+/
+/
+******************************************************************************************** */
+
+template<bool merge>
 List make_booklets_tmpl(const IntegerVector& person_id, const IntegerVector& item_id, const IntegerVector& item_score, IntegerVector& booklet_id, IntegerVector& booklet_score)
 {
 	const int nit = as<CharacterVector>(item_id.attr("levels")).length();
@@ -81,13 +170,22 @@ List make_booklets_tmpl(const IntegerVector& person_id, const IntegerVector& ite
 	int nbk = 1;
 	int nitbk = 0;
 	
+	typedef std::pair<std::vector<bool>, int> key;	
 	
-	typedef std::vector<bool> key;	
-	typedef std::pair<int, int> val;
+	struct key_hash
+	{
+		std::size_t operator()(const key& k) const
+		{
+			// hash bool vector xor int
+			auto hash1 = std::hash<std::vector<bool>>{}(k.first); 
+			auto hash2 = std::hash<int>{}(k.second); 
+			return hash1 ^ hash2; 
+		}	
+	};
+		
 	
-	key bk(nit+1);
-	std::map<key,val> booklets;
-	std::pair<std::map<key,val>::iterator, bool> ret; 
+	std::vector<bool> bk(nit+1);
+	std::unordered_map<key, int, key_hash> booklets;
 	
 	std::fill(bk.begin(), bk.end(), false);
 	
@@ -98,11 +196,11 @@ List make_booklets_tmpl(const IntegerVector& person_id, const IntegerVector& ite
 	
 	for(int r=1; r<nr; r++) 
 	{
-		if(person_id[r] != person_id[r-1] || (not_merge && booklet_id[r] != booklet_id[r-1]))
+		if(person_id[r] != person_id[r-1] || !(booklet_id[r] == booklet_id[r-1] || merge))
 		{
-			ret = booklets.insert( std::pair<key,val>(bk,std::make_pair(nbk,booklet_id[r-1])) );
+			const auto& ret = booklets.insert( std::make_pair(std::make_pair(bk, merge ? 1 : booklet_id[r-1]), nbk));
 			
-			std::fill(booklet_id.begin()+person_start, booklet_id.begin() + r, ret.first->second.first);
+			std::fill(booklet_id.begin()+person_start, booklet_id.begin() + r, ret.first->second);
 			std::fill(booklet_score.begin()+person_start, booklet_score.begin() + r, ss);
 			
 			if (ret.second) // did not already exist
@@ -125,12 +223,12 @@ List make_booklets_tmpl(const IntegerVector& person_id, const IntegerVector& ite
 		ss += item_score[r];
 	}
 	if(overlap)
-	{//to do: error message should say something abotu persons makeing same items twice, booklet is irrelevant
-		stop("attempt to merge booklets that have common items, this is not allowed");
+	{
+		stop("at least one person has answered at least one item more than once, this is not allowed");
 	}
 	// finally
-	ret = booklets.insert( std::pair<key,val>(bk,std::make_pair(nbk,booklet_id[nr-1])) );
-	std::fill(booklet_id.begin()+person_start, booklet_id.end(), ret.first->second.first);
+	const auto& ret = booklets.insert( std::make_pair(std::make_pair(bk, merge ? 1 : booklet_id[nr-1]), nbk));
+	std::fill(booklet_id.begin()+person_start, booklet_id.end(), ret.first->second);
 	std::fill(booklet_score.begin()+person_start, booklet_score.end(), ss);
 	
 	if (ret.second)
@@ -148,18 +246,20 @@ List make_booklets_tmpl(const IntegerVector& person_id, const IntegerVector& ite
 	
 	int indx = 0;
 	int bkindx = 0;
-	val this_booklet ;
-	for(std::map<key,val>::iterator iter = booklets.begin(); iter != booklets.end(); ++iter)
+	for(auto& iter: booklets )
 	{
-		bk =  iter->first;
-		this_booklet = iter->second;
-		map_orig_booklet[bkindx] = this_booklet.second;
-		map_booklet_id[bkindx++] = this_booklet.first;
+		const auto& bki =  iter.first.first;
+		int bnum = iter.second;
+		if(!merge)
+		{
+			map_orig_booklet[bkindx] = iter.first.second;
+			map_booklet_id[bkindx++] = bnum;
+		}
 		for(int i=1;i<=nit;i++)
 		{
-			if(bk[i])						{
-				
-				dbooklet[indx] = this_booklet.first;
+			if(bki[i])			
+			{				
+				dbooklet[indx] = bnum;
 				ditem[indx++] = i; //1-indexed item_id from r
 			}
 		}		
@@ -170,13 +270,15 @@ List make_booklets_tmpl(const IntegerVector& person_id, const IntegerVector& ite
 
 	if(Rf_isFactor(booklet_id))
 	{
-		map_orig_booklet.attr("levels") = as<CharacterVector>(booklet_id.attr("levels"));
-		map_orig_booklet.attr("class") = "factor";
-			
+		if(!merge)
+		{
+			map_orig_booklet.attr("levels") = as<CharacterVector>(booklet_id.attr("levels"));
+			map_orig_booklet.attr("class") = "factor";
+		}	
 		booklet_id.attr("levels") = R_NilValue;
 		booklet_id.attr("class") = "integer";	
 	}
-	
+	//map booklet is only relevant in case there is no merge
 	return List::create(
 		Named("design") = DataFrame::create( 
 			Named("booklet_id") = dbooklet,
@@ -190,50 +292,48 @@ List make_booklets_tmpl(const IntegerVector& person_id, const IntegerVector& ite
 
 
 
-// [[Rcpp::export]]
-List make_booklets(const IntegerVector& person_id, const IntegerVector& item_id, const IntegerVector& item_score, IntegerVector& booklet_id, IntegerVector& booklet_score, const bool merged)
-{
-	// template argument is !merged
-	if(merged)
-		return make_booklets_tmpl<false>(person_id, item_id, item_score, booklet_id, booklet_score);
-		
-	return make_booklets_tmpl<true>(person_id, item_id, item_score, booklet_id, booklet_score);
-}
 
 
-// outputs information about the new and old design, add booklet_id
-// additionally does group_by(person, booklet) %>% summarise(booklet_score=sum(item_score))
-// data is pushed back, final shrink to size out$np must be done in R
 
 
-template <bool not_merge>
+
+
+template<bool merge>
 List make_booklets_summed_tmpl(IntegerVector& person_id, IntegerVector& booklet_id, IntegerVector& item_id, IntegerVector& item_score)
 {
 	const int nit = as<CharacterVector>(item_id.attr("levels")).length();
 	const int nr = item_id.length();
-		
-	typedef std::vector<bool> key;	
-	typedef std::pair<int, int> val;
 	
-	key bk(nit+1, false);
-	std::map<key,val> booklets;
-	std::pair<std::map<key,val>::iterator, bool> ret;  
+	typedef std::pair<std::vector<bool>, int> key;	
 	
+	struct key_hash
+	{
+		std::size_t operator()(const key& k) const
+		{
+			// hash bool vector xor int
+			auto hash1 = std::hash<std::vector<bool>>{}(k.first); 
+			auto hash2 = std::hash<int>{}(k.second); 
+			return hash1 ^ hash2; 
+		}	
+	};
+	
+	std::vector<bool> bk(nit+1, false);
+	std::unordered_map<key, int, key_hash> booklets;	
+
 	int np = 0;
 	int nitbk = 0;
 	int nbk = 1;
 	bool overlap = false;
 	int ss = item_score[0];
 	bk[item_id[0]] = true;	
-	
-	// to do: probleem: boekjes met verschillende namen hebben mogelijk exact dezelfde items
+
 	for(int r=1; r<nr; r++)
 	{
-		if(person_id[r] != person_id[r-1] || (not_merge && booklet_id[r] != booklet_id[r-1]))
+		if(person_id[r] != person_id[r-1] || !(booklet_id[r] == booklet_id[r-1] || merge))
 		{
-			ret = booklets.insert( std::pair<key,val>(bk,std::make_pair(nbk,booklet_id[r-1])) );
+			const auto& ret = booklets.insert( std::make_pair(std::make_pair(bk, merge ? 1 : booklet_id[r-1]), nbk));
 			
-			booklet_id[np] = ret.first->second.first;
+			booklet_id[np] = ret.first->second;
 			item_score[np] = ss;
 			person_id[np] = person_id[r-1];
 			item_id[np] = r; //permutation index, 1-indexed for R
@@ -256,12 +356,12 @@ List make_booklets_summed_tmpl(IntegerVector& person_id, IntegerVector& booklet_
 	}
 	if(overlap)
 	{
-		stop("attempt to merge booklets that have common items, this is not allowed");
+		stop("at least one person has answered at least one item more than once, this is not allowed");
 	}
 
 	// finally
-	ret = booklets.insert ( std::pair<key,val>(bk,std::make_pair(nbk,booklet_id[nr-1])) );
-	booklet_id[np] = ret.first->second.first;
+	const auto& ret = booklets.insert( std::make_pair(std::make_pair(bk, merge ? 1 : booklet_id[nr-1]), nbk));
+	booklet_id[np] = ret.first->second;
 	item_score[np] = ss;
 	person_id[np] = person_id[nr-1];
 	item_id[np] = nr-1;
@@ -281,31 +381,37 @@ List make_booklets_summed_tmpl(IntegerVector& person_id, IntegerVector& booklet_
 	
 	int indx = 0;
 	int bkindx = 0;
-	val this_booklet ;
-	for(std::map<key,val>::iterator iter = booklets.begin(); iter != booklets.end(); ++iter)
+
+	for(auto& iter: booklets )
 	{
-		bk =  iter->first;
-		this_booklet = iter->second;
-		map_orig_booklet[bkindx] = this_booklet.second;
-		map_booklet_id[bkindx++] = this_booklet.first;
+		const auto& bki =  iter.first.first;
+		int bnum = iter.second;
+		if(!merge)
+		{
+			map_orig_booklet[bkindx] = iter.first.second;
+			map_booklet_id[bkindx++] = bnum;
+		}
 		for(int i=1;i<=nit;i++)
 		{
-			if(bk[i])						{
-				
-				dbooklet[indx] = this_booklet.first;
+			if(bki[i])			
+			{				
+				dbooklet[indx] = bnum;
 				ditem[indx++] = i; //1-indexed item_id from r
 			}
 		}		
 	}
+	
 	
 	ditem.attr("levels") = as<CharacterVector>(item_id.attr("levels"));
 	ditem.attr("class") = "factor";	
 
 	if(Rf_isFactor(booklet_id))
 	{
-		map_orig_booklet.attr("levels") = as<CharacterVector>(booklet_id.attr("levels"));
-		map_orig_booklet.attr("class") = "factor";
-			
+		if(!merge)
+		{
+			map_orig_booklet.attr("levels") = as<CharacterVector>(booklet_id.attr("levels"));
+			map_orig_booklet.attr("class") = "factor";
+		}	
 		booklet_id.attr("levels") = R_NilValue;
 		booklet_id.attr("class") = "integer";
 	}
@@ -326,14 +432,27 @@ List make_booklets_summed_tmpl(IntegerVector& person_id, IntegerVector& booklet_
 
 
 
+
+
+
+// [[Rcpp::export]]
+List make_booklets(const IntegerVector& person_id, const IntegerVector& item_id, const IntegerVector& item_score, IntegerVector& booklet_id, IntegerVector& booklet_score, const bool merged)
+{
+	if(merged)
+		return make_booklets_tmpl<true>(person_id, item_id, item_score, booklet_id, booklet_score);
+		
+	return make_booklets_tmpl<false>(person_id, item_id, item_score, booklet_id, booklet_score);
+}
+
+
 // [[Rcpp::export]]
 List make_booklets_summed(IntegerVector& person_id, IntegerVector& booklet_id, IntegerVector& item_id, IntegerVector& item_score, const bool merged)
 {
 	// template argument is !merged
 	if(merged)
-		return make_booklets_summed_tmpl<false>(person_id, booklet_id, item_id, item_score);
+		return make_booklets_summed_tmpl<true>(person_id, booklet_id, item_id, item_score);
 		
-	return make_booklets_summed_tmpl<true>(person_id, booklet_id, item_id, item_score);
+	return make_booklets_summed_tmpl<false>(person_id, booklet_id, item_id, item_score);
 }
 
 
@@ -413,6 +532,7 @@ List make_booklets_summed_matrix(const IntegerVector& mtx, const int ncol, const
 
 // equivalent to gather %>% make_booklets
 
+
 // [[Rcpp::export]]
 List make_booklets_matrix(const IntegerVector& mtx, const int ncol, const int nrow)
 {
@@ -421,11 +541,11 @@ List make_booklets_matrix(const IntegerVector& mtx, const int ncol, const int nr
 	const int sz = mtx.length();
 	
 	typedef std::vector<bool> key;		
-	// to do: unordered map probably faster, if 16+ booklets
+
 	key bk(ncol);
-	std::map<key,int> booklets;
-	std::pair<std::map<key,int>::iterator, bool> ret; 
+	std::unordered_map<key,int> booklets;
 	
+	// matrix typically contains NA's
 	// choice is either two passes or create oversized vectors and shrink later or create smaller vectors and expand
 	// from experiments, this is slightly faster than reserve and push_back (probably because std::fill is very fast)
 	// arma vec maybe more convenient, also doesn't init to 0
@@ -446,7 +566,7 @@ List make_booklets_matrix(const IntegerVector& mtx, const int ncol, const int nr
 				item_id[i_row++] = i+1; // 1-indexed
 			}
 		}
-		ret = booklets.insert( std::pair<key,int>(bk, nbk));
+		const auto& ret = booklets.insert( std::pair<key,int>(bk, nbk));
 		if (ret.second) // did not already exist
 		{
 			nbk++;
@@ -473,14 +593,14 @@ List make_booklets_matrix(const IntegerVector& mtx, const int ncol, const int nr
 	
 	int indx = 0;
 
-	for(std::map<key,int>::iterator iter = booklets.begin(); iter != booklets.end(); ++iter)
+	for(auto& iter: booklets)
 	{
-		bk =  iter->first;
+		auto& bki = iter.first;
 		for(int i=0;i<ncol;i++)
 		{
-			if(bk[i])						
+			if(bki[i])						
 			{				
-				dbooklet[indx] = iter->second;
+				dbooklet[indx] = iter.second;
 				ditem[indx++] = i+1; //1-indexed item_id
 			}
 		}		
@@ -493,6 +613,7 @@ List make_booklets_matrix(const IntegerVector& mtx, const int ncol, const int nr
 				Named("design") = DataFrame::create(Named("booklet_id") = dbooklet, Named("item_id") = ditem));
 
 }
+
 
 
 
@@ -587,17 +708,16 @@ int summarise_booklet_score(IntegerVector& person_id, IntegerVector& booklet_id,
 }
 
 
-// to do: find out how to avoid rehasing of unordered map, probably possible to give a hint of the necessary size?
+
 // merge over persons for a person-booklet ordered dataset,  sumscore not updated (not useful for summarised)
 // [[Rcpp::export]]
 DataFrame merge_booklets(IntegerVector& booklet_id,  const IntegerVector& person_id, const IntegerVector ds_booklet_id, const int maxb)
 {
 	const int n = booklet_id.length();
-	// vector bool has a defined hash in std :-)
 	typedef std::vector<bool> key;		
 	std::unordered_map<key, int> bkcombi;
 	
-	key books(maxb+1, false); // plus one for 1 indexd factors in R
+	key books(maxb+1, false); // plus one for 1 indexed factors in R
 	
 	books[booklet_id[0]] = true; // do the first iter
 	int start = 0, nb=1;
@@ -606,10 +726,10 @@ DataFrame merge_booklets(IntegerVector& booklet_id,  const IntegerVector& person
 	{
 		if(person_id[i] != person_id[i-1])
 		{
-			const auto& ret = bkcombi.insert(std::make_pair(books,nb)); //&
+			const auto& ret = bkcombi.insert(std::make_pair(books,nb)); 
 			if(ret.second)
 				nb++;
-			std::fill(booklet_id.begin() + start, booklet_id.begin() + i, ret.first->second); // assume not -1, to do: check
+			std::fill(booklet_id.begin() + start, booklet_id.begin() + i, ret.first->second); 
 			std::fill(books.begin(), books.end(), false);
 			start = i;
 		}
@@ -623,7 +743,7 @@ DataFrame merge_booklets(IntegerVector& booklet_id,  const IntegerVector& person
 	int sz = 0;
 	for(std::unordered_map<key, int>::iterator iter = bkcombi.begin(); iter != bkcombi.end(); ++iter)
 	{
-		key k = iter->first;
+		const auto& k = iter->first;
 		for(int i=1; i<=maxb; i++)
 			if(k[i])
 				sz++;
@@ -661,7 +781,7 @@ DataFrame merge_booklets(IntegerVector& booklet_id,  const IntegerVector& person
 // system.time({ds2=get_design_C(y$booklet_id,y$item_id)})
 // all(ds$booklet_id == ds2$booklet_id)
 // all(ds$item_id == ds2$item_id)
-// to do: check timing for a ridiculously large item*booklet combination like stex
+// todo: check timing for a ridiculously large item*booklet combination like stex
 // about .23 vs .015 for pisa
 // [[Rcpp::export]]
 DataFrame get_design_C(const IntegerVector& booklet_id, const IntegerVector& item_id)
@@ -797,7 +917,7 @@ List polytomize_C(IntegerVector& booklet_id, IntegerVector& person_id, IntegerVe
 bool is_person_booklet_sorted(const IntegerVector& booklet_id, const IntegerVector& person_id)
 {
 	const int n = booklet_id.length();
-	bool sorted = true;
+	std::atomic<bool> sorted(true);
 	// prefer parallel time worst case over fast return if not sorted
 #pragma omp parallel for
 	for(int i=1; i<n; i++)
@@ -806,11 +926,6 @@ bool is_person_booklet_sorted(const IntegerVector& booklet_id, const IntegerVect
 		   (person_id[i] < person_id[i-1]))
 		   sorted = false; 
 	}
-	//to do: assume this is atomic,  may prove incorrect, see: https://stackoverflow.com/questions/16320838/when-do-i-really-need-to-use-atomicbool-instead-of-bool
-	// https://stackoverflow.com/questions/14624776/can-a-bool-read-write-operation-be-not-atomic-on-x86
-	// it seems safe but if atomic gives same speed, might as well make it atomic
-	
-	
 	return sorted;
 }
 
@@ -835,7 +950,7 @@ bool parms_is_superset_matrix(const IntegerMatrix& x, const IntegerVector& item_
 		scores[(item_id[i]-1) * maxs + item_score[i]] = true;
 	
 	
-	bool is_super = true;
+	std::atomic<bool> is_super(true);
 	
 #pragma omp parallel for
 	for(int i=0; i< nit; i++)
@@ -921,7 +1036,7 @@ List suf_stats_nrm(const IntegerVector& booklet_id, const IntegerVector& booklet
 		plt_booklet_score[i] = std::get<1>(k);
 		plt_item_id[i] = std::get<2>(k);
 		plt_n[i] = std::get<1>(s);
-		plt_mean[i++] = (double)(std::get<0>(s))/std::get<1>(s);		
+		plt_mean[i++] = ((double)(std::get<0>(s)))/std::get<1>(s);		
 	}
 	
 	plt_booklet_id.attr("levels") = booklet_id.attr("levels");	
@@ -1020,7 +1135,6 @@ List suf_stats_im(const IntegerVector& booklet_score, const IntegerVector& item_
 		{			
 			if(ss_i[itm * nscore + s] > 0)
 			{
-				// to do: ss_c can overflow but protecting for that means changing the estIM routine
 				ss_c[indx] = ss_c[itm * nscore + s] * s;
 				ss_i[indx++] = ss_i[itm * nscore + s];
 				ssi_item.push_back(itm+1); // 1-indexed
@@ -1066,14 +1180,12 @@ IntegerVector score_tab_single(const IntegerVector& scores, const int max_score)
 	return out;
 }
 
-// to do: pvalue 0 wordt NaN
-// about 10-30 times faster than R (small bonus for rasch) (to do: check for severly incomplete designs)
+
+// about 10-30 times faster than R (small bonus for rasch) (to~do: check for severly incomplete designs)
 // [[Rcpp::export]]
 DataFrame tia_C(const IntegerVector& booklet_id, const IntegerVector& booklet_score, const IntegerVector& item_id, const IntegerVector& item_score, const int nb, const int nit, 
 				const IntegerVector& frst_item, const IntegerVector& ds_booklet_id, const IntegerVector& ds_item_id ) 
-				// to do: mind gaps in booklets through slection or wff, what to to with user supplied factor?
 {
-	//assume booklet and item sorted in design, to do: enforce
 	
 	const int n = booklet_id.length();
 

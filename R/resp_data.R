@@ -1,5 +1,4 @@
 
-# to do: check why postgres startswith gives error instead of reroute
 
 # faster factor, does not handle or check for NA values
 ffactor = function (x, levels=NULL, as_int=FALSE) 
@@ -13,43 +12,48 @@ ffactor = function (x, levels=NULL, as_int=FALSE)
   }
 }
 
-# to do: respect inputted factors (perhaps shrink levels?)
+
 
 #' Functions for developers
 #'
-#' Regular users are advised not to use these functions.
+#' These functions are meant for people who want to develop their own models based
+#' on the data management structure of dexter. Very little input checking is performed,
+#' the benefit is some extra speed over using `get_responses`.
+#' Regular users are advised not to use these functions 
 #' as incorrect use can easily crash your R-session or lead to unexpected results.
 #' 
-#' These functions are meant for people wishing to develop their own models based
-#' on the data management structure of dexter. Very little input checking is performed,
-#' the benefit is some extra speed over using regular dexter functions.
-#' 
-#' Not all aspects of the interface are completely stable yet
 #'
-#' @param dataSrc data.frame, numeric matrix, dexter database or `dx_resp_data` object
+#' @param dataSrc data.frame, integer matrix, dexter database or `dx_resp_data` object
 #' @param qtpredicate quoted predicate
 #' @param extra_columns to be returned in addition to person_id, booklet_id, item_score, item_id
 #' @param summarised if TRUE, no item scores are returned, just sumscores
 #' @param env environment for evaluation of qtpredicate, defaults to caller environment
 #' @param protect_x best set TRUE (default)
 #' @param retain_person_id whether to retain the original person_id levels or just use arbitrary integers
-#' @param merge_within_person merge different booklets for the same person together
+#' @param merge_within_persons merge different booklets for the same person together
 #' @param parms_check data.frame of item_id, item_score to check for coverage of data
 #' 
 #' @return
-#' list of type `dx_resp_data` containing:
-#' when summarised=F
-#'   x: tibble(person_id, booklet_id, item_id, item_score, booklet_score <, extra_columns>)
-#' when summarised=T
-#'   x: tibble(person_id, booklet_id, booklet_score <, extra_columns>)
+#' \describe{
+#' \item{get_resp_data}{ returns a list with class `dx_resp_data` with elements
+#' \describe{
+#' \item{x}{
+#' when summarised is FALSE, a tibble(person_id, booklet_id, item_id, item_score, booklet_score [, extra_columns>]), sorted in such a way that
+#'   all rows pertaining to the same person-booklet are together
+#'   
+#' when summarised is TRUE, a tibble(person_id, booklet_id, booklet_score [, extra_columns])}
+#' \item{design}{
+#'   tibble(booklet_id, item_id), sorted
+#'   }}}
 #'
-#' design: tibble(booklet_id, item_id), sorted
-#'
+#' \item{get_resp_matrix}{returns a matrix of item scores as commonly used in other IRT packages, facilitating
+#' easy connection of your own package to the data management capabilities of dexter}
+#' }
 get_resp_data = function(dataSrc, qtpredicate=NULL, 
                          extra_columns=NULL, 
                          summarised=FALSE, env=NULL,
                          protect_x=TRUE, retain_person_id=TRUE,
-                         merge_within_person = FALSE,
+                         merge_within_persons = FALSE,
                          parms_check=NULL)
 {
 
@@ -59,7 +63,7 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
       stop("predicates don't work in combination with dx_resp_data object yet")
     
     return(resp_data.from_resp_data(dataSrc, extra_columns=extra_columns, summarised=summarised, 
-                                    protect_x=protect_x,merge_within_person = merge_within_person))
+                                    protect_x=protect_x,merge_within_persons = merge_within_persons))
   }
   
   if(is.matrix(dataSrc))
@@ -71,21 +75,30 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
       stop("a dataSrc of class 'matrix' is not supported for this function")
     
     return(resp_data.from_matrix(dataSrc, summarised=summarised, retain_person_id=retain_person_id,
-                                 merge_within_person=merge_within_person, parms_check=parms_check ))
+                                 merge_within_persons=merge_within_persons, parms_check=parms_check ))
     
   }
+  if(is_grouped_df(dataSrc))
+    dataSrc = ungroup(dataSrc)
   
   if(is.null(env)) 
     env = caller_env()
   
+  if(is_db(dataSrc))
+    protect_x = FALSE
+  
+  booklet_safe = is_bkl_safe(dataSrc, qtpredicate, env) 
+  
 
   # special case that can be done much faster
-  # to do: merge_within person could be accomodated, seems not much use though if we lose booklet id
-  if(summarised && inherits(dataSrc,'DBIConnection') && is_bkl_safe(dataSrc, qtpredicate) && !merge_within_person)
+  # merge_within person could be accomodated, seems not much use though if we lose booklet id
+  if(summarised && is_db(dataSrc) && booklet_safe && !merge_within_persons)
   {
     columns = union(extra_columns, c('person_id','booklet_id'))
     
     x = db_get_testscores(dataSrc, qtpredicate=qtpredicate, columns=columns, env=env)
+    if(NROW(x)==0)
+      stop("no data to analyse")
     x$person_id = ffactor(x$person_id, as_int = !retain_person_id)
     
     if(is.null(qtpredicate))
@@ -128,19 +141,31 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
         items_in = paste(sql_quote(unique(no_par$item_id), "'"), collapse=',')
         if(is.null(qtpredicate))
         {
-          sql = paste("SELECT DISTINCT item_id, item_score FROM dxResponses INNER JOIN dxScoring_rules USING(item_id,response)",
-                      "WHERE item_id IN(",items_in,");")
+          itm_sc = dbGetQuery(dataSrc,
+              paste("SELECT DISTINCT item_id, item_score FROM dxResponses INNER JOIN dxScoring_rules USING(item_id,response)",
+                          "WHERE item_id IN(",items_in,");"))
         } else
         {
-          # to do:  proof of concept, this can fail if predicate has non sql functions, better add a distinct option to get_responses
-          sql = paste("SELECT DISTINCT item_id, item_score FROM", 
-                      get_cte(dataSrc, union(c('item_id','item_score'), all.vars(qtpredicate))),
-                      qtpredicate2where(qtpredicate, dataSrc, env),
-                      "AND item_id IN(",items_in,");")
+		      pred_sql = qtpredicate_to_sql(qtpredicate, dataSrc, env)	
+          itm_sc = try(dbGetQuery(dataSrc,
+                          paste("SELECT DISTINCT item_id, item_score FROM", 
+                          get_cte(dataSrc, union(c('item_id','item_score'), pred_sql$db_vars)),
+                          pred_sql$where,
+                          "AND item_id IN(",items_in,");")), silent=TRUE)
+          if(inherits(itm_sc,'try-error'))
+          {
+            itm_sc = dbGetQuery(dataSrc,
+                       paste("SELECT DISTINCT ",
+                             paste(union(c('item_id','item_score'), pred_sql$db_vars),collapse=','),
+                             "FROM", 
+                             get_cte(dataSrc, union(c('item_id','item_score'), pred_sql$db_vars)),
+                             "WHERE item_id IN(",items_in,");"))
+            itm_sc = itm_sc[eval_tidy(qtpredicate, data=itm_sc, env=env) , c('item_id','item_score')]
+          }
         }
         
-        no_par = dbGetQuery(dataSrc, sql) %>%
-          dplyr::intersect(no_par)
+        no_par = dplyr::intersect(itm_sc, no_par)
+
         
         if(nrow(no_par) > 0)
         {
@@ -150,7 +175,7 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
         }
       }
     }
-    out = list(x=x, design=design, summarised=TRUE, merge_within_person = merge_within_person)
+    out = list(x=x, design=design, summarised=TRUE, merge_within_persons = merge_within_persons)
     
     class(out) = append('dx_resp_data', class(out))
     return(out)
@@ -159,33 +184,36 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
   
   
   columns = unique(c(extra_columns, 'person_id','booklet_id','item_id','item_score'))
+  
   if(inherits(dataSrc,'data.frame'))
     columns = intersect(colnames(dataSrc), columns)
   
   x = get_responses_(dataSrc, qtpredicate = qtpredicate, columns = columns, env = env) 
   
-  # to do: tidy up order of code
+  if(NROW(x)==0)
+    stop("no data to analyse")
+  
   if(inherits(dataSrc,'data.frame'))
   {
-    booklet_safe = FALSE
     if(nrow(dataSrc) > nrow(x))
       protect_x = FALSE
-  } else
-  {
-    booklet_safe = is_bkl_safe(dataSrc, qtpredicate) 
-    protect_x = FALSE
+    mn = min(x$item_score)
+    if(is.na(mn))
+      stop('item scores may not be NA')
+    if(mn<0)
+      stop('all item scores must be >= 0')
   }
-  
+
   
   # very common case, saves .5 seconds with letting from_df sort it out
-  if(booklet_safe && inherits(dataSrc,'DBIConnection') && !summarised)
+  if(booklet_safe && is_db(dataSrc) && !summarised)
   {
     x$person_id = ffactor(x$person_id, 
-                          dbGetQuery(dataSrc,'SELECT person_id FROM dxPersons 
+                          dbGetQuery(dataSrc,'SELECT person_id FROM dxpersons 
                                               ORDER BY person_id;')$person_id, 
                           as_int=!retain_person_id)
     
-    design = dbGetQuery(dataSrc, "SELECT booklet_id, item_id, item_position FROM dxBooklet_design;")
+    design = dbGetQuery(dataSrc, "SELECT booklet_id, item_id, item_position FROM dxbooklet_design;")
     
     if(is.null(qtpredicate))
     {
@@ -206,7 +234,7 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
     if(!is.null(parms_check))
     {
       suppressWarnings({
-        itm_scr = dbGetQuery(dataSrc,"SELECT DISTINCT item_id, item_score FROM dxScoring_rules WHERE item_score > 0;") %>%
+        itm_scr = dbGetQuery(dataSrc,"SELECT DISTINCT item_id, item_score FROM dxscoring_rules WHERE item_score > 0;") %>%
           semi_join(tibble(item_id=levels(design$item_id)), by='item_id') %>%
           anti_join(parms_check, by=c('item_id','item_score'))
       })
@@ -230,7 +258,7 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
       x = arrange(x, .data$person_id, .data$booklet_id) 
     }
 
-    if(merge_within_person)
+    if(merge_within_persons)
     {
       # it is likely we have to merge stuff
       # wrapping in function might make R copy more stuff again
@@ -247,7 +275,7 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
         distinct(.data$booklet_id, .data$item_id)
       
       if(nr > nrow(design))
-        stop("attempt to merge booklets that have common items, this is not allowed")
+        stop("at least one person has answered at least one item more than once, this is not allowed")
       
       lvls = bmap %>%
         group_by(.data$booklet_id) %>%
@@ -262,7 +290,7 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
     
     x$booklet_score = mutate_booklet_score(x$person_id, x$booklet_id, x$item_score)
     
-    out = list(x=x, design=design, summarised=FALSE, merge_within_person = merge_within_person)
+    out = list(x=x, design=design, summarised=FALSE, merge_within_persons = merge_within_persons)
     class(out) = append('dx_resp_data', class(out))
     return(out)
   }
@@ -272,25 +300,23 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
     resp_data.from_df(x, extra_columns=extra_columns, 
                       summarised = summarised,
                       booklet_safe = booklet_safe, protect_x = protect_x,
-                      merge_within_person = merge_within_person, retain_person_id=retain_person_id,
+                      merge_within_persons = merge_within_persons, retain_person_id=retain_person_id,
                       parms_check=parms_check))
   
 }
 
 
 resp_data.from_resp_data = function(rsp, extra_columns=NULL, summarised=FALSE, protect_x=TRUE,
-                                    merge_within_person = merge_within_person) # to do
+                                    merge_within_persons = merge_within_persons) 
 {
   
-  # to do: we assume respdata is always ordered, is this always so?
-  
-  if(merge_within_person && !rsp$merge_within_person)
+  if(merge_within_persons && !rsp$merge_within_persons)
   {
     return(
       resp_data.from_df(rsp$x, extra_columns=extra_columns, 
                         summarised = summarised,
                         booklet_safe = TRUE, protect_x = protect_x,
-                        merge_within_person = merge_within_person))
+                        merge_within_persons = merge_within_persons))
     
   }
   
@@ -308,8 +334,7 @@ resp_data.from_resp_data = function(rsp, extra_columns=NULL, summarised=FALSE, p
     rsp$x$item_id = duplicate(rsp$x$item_id)
     rsp$x$item_score = duplicate(rsp$x$item_score)
   }
-  #print(system.time({y=distinct(rsp$x[,union(c('booklet_id','person_id','booklet_score'), extra_columns)],person_id, booklet_id,.keep_all=T)}))
-  
+   
   np = summarise_booklet_score(rsp$x$person_id, rsp$x$booklet_id, rsp$x$item_id, rsp$x$item_score)
   if(!is.null(extra_columns))
   {
@@ -325,18 +350,18 @@ resp_data.from_resp_data = function(rsp, extra_columns=NULL, summarised=FALSE, p
   
   return(rsp)
 }
-# to do: think about what to do when booklet, item, person are already factors
-# to do: unit test should check that item and booklet are factors for all possible input variants
-# to do: make sure no crash on empty data
+
+
 # data.frame x
 # set protect_x to FALSE for a possible small speed gain if x may be destroyed
 resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
                              booklet_safe = FALSE, protect_x = FALSE,
-                             merge_within_person = FALSE, retain_person_id=TRUE,
-                             parms_check=NULL) #factored = false
+                             merge_within_persons = FALSE, retain_person_id=TRUE,
+                             parms_check=NULL) 
 {
+  if(NROW(x)==0)
+    stop("no data to analyse")
   
-  # to do: allow uppercase?
   if(!all(c('person_id','item_id','item_score') %in% colnames(x)))
     stop("data should contain the columns 'item_id','item_score','person_id'")
   
@@ -345,70 +370,65 @@ resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
                           colnames(x))
   x = x[,all_columns]
   
-  design = NULL
+  pointers = lapply(x, ppoint)
+  
   if(!is.factor(x$item_id))
     x$item_id = ffactor(x$item_id)
-  x$item_score = as.integer(x$item_score) # to do: NA's, smaller than 0? (use min?)
+  
+  x$item_score = as.integer(x$item_score) 
+  
   if(!is.null(parms_check))
   {
-    # to do: if necessary, this can be done in c
-    scores = distinct(x, .data$item_id, .data$item_score)
     suppressWarnings({
-      uncalibrated = dplyr::setdiff(scores, parms_check)})
+      uncalibrated = dplyr::setdiff(x[x$item_score>0,c('item_id','item_score')], 
+                                    parms_check[parms_check$item_score>0, c('item_id','item_score')])}) 
     
     if(nrow(uncalibrated) > 0)
     {
-      message("no parameters for these items and/or scores")
+      message("no parameters for these items and/or scores:")
       print(uncalibrated)
       stop("no parameters for some items and/or scores in your data")
     }
   }
   
-  person_duplicated = FALSE
   if(!is.integer(x$person_id) && !is.factor(x$person_id))
-  {
     x$person_id = ffactor(x$person_id, as_int = !retain_person_id)
-    person_duplicated = TRUE
-  }
-  
+
   if('booklet_id' %in% all_columns)
   {
     if(!is.factor(x$booklet_id))
       x$booklet_id = ffactor(x$booklet_id)
-    if(merge_within_person)
+    
+    if(merge_within_persons)
     { 
       if(is.unsorted(x$person_id))
-      {
         x = arrange(x, .data$person_id) 
-        protect_x = FALSE
-      }
     }else if(!is_person_booklet_sorted(x$booklet_id, x$person_id))
     {
       x = arrange(x, .data$person_id, .data$booklet_id)
-      protect_x = FALSE
     }
   } else
   {
     if(is.unsorted(x$person_id))
-    {
       x = arrange(x, .data$person_id) 
-      protect_x = FALSE
-    }
+
     x$booklet_id = 1L
     class(x$booklet_id) = 'factor'
-    levels(x$booklet_id) = 'bkl'
+    levels(x$booklet_id) = 'bkl' 
     booklet_safe = FALSE
   }
   
   if(summarised && protect_x)
   {
-    x$item_score = duplicate(x$item_score)
-    if(!person_duplicated)
+    if(ppoint(x$item_score) == pointers$item_score)
+      x$item_score = duplicate(x$item_score)
+    
+    if(ppoint(x$person_id) == pointers$person_id)
       x$person_id = duplicate(x$person_id)
   }  
   
   
-  if(booklet_safe && !merge_within_person)
+  if(booklet_safe && !merge_within_persons)
   {
     design = get_design_C(x$booklet_id, x$item_id)
     if(summarised)
@@ -418,10 +438,10 @@ resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
       {
         #item_id has become permutation index
         indx = head(x$item_id, np)
-        x[1:np, extra_columns] = x[indx, extra_columns]
+        x[seq_len(np), extra_columns] = x[indx, extra_columns]
       }
       names(x)[names(x)=='item_score'] = 'booklet_score'
-      x = head(x[,union(c('booklet_id','person_id','booklet_score'), extra_columns)],np)
+      x = x[seq_len(np),union(c('booklet_id','person_id','booklet_score'), extra_columns)]
       
     } else
     {
@@ -430,29 +450,27 @@ resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
     
   } else
   {
-    # to do: multiple bk per person, check if booklet column supplied
-    # to do: if necessary duplicate item_score for summarised
+    if(protect_x && ppoint(x$item_score) == pointers$item_score)
+      x$item_score = duplicate(x$item_score)
     
     if(summarised)
     {
-      res = make_booklets_summed(x$person_id, x$booklet_id, x$item_id, x$item_score, merge_within_person)
+      res = make_booklets_summed(x$person_id, x$booklet_id, x$item_id, x$item_score, merge_within_persons)
       names(x)[names(x)=='item_score'] = 'booklet_score'
       if(!is.null(extra_columns))
       {
         #item_id has become permutation index
-        indx = head(x$item_id, res$np)
-        x[1:res$np, extra_columns] = x[indx, extra_columns]
+        x[seq_len(res$np), extra_columns] = x[x$item_id[seq_len(res$np)], extra_columns]
       }
-      # to do: might be done in c more easily by assigning new vecot ron location of old?
-      x = head(x[,union(c('booklet_id','person_id','booklet_score'), extra_columns)],res$np)
+      x = x[seq_len(res$np), union(c('booklet_id','person_id','booklet_score'), extra_columns)]
     } else
     {
       x$booklet_score = 0L
-      res = make_booklets(x$person_id, x$item_id, x$item_score, x$booklet_id, x$booklet_score, merge_within_person)
+      res = make_booklets(x$person_id, x$item_id, x$item_score, x$booklet_id, x$booklet_score, merge_within_persons)
     }
     
     design = res$design
-    if('booklet_id' %in% all_columns)
+    if('booklet_id' %in% all_columns && !merge_within_persons)
     {
       lvls = res$map_booklet %>%
         arrange( .data$booklet_id) %>%
@@ -467,9 +485,8 @@ resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
       } 
     } else
     {
-      lvls = sprintf(paste0("%0",ceiling(log10(nrow(res$map_booklet))),'i'), 1:nrow(res$map_booklet))
+      lvls = sprintf(paste0("bk%0",ceiling(log10(nrow(res$map_booklet))),'i'), 1:nrow(res$map_booklet))
     }
-    # to do: does this involve copying?
     class(x$booklet_id) = 'factor'
     class(design$booklet_id) = 'factor'
     levels(x$booklet_id) = lvls
@@ -477,18 +494,18 @@ resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
   }   
   
   
-  out = list(x = x,  design = design, summarised = summarised, merge_within_person = merge_within_person)
+  out = list(x = x,  design = design, summarised = summarised, merge_within_persons = merge_within_persons)
   class(out) = append('dx_resp_data', class(out))
   
   out
 }
 
 
-resp_data.from_matrix = function(X, summarised = summarised, retain_person_id = retain_person_id,
-                                 merge_within_person = merge_within_person, parms_check = parms_check )
+resp_data.from_matrix = function(X, summarised = FALSE, retain_person_id = TRUE,
+                                 merge_within_persons = FALSE, parms_check = NULL )
 {
 
-  if(merge_within_person)
+  if(merge_within_persons)
     stop('merge within person not yet implemented for matrix dataSrc')
   
   if(!is.numeric(X))
@@ -496,22 +513,26 @@ resp_data.from_matrix = function(X, summarised = summarised, retain_person_id = 
   
   if(typeof(X) == 'double')
     mode(X) = 'integer'
-  
-  
-  # to do: check duplicate row names/column names, parms_check
+
   
   if(is.null(colnames(X)))
-    colnames(X) = sprintf('%04i',1:ncol(X))
+  {
+    colnames(X) = sprintf('item%04i',1:ncol(X))
+  } else if(anyDuplicated(colnames(X)))
+  {
+    stop('dataSrc must not have duplicate column names')
+  }
+  
   
   if(min(X, na.rm=TRUE) < 0)
     stop("item_scores must be positive numbers")
   
   if(!is.null(parms_check))
   {
-    maxs = max(X, na.rm=TRUE) # to do: maxs in respData, all non summarised routines compute max
+    maxs = max(X, na.rm=TRUE) 
     # item_score <= maxs is necessary to prevent out of bounds in C
     parms_check = parms_check %>%
-      mutate(item_id = ffactor(as.character(.data$item_id), levels = colnames(X),as_int=TRUE)) %>%
+      mutate(item_id = ffactor(as.character(.data$item_id), levels = sort(colnames(X)),as_int=TRUE)) %>%
       filter(!is.na(.data$item_id) & .data$item_id <= ncol(X) & .data$item_score <= maxs) %>%
       arrange(.data$item_id)
     
@@ -530,7 +551,7 @@ resp_data.from_matrix = function(X, summarised = summarised, retain_person_id = 
   } else
   {
     out = make_booklets_matrix(X, ncol(X), nrow(X))
-    
+
     class(out$x$item_id) = 'factor' 
     levels(out$x$item_id) = colnames(X)
   }
@@ -594,7 +615,7 @@ intersection = function(respData)
 # item_property must be a string indicating a column in x
 # no protection against making meaningless combinations if more than one booklet!
 # currently removes any other person or item property columns from x
-# to do: extend to keep person properties for future extended use, accept item property in design or as extra
+# to~do: extend to keep person properties for future extended use, accept item property in design or as extra
 polytomize = function(respData, item_property, protect_x=TRUE)
 {
   if(!is.factor(respData$x[[item_property]]))
@@ -611,8 +632,6 @@ polytomize = function(respData, item_property, protect_x=TRUE)
     respData$x$item_score = duplicate(respData$x$item_score)
     respData$x$booklet_score = duplicate(respData$x$booklet_score)
   }
-  
-  #assume a sorted respData object. To do: check code and make unit test so this is always so.
   
   res = polytomize_C(respData$x$booklet_id, respData$x$person_id, respData$x[[item_property]], 
                        respData$x$item_score, respData$x$booklet_score,
@@ -640,7 +659,8 @@ filter.dx_resp_data = function(respData, predicate, env=NULL, .recompute_sumscor
   if(is.null(env)) env = caller_env()
   qtpredicate = eval(substitute(quote(predicate)))
   
-  if(.recompute_sumscores & respData$summarised) stop('cannot recompute booklet_scores on summarised data')
+  if(.recompute_sumscores & respData$summarised) 
+    stop('cannot recompute booklet_scores on summarised data')
   
   respData$filter = c(respData$filter, as.character(qtpredicate))
   
@@ -653,13 +673,9 @@ filter.dx_resp_data = function(respData, predicate, env=NULL, .recompute_sumscor
   
   
   if(.recompute_sumscores)
-  {
-    respData$x = respData$x %>% 
-      group_by(.data$person_id, .data$booklet_id) %>% 
-      mutate(booklet_score = sum(.data$item_score))  %>% 
-      ungroup()
-  }
-  
+    respData$x$booklet_score = mutate_booklet_score(respData$x$person_id, respData$x$booklet_id,
+                                                     respData$x$item_score) 
+
   return(respData)
 }
 
@@ -675,19 +691,10 @@ semi_join.dx_resp_data = function(respData, y, by, .recompute_sumscores = FALSE)
   
   respData$design = semi_join(respData$design, y, by = by)
   respData$x = semi_join(respData$x, y, by = by)
-  
-  #to do: it seems unlikely that a semi_join would reorder the much larger df x
-  # tested it: ok, maybe a test in testthat
-  
+
   if(.recompute_sumscores)
-  {
-    # this can be faster
-    # respData$x = respData$x %>% 
-    #   group_by(.data$person_id, .data$booklet_id) %>% 
-    #   mutate(booklet_score = sum(.data$item_score))  %>% 
-    #   ungroup()
-    respData$x$booklet_score = mutate_booklet_score(respData$x$person_id, respData$x$booklet_id, respData$x$item_score)
-  }
+    respData$x$booklet_score = mutate_booklet_score(respData$x$person_id, respData$x$booklet_id, 
+                                                    respData$x$item_score)
   
   return(respData)
 }
@@ -705,11 +712,9 @@ anti_join.dx_resp_data = function(respData, y, by, .recompute_sumscores = FALSE)
   respData$design = anti_join(respData$design, y, by = by)
   respData$x = anti_join(respData$x, y, by = by)
   
-  #to do: it seems unlikely that an anti_join would reorder the much larger df x
-  # tested it: ok, maybe a test in testthat
-  
   if(.recompute_sumscores)
-    respData$x$booklet_score = mutate_booklet_score(respData$x$person_id, respData$x$booklet_id, respData$x$item_score)
+    respData$x$booklet_score = mutate_booklet_score(respData$x$person_id, respData$x$booklet_id, 
+                                                    respData$x$item_score)
 
   
   return(respData)
@@ -731,3 +736,57 @@ by.dx_resp_data = function (data, INDICES, FUN, ..., simplify = TRUE)
   }, 
   simplify = simplify)
 }
+
+
+
+# compute new levels for item_id in respData
+# returns items in same order with new factor levels (underlying integer is different)
+# caller should replace levels of item_id in respData by new levels of items
+re_factor_item_id = function(respData, items)
+{
+  rd_lev = levels(respData$design$item_id)
+  itm_lev = levels(items)
+  if(length(rd_lev) != length(itm_lev) || !all(rd_lev==itm_lev))
+  {
+    new_lev = c(rd_lev, setdiff(itm_lev,rd_lev))
+    items = match(itm_lev, new_lev)[as.integer(items)]
+    class(items) = 'factor'
+    levels(items) = new_lev
+  }
+  items
+}
+
+#' @rdname get_resp_data
+get_resp_matrix = function(dataSrc, qtpredicate=NULL, env=NULL)
+{
+  if(is.matrix(dataSrc))
+    stop('dataSrc is already a matrix')
+  
+  if(inherits(dataSrc,'dx_resp_data'))
+  {
+    if(!is.null(qtpredicate))
+      stop('predicates on resp_data objects are not yet supported')
+    x = dataSrc$x
+  } else
+  {
+    x = get_responses_(dataSrc, qtpredicate = qtpredicate, columns = c('person_id','item_id','item_score'), env = env) 
+
+    if(!is.factor(x$person_id))
+      x$person_id = ffactor(x$person_id)
+    
+    if(!is.factor(x$item_id))
+      x$item_id = ffactor(x$item_id)
+  }
+  out = matrix(NA_integer_, nlevels(x$person_id),nlevels(x$item_id))
+  fill_resp_matrix(x$person_id, x$item_id, x$item_score, out)
+  rownames(out) = levels(x$person_id)
+  colnames(out) = levels(x$item_id)
+  out
+}
+
+
+
+
+
+
+

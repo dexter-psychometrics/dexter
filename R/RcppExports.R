@@ -9,6 +9,22 @@ fast_factor_lev <- function(x, levs, as_int) {
     .Call(`_dexter_fast_factor_lev`, x, levs, as_int)
 }
 
+ppoint <- function(x) {
+    .Call(`_dexter_ppoint`, x)
+}
+
+fill_resp_matrix <- function(person_id, item_id, item_score, out) {
+    invisible(.Call(`_dexter_fill_resp_matrix`, person_id, item_id, item_score, out))
+}
+
+ds_connected_groups <- function(a) {
+    .Call(`_dexter_ds_connected_groups`, a)
+}
+
+unequal_categories_C <- function(group_id, item_id, item_score, nit, max_score) {
+    .Call(`_dexter_unequal_categories_C`, group_id, item_id, item_score, nit, max_score)
+}
+
 make_booklets <- function(person_id, item_id, item_score, booklet_id, booklet_score, merged) {
     .Call(`_dexter_make_booklets`, person_id, item_id, item_score, booklet_id, booklet_score, merged)
 }
@@ -89,8 +105,8 @@ NR_booklets <- function(b, a, first, last, scoretab, n_score, nit, max_par_bk, E
     invisible(.Call(`_dexter_NR_booklets`, b, a, first, last, scoretab, n_score, nit, max_par_bk, EsufI, H))
 }
 
-calibrate_Bayes_C <- function(a, first, last, ib, bi, nbi, nib, bfirst, blast, bnscore, m, sufI, bkscoretab, b_in, fixed_b, nIter) {
-    .Call(`_dexter_calibrate_Bayes_C`, a, first, last, ib, bi, nbi, nib, bfirst, blast, bnscore, m, sufI, bkscoretab, b_in, fixed_b, nIter)
+calibrate_Bayes_C <- function(a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, bkscoretab, b_in, fixed_b, from, step, ndraws, prior_eta = 0.5, prior_rho = 0.5, pgw = 0L) {
+    .Call(`_dexter_calibrate_Bayes_C`, a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, bkscoretab, b_in, fixed_b, from, step, ndraws, prior_eta, prior_rho, pgw)
 }
 
 H_im <- function(a, b, c, first, last, sufI, sufC, scoretab, H, Grad, pi_s, diagonal = FALSE) {
@@ -109,8 +125,8 @@ NR_booklets_mean <- function(b, a, first, last, scoretab, n_score, nit, max_par_
     invisible(.Call(`_dexter_NR_booklets_mean`, b, a, first, last, scoretab, n_score, nit, max_par_bk, EsufI, H))
 }
 
-ittotmat_C <- function(b, a, c, first, last) {
-    .Call(`_dexter_ittotmat_C`, b, a, c, first, last)
+ittotmat_C <- function(b, a, c, first, last, ps) {
+    .Call(`_dexter_ittotmat_C`, b, a, c, first, last, ps)
 }
 
 ss_table_enorm_C <- function(a, b, first, last, firstA, lastA, firstB, lastB) {
@@ -137,11 +153,23 @@ theta_mle_sec <- function(b, a, first, last) {
     .Call(`_dexter_theta_mle_sec`, b, a, first, last)
 }
 
+escore_wle <- function(theta, b, a, first, last, nI, max_a) {
+    .Call(`_dexter_escore_wle`, theta, b, a, first, last, nI, max_a)
+}
+
+theta_wle_sec <- function(b, a, first, last) {
+    .Call(`_dexter_theta_wle_sec`, b, a, first, last)
+}
+
 IJ_c <- function(theta, b, a, first, last, I, J, logFi) {
     invisible(.Call(`_dexter_IJ_c`, theta, b, a, first, last, I, J, logFi))
 }
 
 PVrecycle <- function(b, a, first, last, mu, sigma, scoretb, A, alpha = -1.0) {
     .Call(`_dexter_PVrecycle`, b, a, first, last, mu, sigma, scoretb, A, alpha)
+}
+
+sampleIM <- function(bIM, cIM, a, first, last, scoretab) {
+    .Call(`_dexter_sampleIM`, bIM, cIM, a, first, last, scoretab)
 }
 

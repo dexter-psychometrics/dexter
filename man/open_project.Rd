@@ -7,10 +7,10 @@
 open_project(db_name = "dexter.db")
 }
 \arguments{
-\item{db_name}{The name of the data base to be opened.}
+\item{db_name}{The name of the database to be opened.}
 }
 \value{
-a datbase connection object
+a database connection object
 }
 \description{
 Opens a database created by function \code{start_new_project}

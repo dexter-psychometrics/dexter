@@ -4,13 +4,12 @@
 \alias{get_design}
 \title{Test design}
 \usage{
-get_design(db, format = c("long", "wide"), rows = c("booklet_id",
+get_design(dataSrc, format = c("long", "wide"), rows = c("booklet_id",
   "item_id", "item_position"), columns = c("item_id", "booklet_id",
   "item_position"), fill = NA)
 }
 \arguments{
-\item{db}{a connection to a dexter database, e.g. the output of \code{start_new_project}
-or \code{open_project}}
+\item{dataSrc}{a dexter database or any object form which a design can be inferred}
 
 \item{format}{return format, see below}
 
@@ -22,7 +21,7 @@ or \code{open_project}}
 }
 \value{
 A data.frame with the design. The contents depend on the rows, columns and format parameters
- if \code{format} is \code{'long'} a data.frame with columns: booklet_id, item_id, item_position
+ if \code{format} is \code{'long'} a data.frame with columns: booklet_id, item_id, item_position (if available)
  if \code{format} is \code{'wide'} a data.frame with the rows defined by the \code{rows} parameter and 
  the columns by the \code{columns} parameter, with the remaining variable (i.e. item_id, booklet_id or item_position)
  making up the cells

@@ -4,7 +4,7 @@
 #' Estimate the parameters of the Interaction model and the Rasch model
 #'
 #'
-#' @param dataSrc Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score
+#' @param dataSrc a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score
 #' @param predicate An optional expression to subset data, if NULL all data is used
 #' @return An object of class \code{rim} holding results
 #' for the Rasch model and the interaction model.
@@ -98,30 +98,23 @@ fit_inter_ = function(dataSrc, qtpredicate = NULL, env=NULL, regs=TRUE)
 
   if(regs)
   {
-    # add the regressions, used for plotting
-    mm = sweep(model.matrix(~0 + as.character(ssIS$item_id)), 1, ssIS$item_score, '*')
-    est$itrRM = as.data.frame(crossprod(mm, est$ctrRM))
-    est$itrIM = as.data.frame(crossprod(mm, est$ctrIM))
-    row.names(est$itrRM) = row.names(est$itrIM) = as.character(ssI$item_id)
+    est$itrRM = rowsum(est$ctrRM * ssIS$item_score, ssIS$item_id, reorder=FALSE)
+    est$itrIM = rowsum(est$ctrIM * ssIS$item_score, ssIS$item_id, reorder=FALSE)
   }
   
   output = list(est = est, 
-                inputs = list(ssI = ssI, ssIS = ssIS, plt = plt, scoretab = scoretab))
+                inputs = list(ssI = ssI, ssIS = ssIS, plt = plt, scoretab = scoretab, design=respData$design))
   class(output) = append("rim", class(output))
   output
 }
 
-#to do: check fit_inter plot in test_vignettes
-
-
-# to do: this function has not been tested in ages
 
 #' Estimate the Rasch and the Interaction model per domain
 #'
 #' Estimate the parameters of the Rasch model and the Interaction model
 #'
 #'
-#' @param dataSrc Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score
+#' @param dataSrc a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score
 #' @param predicate An optional expression to subset data, if NULL all data is used
 #' @param item_property The item property defining the
 #' domains (subtests)
@@ -135,33 +128,29 @@ fit_inter_ = function(dataSrc, qtpredicate = NULL, env=NULL, regs=TRUE)
 #' @seealso \code{\link{plot.rim}}, \code{\link{fit_inter}}, \code{\link{add_item_properties}}
 #'
 #' @examples
-#' \dontrun{
-#' db = start_new_project(verbAggrRules, "verbAggression.db")
+#' 
+#' db = start_new_project(verbAggrRules, ":memory:")
 #' add_booklet(db, verbAggrData, "agg")
 #' add_item_properties(db, verbAggrProperties)
 #' mSit = fit_domains(db, item_property= "situation")
 #' plot(mSit)
 #'
 #' close_project(db)
-#' }
+#' 
 #'
 fit_domains = function(dataSrc, item_property, predicate = NULL)
 {
-  # to do: no unit test for this function yet
-  
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
 
   respData = get_resp_data(dataSrc, qtpredicate, extra_columns = item_property, env = env, retain_person_id=FALSE) %>%
 	  intersection() %>%
-    polytomize(item_property, protect_x = !inherits(dataSrc,'DBIconnection')) %>%
+    polytomize(item_property, protect_x = !is_db(dataSrc)) %>%
     fit_inter_()
 
 }
 
 
-
-# to do: check if rename from regs to est influences mst plot
 
 #' A plot method for the interaction model
 #'
@@ -189,45 +178,46 @@ fit_domains = function(dataSrc, item_property, predicate = NULL)
 #'
 plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
                      curtains=10, show.observed=TRUE, ...){
-  allItems = x$inputs$ssI$item_id
+  allItems = as.character(x$inputs$ssI$item_id)
   if(!is.null(items))
   {
-    if(length(setdiff(items, allItems)) > 0) stop(paste('item(s):', paste0(setdiff(items, allItems), collapse=', '), 'not found'))
+    if(length(setdiff(items, allItems)) > 0) 
+      stop(paste('item(s):', paste0(setdiff(items, allItems), collapse=', '), 'not found'))
   } else
   {
     items = allItems
   }
   user.args = list(...)
 
-  if(any(c('nr','nc') %in% names(user.args)))
-  {
-    warning('Arguments `nr` and `nc` have been deprecated and are ignored, you can achieve the desired ',
-            'result by using par(mfrow=c(nr,nc)).')
-    user.args[['nc']] = NULL
-    user.args[['nr']] = NULL
-  }
-  
   qua = curtains/200
   qnt=NULL
   if(qua>0 && qua<.5) {
-    qnt = quantile(rep(as.integer(x$inputs$scoretab$booklet_score), x$inputs$scoretab$N), c(qua,1-qua))
+    #qnt = quantile(rep(as.integer(x$inputs$scoretab$booklet_score), x$inputs$scoretab$N), c(qua,1-qua))
+    qnt = weighted_quantile(x$inputs$scoretab$booklet_score, x$inputs$scoretab$N, c(qua,1-qua))
   }
 
   npic = length(items)
 
+  max_score = ncol(x$est$itrRM)-1L
+  scores = x$est$possible_scores
+  zRM = x$est$itrRM[,scores+1L]
+  zIM = x$est$itrIM[,scores+1L]
+  
+  
   if (overlay && !summate) overlay=FALSE
-  if (overlay) {
+  if (overlay) 
+  {
     # only summate possible
     # do the Rasch model
     #
-    z = x$est$itrRM
-    z = z[row.names(z) %in% items,]
-    maxScore = ncol(z)-1
+    z = zRM[row.names(zRM) %in% items,]
+    items = row.names(z)
+    maxy = max(z[1,ncol(z)])
 
     plot.args = merge_arglists(user.args,
                                default=list(main="$model model",xlab="Test score",
                                             ylab="Item score", bty='l'),
-                               override=list(x = c(0,maxScore),y= c(0,max(z)), type="n"))
+                               override=list(x = c(0,max_score),y= c(0,maxy), type="n"))
 
     plot.args$main = fstr(plot.args$main, list(model='Rasch'))
     plot.args$sub = fstr(plot.args$sub, list(model='Rasch'))
@@ -235,22 +225,21 @@ plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
     do.call(plot, plot.args)
     draw_curtains(qnt)
     
-    for (i in 1:npic) lines(0:maxScore,z[i,]) # the actual lines
-    lx = sample(0:maxScore, npic, replace = FALSE) # label the lines
+    for (i in 1:npic) 
+      lines(scores,z[i,]) # the actual lines
+    lx = sample(scores, npic, replace = FALSE) # label the lines
     for (i in 1:npic) {
       points(lx[i], z[i,lx[i]+1], co="white", cex=1.6, pch=19)
       text(lx[i], z[i,lx[i]+1], items[i], co=1, cex=.6)
     }
     # do the Interaction model
     #
-    z = x$est$itrIM
-    z = z[row.names(z) %in% items,]
-    maxScore = ncol(z)-1
+    z = zIM[row.names(zIM) %in% items,]
 
     plot.args = merge_arglists(user.args,
                                default=list(main="$model model",xlab="Test score",
                                             ylab="Item score", bty='l'),
-                               override=list(x = c(0,maxScore),y= c(0,max(z,na.rm=TRUE)), type="n"))
+                               override=list(x = c(0,max_score),y= c(0,maxy), type="n"))
 
     plot.args$main = fstr(plot.args$main, list(model='Interaction'))
     plot.args$sub = fstr(plot.args$sub, list(model='Interaction'))
@@ -258,8 +247,9 @@ plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
     do.call(plot, plot.args)
     draw_curtains(qnt)
     
-    for (i in 1:npic) lines(x$est$possible_scores, z[i,x$est$possible_scores+1L])
-    lx = sample(0:maxScore, npic, replace = FALSE) # label the lines
+    for (i in 1:npic) 
+      lines(scores, z[i,])
+    lx = sample(scores, npic, replace = FALSE) # label the lines
     for (i in 1:npic) {
       points(lx[i], z[i,lx[i]+1], col="white", cex=1.6, pch=19)
       text(lx[i], z[i,lx[i]+1], items[i], col=1, cex=.6)
@@ -272,16 +262,14 @@ plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
     
     if (summate) {
       # for each item in turn, do both models (with summation), and plot
-      zI = x$est$itrIM
-      zR = x$est$itrRM
-      maxScore = ncol(zR)-1
+
       for (i in items) {
-        mxY = max(zR[row.names(zR)==i,],na.rm=TRUE)
+        maxy = zRM[row.names(zRM)==i,ncol(zRM)]
 
         plot.args = merge_arglists(user.args,
                                    default=list(main='Item $item_id',xlab="Test score",
                                                 ylab="Item score", bty='l'),
-                                   override=list(x = c(0,maxScore),y = c(0,mxY), type="n"))
+                                   override=list(x = c(0,max_score),y = c(0,maxy), type="n"))
 
         plot.args$main = fstr(plot.args$main, list(item_id=i))
         plot.args$sub = fstr(plot.args$sub, list(item_id=i))
@@ -293,15 +281,13 @@ plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
           plt = filter(x$inputs$plt, .data$item_id == i)
           points(plt$booklet_score, plt$meanScore, col="coral",pch=20)
         }
-        # to do: possible scores also for not summate
-        lines(x$est$possible_scores, zI[row.names(zI)==i,x$est$possible_scores+1L], col="gray80", lwd=3)
-        lines(x$est$possible_scores, zR[row.names(zR)==i,x$est$possible_scores+1L])
+        lines(scores, zIM[row.names(zIM)==i,], col="gray80", lwd=3)
+        lines(scores, zRM[row.names(zRM)==i,])
       }
       
     } else {
-      zI = x$est$ctrIM
-      zR = x$est$ctrRM
-      maxScore = ncol(zR)-1
+      zI = x$est$ctrIM[,scores+1L]
+      zR = x$est$ctrRM[,scores+1L]
       # for each item in turn, similar but possibly multiline and coloured
       for (i in items) {
         ssI = filter(x$inputs$ssI, .data$item_id==i)
@@ -313,7 +299,7 @@ plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
         plot.args = merge_arglists(user.args,
                                    default=list(main='Item $item_id',xlab="Test score",
                                                 ylab="Probability",bty='l'),
-                                   override=list(x = c(0,maxScore),y = 0:1, type="n"))
+                                   override=list(x = c(0,max_score),y = 0:1, type="n"))
 
         plot.args$main = fstr(plot.args$main, list(item_id=i))
         plot.args$sub = fstr(plot.args$sub, list(item_id=i))
@@ -322,14 +308,14 @@ plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
 
         draw_curtains(qnt)
         for (j in 1:nrow(prb)) {
-          lines(0:maxScore, prb[j,], col=pte[j], lwd=3)
+          lines(scores, prb[j,], col=pte[j], lwd=3)
         }
         prb = zR[ssI$first : ssI$last,]
         pte = qcolors(nrow(prb))
         for (j in 1:nrow(prb)) {
-          lines(0:maxScore, prb[j,], col=pte[j])
+          lines(scores, prb[j,], col=pte[j])
         }
-      } # eol items
+      } # eo items
       
     } # eo not summate
     
@@ -344,22 +330,63 @@ print.rim <- function(x, ...){
 }
 
 
-# TO DO: reparameterize pars for IM
 coef.rim = function(object, ...) 
 {
   x = object
   first = x$inputs$ssI$first
   last  = x$inputs$ssI$last
-  dRM = x$est$bRM[-first]
-  dRM = -log(dRM/dRM[1])
-  dIM = x$est$bIM[-first]
-  dIM = -log(dIM/dIM[1])
   report_RM = toOPLM(x$inputs$ssIS$item_score, x$est$bRM, first, last)
+  report_IM = toOPLM(x$inputs$ssIS$item_score, x$est$bIM, first, last)
   
   IS = tibble(item_id = x$inputs$ssIS$item_id[-first], item_score = x$inputs$ssIS$item_score[-first],
-              beta_rasch = as.vector(report_RM$beta), beta_IM = dIM)
-  I = tibble(item_id = x$inputs$ssI$item_id, sigma = log(x$est$cIM), SE_sigma= x$est$se.c, fit_IM=x$est$fit.stats)
+              beta_rasch = as.vector(report_RM$beta), beta_IM = as.vector(report_IM$beta))
+  I = tibble(item_id = x$inputs$ssI$item_id, sigma = log(x$est$cIM), SE_sigma= x$est$se.sigma, fit_IM=x$est$fit.stats)
   
-  inner_join(IS,I,by='item_id') %>% arrange(.data$item_id, .data$item_score) %>% as.data.frame()
+  inner_join(IS,I,by='item_id') %>% 
+	  arrange(.data$item_id, .data$item_score) %>% 
+    mutate(item_id=as.character(.data$item_id)) %>%
+	  df_format()
 }
 
+
+#' Simulation from the interaction model
+#'
+#' Simulate item scores conditional on test scores using the interaction model
+#'
+#' @param m an object produced by function \code{fit_inter}
+#' @param scores vector of test scores
+#' 
+#' @return
+#' a matrix with item scores, one column per item and one row per test score. Row order
+#' equal to scores
+#' 
+r_score_IM = function(m, scores)
+{
+
+  first = m$inputs$ssI$first
+  last = m$inputs$ssI$last
+  a = m$inputs$ssIS$item_score
+  bIM = m$est$bIM
+  cIM = m$est$cIM
+  maxs = sum(a[last])
+
+  if(any(scores>maxs))
+    stop('scores may not be larger than the maximum score on the test')
+  
+  scoretab = score_tab_single(scores, maxs)
+  
+  s = sampleIM(bIM,cIM,a,as.integer(first-1L), as.integer(last-1L), scoretab)
+
+  if(scoretab[1]>0)
+    s[1:scoretab[1],] = 0
+  
+  if(scoretab[maxs+1]>0)
+    s[(nrow(s)-scoretab[maxs+1]+1):nrow(s),] = a[last]
+  
+  colnames(s) = m$inputs$ssI$item_id
+  
+  if(is.unsorted(scores))
+    s = s[order(order(scores)),,drop=FALSE]
+
+  s
+}

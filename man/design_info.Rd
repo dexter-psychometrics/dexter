@@ -7,7 +7,7 @@
 design_info(dataSrc, predicate = NULL)
 }
 \arguments{
-\item{dataSrc}{a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score}
+\item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}
 
 \item{predicate}{An optional expression to subset data, if NULL all data is used}
 }
@@ -16,7 +16,7 @@ a list with the following components
 \describe{
 \item{design}{a data.frame with columns booklet_id, item_id, item_position, n_persons} 
 \item{connected_booklets}{a data.frame with columns booklet_id, group; 
-booklets with the same `group` are connected to eachother.} 
+booklets with the same `group` are connected to each other.} 
 \item{connected}{TRUE/FALSE indicating whether the design is connected or not} 
 \item{testlets}{a data.frame with columns item_id and testlet; items within the same testlet 
 always occur together in a booklet} 

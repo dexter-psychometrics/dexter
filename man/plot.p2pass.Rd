@@ -4,17 +4,17 @@
 \alias{plot.p2pass}
 \title{A plot method for probability_to_pass}
 \usage{
-\method{plot}{p2pass}(x, ..., booklet_id = NULL, what = c("both",
-  "equating", "sens/spec"))
+\method{plot}{p2pass}(x, what = c("all", "equating", "sens/spec", "roc"),
+  booklet_id = NULL, ...)
 }
 \arguments{
 \item{x}{An object produced by function \code{\link{probability_to_pass}}}
 
-\item{...}{Any additional plotting parameters.}
+\item{what}{information to plot, 'equating', 'sens/spec', 'roc, or 'all'}
 
 \item{booklet_id}{vector of booklet_id's to plot, if NULL all booklets are plotted}
 
-\item{what}{information to plot, 'equating', 'sens/spec' or 'both'}
+\item{...}{Any additional plotting parameters; e.g., cex = 0.7.}
 }
 \description{
 Plot equating information from probability_to_pass

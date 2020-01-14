@@ -5,10 +5,10 @@
 \title{Profile plot}
 \usage{
 profile_plot(dataSrc, item_property, covariate, predicate = NULL,
-  model = c("IM", "RM"), x = NULL, ...)
+  model = c("IM", "RM"), x = NULL, col = NULL, ...)
 }
 \arguments{
-\item{dataSrc}{Data source: a connection to a dexter database or a data.frame with columns: 
+\item{dataSrc}{a connection to a dexter database or a data.frame with columns: 
 person_id, item_id, item_score and the item_property and the covariate of interest.}
 
 \item{item_property}{The name of the item property defining the domains. 
@@ -25,7 +25,9 @@ the data better or at least as good as the Rasch model.}
 
 \item{x}{Which value of the item_property to draw on the x axis, if NULL, one is chosen automatically}
 
-\item{...}{further arguments to plot, many have useful defaults}
+\item{col}{vector of colors to use for plotting}
+
+\item{...}{further arguments to plot}
 }
 \description{
 Profile plot

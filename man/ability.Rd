@@ -5,24 +5,24 @@
 \alias{ability_tables}
 \title{Estimate abilities}
 \usage{
-ability(dataSrc, parms, predicate = NULL, method = c("MLE", "EAP"),
-  prior = c("normal", "Jeffreys"), use_draw = NULL, npv = 500,
-  mu = 0, sigma = 4, standard_errors = FALSE,
-  merge_within_person = FALSE)
+ability(dataSrc, parms, predicate = NULL, method = c("MLE", "EAP",
+  "WLE"), prior = c("normal", "Jeffreys"), use_draw = NULL,
+  npv = 500, mu = 0, sigma = 4, standard_errors = FALSE,
+  merge_within_persons = FALSE)
 
-ability_tables(parms, design = NULL, method = c("MLE", "EAP"),
+ability_tables(parms, design = NULL, method = c("MLE", "EAP", "WLE"),
   prior = c("normal", "Jeffreys"), use_draw = NULL, npv = 500,
   mu = 0, sigma = 4, standard_errors = TRUE)
 }
 \arguments{
-\item{dataSrc}{Data source: a connection to a dexter database or a data.frame with columns or a data.frame with columns: person_id, item_id, item_score}
+\item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}
 
-\item{parms}{An object returned by \code{\link{fit_enorm}} and containing
-parameter estimates}
+\item{parms}{object produced by \code{\link{fit_enorm}} or a data.frame with columns item_id, item_score and, 
+depending on parametrization, a column named either beta/delta, eta or b}
 
 \item{predicate}{An optional expression to subset data, if NULL all data is used}
 
-\item{method}{Maximum Likelihood (MLE) or Expected A posteriori (EAP)}
+\item{method}{Maximum Likelihood (MLE), Expected A posteriori (EAP) or Weighted Likelihood (WLE)}
 
 \item{prior}{If an EAP estimate is produced one can choose a normal prior or
 Jeffreys prior; i.e., a prior proportional to the square root of test information.}
@@ -41,13 +41,13 @@ If outside range, the last iteration will be used.}
 
 \item{standard_errors}{If true standard-errors are produced}
 
-\item{merge_within_person}{for persons who were administered multiple booklets, 
-whether to provide just one abilty value (TRUE) or one per booklet(FALSE)}
+\item{merge_within_persons}{for persons who were administered multiple booklets, 
+whether to provide just one ability value (TRUE) or one per booklet(FALSE)}
 
-\item{design}{A data.frame with columns item_id and optionally booklet_id. If design is NULL
-the score transformation table will be computed based on the test design 
-that was used to calibrate the items. If the column booklet_id is not included, the score 
-transformation table will be based on all items found in the design.}
+\item{design}{A data.frame with columns item_id and optionally booklet_id. If the column booklet_id is not included, the score 
+transformation table will be based on all items found in the design. If design is NULL
+and parms is an enorm fit object the score transformation table will be computed based on the test design 
+that was used to fit the items.}
 }
 \value{
 \describe{

@@ -5,7 +5,8 @@
 \alias{profile_tables}
 \title{Profile analysis}
 \usage{
-profiles(dataSrc, parms, item_property, predicate = NULL)
+profiles(dataSrc, parms, item_property, predicate = NULL,
+  merge_within_persons = FALSE)
 
 profile_tables(parms, domains, item_property, design = NULL)
 }
@@ -20,6 +21,8 @@ item_property must match a known item property. If datasrc is a data.frame, item
  one of its column names. For profile_tables item_property must match a column name in \code{domains}.}
 
 \item{predicate}{An optional expression to subset data in dataSrc, if NULL all data is used}
+
+\item{merge_within_persons}{whether to merge different booklets administered to the same person.}
 
 \item{domains}{data.frame with column item_id and a column with name equal to \code{item_property}}
 

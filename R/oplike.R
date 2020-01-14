@@ -1,6 +1,5 @@
 
 
-
 #' Start a new project from oplm files
 #'
 #' Creates a dexter project database and fills it with response data based on a .dat and .scr file
@@ -56,7 +55,12 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
   scr$itemLabels = trimws(scr$itemLabels)
   
   if(is.null(booklet_position))
+  {
     booklet_position = scr$booklet_position
+  } else
+  {
+    booklet_position = rng_fl(booklet_position)
+  }  
   
   if(is.null(responses_start))
     responses_start = scr$responses_start
@@ -80,18 +84,12 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
       stop('missing character may not be longer than the length of an individual response')
   
   if(!is.null(person_id))
-  {
-    if(length(person_id)!=2) stop('person_id should be a vector of length 2')
-    if(person_id[2]<person_id[1]) stop('person_id is invalid, end position is smaller than start position')
-  }
-  if(length(booklet_position)!=2) stop('booklet_position should be a vector of length 2')
-  if(booklet_position[2]<booklet_position[1]) stop('booklet_position is invalid, end position is smaller than start position')
-  
-  
+    person_id = rng_fl(person_id)
+
   if(anyDuplicated(scr$itemLabels))
   {
     warning("screenfile contains duplicate itemlabels, labels have been adjusted to make them unique")
-    scr$itemLabels = sprintf('%04i_%s',1:length(scr$itemLabels),scr$itemLabels)
+    scr$itemLabels = sprintf('i%04i_%s',1:length(scr$itemLabels),scr$itemLabels)
   }
   
   rules = tibble(item_id = rep(scr$itemLabels, as.integer(scr$maxScore)+1+length(missing_character)), 
@@ -104,11 +102,11 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
   
   finished = FALSE
   dbTransaction(db,{
-    dbExecute(db,'ALTER TABLE dxBooklets ADD COLUMN booklet_on_off INTEGER NOT NULL DEFAULT 1;')
-    dbExecute(db,'ALTER TABLE dxBooklet_design ADD COLUMN item_local_on_off INTEGER NOT NULL DEFAULT 1;')
-    dbExecute(db,'ALTER TABLE dxItems ADD COLUMN item_global_on_off INTEGER NOT NULL DEFAULT 1;')
+    dbExecute(db,'ALTER TABLE dxbooklets ADD COLUMN booklet_on_off INTEGER NOT NULL DEFAULT 1;')
+    dbExecute(db,'ALTER TABLE dxbooklet_design ADD COLUMN item_local_on_off INTEGER NOT NULL DEFAULT 1;')
+    dbExecute(db,'ALTER TABLE dxitems ADD COLUMN item_global_on_off INTEGER NOT NULL DEFAULT 1;')
     
-    dbExecute(db,'UPDATE dxItems SET item_global_on_off=:onoff WHERE item_id=:item;', 
+    dbExecute_param(db,'UPDATE dxitems SET item_global_on_off=:onoff WHERE item_id=:item;', 
                 tibble(onoff=scr$globCal, item=scr$itemLabels))
   
     design = tibble(booklet_id = as.character(unlist(lapply(1:scr$nBook, function(x) rep(x,scr$nitBook[x])))),
@@ -118,9 +116,9 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
               inner_join(tibble(item_nbr = 1:scr$nit, item_id = scr$itemLabels), by='item_nbr') %>%
               arrange(.data$booklet_id, .data$item_position) 
             
-    dbExecute(db,'INSERT INTO dxBooklets(booklet_id, booklet_on_off) VALUES(:b,:onoff);',
+    dbExecute_param(db,'INSERT INTO dxbooklets(booklet_id, booklet_on_off) VALUES(:b,:onoff);',
                       tibble(b=as.character(1:scr$nBook),onoff=scr$bookOn))
-    dbExecute(db,'INSERT INTO dxBooklet_design(booklet_id, item_id, item_position, item_local_on_off) 
+    dbExecute_param(db,'INSERT INTO dxbooklet_design(booklet_id, item_id, item_position, item_local_on_off) 
                             VALUES(:booklet_id,:item_id,:item_position, :onoff);', 
 					select(design, .data$booklet_id,.data$item_id,.data$item_position, .data$onoff))                
     
@@ -138,12 +136,12 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
       if(anyNA(bkl))
       {
         cat('\n')
-        stop(paste0("empty booklet id's at position (", paste0(booklet_position, collapse=', ' ),")"))
+        stop(paste0("empty booklet id's at position (", paste0(booklet_position, collapse=', ' ),")"),call.=FALSE)
       } else if(min(bkl) < 1 || max(bkl) > scr$nBook)
       {
         cat('\n')
         stop(paste0("The following booklet_id's in data are not present in the .scr file:\n",
-                    paste(setdiff(bkl, 1:scr$nBook), collapse = ' ')))
+                    paste(setdiff(bkl, 1:scr$nBook), collapse = ' ')),call.=FALSE)
       }
       
       
@@ -183,12 +181,12 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
         inner_join(design, by=c('booklet_id','item_position')) %>%
         select(.data$person_id, .data$booklet_id, .data$item_id, .data$response)
       
-      dbExecute(db,'INSERT INTO dxPersons(person_id) VALUES(:person_id);',tibble(person_id=prs) )
-      dbExecute(db,'INSERT INTO dxAdministrations(person_id,booklet_id) VALUES(:person_id,:booklet_id);', 
+      dbExecute_param(db,'INSERT INTO dxpersons(person_id) VALUES(:person_id);',tibble(person_id=prs) )
+      dbExecute_param(db,'INSERT INTO dxadministrations(person_id,booklet_id) VALUES(:person_id,:booklet_id);', 
                       tibble(person_id=prs,booklet_id=bkl))
 
-      dbExecute(db,
-                'INSERT INTO dxResponses(booklet_id,person_id,item_id,response) 
+      dbExecute_param(db,
+                'INSERT INTO dxresponses(booklet_id,person_id,item_id,response) 
                                   VALUES(:booklet_id,:person_id,:item_id,:response);', 
                 select(data, .data$booklet_id,.data$person_id,.data$item_id,.data$response))
     
@@ -197,25 +195,24 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
     finished=TRUE
     if(!is.null(short_line))
     {
-      message('Too short lines in file:')
+      cat('\nLines in file that are too short:\n')
       print(short_line)
       warning('Some lines are too short for the number of responses that are supposed to be present ',
               'according to the design', call.=FALSE)
-      
     }
     cat('\nvalidating constraints...\n')
  }, on_error = function(e)
     {
       if(!finished) close(con)
    
-      if(finished & grepl('foreign key', e$message,ignore.case=TRUE))
+      if(finished && grepl('foreign key', e$message,ignore.case=TRUE))
       {
 
         # there are three deferred foreign key constraints
         # that are not caught until the end of the transaction (for efficiency reasons)
         # we can test them one by one
-        unknown_responses = dbGetQuery(db,'SELECT item_id, response FROM dxResponses 
-                                            EXCEPT SELECT item_id, response FROM dxScoring_rules;')
+        unknown_responses = dbGetQuery(db,'SELECT item_id, response FROM dxresponses 
+                                            EXCEPT SELECT item_id, response FROM dxscoring_rules;')
         if(nrow(unknown_responses) > 0)
         {
           cat('\nThe following responses were found in the data but they are not defined in the .scr file or coded as missing responses.')
@@ -232,7 +229,7 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
       
       dbRollback(db)  
       dbDisconnect(db)
-      stop(e, .call=FALSE)
+      stop(e)
     }, on_error_rollback=FALSE)
   return(db)
 }
@@ -269,11 +266,11 @@ read_oplm_par = function(par_path){
       }) %>% 
         bind_rows() %>%
         arrange(.data$item_id, .data$item_score) %>%
-        as.data.frame()
+        df_format()
     )
   } else
   {
-    return(as.data.frame(readCML(par_path)))
+    return(df_format(readCML(par_path)))
   }
 }
 
@@ -311,7 +308,8 @@ readCML = function(cml_path)
   # fill out the NA's in the first two columns
   pars %>% 
     fill(.data$nr, .data$item_id) %>% 
-    rename(nbr = 'nr')
+    rename(nbr = 'nr') %>%
+	df_format()
 }
 
 

@@ -6,34 +6,30 @@
 \usage{
 plausible_values(dataSrc, parms = NULL, predicate = NULL,
   covariates = NULL, nPV = 1, use_draw = NULL,
-  prior.dist = c("normal", "mixture"), merge_within_person = FALSE)
+  prior.dist = c("normal", "mixture"), merge_within_persons = FALSE)
 }
 \arguments{
-\item{dataSrc}{Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score}
+\item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}
 
-\item{parms}{An object returned by function \code{fit_enorm} and containing
-parameter estimates. If parms is given the function provides plausible values conditional on the 
-item parameters; i.e., these are considered known and might be based on a different data set. 
-If parms = NULL, the user is given plausible values marginalized over the posterior distribution of the item parameters. 
-In plain words, this means that the uncertainty of the item parameters is taken into account.}
+\item{parms}{An object returned by function \code{fit_enorm} containing parameter estimates. If parms are provided, item parameters are considered known. 
+If parms = NULL, plausible values are marginalized over the posterior distribution of the item parameters and uncertainty of the item parameters is taken into account.}
 
 \item{predicate}{an expression to filter data. If missing, the function will use 
 all data in dataSrc}
 
 \item{covariates}{name or a vector of names of the variables to group the populations used to improve the prior.
-A covariate must be a discrete person property (e.g. not a float) that indicates nominal categories, e.g. gender or school
+A covariate must be a discrete person property (e.g. not a float) that indicates nominal categories, e.g. gender or school.
 If dataSrc is a data.frame, it must contain the covariate.}
 
 \item{nPV}{Number of plausible values to draw per person.}
 
-\item{use_draw}{When the ENORM was fitted with a Gibbs sampler (this is}
+\item{use_draw}{When the ENORM was fitted with a Gibbs sampler, this specifies the use of a particular sample of item parameters used to generate the plausible value(s). If NULL, the posterior means are used. If outside range, the last iteration will be used.}
 
 \item{prior.dist}{use a normal prior or a mixture of two normals
-recognised automatically), the number of the random draw (iteration) to use 
-in generating the PV. If NULL, all draws will be averaged; that is, the posterior means are used for the item parameters. If outside range, the last iteration will be used.}
+recognised automatically),}
 
-\item{merge_within_person}{for persons who were administered multiple booklets, 
-whether to provide just one plausible value (TRUE) or one per booklet(FALSE)}
+\item{merge_within_persons}{If a person took multiple booklets, this indicates
+whether plausible values are generated per person (TRUE) or per booklet (FALSE)}
 }
 \value{
 A data.frame with columns booklet_id, person_id, booklet_score and nPV plausible values

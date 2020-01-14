@@ -1,9 +1,11 @@
 ---
 title: "Dexter: The Fundamentals"
-author: "Ivailo Partchev"
+author: "Ivailo Partchev, Jesse Koops, Timo Bechger, Gunter Maris"
 date: "`r Sys.Date()`"
 bibliography: dexter.bib
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    df_print: kable
 vignette: >
   %\VignetteIndexEntry{Dexter: The Fundamentals}
   %\VignetteEngine{knitr::rmarkdown}
@@ -26,6 +28,7 @@ par_hook = function(before, options, envir)
   }
 }
 knit_hooks$set(par = par_hook)
+
 ```
 
 **Dexter** is an R [@R] package intended as a robust and fairly comprehensive system for managing and analyzing test data organized in booklets. It includes facilities for importing and managing test data, assessing and improving the quality of data through basic test-and-item analysis, fitting an IRT model, and computing various estimates of ability.
@@ -46,8 +49,12 @@ In **dexter**, item scores are always integers, and the lowest score for each it
 
 With the scoring rules defined, a new **dexter** project is created with:
 
-```{r}
+```{r, eval=FALSE}
 db = start_new_project(verbAggrRules, "verbAggression.db", person_properties=list(gender="unknown"))
+```
+
+```{r, include=FALSE}
+db = start_new_project(verbAggrRules, ":memory:", person_properties=list(gender="unknown"))
 ```
 
 The first argument is the data frame with the scoring rules, the second is an optional name for the data base defaulting to 'dexter.db', and the third one is an optional list of person covariates. In this case, we have declared that, in addition to the response data, we will also input the gender of the respondents, with any missing data for gender represented as 'unknown'.
@@ -78,7 +85,7 @@ Of course, the `item_id` must be exactly as specified in the scoring rules. Func
 
 ```{r}
 get_booklets(db)
-get_items(db)
+head(get_items(db))
 get_persons(db) %>% 
   glimpse()
 ```

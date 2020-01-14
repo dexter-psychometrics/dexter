@@ -1,4 +1,3 @@
-# to do check 3dc app is able to deal with decimal test scores
 
 
 #' Standard setting
@@ -6,7 +5,7 @@
 #' Set performance standards on one or more test forms using the data driven direct consensus (3DC) method
 #'
 #' @param parms parameters object returned from fit_enorm
-#' @param design a data.frame with columns `cluster_id` and `item_id`
+#' @param design a data.frame with columns `cluster_id`, `item_id` and optionally `booklet_id`
 #' @param x an object containing parameters for the 3DC standard setting procedure
 #' @param object an object containing parameters for the 3DC standard setting procedure
 #' @param booklet_id which test form to plot
@@ -29,11 +28,11 @@
 #' 
 #' @references 
 #' Keuning J., Straat J.H., Feskens R.C.W. (2017) The Data-Driven Direct Consensus (3DC) Procedure: A New Approach to Standard Setting. 
-#' In: Blömeke S., Gustafsson JE. (eds) Standard Setting in Education. 
+#' In: Blomeke S., Gustafsson JE. (eds) Standard Setting in Education. 
 #' Methodology of Educational Measurement and Assessment. Springer, Cham
 #' 
 #' Moe E., Verhelst N. (2017) Setting Standards for Multistage Tests of Norwegian for Adult Immigrants 
-#' In: Blömeke S., Gustafsson JE. (eds) Standard Setting in Education. 
+#' In: Blomeke S., Gustafsson JE. (eds) Standard Setting in Education. 
 #' Methodology of Educational Measurement and Assessment. Springer, Cham
 #' 
 #' @seealso how to make a database for the 3DC standard setting application: \code{\link{standards_db}}
@@ -56,7 +55,7 @@
 #' plot(sts_par)
 #' 
 #' 
-#' # standards_db(sts_par,'test.db',c('mildly aggressive','dangerously aggressive'))
+#' # db_sts = standards_db(sts_par,'test.db',c('mildly aggressive','dangerously aggressive'))
 standards_3dc = function(parms, design)
 {
   
@@ -86,18 +85,6 @@ standards_3dc = function(parms, design)
   }
   est = lapply(split(design, design$booklet_id), function(tds)
   {
-    # if(method=='profiles')
-    # {
-    #   # to do: klopt niet helemaal, design nodig voor profile tables als meer dan 1 toets
-    #   profile_tables(parms, tds, 'cluster_id') %>%
-    #     mutate(cluster_score = as.integer(expected_domain_score)) %>%
-    #     group_by(.data$cluster_id, .data$cluster_score) %>%
-    #     summarise(booklet_score=min(.data$booklet_score)) %>%
-    #     ungroup() %>%
-    #     inner_join(distinct(tds,cluster_nbr, cluster_id), by='cluster_id') 
-    # 
-    # } else if(method=='expected')
-    # {
       es = expected_score(parms, items=tds$item_id)
       
       select(tds, booklet_id='cluster_id', .data$item_id) %>%
@@ -105,33 +92,6 @@ standards_3dc = function(parms, design)
         rename(cluster_id='booklet_id', cluster_score='booklet_score') %>%
         mutate(booklet_score = es(.data$theta)) %>%
         inner_join(distinct(tds, .data$cluster_nbr, .data$cluster_id), by='cluster_id')
-    
-    # } else if(method=='sim')
-    # {
-    #   ## Data complete
-    #   m = 300000
-    #   pv = plausible_values(respData, parms)
-    #   mu = mean(pv$PV1)
-    #   sigma = sd(pv$PV1)
-    #   
-    #   theta = rnorm(m, mu, sigma)
-    #   
-    #   cluster_scores = as_tibble(
-    #     do.call(cbind,
-    #       lapply(split(tds$item_id, tds$cluster_id), function(items) rowSums(r_score(parms, items=items)(theta)))))
-    #   
-    #   cluster_scores$booklet_score = rowSums(cluster_scores)
-    #   
-    #   cluster_scores %>% 
-    #     gather(key='cluster_id', value='cluster_score', -.data$booklet_score) %>%
-    #     group_by(.data$booklet_score, .data$cluster_id) %>%
-    #     summarise(cluster_score = as.integer(mean(.data$cluster_score))) %>%
-    #     ungroup() %>%
-    #     group_by(.data$cluster_id, .data$cluster_score) %>%
-    #     summarise(booklet_score=min(.data$booklet_score)) %>%
-    #     ungroup() %>%
-    #     inner_join(distinct(tds,cluster_nbr, cluster_id), by='cluster_id')
-    # }
   })
   
   
@@ -142,7 +102,7 @@ standards_3dc = function(parms, design)
 
 #' Export a standard setting database for use by the free 3DC application
 #' 
-#' This function creates an export (an sqlite dfatabse file) which can be used by the 3DC application. This is a free application with which
+#' This function creates an export (an sqlite database file) which can be used by the 3DC application. This is a free application with which
 #' a standard setting session can be facilitated through a LAN network using the Chrome browser.
 #' The 3DC application can be downloaded from \href{http://www.cito.com/our-expertise/implementation/3dc}{3DC application download page}
 #' 
@@ -153,14 +113,15 @@ standards_3dc = function(parms, design)
 #' @param standards vector of 1 or more standards. In case there are multiple test forms and
 #' they should use different performance standards, a list of such vectors. 
 #' The names of this list should correspond to the names of the testforms
-#' @param population a data.frame with three columns: `booklet_id`,`booklet_score`,`n` (where n is a count)
+#' @param population optional, a data.frame with three columns: `booklet_id`,`booklet_score`,`n` (where n is a count)
 #' @param group_leader login name of the group leader. The login password will always be `admin` 
 #' but can be changed in the 3DC application
 #' 
 standards_db = function(par.sts, file_name, standards, population=NULL, group_leader = 'admin')
 {
   if (file.exists(file_name)) 
-    file.remove(file_name)
+    if(!file.remove(file_name))
+      stop('file already exists and cannot be removed')
   
   booklets = names(par.sts$est)
   if(!is.list(standards))
@@ -225,12 +186,14 @@ standards_db = function(par.sts, file_name, standards, population=NULL, group_le
 
     if(!is.null(population))
     {
-      # to do: check input, booklets don't have to match, etc.
-      # better just ask for data.frame with booklet_id, test_score, n
+      check_df(population, c('booklet_id', 'booklet_score', 'n'))
+      #to~do: possible pop from prms?
+      if(length(intersect(booklets,population$booklet_id)) < length(booklets))
+        stop("one or more booklet_id's in your population do not exist in your sts parameters")
       dbExecute(db3dc, 
               "INSERT INTO Population(test_id,test_score,test_score_frequency) 
                 VALUES(:booklet_id, :booklet_score, :n);",
-                count(population, .data$booklet_id, .data$booklet_score))
+                select(population, .data$booklet_id, .data$booklet_score, .data$n))
     } 
   }, on_error=function(e){
     dbDisconnect(db3dc); file.remove(file_name); stop(e)})
@@ -245,7 +208,7 @@ coef.sts_par = function(object, ...)
     inner_join(distinct(object$design, .data$booklet_id, .data$cluster_nbr, .data$cluster_id), 
                by=c('booklet_id','cluster_nbr','cluster_id')) %>%
     arrange(.data$booklet_id, .data$cluster_nbr, .data$cluster_score) %>%
-    as.data.frame()
+    df_format()
 }
 
 #'@rdname standards_3dc
@@ -259,7 +222,7 @@ plot.sts_par = function(x, booklet_id=NULL, ...)
   {
 
     max_score = max(x$est[[tst]]$booklet_score)
-    n_cluster = max(x$est[[tst]]$cluster_nbr) # to do: gaten
+    n_cluster = max(x$est[[tst]]$cluster_nbr)
     
     default.args = list(
       xaxp = c(0,max_score,max_score),

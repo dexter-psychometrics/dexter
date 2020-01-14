@@ -73,24 +73,29 @@ The gray line shows the predicted frequency of each sum score under the hypothes
 The print function for the test shows a chi-squared test for the null hypothesis. Note that this uses R's option to simulate the p-value, which explains why the degrees of freedom are missing:
 
 ```{r}
-print(dd)
+dd
 ```
 
 Thus, we find a p-value of `r round(dd$est$test$p.value,digits=2)` for the hypothesis that there are no individual differences.
 
 What about real data?  **Dexter** comes with a well-known example preinstalled, the verbal aggression data [@VanData] analysed in great detail in [@boeck] and many others. 243 females and 73 males have answered on a 3-point scale ('yes', 'perhaps', or 'no') how likely they are to become verbally aggressive in four different frustrating situations
 
-```{r, fig.align='center', fig.height=4, fig.width=4}
+```{r, fig.align='center', fig.height=4, fig.width=4,results='hide',message=FALSE}
 db = start_new_project(verbAggrRules, ":memory:")
 add_booklet(db, verbAggrData, "data")
+
 dd = individual_differences(db, booklet_id=="data")
 plot(dd)
 ```
 
 This is quite different now, and the chi-squared test is highly significant.
 
+```{r}
+dd
+```
 
-```{r, show=FALSE}
+
+```{r, include=FALSE}
 close_project(db)
 ```
 

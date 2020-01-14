@@ -4,12 +4,17 @@
 \alias{plot.prms}
 \title{Plot for the extended nominal Response model}
 \usage{
-\method{plot}{prms}(x, item_id = NULL, nbins = 5, ci = 0.95, ...)
+\method{plot}{prms}(x, item_id = NULL, dataSrc = NULL,
+  predicate = NULL, nbins = 5, ci = 0.95, ...)
 }
 \arguments{
 \item{x}{object produced by fit_enorm}
 
 \item{item_id}{which item to plot, if NULL, one plot for each item is made}
+
+\item{dataSrc}{data source, see details}
+
+\item{predicate}{an expression to subset data in dataSrc}
 
 \item{nbins}{number of ability groups}
 
@@ -22,4 +27,9 @@ Default = 0.95 for a 95\% confidence interval}
 The plot shows 'fit' by comparing the expected score based on the model (grey line)
 with the average scores based on the data (black line with dots) for groups of students
 with similar estimated ability.
+}
+\details{
+The standard plot shows the fit against the sample on which the parameters were fitted. If
+dataSrc is provided, the fit is shown against the observed data in dataSrc. This may be useful 
+for plotting the fit in different subgroups as a visual test for item level DIF.
 }

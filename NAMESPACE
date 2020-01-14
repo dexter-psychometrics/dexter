@@ -4,7 +4,8 @@ importFrom(RcppArmadillo, "armadillo_version")
 import(dplyr, except="sql")
 importFrom(RSQLite, "SQLite")
 importFrom(DBI,"dbExecute", "dbGetQuery","dbDisconnect", "dbConnect", "dbListFields",
-            "dbCommit","dbRollback","dbBegin", "dbReadTable", "dbExistsTable") 
+            "dbCommit","dbRollback","dbBegin", "dbReadTable", "dbExistsTable", "dbIsValid",
+            "dbSendQuery","dbColumnInfo","dbClearResult") 
 importFrom(rlang,"caller_env",".data","eval_tidy","duplicate","env_has")
 importFrom(tidyr, "gather", "spread", "fill")
 importFrom(stats, "complete.cases", "cor", "quantile","var",
@@ -12,12 +13,12 @@ importFrom(stats, "complete.cases", "cor", "quantile","var",
             "cov", "mahalanobis", "model.matrix", "pchisq","rchisq",
             "rgamma", "runif", "setNames", 'rnorm',"chisq.test",
            "smooth.spline", "coef", "lm", "predict", "dnorm", "qnorm")
-importFrom(graphics, "plot", "axis", "image", "layout", "par", "lines", 
+importFrom(graphics, "plot", "axis", "image", "layout", "par", "lines", "hist",
            "text","legend","abline","segments","arrows","points", "rect","clip")
 importFrom(grDevices, "rainbow","colorRampPalette","col2rgb","rgb")
 importFrom(methods, "is", "new")
-importFrom(utils, "str", "head", "person", "setTxtProgressBar", "tail",
-             "txtProgressBar","modifyList")
+importFrom(utils, "str", "head", "person", "tail", "modifyList")
+importFrom(MASS, "lmsreg")
 
 
 # dexter.R
@@ -37,7 +38,7 @@ export(get_booklets)
 export(get_items)
 export(get_variables)
 export(get_rules)
-export(touch_rules) # nobody gets this name, to do: change
+export(touch_rules) 
 
 #data_selection.R
 export(get_responses)
@@ -56,12 +57,11 @@ S3method(plot,prms)
 export(information)
 export(expected_score)
 export(r_score)
-export(variance_score)
+export(p_score)
 
 S3method(print,inf_func)
 S3method(print,exp_func)
 S3method(print,sim_func)
-S3method(print,var_func)
 
 #ability.R
 export(ability)
@@ -77,6 +77,7 @@ export(plausible_scores)
 #interaction_model.R
 export(fit_inter)
 export(fit_domains)
+export(r_score_IM)
 
 S3method(plot,rim)
 S3method(print,rim)
@@ -105,6 +106,7 @@ S3method(print,p2pass)
 export(individual_differences)
 S3method(plot,tind)
 S3method(print,tind)
+S3method(coef,tind)
 
 #tia.R
 export(tia_tables)
@@ -119,6 +121,7 @@ S3method(coef,sts_par)
 
 #resp_data.R
 export(get_resp_data)
+export(get_resp_matrix)
 
 
 

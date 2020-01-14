@@ -35,52 +35,9 @@ fq=matrix(fq,3,3)
 attr(fq,"dimnames")=list(c(0,1,2),c(0,1,2))
 den = matrix(c(10,32,85,32,85,42,85,42,14),3,3)
 
-blues=function (n, h = 221, c. = c(80, 0), l = c(30, 90), power = 1.5, 
-          fixup = TRUE, gamma = NULL, alpha = 1, ...) 
-{
-  if (!is.null(gamma)) 
-    warning("'gamma' is deprecated and has no effect")
-  if (n < 1L) 
-    return(character(0L))
-  c <- rep(c., length.out = 2L)
-  l <- rep(l, length.out = 2L)
-  power <- rep(power, length.out = 2L)
-  rval <- seq(1, 0, length = n)
-  rval <- colorspace::hex(colorspace::polarLUV(L = l[2L] - diff(l) * rval^power[2L], 
-                       C = c[2L] - diff(c) * rval^power[1L], H = h[1L]), fixup = fixup, 
-              ...)
-  if (!missing(alpha)) {
-    alpha <- pmax(pmin(alpha, 1), 0)
-    alpha <- format(as.hexmode(round(alpha * 255 + 1e-04)), 
-                    width = 2L, upper.case = TRUE)
-    rval <- paste(rval, alpha, sep = "")
-  }
-  return(rval)
-}
+blues = c("#005D88","#0086A3","#84AEBF","#C2D0D6","#E2E2E2")
+reds = c("#972B2F","#A94C4F","#BD6F71","#D39A9B","#F7EFEF")
 
-reds=
-function (n, h = 11, c. = c(80, 5), l = c(35, 95), power = 0.6, 
-          fixup = TRUE, gamma = NULL, alpha = 1, ...) 
-{
-  if (!is.null(gamma)) 
-    warning("'gamma' is deprecated and has no effect")
-  if (n < 1L) 
-    return(character(0L))
-  c <- rep(c., length.out = 2L)
-  l <- rep(l, length.out = 2L)
-  power <- rep(power, length.out = 2L)
-  rval <- seq(1, 0, length = n)
-  rval <- colorspace::hex(colorspace::polarLUV(L = l[2L] - diff(l) * rval^power[2L], 
-                       C = c[2L] - diff(c) * rval^power[1L], H = h[1L]), fixup = fixup, 
-              ...)
-  if (!missing(alpha)) {
-    alpha <- pmax(pmin(alpha, 1), 0)
-    alpha <- format(as.hexmode(round(alpha * 255 + 1e-04)), 
-                    width = 2L, upper.case = TRUE)
-    rval <- paste(rval, alpha, sep = "")
-  }
-  return(rval)
-}
 ```
 
 The function `profile_plot` in package dexter produces plots like the following one based on the verbal aggression dataset:
@@ -102,7 +59,7 @@ Let us assume a test of four dichotomous items. The possible sum scores are then
 ```{r frq, echo=FALSE}
 rownames(fq) = c(0,1,2)
 colnames(fq) = c(0,1,2)
-fq
+knitr::kable(fq)
 ```
 
 
@@ -174,8 +131,7 @@ Special
 ```{r, fig3, echo=FALSE,out.extra='style="margin-left: -30px; margin-top: -50px;"'}
 special = fq / den
 j = 6-c(1,2,3,2,3,4,3,4,5)
-pa=blues(5)
-sp=pa[j]
+sp=blues[j]
 cloud(special, panel.3d.cloud = panel.3dbars,
       xbase = 0.4, ybase = 0.4, zlim = c(0, 1),
       scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",zlab ='',
@@ -193,9 +149,8 @@ What we do now is identify the pattern with the largest probability given a tota
 <div style='text-align:center;'>
 <div class='crop' style='display:inline-block;'>
 ```{r, fig41, echo=FALSE,out.extra='style="margin-left: -30px; margin-top: -50px;"'}
-pa=reds(5)
 hi = c(1,4,5,6,9)
-sp[hi] = pa[j[hi]]
+sp[hi] = reds[j[hi]]
 
 cloud(special, panel.3d.cloud = panel.3dbars,
       xbase = 0.4, ybase = 0.4, zlim = c(0, 1),
@@ -240,11 +195,11 @@ mtext('Do versus Want')
 ```
 
 
-Speaking in general, the profile plots can be used to investigate whether two (or more) groups of respondents attain the same test score in the same way. When applied to educational test data, the plots can be used to detect differences in the relative difficulty of (sets of) items for respondents that belong to different groups and are matched on the test score. This is different from regular procedures to detect *Differential Item Functioning (or DIF)*; and better. First of all, the procedure is not exploratory but requires its user to provide a meaningful classification of the items which should improve the odds that the results make sense to content-experts. Second, it looks explicitly at relations between items and avoids the erroneous conception of DIF as an item property [@BechgerMarisDIF]. 
+Speaking in general, the profile plots can be used to investigate whether two (or more) groups of respondents obtain the same test score in the same way. When applied to educational test data, the plots can be used to detect differences in the relative difficulty of (sets of) items for respondents that belong to different groups and are matched on the test score. In some cases, one would associate this to *Differential Item Functioning (or DIF)*. Note however, that profile plots are different from regular procedures to detect DIF; and better. First of all, the procedure is not exploratory but requires its user to provide a meaningful classification of the items which should improve the odds that the results make sense to content-experts. Second, it looks explicitly at relations between items and avoids the erroneous conception of DIF as an item property [@BechgerMarisDIF]. 
 
-Note that the profile plots got their name from their similarity to *profile analysis* which was proposed by Norman Verhelst [@VerhelstPA] and suggested by him and his co-workers as a method to test for DIF [@Yildirim14]. Profile analysis will become available in dexter in the near future. 
+Note that the profile plots got their name from their similarity to *profile analysis* which was proposed by Norman Verhelst [@VerhelstPA] and suggested by him and his co-workers as a method to test for DIF [@Yildirim14]. Regular profile analysis is also available in dexter. 
 
-```{r, show=FALSE}
+```{r, include=FALSE}
 close_project(db)
 ```
 

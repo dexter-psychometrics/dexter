@@ -37,7 +37,7 @@ A list with information about the recent import.
 Add item response data in long or wide format
 }
 \details{
-It is a common practice to keep respons data in tables where each row 
+It is a common practice to keep response data in tables where each row 
 contains the responses from a single person. \code{add_booklet} is provided to input
 data in that form, one booklet at a time. 
 

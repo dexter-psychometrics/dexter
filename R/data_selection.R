@@ -1,10 +1,9 @@
-# to do: postgres apparently has lower case table names  or case sensitive table names
 
 #' Selecting data
 #' 
 #' Extract data from a dexter database 
 #' 
-#' @param dataSrc a dexter project database or data.frame
+#' @param dataSrc a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score
 #' @param predicate an expression to select data on
 #' @param columns the columns you wish to select, can include any column in the project, see: \code{\link{get_variables}}
 #' @return a data.frame of responses
@@ -42,7 +41,8 @@ get_responses = function(dataSrc, predicate=NULL, columns=c('person_id','item_id
 {
   env = caller_env() 
   qtpredicate = eval(substitute(quote(predicate)))
-  get_responses_(dataSrc, qtpredicate=qtpredicate, env=env, columns=columns)
+  check_dataSrc(dataSrc)
+  df_format(get_responses_(dataSrc, qtpredicate=qtpredicate, env=env, columns=columns))
 }
 
 get_responses_ = function(dataSrc, qtpredicate=NULL, env=NULL, columns=c('person_id','item_id','item_score'))
@@ -55,34 +55,50 @@ get_responses_ = function(dataSrc, qtpredicate=NULL, env=NULL, columns=c('person
     if(is.null(qtpredicate))
       return(dataSrc[,columns])    
     
-    return(dataSrc[eval_tidy(qtpredicate, data=dataSrc, env=env), columns])
+    dataSrc[eval_tidy(qtpredicate, data=dataSrc, env=env), columns]
+  
+  } else if(inherits(dataSrc,'matrix'))
+  {
+    items = if.else(is.null(colnames(dataSrc)), sprintf('item%04i',1:ncol(dataSrc)), colnames(dataSrc))
+    persons = if.else(is.null(rownames(dataSrc)), 1:nrow(dataSrc), rownames(dataSrc))
+    
+    if(!is.null(qtpredicate))
+      stop('predicates not supported for matrix datasource')
+    
+    tibble(person_id=rep(persons, ncol(dataSrc)), 
+                  item_id=rep(items, each=nrow(dataSrc)),
+                  item_score=as.integer(dataSrc)) %>%
+      filter(!is.na(.data$item_score))
+    
+  } else
+  {
+    db_get_responses(dataSrc, qtpredicate=qtpredicate, env=env, columns=columns)
   }
   
-  db_get_responses(dataSrc, qtpredicate=qtpredicate, env=env, columns=columns)
 }
 
 
 get_cte = function(db, columns)
 {
   columns = setdiff(columns, 
-    c(dbListFields(db,'dxResponses'), dbListFields(db,'dxScoring_rules')))
+    c(dbListFields(db,'dxresponses'), dbListFields(db,'dxscoring_rules')))
   
-  cte = " dxResponses INNER JOIN dxScoring_rules USING(item_id, response)"
+  cte = " dxresponses INNER JOIN dxscoring_rules USING(item_id, response)"
   
-  if(length(intersect(dbListFields(db,'dxPersons'),columns))>0) 
-    cte = c(cte, 'INNER JOIN dxPersons USING(person_id)')
+  if(length(intersect(dbListFields(db,'dxpersons'),columns))>0) 
+    cte = c(cte, 'INNER JOIN dxpersons USING(person_id)')
 
-  if(length(intersect(dbListFields(db,'dxAdministrations'),columns))>0) 
-    cte = c(cte, 'INNER JOIN dxAdministrations USING(person_id, booklet_id)')
+  if(length(intersect(dbListFields(db,'dxadministrations'),columns))>0) 
+    cte = c(cte, 'INNER JOIN dxadministrations USING(person_id, booklet_id)')
     
-  if(length(intersect(dbListFields(db,'dxItems'),columns))>0) 
-    cte = c(cte, 'INNER JOIN dxItems USING(item_id)')
+  if(length(intersect(dbListFields(db,'dxitems'),columns))>0) 
+    cte = c(cte, 'INNER JOIN dxitems USING(item_id)')
   
-  if(length(intersect(dbListFields(db,'dxBooklets'),columns))>0) 
-    cte = c(cte, 'INNER JOIN dxBooklets USING(booklet_id)')
+  if(length(intersect(dbListFields(db,'dxbooklets'),columns))>0) 
+    cte = c(cte, 'INNER JOIN dxbooklets USING(booklet_id)')
   
-  if(length(intersect(dbListFields(db,'dxBooklet_design'),columns))>0) 
-    cte = c(cte, 'INNER JOIN dxBooklet_design USING(booklet_id, item_id)')
+  if(length(intersect(dbListFields(db,'dxbooklet_design'),columns))>0) 
+    cte = c(cte, 'INNER JOIN dxbooklet_design USING(booklet_id, item_id)')
   
   paste(cte, collapse=' ')
 }
@@ -93,39 +109,37 @@ db_get_responses = function(db, qtpredicate=NULL, columns=c('person_id','item_id
     env=caller_env() 
   
   columns = dbValid_colnames(columns)
-  if(is.null(qtpredicate))
-  {
-    where = ''
-    used_columns = columns
-  } else
-  {
-    where = try(qtpredicate2where(qtpredicate, db, env), silent=TRUE)
-    used_columns = union(columns, tolower(all.vars(qtpredicate)))                      
-  }
+	pred_sql = qtpredicate_to_sql(qtpredicate, db, env)
+  used_columns = union(pred_sql$db_vars, columns)
+  
   # decide which tables we need to join since joining costs time
   cte = get_cte(db, used_columns)
   
-  if(!inherits(where, 'try-error'))
-  { 
+  if(pred_sql$success)
+  {   
     respData = try(dbGetQuery(db, 
                      paste("SELECT", paste0(columns, collapse=','),
-                           "FROM", cte, where)),
+                           "FROM", cte, pred_sql$where)),
                    silent=TRUE)
     if(!inherits(respData,'try-error'))
       return(respData)
+    
+    if(grepl('malformed', respData))
+      stop('your database file appears to be broken, this can happen due to a copy error. For more information,', 
+           'see: https://www.sqlite.org/faq.html#q21')
   }
-  # to do: remove temp message
-  message('sql translation did not work')
-  print(qtpredicate)
+  #message('sql translation of the predicate failed')
+  #print(pred_sql)
+  #print(qtpredicate)
   
   # translation to sql did not work  
-  which_columns = intersect(c(columns, all.vars(qtpredicate)),
-                            get_variables(db)$name)
-          
-  respData = dbGetQuery(db, 
-               paste("SELECT", paste(which_columns, collapse=','),
-                      "FROM", cte))
 
+  respData = dbGetQuery(db, 
+               paste("SELECT", paste(used_columns, collapse=','),
+                      "FROM", cte))
+  
+  qtpredicate = correct_symbol_case(qtpredicate, used_columns,env=env)
+  
   return(respData[eval_tidy(qtpredicate, data=respData, env=env), columns])
 }
 
@@ -141,38 +155,28 @@ db_get_testscores = function(db, qtpredicate=NULL, columns=c('booklet_id','perso
     env=caller_env() 
   
   columns = dbValid_colnames(columns)
-  if(is.null(qtpredicate))
-  {
-    where = ''
-    used_columns = columns
-  } else
-  {
-    where = try(qtpredicate2where(qtpredicate, db, env), silent=TRUE)
-    # to do: non.nse??? 
-    used_columns = union(columns, tolower(all.vars(qtpredicate)))                       
-  }
+  pred_sql = qtpredicate_to_sql(qtpredicate, db, env)
+  used_columns = union(pred_sql$db_vars, columns)
+  
   # decide which tables we need to join since joining costs time
   cte = get_cte(db, used_columns)
   
-  if(!inherits(where, 'try-error'))
+  if(pred_sql$success)
   { 
-    # to do: postgres maes this a lower case column name, also for NFER its not an integer
-    # use booklet_score everywhere, booklet_score is annoying
     respData = try(dbGetQuery(db, 
                      paste("SELECT", paste0(columns, collapse=','), ", SUM(item_score) AS booklet_score",
-                             "FROM", cte, where,
+                             "FROM", cte, pred_sql$where,
                              "GROUP BY", paste0(columns, collapse=','),";")),        
                    silent=TRUE) 
     if(!inherits(respData,'try-error'))
       return(respData)
   }
   
-  which_columns = intersect(c(columns, all.vars(qtpredicate),'item_score'),
-                             get_variables(db)$name)
-        
   respData = dbGetQuery(db, 
-               paste("SELECT", paste(which_columns, collapse=','),
+               paste("SELECT", paste(used_columns, collapse=','),
                         "FROM", cte))
+  
+  qtpredicate = correct_symbol_case(qtpredicate, used_columns,env=env)
   
   # this is a worse case scenario, it will take very long compared to using C, as a to do?
   return(
@@ -183,8 +187,6 @@ db_get_testscores = function(db, qtpredicate=NULL, columns=c('booklet_id','perso
 }
 
 
-
-# to do: better error message for sqlite if db connection is lost
 
 
 
@@ -200,49 +202,47 @@ db_get_design = function(db, qtpredicate=NULL, env=NULL)
       dbGetQuery(db,
         "WITH bkl_count AS(
           SELECT booklet_id, COUNT(*) AS n_persons 
-            FROM dxAdministrations
+            FROM dxadministrations
               GROUP BY booklet_id)
             
          SELECT booklet_id, item_id, item_position, n_persons 
-           FROM dxBooklet_design
+           FROM dxbooklet_design
              INNER JOIN bkl_count USING(booklet_id);"))
   
-  if(is_bkl_safe(db, qtpredicate) )
+  if(is_bkl_safe(db, qtpredicate, env) )
   {
-    uns = setdiff(c(dbListFields(db,'dxAdministrations'), dbListFields(db,'dxPersons')),
+    uns = setdiff(c(dbListFields(db,'dxadministrations'), dbListFields(db,'dxpersons')),
                   'booklet_id')
-    
-    where = try(qtpredicate2where(qtpredicate, db, env))
-    
-    if(!inherits(where,'try-error'))
+    pred_sql = qtpredicate_to_sql(qtpredicate, db, env)
+
+    if(pred_sql$success)
     {
-      ## to do: all.vars and sql
-      if(length(intersect(all.vars(qtpredicate), uns)) == 0) 
+      if(length(intersect(pred_sql$db_vars, uns)) == 0) 
       {
         res = try(
           dbGetQuery(db, paste(
             "WITH bkl_count AS(
               SELECT booklet_id, COUNT(*) AS n_persons 
-                FROM dxAdministrations
+                FROM dxadministrations
                   GROUP BY booklet_id)
                 
              SELECT booklet_id, item_id, item_position, n_persons 
-               FROM dxBooklets
+               FROM dxbooklets
                  INNER JOIN bkl_count USING(booklet_id)
-                   INNER JOIN dxBooklet_design USING(booklet_id)
-                     INNER JOIN dxItems USING(item_id)",
-              where,";")))
+                   INNER JOIN dxbooklet_design USING(booklet_id)
+                     INNER JOIN dxitems USING(item_id)",
+              pred_sql$where,";")))
       } else
       {
         res = try(
           dbGetQuery(db, paste(
             "SELECT booklet_id, item_id, item_position, COUNT(*) AS n_persons 
-               FROM dxBooklets
-                 INNER JOIN dxBooklet_design USING(booklet_id)
-                   INNER JOIN dxItems USING(item_id)
-                    INNER JOIN dxAdministrations USING(booklet_id)
-                      INNER JOIN dxPersons USING(person_id)",
-                where,
+               FROM dxbooklets
+                 INNER JOIN dxbooklet_design USING(booklet_id)
+                   INNER JOIN dxitems USING(item_id)
+                    INNER JOIN dxadministrations USING(booklet_id)
+                      INNER JOIN dxpersons USING(person_id)",
+                pred_sql$where,
             "GROUP BY booklet_id, item_id, item_position;")))
       }
       if(!inherits(res,'try-error'))
@@ -251,14 +251,8 @@ db_get_design = function(db, qtpredicate=NULL, env=NULL)
   }
   
   # fail safe + case when !booklet_safe, will be slower  
-  rsp = get_resp_data(db, qtpredicate, env=env, extra_columns = 'item_position')$x 
-  if(nrow(rsp) == 0)
-    return(rsp)
-  
-  rsp %>%
-    group_by(.data$booklet_id, .data$item_id, .data$item_position) %>%
-    summarise(n_persons = n()) %>%
-    ungroup()
+  rsp = get_resp_data(db, qtpredicate, env=env, extra_columns = 'item_position')$x %>%
+    count(.data$booklet_id, .data$item_id, .data$item_position, name='n_persons')
 
 }
 

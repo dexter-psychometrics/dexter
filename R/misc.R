@@ -1,18 +1,76 @@
-# common utility functions and datasets
+# common utility functions
 
-# to do: better progressbars that can be turned off for vignettes
 
-.onUnload = function (libpath) {
-  library.dynam.unload("dexter", libpath)
+.onLoad = function(libname, pkgname) 
+{
+  dexter_options = list(dexter.use_tibble=FALSE, dexter.progress=TRUE)
+  
+  to_set = setdiff(names(dexter_options), names(options()))
+  if(length(to_set)>0)
+    options(dexter_options[to_set])
+
+  invisible()
+}
+
+show_progress = function()
+{
+  is.null(getOption("knitr.in.progress")) && getOption("dexter.progress", FALSE)
+}
+
+pg_start = function() cat('|')
+
+pg_tick = function(step=NULL, nsteps=NULL)
+{
+  if(is.null(step) || is.null(nsteps))
+  {
+    cat('=')
+  } else
+  {
+    w = getOption("width") - nchar('| 100%') - 2L
+    l = as.integer(w * step/nsteps)
+    cat(sprintf('\r|%s%s| %3i%%',strrep('=',l),strrep(' ',w-l),as.integer(100*step/nsteps)))
+  }
+}
+  
+pg_close = function() cat('\n')
+
+## Burnin and thinning for different purposes:
+# cal: Bayesian calibration
+# pv: plausible values
+# ps: plausible scores
+Gibbs.settings = list(from.cal = 20L, step.cal = 2L, start_b='cml',
+                      from.pv = 20L, step.pv = 5L,
+                      from.ps = 1L, step.ps = 1L)
+
+
+
+which_gibbs = function(n_samples, n_gibbs)
+{
+  step = n_gibbs %/% n_samples
+  from = (n_gibbs %% n_samples) + 1L
+  
+  which = 
+    if(step>0)
+      seq(from, n_gibbs, step)
+    else
+      1:n_samples
+  
+  list(step=step, from=from, which=which, enough = step>0)
 }
 
 
-# .onLoad = function(libname, pkgname) {
-#   op = options()
-#   if(!'dexter.elsymmean' %in% names(op))
-#     options(dexter.elsymmean=FALSE)
-#   invisible()
-# }
+df_format = function(df)
+{
+  if(getOption('dexter.use_tibble', FALSE))
+  {
+    as_tibble(ungroup(df))
+  } else
+  {
+    as.data.frame(df, stringsAsFactors = FALSE)
+  }
+}
+
+
 
 is.date = function(x) inherits(x, "Date")
 is.time = function(x) inherits(x,'POSIXt')
@@ -22,25 +80,40 @@ add_column = function(df, ...)
 {
   dots = list(...)
   if(is.null(names(dots)) || any(names(dots) == ''))
-     stop('arguments must be named')
+    stop('arguments must be named')
   
   for(nm in names(dots))
   {
     vec = dots[[nm]]
-    stopifnot(length(vec)==1 || nrow(df) == length(vec))
+    if(NROW(df)==0)
+      vec = vec[0]
+    
+    stopifnot(length(vec)==1 || NROW(df) == length(vec))
     df[[nm]] = vec
   }
   
   df
 }
 
+bind_vertical = function(lst)
+{
+  mtx = any(sapply(lst, is.matrix))
+  if(mtx)
+    bind_rows(lst)
+  else
+    matrix(unlist(lst), ncol=1)
+}
+
+
 # scores is data.frame item_id, item_score, assumed that 0 is present
 all_trivial_scores = function(scores)
 {
   length(Reduce(function(a,b){out = as.vector(outer(a,b,'+')); if(!anyDuplicated(out)) out else NULL}, 
-                split(scores$item_score, scores$item_id))
+                split(scores$item_score, scores$item_id, drop=TRUE))
   ) > 0
 }
+
+
 
 
 # format string with named arguments
@@ -124,6 +197,41 @@ weighted_ntile = function(x, weights, n)
   as.integer(floor(n * dat$rn/sum(dat$w) + 1))
 }
 
+weighted_cor = function(x,y,n)
+{
+  x_u = x - weighted.mean(x,n)
+  y_u = y - weighted.mean(y,n)
+
+  weighted.mean(x_u * y_u, n)/
+    (sqrt(weighted.mean(x_u ^ 2, n)) * sqrt(weighted.mean(y_u ^ 2, n)))
+}
+
+# not able to deal with na,nan,etc
+weighted_quantile = function(x,w,probs)
+{
+  if(is.unsorted(x))
+  {
+    ord = order(x)
+    x = x[ord]
+    w = w[ord]
+  }  
+  csw = cumsum(w)
+  n = sum(w)
+  #np = length(probs)
+  index = 1 + (n - 1) * probs
+  lo = floor(index)
+  hi = ceiling(index)
+  
+  qs = x[sapply(lo,function(i) min(which(csw>=i)))]
+  
+  i = which(index > lo)
+  h = (index - lo)[i]
+  qs[i] = (1 - h) * qs[i] + h * x[sapply(hi,function(i) min(which(csw>=i)))]
+  
+  qs
+  
+}
+
 
 # non vectorized version of ifelse
 if.else = function(test, yes, no)
@@ -132,11 +240,11 @@ if.else = function(test, yes, no)
   no
 }
 
+
 #  basic argument type and attribute checks with error messages
-# to do:
-# one of multiple possible types
 check_dataSrc = function(x)
 {
+  force(x)
   if(inherits(x, 'dx_resp_data'))
      return(NULL)
   
@@ -150,17 +258,21 @@ check_dataSrc = function(x)
   if(inherits(x, 'data.frame'))
   {
     if(length(setdiff(c('person_id','item_id','item_score'), colnames(x)))>0)
-      stop("dataSrc must containt the columns: 'person_id','item_id','item_score'")
+      stop("dataSrc must contain the columns: 'person_id','item_id','item_score'")
     return(NULL)
   }
-  if(inherits(x, 'DBIConnection'))
-    return(NULL)
+  if(is_db(x))
+  {
+    if(dbIsValid(x)) return(NULL)
+    stop('your database connection is no longer valid, you need to reconnect. see: ?open_project for details')
+  }
+    
      
   if(length(x)== 1 && is.character(x) && file.exists(x))
       stop('dataSrc is a string but must be a database connection, data.frame or matrix. ',
-           'Did you forget to do: `open_project"',x,'")`?', call.=FALSE)
+           'Did you forget to do: `db = open_project("',x,'")`?', call.=FALSE)
  
-  stop("dataSrc must be of type 'DBIConnection', 'data.frame' or 'matrix'")
+  stop("dataSrc must be of type 'DBIconnection', 'data.frame' or 'matrix'")
 }
 
 
@@ -208,7 +320,7 @@ check_df = function(x, columns=NULL, n_rows=NULL, name = deparse(substitute(x)),
     stop('column(s): ', paste0('`', missing_col, '`',collapse=', '),' must be present in ', name)
   
   if(!is.null(n_rows) && NROW(x)!=n_rows)
-    stop(name, 'must have', n_rows, 'rows')
+    stop('argument`', name, '` must have ', n_rows, ' rows')
   
 }
 
@@ -228,14 +340,37 @@ check_list = function(x, name = deparse(substitute(x)), nullable=FALSE)
     stop(name,' must be a list')
 }
 
-dropNulls = function (x) 
+
+# start, stop
+# rng_fl(1:6) => c(1,6)
+# rng_fl(c(1,6)) => c(1,6)
+# rng_fl(c(6,1)) => error, etc.
+rng_fl = function(x, name = deparse(substitute(x)))
 {
-  x[!vapply(x, is.null, FUN.VALUE = logical(1))]
+  if(length(x)==2)
+  {
+    if(x[1]>x[2])
+      stop('first element of ',name,' must be smaller or equal than second element')
+    x
+  } else if(length(x)<2)
+  {
+    stop(name, ' must be a vector of length 2')
+  } else
+  {
+    test = x[1]:x[length(x)] 
+    if(length(x) != length(test) || !all(test == x) || x[1]>x[length(x)])
+      stop(name, ' is not a valid range')
+    c(x[1],x[length(x)])
+  }
 }
 
 
 
 
+dropNulls = function (x) 
+{
+  x[!vapply(x, is.null, FUN.VALUE = logical(1))]
+}
 
 # use for forwarding arguments to e.g. plot function
 merge_arglists = function(args, default = NULL, override = NULL)
@@ -265,29 +400,22 @@ df_identical = function(a, b)
 
 is_connected = function(design)
 {
-  bkl = sort(unique(design$booklet_id))
-  nbk = length(bkl)
-  if(nbk == 1) 
-    return(TRUE)
-  
-  ds = design %>% 
-    inner_join(rename(design, booklet2 = 'booklet_id'), by = 'item_id') %>%
-    distinct(.data$booklet_id, .data$booklet2) 
-  
-  adjm = matrix(0L, nrow = nbk, ncol = nbk, dimnames = list(bkl, bkl))
-  adjm[as.matrix(ds)] = 1L
-  
-  visited = vector(length = nbk)
-  
-  dfs = function(start)
+  design = droplevels(design)
+  # usually best via items but with extreme predicates and large data this might lead to 
+  # adj larger than working memory
+  if(nlevels(design$item_id) >= nlevels(design$booklet_id))
   {
-    if(visited[start]) return(0L)
-    visited[start] <<- TRUE
-    vapply((1:ncol(adjm))[adjm[,start]>0], dfs, 0L)
-    0L
-  } 
-  dfs(1L)
-  return(all(visited))
+    items = as.matrix(table(design$item_id, design$booklet_id))
+    adj = crossprod(items, items)
+  } else
+  {
+    booklets = as.matrix(table(design$booklet_id, design$item_id))
+    adj = crossprod(booklets, booklets)
+  }
+    
+  mode(adj) = 'integer'
+  
+  all(ds_connected_groups(adj)==1)
 }
 
 ### Greatest Common Divisor via Euclid's algorithm
@@ -338,14 +466,9 @@ GCD_ <-function (x)
   return(g)
 }
 
-
-first_last2indx = function(first,last) unlist(apply(data.frame(first,last),1,function(x) x[1]:x[2]))
-
-
-
 # highest posterior density interval
 # not safe for bimodal distributions
-hpd=function(x, conf=0.95, print=TRUE)
+hpdens = function(x, conf=0.95)
 {
   conf <- min(conf, 1-conf)
   n <- length(x)
@@ -354,14 +477,9 @@ hpd=function(x, conf=0.95, print=TRUE)
   xx <- x[ (n-nn+1):n ] - x[1:nn]
   m <- min(xx)
   nnn <- which(xx==m)[1]
-  if (print)
-  {
-    return(data.frame(l=x[ nnn ],r=x[ n-nn+nnn ]))
-  }else
-  {
-    return(rbind(x[ nnn ],x[ n-nn+nnn ]))
-  }
+  return(c(l=x[ nnn ],r=x[ n-nn+nnn ]))
 }
+
 
 # For a discrete vector x, this function gives 
 # Frequencies P(x operator i) for i in min_max[1]:min_max[2]
@@ -413,7 +531,7 @@ c2weights<-function(cIM)
 # Example: test information for each of ncol ability values is calculated for nrow samples of 
 # item parameters from posterior.
 ########
-#TO DO: protect against NA's
+#TO~DO: protect against NA's
 conf_env = function(mat, level = 0.95) 
 {
   overall_found = TRUE

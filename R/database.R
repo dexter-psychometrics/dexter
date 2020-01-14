@@ -1,4 +1,9 @@
 
+is_db = function(db)
+{
+  inherits(db,'DBIConnection')
+}
+
 
 dbRunScript = function(db, fn)
 {
@@ -11,7 +16,7 @@ dbRunScript = function(db, fn)
 }
 
 
-dbExists = function(db, query, data) (nrow(dbGetQuery(db, query, data)) > 0)
+dbExists = function(db, query, data) (nrow(dbGetQuery_param(db, query, data)) > 0)
 
 dbCheck_reserved_colnames = function(nm)
 {
@@ -33,22 +38,20 @@ dbCheck_reserved_colnames = function(nm)
 
 dbUniquePersonIds = function(db,n)
 {
-  # to do: other dbms
   if(is(db, 'SQLiteConnection'))
   {
     last = dbGetQuery(db,
-                      "SELECT substr(person_id,4) AS n FROM dxPersons 
+                      "SELECT substr(person_id,4) AS n FROM dxpersons 
                         WHERE substr(person_id,1,3)='dx_' 
                           ORDER BY person_id DESC LIMIT 1;")
-  } else if(is(db, 'PostgreSQLConnection')) 
+  } else if(is(db, 'PostgreSQLConnection') || is(db, 'PqConnection')) 
   {
-    # to do:test
-    last = dbGetQuery(db,"SELECT substring(person_id from 4) AS n FROM dxPersons 
+    last = dbGetQuery(db,"SELECT substring(person_id from 4) AS n FROM dxpersons 
                             WHERE person_id ~ '^dx_\\d+$'
                               ORDER BY person_id DESC LIMIT 1;")
   }
- 
-  if (nrow(last)==0) { last = 0L}  else {last = as.integer(last[1,1])}
+ # to~do: other db's
+  if (NROW(last)==0) { last = 0L}  else {last = as.integer(last[1,1])}
   
   return(sprintf('dx_%07i',(1:n) + last))
 }
@@ -60,7 +63,6 @@ project_CreateTables = function(db, person_properties=NULL)
     dbRunScript(db,"dexter_sqlite.sql")
   } else
   {
-    # to do: test on postgres
     dbRunScript(db,"dexter_standard.sql")
   } 
   
@@ -71,7 +73,7 @@ project_CreateTables = function(db, person_properties=NULL)
     person_properties[['person_id']] = NULL
     for(col in names(person_properties))
     {
-      dbExecute(db, paste0("ALTER TABLE dxPersons ADD COLUMN ",col,sql_col_def(person_properties[[col]],is.default=TRUE),';'))
+      dbExecute(db, paste0("ALTER TABLE dxpersons ADD COLUMN ",col,sql_col_def(person_properties[[col]],is.default=TRUE),';'))
     }
   }
 }
@@ -120,4 +122,92 @@ dbTransaction = function(db, expr, on_error = stop, on_error_rollback=TRUE)
   tryCatch(expr, error=function(e){if(on_error_rollback) dbRollback(db); on_error(e);}, finally=NULL)
   tryCatch(dbCommit(db), error=function(e){if(on_error_rollback) dbRollback(db); on_error(e);}, finally=NULL)
 }
+
+
+#to~do: for some reason data insertion in porstgres responses is extremely slow
+
+# don't use literal strings containing : in these
+
+dbGetQuery_param = function(db, statement, param)
+{
+  if(is(db, 'SQLiteConnection'))
+    return(dbGetQuery(db,statement,param))
+  
+  param = as.list(param)
+  
+  if(is(db, 'PostgreSQLConnection') || is(db, 'PqConnection'))
+  {
+    vars = paste0(':',names(param))
+    names(param) = NULL
+    for(i in seq_along(vars))
+    {
+      statement = gsub(vars[i], paste0('$',i), statement, fixed=TRUE)
+    }
+  }  else if(is(db, 'RMySQL'))
+  {
+    vars = names(param)
+    np = list()
+    m = gregexpr('\\:\\w[\\w\\d_]*',statement)
+    l = attr(m,'match.length')
+    m = m[[1]]
+    for(i in seq_along(m[[1]]))
+    {
+      if(m[i]>0)
+      {
+        var = substr(statement, m[i]+1, m[i]+l[i])
+        if(var %in% vars)
+        {
+          statement = sub(var,'?',statement, fixed=TRUE)
+          np[[length(np)+1]] = param[[var]]
+        }
+      }
+    }
+  }
+  dbGetQuery(db,statement,param)
+}
+  
+  
+
+dbExecute_param = function(db, statement, param)
+{
+  if(is(db, 'SQLiteConnection'))
+    return(dbExecute(db,statement,param))
+  
+  param = as.list(param)
+  
+  if(is(db, 'PostgreSQLConnection') || is(db, 'PqConnection'))
+  {
+    vars = paste0(':',names(param))
+    names(param) = NULL
+    for(i in seq_along(vars))
+    {
+      statement = gsub(vars[i], paste0('$',i), statement, fixed=TRUE)
+    }
+  }  else if(is(db, 'RMySQL'))
+  {
+    vars = names(param)
+    np = list()
+    m = gregexpr('\\:\\w[\\w\\d_]*',statement)
+    l = attr(m,'match.length')
+    m = m[[1]]
+    for(i in seq_along(m[[1]]))
+    {
+      if(m[i]>0)
+      {
+        var = substr(statement, m[i]+1, m[i]+l[i])
+        if(var %in% vars)
+        {
+          statement = sub(var,'?',statement, fixed=TRUE)
+          np[[length(np)+1]] = param[[var]]
+        }
+      }
+    }
+    param = np
+  }
+  
+  dbExecute(db,statement,param)
+}
+
+
+
 

@@ -16,11 +16,10 @@ img{ border:none;}
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=5, dev='CairoPNG')
-
 ```
 
 ## Test Differential Items Functioning
-Based on the theory given in @BechgerMarisDIF, the function `DIF()` tests for differential items function (DIF) under an extended nominal response model. We illustrate how it works using the verbalAgression data.
+Based on the theory given in @BechgerMarisDIF, the function `DIF()` tests for differential items function (DIF) under an extended nominal response model. We illustrate how it works using the verbal aggression data.
 
 ```{r get_data, results='hide', message=FALSE}
 library(dexter)
@@ -31,7 +30,7 @@ add_booklet(db, verbAggrData, "data")
 add_item_properties(db, verbAggrProperties)
 ```
 
-Gender is available as a discrete covariate which defines two groups: male and female respondents. We first test whether there is DIF. Note that we see progress bars from two calls to `fit_enorm`; one for each group.
+Gender is available as a discrete covariate which defines two groups: male and female respondents. We first test whether there is DIF. 
 
 ```{r dif}
 dif_gender = DIF(db, "gender")
@@ -42,7 +41,7 @@ The results shows that there is DIF hence it makes sense to look further to see 
 
 ## Exploring DIF
 Consider a plot of the ability scale in each of the two groups. 
-```{r abscale, echo=FALSE, results='hide', fig.height=3}
+```{r abscale, echo=FALSE, results='hide', fig.height=3, fig.width=8, fig.align='center'}
 cc=fit_enorm(db,(gender=="Male")&(item_id%in%c("S1DoCurse","S1WantCurse","S3WantScold")))
 plot(c(-2,3),c(0,1),xaxt='n',yaxt='n',bty='n',pch='',ylab='',xlab='ability-scale')
 lines(-1.4:2.6,rep(0,5),lty=2,col="gray")
@@ -62,18 +61,18 @@ The plot show the ability scale in each group and the location of the score cate
 
 On first sight, we would conclude that the locations of the item categories are clearly different. Now we wish to test whether, for each pair of locations whether this is indeed the case or whether the differences we see are due to chance. The simplest way to do this is to plot the output of the DIF function.
 
-```{r plotdif}
+```{r plotdif,fig.align='center'}
 plot(dif_gender)
 ```
 
 This produces an image plot of a matrix of differences between groups of the relative positions of each pair of item categories. The entries are standardized and can be interpreted as normally distributed test statistics such that significance can be judged from the colors. It is clear, for instance that, across male and female respondents, the second category of the item S3WantScold has a different position relative to most other item-categories. Note that the matrix can be found in the output of the DIF function.
 
 ## Limitations
-As usual in DIF testing, the procedure we have described is exploratory and there is no guarantee that the results can be interpreted easily. Furthermore, the plots will become cluttered when there are many items. If possible, we therefore recommend to use the profile plots.
+As usual in DIF testing, the procedure we have described is exploratory and there is no guarantee that the results can be interpreted easily. Furthermore, the plots will become cluttered when there are many items. If possible, we therefore recommend to use the profile plots. Note that with three groups, the procedure can be applied to each pair of groups but this will not take us very far when there are many more groups.
 
 Finally, note that sorting can help to make the picture more interpretable. For example, we can sort on 'want' versus 'do':
 
-```{r sorting}
+```{r sorting, fig.align='center'}
 items = get_items(db) %>%
   arrange(mode, item_id)
   
@@ -84,6 +83,7 @@ plot(dif_gender, items=items$item_id)
 close_project(db)
 ```
 Now, we see that the DO-items among themselves keep their relative positions in the two groups.
+
 
 ## References
 

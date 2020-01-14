@@ -1,7 +1,7 @@
 ##########################################
 #' Test individual differences
 #'
-#' @param dataSrc Data source: a connection to a dexter database or a data.frame
+#' @param dataSrc a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score
 #' @param predicate An optional expression to subset data, if NULL all data are used.
 #' @details This function uses a score distribution to test whether there are individual 
 #' differences in ability. First, it estimates ability based on the score distribution. Then, 
@@ -43,8 +43,8 @@ individual_differences <- function(dataSrc, predicate = NULL)
   observed = parms$inputs$scoretab$N
   m = sum(observed)
   lambda = parms$est$lambda$lambda
-  observed_smooth = ENORM2ScoreDist(b,a,lambda,first,last,observed)$n.smooth
-  
+  observed_smooth = ENORM2ScoreDist(b,a,lambda,first,last)$n.smooth
+
   theta.est = theta_score_distribution(b,a,first,last,observed)
   expected = pscore(theta.est,b,a,first,last)[,1,drop=TRUE]
   chi = chisq.test(x=observed,p=expected,simulate.p.value = TRUE)
@@ -59,7 +59,6 @@ individual_differences <- function(dataSrc, predicate = NULL)
 }
 
 
-# to do: coef, summary?
 
 print.tind=function(x,...)
 {
@@ -67,6 +66,11 @@ print.tind=function(x,...)
   print(x$est$test,...)
 }
 
+
+coef.tind=function(object,...)
+{
+	object$est
+}
 
 plot.tind=function(x,...)
 {
@@ -84,7 +88,7 @@ plot.tind=function(x,...)
   do.call(plot,merge_arglists(user.args,override=override.args, default=default.args))
 
   lines(0:x$inputs$max.score,x$est$test$expected,col="gray",pch=19,cex=0.7)
- # lines(0:x$inputs$max.score,x$inputs$observed_smooth,col="lightgreen")
+  lines(0:x$inputs$max.score,x$inputs$observed_smooth,col="lightgreen")
   legend("topleft", legend = c("observed", "expected"), bty = "n",
          lwd = 1, cex = 0.7, col = c("#4DAF4A", "gray"), lty = c(NA,1), pch = c(19,NA))
 }

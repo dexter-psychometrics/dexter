@@ -7,7 +7,7 @@
 individual_differences(dataSrc, predicate = NULL)
 }
 \arguments{
-\item{dataSrc}{Data source: a connection to a dexter database or a data.frame}
+\item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}
 
 \item{predicate}{An optional expression to subset data, if NULL all data are used.}
 }

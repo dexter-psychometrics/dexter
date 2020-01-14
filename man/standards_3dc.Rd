@@ -15,7 +15,7 @@ standards_3dc(parms, design)
 \arguments{
 \item{parms}{parameters object returned from fit_enorm}
 
-\item{design}{a data.frame with columns `cluster_id` and `item_id`}
+\item{design}{a data.frame with columns `cluster_id`, `item_id` and optionally `booklet_id`}
 
 \item{object}{an object containing parameters for the 3DC standard setting procedure}
 
@@ -62,15 +62,15 @@ sts_par = standards_3dc(f, design)
 plot(sts_par)
 
 
-# standards_db(sts_par,'test.db',c('mildly aggressive','dangerously aggressive'))
+# db_sts = standards_db(sts_par,'test.db',c('mildly aggressive','dangerously aggressive'))
 }
 \references{
 Keuning J., Straat J.H., Feskens R.C.W. (2017) The Data-Driven Direct Consensus (3DC) Procedure: A New Approach to Standard Setting. 
-In: Blömeke S., Gustafsson JE. (eds) Standard Setting in Education. 
+In: Blomeke S., Gustafsson JE. (eds) Standard Setting in Education. 
 Methodology of Educational Measurement and Assessment. Springer, Cham
 
 Moe E., Verhelst N. (2017) Setting Standards for Multistage Tests of Norwegian for Adult Immigrants 
-In: Blömeke S., Gustafsson JE. (eds) Standard Setting in Education. 
+In: Blomeke S., Gustafsson JE. (eds) Standard Setting in Education. 
 Methodology of Educational Measurement and Assessment. Springer, Cham
 }
 \seealso{

@@ -81,7 +81,12 @@ test_that('calibration of verbal aggression dataset matches oplm results, with f
   regexp='S1DoShout')
   
   # check for correct error message
+  # no score variation
   expect_error(fit_enorm(db, item_score == 1), regexp='score.+variation')
+  # no 0 score category
+  expect_output(
+    expect_error(fit_enorm(db, item_score > 0 | item_id!='S1DoShout'), regexp='minimum.+must.+(zero)|0', ignore.case=TRUE),
+    regexp='S1DoShout')
   expect_no_error(fit_enorm(db, item_score <= 1))
   
   

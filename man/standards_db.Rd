@@ -17,13 +17,13 @@ standards_db(par.sts, file_name, standards, population = NULL,
 they should use different performance standards, a list of such vectors. 
 The names of this list should correspond to the names of the testforms}
 
-\item{population}{a data.frame with three columns: `booklet_id`,`booklet_score`,`n` (where n is a count)}
+\item{population}{optional, a data.frame with three columns: `booklet_id`,`booklet_score`,`n` (where n is a count)}
 
 \item{group_leader}{login name of the group leader. The login password will always be `admin` 
 but can be changed in the 3DC application}
 }
 \description{
-This function creates an export (an sqlite dfatabse file) which can be used by the 3DC application. This is a free application with which
+This function creates an export (an sqlite database file) which can be used by the 3DC application. This is a free application with which
 a standard setting session can be facilitated through a LAN network using the Chrome browser.
 The 3DC application can be downloaded from \href{http://www.cito.com/our-expertise/implementation/3dc}{3DC application download page}
 }

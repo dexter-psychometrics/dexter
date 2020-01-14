@@ -7,7 +7,7 @@
 fit_domains(dataSrc, item_property, predicate = NULL)
 }
 \arguments{
-\item{dataSrc}{Data source: a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score}
+\item{dataSrc}{a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score}
 
 \item{item_property}{The item property defining the
 domains (subtests)}
@@ -27,15 +27,15 @@ of response categories. This function represents scores on subtests as
 super-items and analyses these as normal items.
 }
 \examples{
-\dontrun{
-db = start_new_project(verbAggrRules, "verbAggression.db")
+
+db = start_new_project(verbAggrRules, ":memory:")
 add_booklet(db, verbAggrData, "agg")
 add_item_properties(db, verbAggrProperties)
 mSit = fit_domains(db, item_property= "situation")
 plot(mSit)
 
 close_project(db)
-}
+
 
 }
 \seealso{
