@@ -4,8 +4,12 @@
 \alias{plot.p2pass}
 \title{A plot method for probability_to_pass}
 \usage{
-\method{plot}{p2pass}(x, what = c("all", "equating", "sens/spec", "roc"),
-  booklet_id = NULL, ...)
+\method{plot}{p2pass}(
+  x,
+  what = c("all", "equating", "sens/spec", "roc"),
+  booklet_id = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{An object produced by function \code{\link{probability_to_pass}}}

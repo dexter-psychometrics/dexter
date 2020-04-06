@@ -14,20 +14,38 @@
 #' with the number of persons as weights, or \code{compared}, in which case the pvalues, 
 #' correlations with the sum score (rit), and correlations with the rest score (rit) are 
 #' shown in separate tables and compared across booklets
+#' @param max_scores use the observed maximum item score or the theoretical maximum items score 
+#' according to the scoring rules in the database to compute pvalues and maximum scores
 #' @return A list containing:
 #' \item{testStats}{a data.frame of statistics at test level} 
 #' \item{itemStats}{a data.frame (or list if type='compared') of statistics at item level}
 #'
-tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compared')) {
+tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compared'),
+                      max_scores = c('observed','theoretical')) 
+{
   type = match.arg(type)
+  max_scores = match.arg(max_scores)
   check_dataSrc(dataSrc)
   
   qtpredicate = eval(substitute(quote(predicate)))
   env=caller_env()
   respData = get_resp_data(dataSrc, qtpredicate, env=env, summarised=FALSE)
   
-  ti = get_sufStats_tia(respData) %>%
-    mutate(pvalue=coalesce(.data$meanScore/.data$maxScore, 0))
+  ti = get_sufStats_tia(respData) 
+  
+  if(max_scores=='theoretical' && is_db(dataSrc))
+  {
+    ti$item_id = as.character(ti$item_id)
+    ti = inner_join(
+      select(ti,-.data$maxScore),
+      dbGetQuery(dataSrc, 'SELECT item_id, MAX(item_score) AS max_score 
+                          FROM dxscoring_rules GROUP BY item_id;'),
+      by='item_id') %>%
+      rename(maxScore = .data$max_score)
+  } 
+  
+  ti = mutate(ti, pvalue=coalesce(.data$meanScore/.data$maxScore, 0))
+  
   
   if(type=='raw')
   {

@@ -180,7 +180,7 @@ arma::vec theta_mle_sec(const arma::vec& b, const arma::ivec& a,
 	
 	vec theta(max_score-1);
 	
-	double xl = -1, rts = -2;
+	double xl = 0, rts = -1.3;
 	double fl = Escore_single(xl, b, a, first, last, n, maxA),
 		   f = Escore_single(rts, b, a, first, last, n, maxA);
 	
@@ -197,8 +197,9 @@ arma::vec theta_mle_sec(const arma::vec& b, const arma::ivec& a,
 			dx = (xl-rts) * (f-s)/(f-fl);
 			xl = rts;
 			fl = f;
-			rts += dx;
+			rts += std::copysign(std::min(std::abs(dx),0.5), dx); // steps larger than 0.5 on the theta scale are useless and can cause overflow in escore
 			f = Escore_single(rts, b, a, first, last, n, maxA);
+			
 			if(std::abs(dx) < acc)
 				break;
 		} 
@@ -261,7 +262,7 @@ arma::vec theta_wle_sec(const arma::vec& b, const arma::ivec& a,
 	
 	vec theta(max_score+1);
 	
-	double xl = 0, rts = -2;
+	double xl = 0, rts = -1.3;
 	double fl = escore_wle(xl, b, a, first, last, n, maxA),
 		   f = escore_wle(rts, b, a, first, last, n, maxA);
 	
@@ -286,7 +287,8 @@ arma::vec theta_wle_sec(const arma::vec& b, const arma::ivec& a,
 			dx = (xl-rts) * (f-s)/(f-fl);
 			xl = rts;
 			fl = f;
-			rts += dx;
+			//rts += dx;
+			rts += std::copysign(std::min(std::abs(dx),0.5), dx); 
 			f = escore_wle(rts, b, a, first, last, n, maxA);						
 			if(std::abs(dx) < acc)
 				break;

@@ -7,6 +7,7 @@ expect_no_error = function(object, info=NULL) expect_error(object, regexp=NA, in
 
 
 test_that('inconsistencies between data and parms are handled correctly',{
+
   db = open_project('../verbAggression.db')
   
   f1 = fit_enorm(db)
@@ -26,6 +27,7 @@ test_that('inconsistencies between data and parms are handled correctly',{
 
 
 test_that('verbAgg abilities are monotone increasing', {
+
   db = open_project('../verbAggression.db')
   f = fit_enorm(db)
   

@@ -1,5 +1,6 @@
-#include<Rmath.h>
+#include<Rcpp.h>
 
+// to do: test if R::lchoose is exactly equal to rmath lchoose and test elsymmean use
 
 static const int start[500]= {0,
 1,
@@ -125758,15 +125759,15 @@ static const double Pascal[125250]={
 
 double lbinom(int n, int s)
 {
-  double out=0.0;
-  if ((s<n)&&(s>0))
+  double out = 0;
+  if ( s<n && s>0)
   {
     if (n<500)
     {
       out  = Pascal[start[n]+s];
     }else
     {
-      out  = lchoose(n,s);
+      out  = R::lchoose((double)n, (double)s);
     }
   }
   return out;

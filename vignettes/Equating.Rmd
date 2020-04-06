@@ -194,7 +194,7 @@ data[501:nP, 1:20] = NA
 ref_items = items[1:40]
 target_items = items[21:60]
 
-p = fit_enorm(method='Bayes', nIterations = 5000)
+p = fit_enorm(data, method='Bayes', nIterations = 5000)
 
 pp = probability_to_pass(data, p,
                          ref_items = ref_items, pass_fail = 23,

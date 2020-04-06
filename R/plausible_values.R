@@ -66,6 +66,9 @@ plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL
                             nPV=1, use_draw=NULL, prior.dist = c("normal", "mixture"),
                             merge_within_persons=FALSE)
 {
+  dplyr_prog = options(dplyr.show_progress=FALSE)
+  on.exit(options(dplyr.show_progress=dplyr_prog))
+  
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
   prior.dist = match.arg(prior.dist)

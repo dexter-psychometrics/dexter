@@ -4,8 +4,11 @@
 \alias{get_responses}
 \title{Selecting data}
 \usage{
-get_responses(dataSrc, predicate = NULL, columns = c("person_id",
-  "item_id", "item_score"))
+get_responses(
+  dataSrc,
+  predicate = NULL,
+  columns = c("person_id", "item_id", "item_score")
+)
 }
 \arguments{
 \item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}

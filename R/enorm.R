@@ -32,7 +32,7 @@
 #' 
 #' @references 
 #' Maris, G., Bechger, T.M. and San-Martin, E. (2015) A Gibbs sampler for the (extended) marginal Rasch model. 
-#' Psychometrika. 2015; 80(4): 859–879. 
+#' Psychometrika. 2015; 80(4): 859-879. 
 #' 
 #' @seealso functions that accept a prms object as input: \code{\link{ability}}, \code{\link{plausible_values}}, 
 #' \code{\link{plot.prms}}, and \code{\link{plausible_scores}}
@@ -40,6 +40,9 @@
 fit_enorm = function(dataSrc, predicate = NULL, fixed_params = NULL, method=c("CML", "Bayes"), 
                      nIterations=1000, merge_within_persons=FALSE)
 {
+  dplyr_prog = options(dplyr.show_progress=FALSE)
+  on.exit(options(dplyr.show_progress=dplyr_prog))
+  
   method = match.arg(method)
   check_dataSrc(dataSrc)
   check_num(nIterations, 'integer', .length=1, .min=1)
@@ -188,16 +191,26 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
     result = calibrate_CML(scoretab=scoretab, design=design, sufI=ssIS$sufI, a=ssIS$item_score, 
                                first=ssI$first, last=ssI$last, nIter=nIterations,
                                fixed_b=fixed_b)
+
   } else 
   {
     result = calibrate_Bayes(scoretab=scoretab, design=design, sufI=ssIS$sufI, a=ssIS$item_score,
                               first=ssI$first, last=ssI$last, nIter=nIterations, fixed_b=fixed_b)
   }
+  if(tolower(Sys.info()['sysname'])=='sunos' && is.matrix(result$b))
+  {
+    method='Bayes'
+    message('Hessian matrix could not be inverted due to lack of computable precision. Bayesian method was used.')
+  }
+  
+  b=result$b
+  if(is.matrix(b))
+    b=colMeans(b)
   
   mle = design %>% 
     group_by(.data$booklet_id) %>%
     do({
-      est = theta_MLE(result$b, a=ssIS$item_score, .$first, .$last, se=FALSE)
+      est = theta_MLE(b, a=ssIS$item_score, .$first, .$last, se=FALSE)
       theta = est$theta[2:(length(est$theta)-1)]
       tibble(booklet_score=1:length(theta), theta = theta)
     }) %>%
@@ -226,14 +239,17 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
 #' @param dataSrc data source, see details
 #' @param predicate an expression to subset data in dataSrc
 #' @param nbins number of ability groups
-#' @param ci confidence interval for the error bars, between 0 and 1. 0 means no error bars.
+#' @param ci confidence interval for the error bars, between 0 and 1. Use 0 to suppress the error bars.
 #' Default = 0.95 for a 95\% confidence interval
 #' @param ... further arguments to plot
-#' 
+#' @return 
+#' Silently, a data.frame with observed an expected values.
 #' @details
 #' The standard plot shows the fit against the sample on which the parameters were fitted. If
 #' dataSrc is provided, the fit is shown against the observed data in dataSrc. This may be useful 
-#' for plotting the fit in different subgroups as a visual test for item level DIF.
+#' for plotting the fit in different subgroups as a visual test for item level DIF. The confidence 
+#' intervals denote the uncertainty about the predicted pvalues within the ability groups for the 
+#' sample size in dataSrc (if not NULL) or the original data on which the model was fit.
 #' 
 #' @method plot prms
 #' 

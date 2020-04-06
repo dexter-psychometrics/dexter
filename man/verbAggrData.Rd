@@ -4,7 +4,9 @@
 \name{verbAggrData}
 \alias{verbAggrData}
 \title{Verbal aggression data}
-\format{A data set with 316 rows and 26 columns.}
+\format{
+A data set with 316 rows and 26 columns.
+}
 \description{
 A data set of self-reported verbal behaviour in different frustrating
 situations (Vansteelandt, 2000)

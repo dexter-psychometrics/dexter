@@ -255,6 +255,9 @@ NR_bkl = function(..., use_mean = FALSE)
 
 calibrate_CML <- function(scoretab, design, sufI, a, first, last, nIter, fixed_b=NULL,progress = show_progress()) 
 {
+  if(tolower(Sys.info()['sysname'])=='sunos'){
+    return(calibrate_CML_sol(scoretab, design, sufI, a, first, last, nIter, fixed_b))
+  }
   
   use_mean = FALSE
   # perhaps this first part should be moved to fit_enorm
@@ -485,7 +488,7 @@ calibrate_CML <- function(scoretab, design, sufI, a, first, last, nIter, fixed_b
 # lambda' s using the renormalized b to solve this.
 calibrate_Bayes = function(scoretab, design, sufI, a, first, last,  nIter, fixed_b=NULL, progress = show_progress())
 {
-  if(Gibbs.settings$start_b=='random')
+  if(Gibbs.settings$start_b=='random' || tolower(Sys.info()['sysname'])=='sunos')
   {
     b = exp(runif(length(a), -1, 1))
     b[first] = 1

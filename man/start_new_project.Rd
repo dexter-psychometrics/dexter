@@ -4,8 +4,7 @@
 \alias{start_new_project}
 \title{Start a new project}
 \usage{
-start_new_project(rules, db_name = "dexter.db",
-  person_properties = NULL)
+start_new_project(rules, db_name = "dexter.db", person_properties = NULL)
 }
 \arguments{
 \item{rules}{A data frame with columns \code{item_id}, \code{response}, and \code{item_score}.

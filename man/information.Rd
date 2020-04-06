@@ -7,11 +7,9 @@
 \alias{p_score}
 \title{Functions of theta}
 \usage{
-information(parms, items = NULL, booklet_id = NULL,
-  which.draw = NULL)
+information(parms, items = NULL, booklet_id = NULL, which.draw = NULL)
 
-expected_score(parms, items = NULL, booklet_id = NULL,
-  which.draw = NULL)
+expected_score(parms, items = NULL, booklet_id = NULL, which.draw = NULL)
 
 r_score(parms, items = NULL, booklet_id = NULL, which.draw = NULL)
 

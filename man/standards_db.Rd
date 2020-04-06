@@ -4,8 +4,13 @@
 \alias{standards_db}
 \title{Export a standard setting database for use by the free 3DC application}
 \usage{
-standards_db(par.sts, file_name, standards, population = NULL,
-  group_leader = "admin")
+standards_db(
+  par.sts,
+  file_name,
+  standards,
+  population = NULL,
+  group_leader = "admin"
+)
 }
 \arguments{
 \item{par.sts}{an object containing parameters for the 3DC standard setting procedure produced by

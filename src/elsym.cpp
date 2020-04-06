@@ -584,6 +584,7 @@ enjoy!
 *********************** */
 
 // possible scores omitted for the moment
+/*
 template <bool diagonal>
 void H_im_tmpl(const arma::ivec& a, const arma::vec& b, const arma::vec& c, const arma::ivec& first, const arma::ivec& last, const arma::ivec& sufI, const arma::ivec& sufC, const arma::ivec& scoretab,
 			arma::mat& H, arma::vec& Grad, arma::mat& pi_s)
@@ -715,20 +716,22 @@ void H_im_tmpl(const arma::ivec& a, const arma::vec& b, const arma::vec& c, cons
 }
 
 
-/*
-	Cpp:
-	mat H(b.n_elem, b.n_elem, fill::zeros);
-	vec Grad(b.n_elem, fill::zeros);
-	mat pi_s(b.n_elem, scoretab.n_elem);
-	
-	R:
-	H = matrix(0, length(b), length(b))
-	Grad = double(length(b))
-	pi_s = matrix(0, length(b), length(scoretab))	
 
-	for the moment without use of possible scores
-	c is expected to have length equal to b
-*/
+//	Cpp:
+//	mat H(b.n_elem, b.n_elem, fill::zeros);
+//	vec Grad(b.n_elem, fill::zeros);
+//	mat pi_s(b.n_elem, scoretab.n_elem);
+	
+//	R:
+//	H = matrix(0, length(b), length(b))
+//	Grad = double(length(b))
+//	pi_s = matrix(0, length(b), length(scoretab))	
+
+//	for the moment without use of possible scores
+//	c is expected to have length equal to b
+
+
+
 
 // [[Rcpp::export]]
 void H_im(const arma::ivec& a, const arma::vec& b, const arma::vec& c, const arma::ivec& first, const arma::ivec& last, const arma::ivec& sufI, const arma::ivec& sufC, const arma::ivec& scoretab,
@@ -746,7 +749,7 @@ void H_im(const arma::ivec& a, const arma::vec& b, const arma::vec& c, const arm
 }
 
 
-
+*/
 
 
 

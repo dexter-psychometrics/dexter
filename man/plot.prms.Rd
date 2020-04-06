@@ -4,8 +4,15 @@
 \alias{plot.prms}
 \title{Plot for the extended nominal Response model}
 \usage{
-\method{plot}{prms}(x, item_id = NULL, dataSrc = NULL,
-  predicate = NULL, nbins = 5, ci = 0.95, ...)
+\method{plot}{prms}(
+  x,
+  item_id = NULL,
+  dataSrc = NULL,
+  predicate = NULL,
+  nbins = 5,
+  ci = 0.95,
+  ...
+)
 }
 \arguments{
 \item{x}{object produced by fit_enorm}
@@ -18,10 +25,13 @@
 
 \item{nbins}{number of ability groups}
 
-\item{ci}{confidence interval for the error bars, between 0 and 1. 0 means no error bars.
+\item{ci}{confidence interval for the error bars, between 0 and 1. Use 0 to suppress the error bars.
 Default = 0.95 for a 95\% confidence interval}
 
 \item{...}{further arguments to plot}
+}
+\value{
+Silently, a data.frame with observed an expected values.
 }
 \description{
 The plot shows 'fit' by comparing the expected score based on the model (grey line)
@@ -31,5 +41,7 @@ with similar estimated ability.
 \details{
 The standard plot shows the fit against the sample on which the parameters were fitted. If
 dataSrc is provided, the fit is shown against the observed data in dataSrc. This may be useful 
-for plotting the fit in different subgroups as a visual test for item level DIF.
+for plotting the fit in different subgroups as a visual test for item level DIF. The confidence 
+intervals denote the uncertainty about the predicted pvalues within the ability groups for the 
+sample size in dataSrc (if not NULL) or the original data on which the model was fit.
 }

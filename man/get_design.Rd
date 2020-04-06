@@ -4,9 +4,13 @@
 \alias{get_design}
 \title{Test design}
 \usage{
-get_design(dataSrc, format = c("long", "wide"), rows = c("booklet_id",
-  "item_id", "item_position"), columns = c("item_id", "booklet_id",
-  "item_position"), fill = NA)
+get_design(
+  dataSrc,
+  format = c("long", "wide"),
+  rows = c("booklet_id", "item_id", "item_position"),
+  columns = c("item_id", "booklet_id", "item_position"),
+  fill = NA
+)
 }
 \arguments{
 \item{dataSrc}{a dexter database or any object form which a design can be inferred}

@@ -4,8 +4,16 @@
 \alias{profile_plot}
 \title{Profile plot}
 \usage{
-profile_plot(dataSrc, item_property, covariate, predicate = NULL,
-  model = c("IM", "RM"), x = NULL, col = NULL, ...)
+profile_plot(
+  dataSrc,
+  item_property,
+  covariate,
+  predicate = NULL,
+  model = c("IM", "RM"),
+  x = NULL,
+  col = NULL,
+  ...
+)
 }
 \arguments{
 \item{dataSrc}{a connection to a dexter database or a data.frame with columns: 

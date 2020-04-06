@@ -5,10 +5,17 @@
 \alias{get_resp_matrix}
 \title{Functions for developers}
 \usage{
-get_resp_data(dataSrc, qtpredicate = NULL, extra_columns = NULL,
-  summarised = FALSE, env = NULL, protect_x = TRUE,
-  retain_person_id = TRUE, merge_within_persons = FALSE,
-  parms_check = NULL)
+get_resp_data(
+  dataSrc,
+  qtpredicate = NULL,
+  extra_columns = NULL,
+  summarised = FALSE,
+  env = NULL,
+  protect_x = TRUE,
+  retain_person_id = TRUE,
+  merge_within_persons = FALSE,
+  parms_check = NULL
+)
 
 get_resp_matrix(dataSrc, qtpredicate = NULL, env = NULL)
 }

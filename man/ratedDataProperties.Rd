@@ -4,7 +4,9 @@
 \name{ratedDataProperties}
 \alias{ratedDataProperties}
 \title{Item properties in the rated data}
-\format{A data set with 14 rows and 2 columns: item_id and aspect}
+\format{
+A data set with 14 rows and 2 columns: item_id and aspect
+}
 \description{
 A data set of item properties related to the rated data. These are the aspects: 
 IH = content, WZ = word choice and phrasing, and WK = vocabulary.

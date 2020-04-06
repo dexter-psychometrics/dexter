@@ -4,9 +4,16 @@
 \alias{plausible_values}
 \title{Draw plausible values}
 \usage{
-plausible_values(dataSrc, parms = NULL, predicate = NULL,
-  covariates = NULL, nPV = 1, use_draw = NULL,
-  prior.dist = c("normal", "mixture"), merge_within_persons = FALSE)
+plausible_values(
+  dataSrc,
+  parms = NULL,
+  predicate = NULL,
+  covariates = NULL,
+  nPV = 1,
+  use_draw = NULL,
+  prior.dist = c("normal", "mixture"),
+  merge_within_persons = FALSE
+)
 }
 \arguments{
 \item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}

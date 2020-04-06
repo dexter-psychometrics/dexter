@@ -109,10 +109,6 @@ calibrate_Bayes_C <- function(a, first, last, ib, bi, nbi, nib, bfirst, blast, b
     .Call(`_dexter_calibrate_Bayes_C`, a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, bkscoretab, b_in, fixed_b, from, step, ndraws, prior_eta, prior_rho, pgw)
 }
 
-H_im <- function(a, b, c, first, last, sufI, sufC, scoretab, H, Grad, pi_s, diagonal = FALSE) {
-    invisible(.Call(`_dexter_H_im`, a, b, c, first, last, sufI, sufC, scoretab, H, Grad, pi_s, diagonal))
-}
-
 meanElSym <- function(b, a, first, last, item1, item2, nI, mS, g) {
     invisible(.Call(`_dexter_meanElSym`, b, a, first, last, item1, item2, nI, mS, g))
 }

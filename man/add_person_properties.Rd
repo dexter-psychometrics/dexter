@@ -4,8 +4,7 @@
 \alias{add_person_properties}
 \title{Add person properties to a project}
 \usage{
-add_person_properties(db, person_properties = NULL,
-  default_values = NULL)
+add_person_properties(db, person_properties = NULL, default_values = NULL)
 }
 \arguments{
 \item{db}{a connection to a dexter database, e.g. the output of \code{start_new_project}

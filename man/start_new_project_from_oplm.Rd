@@ -4,10 +4,18 @@
 \alias{start_new_project_from_oplm}
 \title{Start a new project from oplm files}
 \usage{
-start_new_project_from_oplm(dbname, scr_path, dat_path,
-  booklet_position = NULL, responses_start = NULL,
-  response_length = 1, person_id = NULL, missing_character = c(" ",
-  "9"), use_discrim = FALSE, format = "compressed")
+start_new_project_from_oplm(
+  dbname,
+  scr_path,
+  dat_path,
+  booklet_position = NULL,
+  responses_start = NULL,
+  response_length = 1,
+  person_id = NULL,
+  missing_character = c(" ", "9"),
+  use_discrim = FALSE,
+  format = "compressed"
+)
 }
 \arguments{
 \item{dbname}{filename/path of new dexter project database (will be overwritten if already exists)}

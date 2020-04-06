@@ -29,6 +29,9 @@
 plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, 
                             covariates=NULL, keep.observed=TRUE, nPS=1,merge_within_persons=FALSE)  
 {
+  dplyr_prog = options(dplyr.show_progress=FALSE)
+  on.exit(options(dplyr.show_progress=dplyr_prog))
+  
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
   check_dataSrc(dataSrc)

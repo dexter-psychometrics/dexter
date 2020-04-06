@@ -1,6 +1,5 @@
 useDynLib(dexter, .registration=TRUE)
 importFrom(Rcpp, "evalCpp")
-importFrom(RcppArmadillo, "armadillo_version")
 import(dplyr, except="sql")
 importFrom(RSQLite, "SQLite")
 importFrom(DBI,"dbExecute", "dbGetQuery","dbDisconnect", "dbConnect", "dbListFields",
@@ -17,7 +16,7 @@ importFrom(graphics, "plot", "axis", "image", "layout", "par", "lines", "hist",
            "text","legend","abline","segments","arrows","points", "rect","clip")
 importFrom(grDevices, "rainbow","colorRampPalette","col2rgb","rgb")
 importFrom(methods, "is", "new")
-importFrom(utils, "str", "head", "person", "tail", "modifyList")
+importFrom(utils, "str", "head", "person", "tail", "modifyList","setTxtProgressBar", "txtProgressBar")
 importFrom(MASS, "lmsreg")
 
 

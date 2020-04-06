@@ -4,8 +4,16 @@
 \alias{distractor_plot}
 \title{Distractor plot}
 \usage{
-distractor_plot(dataSrc, item_id, predicate = NULL, legend = TRUE,
-  curtains = 10, col = NULL, ...)
+distractor_plot(
+  dataSrc,
+  item_id,
+  predicate = NULL,
+  legend = TRUE,
+  curtains = 10,
+  adjust = 1,
+  col = NULL,
+  ...
+)
 }
 \arguments{
 \item{dataSrc}{a connection to a dexter database or a data.frame with columns: person_id, item_id, response, item_score
@@ -23,9 +31,15 @@ response on the total score.}
 \item{curtains}{100*the tail probability of the sum scores to be shaded. Default is 10.
 Set to 0 to have no curtains shown at all.}
 
+\item{adjust}{factor to adjust the smoothing bandwith respective to the default value}
+
 \item{col}{vector of colors to use for plotting}
 
 \item{...}{further arguments to plot.}
+}
+\value{
+Silently, a data.frame of response categories and colors used. Potentially useful if you want to customize the legend or 
+print it separately
 }
 \description{
 Produce a diagnostic distractor plot for an item

@@ -8,7 +8,6 @@ expect_no_error = function(object) expect_error(object, regexp=NA)
 
 
 test_that('calibration of verbal aggression dataset matches oplm results, with fixed and unfixed',{
-
   db = open_project('../verbAggression.db')
   
   #free calibration
@@ -58,6 +57,14 @@ test_that('calibration of verbal aggression dataset matches oplm results, with f
             mutate(difference=abs(SE_beta-se.b)))$difference),
     1e-3)
   
+  # remainder possibly takes too long on solaris
+  if(tolower(Sys.info()['sysname'])=='sunos')
+  {
+    dbDisconnect(db)
+  }
+    
+  skip_on_os('solaris')
+  
   #check that Bayesian is reasonably close.
   fxb = fit_enorm(db, fixed_params=oplm_params %>% filter(is_fixed), method='Bayes')
   
@@ -87,6 +94,8 @@ test_that('calibration of verbal aggression dataset matches oplm results, with f
   expect_output(
     expect_error(fit_enorm(db, item_score > 0 | item_id!='S1DoShout'), regexp='minimum.+must.+(zero)|0', ignore.case=TRUE),
     regexp='S1DoShout')
+  
+  # this is a hard calibration, many booklets. Takes too long on solaris
   expect_no_error(fit_enorm(db, item_score <= 1))
   
   

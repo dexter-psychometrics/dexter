@@ -4,9 +4,16 @@
 \alias{plausible_scores}
 \title{Generate plausible test scores}
 \usage{
-plausible_scores(dataSrc, parms = NULL, predicate = NULL,
-  items = NULL, covariates = NULL, keep.observed = TRUE, nPS = 1,
-  merge_within_persons = FALSE)
+plausible_scores(
+  dataSrc,
+  parms = NULL,
+  predicate = NULL,
+  items = NULL,
+  covariates = NULL,
+  keep.observed = TRUE,
+  nPS = 1,
+  merge_within_persons = FALSE
+)
 }
 \arguments{
 \item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}

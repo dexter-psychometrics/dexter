@@ -46,6 +46,7 @@ test_that('start_new_project_from_oplm',
                                      use_discrim=TRUE)},
     'too short')
     
+    close_project(db)
     # to do, add test with proper oplm file
     
   } 

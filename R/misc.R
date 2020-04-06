@@ -14,7 +14,7 @@
 
 show_progress = function()
 {
-  is.null(getOption("knitr.in.progress")) && getOption("dexter.progress", FALSE)
+  is.null(getOption("knitr.in.progress")) && getOption("dexter.progress", FALSE) && interactive()
 }
 
 pg_start = function() cat('|')

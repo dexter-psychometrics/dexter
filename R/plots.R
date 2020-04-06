@@ -75,8 +75,12 @@ draw_curtains = function(qnt)
 #' @param legend logical, whether to include the legend. default is TRUE
 #' @param curtains 100*the tail probability of the sum scores to be shaded. Default is 10.
 #' Set to 0 to have no curtains shown at all.
+#' @param adjust factor to adjust the smoothing bandwith respective to the default value
 #' @param col vector of colors to use for plotting
 #' @param ... further arguments to plot.
+#' @return 
+#' Silently, a data.frame of response categories and colors used. Potentially useful if you want to customize the legend or 
+#' print it separately
 #' @details 
 #' Customization of title and subtitle can be done by using the arguments main and sub. 
 #' These arguments can contain references to the variables item_id, booklet_id, item_position(if available),
@@ -84,7 +88,7 @@ draw_curtains = function(qnt)
 #' with a sprintf style format string, e.g. 
 #' \code{distractor_plot(db, main='item: $item_id', sub='Item rest correlation: $rir:.2f')}
 #' 
-distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtains=10, col=NULL,...){  
+distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtains=10, adjust=1, col=NULL, ...){  
   check_dataSrc(dataSrc)
 
   qtpredicate = eval(substitute(quote(predicate)))
@@ -201,18 +205,24 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
       do.call(plot, plot.args)
       draw_curtains(qnt)
       
-      dAll = density(bkl_scores$booklet_score, n = 51, weights = bkl_scores$n/N)
+      dAll = density(bkl_scores$booklet_score, n = 512, weights = bkl_scores$n/N, adjust=adjust)
       
       lgnd = y %>% 
         group_by(.data$response)  %>% 
-        filter(n() > 1) %>%
         do({
           k = rsp_colors[rsp_colors$response == .$response[1],]$color
           
-          dxi = density(.$booklet_score, weights = .$n/sum(.$n),   n = 51,
+          if(nrow(.)==1)
+          {
+            yval = .$n/sum(filter(y, .data$booklet_score==.$booklet_score)$n)
+            points(.$booklet_score,yval,col=k,pch=16,xpd=TRUE)
+          } else
+          {
+            dxi = density(.$booklet_score, weights = .$n/sum(.$n), n = 512,
                         bw = dAll$bw, from = min(dAll$x), to = max(dAll$x))
-          yy = dxi$y/dAll$y * sum(.$n)/N
-          lines(dAll$x, yy, co = k, lw = 2)
+            yy = dxi$y/dAll$y * sum(.$n)/N
+            lines(dAll$x, yy, col = k, lw = 2)
+          }
           tibble(col = k, label = paste0(.$response[1]," (", .$item_score[1], ")"))
         })
       

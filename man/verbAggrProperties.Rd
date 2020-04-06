@@ -4,7 +4,9 @@
 \name{verbAggrProperties}
 \alias{verbAggrProperties}
 \title{Item properties in the verbal aggression data}
-\format{A data set with 24 rows and 5 columns.}
+\format{
+A data set with 24 rows and 5 columns.
+}
 \description{
 A data set of item properties related to the verbal
 aggression data

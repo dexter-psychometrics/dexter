@@ -508,6 +508,12 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
 add_response_data = function(db, data, auto_add_unknown_rules = FALSE, missing_value = 'NA')
 {
   colnames(data) = tolower(colnames(data))
+  if('item_score' %in% colnames(data) && ( ! 'response' %in% colnames(data)) && is_scored_db(db))
+  {
+    message('column `response` not found in data, using `item_score` instead')
+    data = rename(data, response = 'item_score')
+  }
+  
   check_df(data, c('item_id', 'person_id', 'response','booklet_id'))
 
   data = ungroup(data)

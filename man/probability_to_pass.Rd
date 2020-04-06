@@ -4,8 +4,15 @@
 \alias{probability_to_pass}
 \title{The probability to pass on a reference test given a score on a new booklet}
 \usage{
-probability_to_pass(dataSrc, parms, ref_items, pass_fail,
-  predicate = NULL, target_booklets = NULL, nIterations = 1000)
+probability_to_pass(
+  dataSrc,
+  parms,
+  ref_items,
+  pass_fail,
+  predicate = NULL,
+  target_booklets = NULL,
+  nIterations = 1000
+)
 }
 \arguments{
 \item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}

@@ -4,9 +4,14 @@
 \alias{fit_enorm}
 \title{Fit the extended nominal response model}
 \usage{
-fit_enorm(dataSrc, predicate = NULL, fixed_params = NULL,
-  method = c("CML", "Bayes"), nIterations = 1000,
-  merge_within_persons = FALSE)
+fit_enorm(
+  dataSrc,
+  predicate = NULL,
+  fixed_params = NULL,
+  method = c("CML", "Bayes"),
+  nIterations = 1000,
+  merge_within_persons = FALSE
+)
 }
 \arguments{
 \item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}
@@ -44,7 +49,7 @@ Each type corresponds to a different parametrization of the model.
 }
 \references{
 Maris, G., Bechger, T.M. and San-Martin, E. (2015) A Gibbs sampler for the (extended) marginal Rasch model. 
-Psychometrika. 2015; 80(4): 859–879.
+Psychometrika. 2015; 80(4): 859-879.
 }
 \seealso{
 functions that accept a prms object as input: \code{\link{ability}}, \code{\link{plausible_values}}, 

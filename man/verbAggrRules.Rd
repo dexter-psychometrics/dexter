@@ -4,7 +4,9 @@
 \name{verbAggrRules}
 \alias{verbAggrRules}
 \title{Scoring rules for the verbal aggression data}
-\format{A data set with 72 rows and 3 columns (item_id, response, item_score).}
+\format{
+A data set with 72 rows and 3 columns (item_id, response, item_score).
+}
 \description{
 A set of (trivial) scoring rules for the verbal 
 aggression data set

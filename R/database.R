@@ -4,6 +4,10 @@ is_db = function(db)
   inherits(db,'DBIConnection')
 }
 
+is_scored_db = function(db)
+{
+  !dbExists(db, 'SELECT 1 FROM dxScoring_rules WHERE CAST(item_score AS TEXT) <> response;')
+}
 
 dbRunScript = function(db, fn)
 {
@@ -38,19 +42,11 @@ dbCheck_reserved_colnames = function(nm)
 
 dbUniquePersonIds = function(db,n)
 {
-  if(is(db, 'SQLiteConnection'))
-  {
-    last = dbGetQuery(db,
+  last = dbGetQuery(db,
                       "SELECT substr(person_id,4) AS n FROM dxpersons 
                         WHERE substr(person_id,1,3)='dx_' 
                           ORDER BY person_id DESC LIMIT 1;")
-  } else if(is(db, 'PostgreSQLConnection') || is(db, 'PqConnection')) 
-  {
-    last = dbGetQuery(db,"SELECT substring(person_id from 4) AS n FROM dxpersons 
-                            WHERE person_id ~ '^dx_\\d+$'
-                              ORDER BY person_id DESC LIMIT 1;")
-  }
- # to~do: other db's
+
   if (NROW(last)==0) { last = 0L}  else {last = as.integer(last[1,1])}
   
   return(sprintf('dx_%07i',(1:n) + last))
@@ -175,13 +171,16 @@ dbExecute_param = function(db, statement, param)
   
   param = as.list(param)
   
+  if(!endsWith(trimws(statement),';'))
+    statement = paste0(statement,';')
+  
   if(is(db, 'PostgreSQLConnection') || is(db, 'PqConnection'))
   {
     vars = paste0(':',names(param))
     names(param) = NULL
     for(i in seq_along(vars))
     {
-      statement = gsub(vars[i], paste0('$',i), statement, fixed=TRUE)
+      statement = gsub(paste0(vars[i],'(?=\\W)'), paste0('$',i), statement, perl=TRUE)
     }
   }  else if(is(db, 'RMySQL'))
   {

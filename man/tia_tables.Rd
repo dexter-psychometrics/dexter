@@ -4,8 +4,12 @@
 \alias{tia_tables}
 \title{Simple test-item analysis}
 \usage{
-tia_tables(dataSrc, predicate = NULL, type = c("raw", "averaged",
-  "compared"))
+tia_tables(
+  dataSrc,
+  predicate = NULL,
+  type = c("raw", "averaged", "compared"),
+  max_scores = c("observed", "theoretical")
+)
 }
 \arguments{
 \item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}
@@ -17,6 +21,9 @@ separately, \code{averaged} averaged over the test booklet in which the item is 
 with the number of persons as weights, or \code{compared}, in which case the pvalues, 
 correlations with the sum score (rit), and correlations with the rest score (rit) are 
 shown in separate tables and compared across booklets}
+
+\item{max_scores}{use the observed maximum item score or the theoretical maximum items score 
+according to the scoring rules in the database to compute pvalues and maximum scores}
 }
 \value{
 A list containing:

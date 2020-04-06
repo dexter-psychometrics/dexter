@@ -410,27 +410,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// H_im
-void H_im(const arma::ivec& a, const arma::vec& b, const arma::vec& c, const arma::ivec& first, const arma::ivec& last, const arma::ivec& sufI, const arma::ivec& sufC, const arma::ivec& scoretab, arma::mat& H, arma::vec& Grad, arma::mat& pi_s, const bool diagonal);
-RcppExport SEXP _dexter_H_im(SEXP aSEXP, SEXP bSEXP, SEXP cSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP sufISEXP, SEXP sufCSEXP, SEXP scoretabSEXP, SEXP HSEXP, SEXP GradSEXP, SEXP pi_sSEXP, SEXP diagonalSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type c(cSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type sufI(sufISEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type sufC(sufCSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type scoretab(scoretabSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type H(HSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type Grad(GradSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type pi_s(pi_sSEXP);
-    Rcpp::traits::input_parameter< const bool >::type diagonal(diagonalSEXP);
-    H_im(a, b, c, first, last, sufI, sufC, scoretab, H, Grad, pi_s, diagonal);
-    return R_NilValue;
-END_RCPP
-}
 // meanElSym
 void meanElSym(const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const int item1, const int item2, const int nI, const int mS, arma::vec& g);
 RcppExport SEXP _dexter_meanElSym(SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP item1SEXP, SEXP item2SEXP, SEXP nISEXP, SEXP mSSEXP, SEXP gSEXP) {
@@ -709,7 +688,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dexter_E_booklets", (DL_FUNC) &_dexter_E_booklets, 7},
     {"_dexter_NR_booklets", (DL_FUNC) &_dexter_NR_booklets, 10},
     {"_dexter_calibrate_Bayes_C", (DL_FUNC) &_dexter_calibrate_Bayes_C, 21},
-    {"_dexter_H_im", (DL_FUNC) &_dexter_H_im, 12},
     {"_dexter_meanElSym", (DL_FUNC) &_dexter_meanElSym, 9},
     {"_dexter_E_booklets_mean", (DL_FUNC) &_dexter_E_booklets_mean, 7},
     {"_dexter_NR_booklets_mean", (DL_FUNC) &_dexter_NR_booklets_mean, 10},

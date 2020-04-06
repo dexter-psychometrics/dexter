@@ -5,8 +5,13 @@
 \alias{profile_tables}
 \title{Profile analysis}
 \usage{
-profiles(dataSrc, parms, item_property, predicate = NULL,
-  merge_within_persons = FALSE)
+profiles(
+  dataSrc,
+  parms,
+  item_property,
+  predicate = NULL,
+  merge_within_persons = FALSE
+)
 
 profile_tables(parms, domains, item_property, design = NULL)
 }

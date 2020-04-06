@@ -4,8 +4,7 @@
 \alias{plot.DIF_stats}
 \title{plot method for pairwise DIF statistics}
 \usage{
-\method{plot}{DIF_stats}(x, items = NULL, itemsX = items,
-  itemsY = items, alpha = 0.05, ...)
+\method{plot}{DIF_stats}(x, items = NULL, itemsX = items, itemsY = items, alpha = 0.05, ...)
 }
 \arguments{
 \item{x}{object produced by \code{\link{DIF}}}

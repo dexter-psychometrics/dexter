@@ -160,7 +160,7 @@ So far, we have been exploring the data, booklet per booklet, making sure that t
 parms = fit_enorm(db)
 ```
 
-The default estimation method is conditional maximum likelihood (CML). The alternative is to use a Gibbs sampler (Bayesian Claibration).
+The default estimation method is conditional maximum likelihood (CML). The alternative is to use a Gibbs sampler (Bayesian Calibration).
 
 ```{r, results='hide'}
 parms_gibbs = fit_enorm(db, method='Bayes')

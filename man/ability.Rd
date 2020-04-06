@@ -5,14 +5,31 @@
 \alias{ability_tables}
 \title{Estimate abilities}
 \usage{
-ability(dataSrc, parms, predicate = NULL, method = c("MLE", "EAP",
-  "WLE"), prior = c("normal", "Jeffreys"), use_draw = NULL,
-  npv = 500, mu = 0, sigma = 4, standard_errors = FALSE,
-  merge_within_persons = FALSE)
+ability(
+  dataSrc,
+  parms,
+  predicate = NULL,
+  method = c("MLE", "EAP", "WLE"),
+  prior = c("normal", "Jeffreys"),
+  use_draw = NULL,
+  npv = 500,
+  mu = 0,
+  sigma = 4,
+  standard_errors = FALSE,
+  merge_within_persons = FALSE
+)
 
-ability_tables(parms, design = NULL, method = c("MLE", "EAP", "WLE"),
-  prior = c("normal", "Jeffreys"), use_draw = NULL, npv = 500,
-  mu = 0, sigma = 4, standard_errors = TRUE)
+ability_tables(
+  parms,
+  design = NULL,
+  method = c("MLE", "EAP", "WLE"),
+  prior = c("normal", "Jeffreys"),
+  use_draw = NULL,
+  npv = 500,
+  mu = 0,
+  sigma = 4,
+  standard_errors = TRUE
+)
 }
 \arguments{
 \item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}

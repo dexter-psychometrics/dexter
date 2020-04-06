@@ -1,7 +1,7 @@
 Package: dexter
 Type: Package
 Title: Data Management and Analysis of Tests
-Version: 1.0.3
+Version: 1.0.8
 Author: Gunter Maris, Timo Bechger, Jesse Koops, Ivailo Partchev
 Maintainer: Jesse Koops <jesse.koops@cito.nl>
 Description: A system for the management, assessment, and psychometric analysis of data from educational and psychological tests. 
@@ -9,7 +9,6 @@ License: GPL-3
 URL: http://dexterities.netlify.com
 BugReports: https://github.com/jessekps/dexter/issues
 Encoding: UTF-8
-LazyLoad: yes
 LazyData: yes
 Depends:
     R (>= 3.4)
@@ -21,13 +20,12 @@ Imports:
     rlang (>= 0.4.0),    
     dplyr (>= 0.8.3),
     Rcpp (>= 1.0.1),
-    RcppArmadillo (>= 0.9.3),
     graphics,
     grDevices,
     methods,
     utils
-LinkingTo: Rcpp, RcppArmadillo
-RoxygenNote: 6.1.1
+LinkingTo: Rcpp, RcppArmadillo (>= 0.9.3)
+RoxygenNote: 7.1.0
 Suggests:
     knitr,
     rmarkdown,

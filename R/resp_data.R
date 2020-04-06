@@ -355,7 +355,7 @@ resp_data.from_resp_data = function(rsp, extra_columns=NULL, summarised=FALSE, p
 # data.frame x
 # set protect_x to FALSE for a possible small speed gain if x may be destroyed
 resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
-                             booklet_safe = FALSE, protect_x = FALSE,
+                             booklet_safe = FALSE, protect_x = TRUE,
                              merge_within_persons = FALSE, retain_person_id=TRUE,
                              parms_check=NULL) 
 {
@@ -420,11 +420,18 @@ resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
   
   if(summarised && protect_x)
   {
+    # to do: tricky for such a small gain, better make new variables instead of overwrite
     if(ppoint(x$item_score) == pointers$item_score)
       x$item_score = duplicate(x$item_score)
     
     if(ppoint(x$person_id) == pointers$person_id)
       x$person_id = duplicate(x$person_id)
+    
+    if(ppoint(x$item_id) == pointers$item_id)
+      x$item_id = duplicate(x$item_id)
+    
+    if('booklet_id' %in% names(pointers) && ppoint(x$booklet_id) == pointers$booklet_id)
+      x$booklet_id = duplicate(x$booklet_id)
   }  
   
   
@@ -480,12 +487,12 @@ resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
       if(anyDuplicated(lvls))
       {
         # one to many, e.g. response!='NA'
-        spr = paste0("%0",ceiling(log10(length(lvls))),'i-%s')
+        spr = paste0("%0",ceiling(log10(length(lvls)+1)),'i-%s')
         lvls = sprintf(spr,1:length(lvls), lvls)
       } 
     } else
     {
-      lvls = sprintf(paste0("bk%0",ceiling(log10(nrow(res$map_booklet))),'i'), 1:nrow(res$map_booklet))
+      lvls = sprintf(paste0("bk%0",ceiling(log10(nrow(res$map_booklet)+1)),'i'), 1:nrow(res$map_booklet))
     }
     class(x$booklet_id) = 'factor'
     class(design$booklet_id) = 'factor'
@@ -557,7 +564,7 @@ resp_data.from_matrix = function(X, summarised = FALSE, retain_person_id = TRUE,
   }
   
   nbk = max(out$design$booklet_id)
-  bkstr = paste0('bk%0', ceiling(pmin(log10(nbk),3)),'i')
+  bkstr = paste0('bk%0', ceiling(pmax(log10(nbk+1),3)),'i')
   
   class(out$x$booklet_id) = class(out$design$booklet_id) = 'factor' 
   levels(out$x$booklet_id) = levels(out$design$booklet_id) = sprintf(bkstr,1:nbk)

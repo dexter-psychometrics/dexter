@@ -1,8 +1,28 @@
+# dexter 1.08
+
+* bugfix: x-axis scaled incorrectly when plotting parameters for Bayesian calibration
+
+# dexter 1.07
+
+* adapting to an update in tibble
+
+# dexter 1.06
+
+* specific workarounds for (cran) solaris
+
+# dexter 1.05
+
+* Almost sure this release finally fixes the solaris issues
+
+# dexter 1.04
+
+* added systemrequirements to description in the hope that it will solve solaris issues
+
 # dexter 1.0.3
 
-* fixed bug that caused warnings in vignette compilation on apple computers
+* fixed bug that caused an error message on some apple computers when using a matrix datasource
 
-* remove unit tests for Solaris as we have no way to test on solaris ourselves, in effect this means solaris is not supported anymore.
+* removed unit tests for Solaris as we have no way to test on solaris, in effect this means dexter does not support solaris anymore
 
 # dexter 1.0.2
 

@@ -7,8 +7,12 @@
 \usage{
 add_booklet(db, x, booklet_id, auto_add_unknown_rules = FALSE)
 
-add_response_data(db, data, auto_add_unknown_rules = FALSE,
-  missing_value = "NA")
+add_response_data(
+  db,
+  data,
+  auto_add_unknown_rules = FALSE,
+  missing_value = "NA"
+)
 }
 \arguments{
 \item{db}{a connection to a dexter database, i.e. the output of \code{start_new_project}

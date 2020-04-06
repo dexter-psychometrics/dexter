@@ -4,7 +4,9 @@
 \name{ratedData}
 \alias{ratedData}
 \title{Rated data}
-\format{A data set with 75 rows and 15 columns.}
+\format{
+A data set with 75 rows and 15 columns.
+}
 \description{
 A data set with rated data. A number of student performances are rated twice on several
 aspects by independent judges. The ratings are binary and have been summed following

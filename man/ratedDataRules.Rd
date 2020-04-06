@@ -4,7 +4,9 @@
 \name{ratedDataRules}
 \alias{ratedDataRules}
 \title{Scoring rules for the rated data}
-\format{A data set with 42 rows and 3 columns (item_id, response, item_score).}
+\format{
+A data set with 42 rows and 3 columns (item_id, response, item_score).
+}
 \description{
 A set of (trivial) scoring rules for the rated data set
 }
