@@ -10,8 +10,8 @@ Authors@R: c(
 Maintainer: Jesse Koops <jesse.koops@cito.nl>
 Description: A system for the management, assessment, and psychometric analysis of data from educational and psychological tests. 
 License: GPL-3
-URL: https://dexterities.netlify.app/
-BugReports: https://github.com/jessekps/dexter/issues
+URL: https://dexter-psychometrics.github.io/dexter/
+BugReports: https://github.com/dexter-psychometrics/dexter/issues
 Encoding: UTF-8
 LazyData: yes
 Depends:
