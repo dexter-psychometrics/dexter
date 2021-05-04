@@ -385,7 +385,7 @@ pv = function(x, design, b, a, nPV, from = NULL, by = NULL, prior.dist = c("norm
 
 # borrowed the following from mvtnorm source for the time being
 # so we don't have to import a whole package
-# will make a cpp implementation for next version so this can be reomved
+# will make a cpp implementation for next version so this can be removed
 rmvnorm = function(n,mean,sigma)
 {
   ev = eigen(sigma, symmetric = TRUE)
