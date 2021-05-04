@@ -522,7 +522,7 @@ void PV_slow(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first
 	for(int prs=0; prs<np; prs++)
 	{
 		const int bk = booklet_id[prs];
-		const int score = booklet_score[prs]
+		const int score = booklet_score[prs];
 		
 		int x=-1;
 		while(x!=score)

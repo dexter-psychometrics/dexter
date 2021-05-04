@@ -169,6 +169,10 @@ PV_sve <- function(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu,
     invisible(.Call(`_dexter_PV_sve`, b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, pv_mat, pv_col_indx, niter))
 }
 
+PV_slow <- function(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, pv_mat, pv_col_indx = 0L) {
+    invisible(.Call(`_dexter_PV_slow`, b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, pv_mat, pv_col_indx))
+}
+
 sampleIM <- function(bIM, cIM, a, first, last, scoretab) {
     .Call(`_dexter_sampleIM`, bIM, cIM, a, first, last, scoretab)
 }
