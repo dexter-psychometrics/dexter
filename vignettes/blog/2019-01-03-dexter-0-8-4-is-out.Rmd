@@ -1,0 +1,12 @@
+---
+title: dexter 0.8.4 is out
+author: Ivailo Partchev
+date: '2019-01-03'
+slug: dexter-0-8-4-is-out
+categories:
+  - Psychometrics
+  - R
+tags: []
+---
+
+I have just uploaded version 0.8.4 of **dexter**. It has the same functionality as version 0.8.3 except for some minor changes to accommodate the upcoming version of **tibble**.

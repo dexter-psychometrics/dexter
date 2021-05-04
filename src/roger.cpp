@@ -304,12 +304,6 @@ arma::vec theta_wle_sec(const arma::vec& b, const arma::ivec& a,
 
 
 
-	
-
-
-
-
-
 /*
 * output: I, J, logFi assumed to be initialized to zero by caller
 *
@@ -424,7 +418,7 @@ arma::vec PVrecycle(const arma::vec& b, const arma::ivec& a, const arma::ivec& f
   {
 	atheta = draw_theta(mu, sigma, alpha);
 	for(int j=1;j<=maxA;j++) 
-		lookup[j] = exp(j*atheta);
+		lookup[j] = std::exp(j*atheta);
     x=0;
     for (int i=0;i<nI;i++)
     {
@@ -458,6 +452,56 @@ arma::vec PVrecycle(const arma::vec& b, const arma::ivec& a, const arma::ivec& f
 	}
   }
   return theta;
+}
+
+
+// a single draw for each person
+// [[Rcpp::export]]
+void PV_sve(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first, const arma::ivec& bk_last, 					
+			const arma::ivec& bcni,
+			const arma::ivec& booklet_id, const arma::ivec& booklet_score, const arma::vec& mu, const double sigma,
+			arma::mat& pv_mat, const int pv_col_indx=0, const int niter=1)
+{
+	const int np = pv_mat.n_rows;
+	const int maxA = max(a);
+	vec lookup(maxA+1);
+	vec p(maxA+3, fill::zeros); 
+	lookup[0] = 1.0;
+	
+	vec pv(pv_mat.colptr(pv_col_indx),np, false, true);
+	
+	for(int iter=0; iter<niter; iter++)
+	{
+		for(int prs=0; prs<np; prs++)
+		{
+			double theta = R::rnorm(mu[prs], sigma);
+			for(int j=1;j<=maxA;j++) 
+				lookup[j] = std::exp(j*theta);
+			
+			const int bk = booklet_id[prs];
+			
+			int x=0;
+			for(int i=bcni[bk]; i<bcni[bk+1]; i++)
+			{
+				p[0] = b[bk_first[i]]; 
+				int k=1;
+				for (int j=bk_first[i]+1;j<=bk_last[i];j++) 
+				{
+					p[k] = p[k-1] + b[j]*lookup[a[j]]; 
+					k++;
+				}
+				double u=p[k-1]*R::runif(0,1);
+				k=0;
+				while (u > p[k])
+					k++;
+				x += a[bk_first[i]+k];
+			}
+			
+			double acc = std::exp((theta-pv[prs])*(booklet_score[prs]-x));
+			if(R::runif(0,1)<acc)
+				pv[prs] = theta;
+		}
+	}
 }
 
 

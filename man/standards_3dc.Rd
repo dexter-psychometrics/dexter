@@ -37,7 +37,7 @@ Set performance standards on one or more test forms using the data driven direct
 The data driven direct consensus (3DC) method of standard setting was invented by Gunter Maris and described in Keuning et. al. (2017).
 To easily apply this procedure, we advise to use the free digital 3DC application. This application 
 can be downloaded from the Cito website, see the 
-\href{http://www.cito.com/our-expertise/implementation/3dc}{3DC application download page}. 
+\href{https://www.cito.com/our-expertise/implementation/3dc}{3DC application download page}. 
 If you want to apply the 3DC method using paper forms instead, you can use the function plot3DC to generate the forms
 from the 3DC database.
 

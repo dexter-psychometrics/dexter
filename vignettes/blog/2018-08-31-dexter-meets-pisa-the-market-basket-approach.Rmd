@@ -1,0 +1,88 @@
+---
+title: dexter meets PISA - The market basket approach
+author: Ivailo Partchev * Robert Zwitser
+date: '2018-09-11'
+bibliography: dexter.bib
+slug: dexter-meets-pisa-the-market-basket-approach
+categories:
+  - Psychometrics
+  - R
+tags: []
+---
+
+In this part, we show how to use **dexter** to apply the market basket approach [@Mislevy98] to the mathematics domain in PISA 2012, following the logic in @Zwitser2017. Once we have read in the data and created the **dexter** database, as shown [here](http://dexterities.netlify.com/2018/08/21/dexter-meets-pisa-1/), this takes only several lines of code. Still, the article will be a bit longer as the market basket approach deserves some attention on its own.
+
+The market basket approach has been borrowed from economics -- more precisely, from the study of inflation and purchasing power. To confuse matters further, the machine learning field has appropriated the term to denote something completely different -- we can ignore this except that their version is the more likely to show up on top in a Google search. 
+
+A market basket contains a mix of goods and services in given proportions that, by social consensus, mirrors the prevalent consumption patterns; the cost of obtaining it, in money or work time, can be compared across countries or over time. The idea is simple but the implementation is not trivial. In comparisons over time, the contents of the basket cannot remain constant forever. In the 1970s, your teenager vitally needed a cassette recorder, today it is a smartphone. The commodity that you buy -- domestic peace -- is the same, but the physical carrier has changed. 
+
+In comparisons across countries or social groups, one may ask: whose basket? For example, the basket of older people contains mostly food and health care; minimal changes in the prices of these may be barely perceptible for richer, active people, but they may have a large impact on the welfare of the specific group. Because of this, many national statistical services maintain separate price indices for the retired.
+
+It appears, however, that no statistical office has come to the idea of representing inflation or purchasing power as an unobservable value on an arbitrary scale. This has been the privilege of psychometricians. Society asks us a simple question -- for example, how well 15-year old students around the globe have mastered mathematics -- and we respond by educating them about the mathematical properties of our favorite abstractions. 
+
+One of the ways to come back to reality has been *standard setting* -- a procedure in which a panel of experts tries to relate cut points on the Great Unobservable to specific skills that candidates are socially expected to have. **dexter** has some support for standard setting: it is compatible with software implementing the 3DS method [@keuning2017]. 
+
+The *market basket approach*, as introduced by @Mislevy98, is seen primarily as a way to report results of educational surveys in a way that will be more transparent to the public and policy makers, and simplify a key step in the standard-setting process, namely, mapping item- or booklet-level judgements to the reporting scale.
+
+Rather than goods and services, the educational market baskets contains items that, by social consensus again, mirror the skills that students are expected to develop. It is essential that the scoring rules are well defined. Tests are typically scored with the sum score. The number of items in the basket may be commensurate with the typical length of a test -- in that case, it is easy to publish the items themselves along with the test results.
+
+Alternatively, the market basket may be larger -- even as large as the domain. Forgetting for a while about the concept of infinite item pools, we notice that a good collection of maths problems like [this one](https://www.amazon.com/Original-Collection-Math-Contest-Problems/dp/1503161390) covers "the areas of Algebra, Geometry, Counting and Probability, and Number Sense ... over 500 examples and problems with fully explained solutions represent the commonly seen competition questions and essential strategies experienced and developed by all the authors throughout their math careers". We can safely think of this as *the domain*. Others may swear by a different collection, but there will be considerable overlap. If the domain is captured in about 500 problems that we can possibly teach, then the 109 items asked in all countries participating in PISA 2012 must represent it rather well.
+
+Of course, we cannot administer 500 or even 109 items to any student, so we can do the usual and distribute them among a number of test forms (booklets) in a connected design. PISA 2012 had 21 booklets for the maths domain. To apply the market basket approach, we fit an IRT model, we draw plausible values given the responses and the item parameters, and we use the plausible values and the model to predict the missing responses. All that remains is compute sum scores over the whole domain, using actual responses where the item was administered and predicted ones where it was not. 
+
+We are accustomed to the view of classical test theory (CTT) used as a prelude to IRT modelling, but the market basket approach follows a circular route from CTT to IRT and back to CTT. In this process, IRT modeling appears more like an intermediate stage where it solves the issue it shines in: the missing data problem.
+
+In the context of an international comparative survey like PISA, @Zwitser2017 go one step further and propose to predict the missing scores from country-specific IRT models. A country-specific model will achieve better fit and predict better than an overall model. Once the missing scores have been filled in in the best way possible, we apply the same summary function to all national data sets. It is a popular one, and available in basic R: `rowSums`.
+
+On to work, then. 
+
+
+```r
+library(dexter)
+library(dplyr)
+library(ggplot2)
+db = open_project('/Rdatasets/pisa2012.db')
+```
+
+Note that the nice data base that we created [last time](http://dexterities.netlify.com/2018/08/21/dexter-meets-pisa-1/) is available and ready for analysis, including the item property that determines which items go into the basket. Once again: these are the items that were administered in all countries, though not necessarily to all students within a country.
+
+As a start, let us draw some plausible values (one per person is enough). This is basically the PISA approach, and even if we don't get exactly their numbers, it is some basis for comparison. First, extract response data with two extra variables added: (i) the country (`cnt`), which will be necessary for country-specific IRT modeling, and (ii) `in_basket`, the item property that indicates whether an item belongs to the market basket (most do). Then, select just the responses to the items in the basket:
+
+
+```r
+pv = plausible_values(db, predicate = in_basket==1, nPV=1, covariates='cnt')
+```
+
+For the country-specific estimation, we have to trick a bit. We know in advance that there are two instances in which an item did not get a correct response in one country, so we have to do a minimal adjustment to be able to fit the IRT model. Other than that, all we have to do is group the data by country and execute the `plausible_scores` function in a `do`:
+
+
+```r
+resp = get_responses(db, columns=c('person_id', 'item_id', 'item_score', 'cnt'))
+
+ps = resp %>%
+  filter( !( (cnt=="VNM" & item_id=="PM828Q01") | 
+             (cnt=='JOR' & item_id=='PM909Q01') |
+             (cnt=='BRA' & item_id=='PM985Q03')) ) %>%
+  group_by(cnt) %>%
+  do({plausible_scores(., nPS=1)})
+```
+
+
+Almost done. Combine the plausible values and the plausible scores, group by country, aggregate, plot:
+
+
+```r
+league = ps %>%
+  left_join(pv, by=c('cnt','person_id')) %>%
+  group_by(cnt) %>%
+  summarise(Traditional=mean(PV1, na.rm=TRUE), Basket=mean(PS1))
+plot(league$Traditional, league$Basket, xlab="Traditional", ylab="Market basket")
+```
+
+<img src="data:image/png;base64,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" />
+
+It appears that the two methods rank the countries in more or less the same way. Whether this is perceived as a good or a bad thing depends on the point of view. To others, it may look as if we have not contributed anything new. From our perspective, PISA 2012 results are close to what we believe is the state of the art. This is not always the case -- some alternative methods can produce very different results, as we hope to show in future posts.
+
+In closing, we observe that the data management model of **dexter**, which fully 'understands' the structure of multi-booklet designs, is very practical -- far more than the SPSS and SAS files that PISA have been delivering. The situation took a turn for the worse in 2015 when the ASCII data -- syntax file pairs were abandoned in favor of huge binary files. These have enormous memory demands when being read into R, which is a bit difficult to swallow as they contain a huge amount of missing value indicators while not being self-sufficient. All these difficulties are eliminated in the **dexter** data base, which is also a single file but ready to roll.
+
+## References

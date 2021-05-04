@@ -1,11 +1,22 @@
 
 
-
+#TO DO: make check on scores optional so that plot.prms does not hang for subgroups
+# without score variation, minimum score, etc.
 get_sufStats_nrm = function(respData)
 {
   mx = max(respData$x$item_score)
   if(is.na(mx))
     stop('there is a problem with your response data or database')
+  
+  design = respData$design
+  
+  # to~do: I think we need tests with at least three items, fischer criterium
+  if(nrow(design) == 1) 
+    stop('There are responses to only one item in your selection, this cannot be calibrated.') 
+  
+  if(!is_connected(design))
+    stop('Your design is not connected')  
+  
   
   #if this happens to be more than the number of distinct items it does not matter much
   # do not use distinct(item_id), there may be gaps
@@ -18,6 +29,62 @@ get_sufStats_nrm = function(respData)
   class(sufs$ssIS$item_id) = 'factor'
   levels(sufs$ssIS$item_id) = levels(respData$x$item_id)
   
+  ssIS = sufs$ssIS
+  
+  # bug in dplyr, min/max of integer in group_by becomes double
+  ssI  = ssIS %>% 
+    mutate(rn = row_number()) %>%
+    group_by(.data$item_id) %>%
+    summarise(first = as.integer(min(.data$rn)),last = as.integer(max(.data$rn))) %>%
+    ungroup() %>%
+    arrange(.data$item_id)
+  
+  
+  
+  if(any(ssI$first == ssI$last)) 
+  {
+    message('Items without score variation:')
+    print(as.character(ssI$item_id[ssI$first == ssI$last]))
+    stop('One or more items are without score variation')
+  }
+  if(any(ssIS$item_score[ssI$first] !=0))
+  {
+    # to do: check in interaction model
+    message('Items without a zero score category')
+    print(as.character(ssI$item_id[ssIS$item_score[ssI$first] !=0]))
+    stop('Minimum score for an item must be zero')
+  }
+  
+  sufs$ssI = ssI
+  
+  sufs$design = design %>%
+    inner_join(ssI,by='item_id') %>%
+    arrange(.data$booklet_id, .data$first)
+  
+  itm_max = sufs$ssIS %>% 
+    group_by(.data$item_id) %>% 
+    summarise(maxScore = as.integer(max(.data$item_score))) %>% 
+    ungroup()
+  
+  # max booklet scores
+  maxScores = itm_max %>%
+    inner_join(sufs$design, by='item_id') %>%
+    group_by(.data$booklet_id) %>%
+    summarise(maxTotScore = sum(.data$maxScore))
+  
+  # booklets 0:maxscore
+  all_scores = maxScores %>% 
+    group_by(.data$booklet_id) %>%
+    do({tibble(booklet_score=0:.$maxTotScore)}) %>%
+    ungroup()
+  
+  sufs$scoretab = sufs$plt %>%
+    distinct(.data$booklet_id, .data$booklet_score,.data$N) %>%
+    right_join(all_scores, by=c('booklet_id','booklet_score')) %>%
+    mutate(N=coalesce(.data$N, 0L)) %>%
+    arrange(.data$booklet_id, .data$booklet_score)
+  
+
   sufs
 }
 

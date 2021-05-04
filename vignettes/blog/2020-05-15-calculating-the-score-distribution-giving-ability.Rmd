@@ -1,0 +1,120 @@
+---
+title: Calculating the score distribution given ability
+author: Timo Bechger
+date: '2020-05-15'
+bibliography: dexterMST.bib
+slug: calculating-the-score-distribution-giving-ability
+categories:
+  - Psychometrics
+tags: []
+---
+
+<B>[A muggle preface by Ivailo]</B> <I>As every fantasy lover knows, IRT people belong to two towers, or is it schools of magic. The little wizards and witches of one school learn to condition on their sufficient statistics before they can even fly or play quidditch, while at the other school they will integrate out anything thrown at them.  
+
+The two approaches have their subtle differences. To predict the score distribution conditional on ability, wizards at the first school apply the same powerful curse, elementary symmetric functions, that they use for all kinds of magic -- from catching dragons over estimating parameters, up to item-total and item-rest regressions, to mention but a few. At the second school, computing the score distribution used to be a frustrating task until @lord1984comparison came up with a seemingly unrelated jinx that did the trick.
+
+In what follows, Timo explains how the two kinds of magic relate to each other.</I>
+
+Consider the Rasch model. Let $X_{i}$ denote the binary-coded response to item $i$ and assume that:
+$$
+p(\mathbf{x}|t,\mathbf{b}) =\prod_i p(x_{i}|t,b_i) =\frac{t^{x_+} \prod_i b^{x_{i}}_i}{\prod_i (1 + t b_i)}
+$$
+where $t>0$ is person ability, $b_i$ the difficulty of item $i$, and $x_+$ the number of correct answers. Conditional on the person's ability and the item difficulties, the test score distribution is:
+$$
+P(X_+=s|t, \mathbf{b}) = \sum_{\mathbf{x} : x_+ = s} p(\mathbf{x}|t,\mathbf{b}) =\frac{t^s \gamma_s(\boldsymbol{b})}{\prod_i (1+t b_i)},
+$$
+where $\gamma_s(\boldsymbol{b}) = \sum_{\mathbf{x} : x_+ = s} \prod_i b_i^{x_i}$ is the _elementary symmetric function (esf)_ of order $s$ of the item parameters $\mathbf{b}=(b_1,b_2,\dots, b_m)$. 
+
+Thus, the esf arise naturally when one works with Rasch models. They appear when we expand a linear factorization of a monic polynomial. More specifically, since $\sum_s P(X_+=s|\theta)=1$, we find the identity:  
+$$
+\prod^m_{i=1} (1+tb_i)
+=\sum^m_{s=0} \gamma_s(\boldsymbol{b}) t^s
+$$
+which is a generalization of Newton's binomial theorem where $\mathbf{b} = \mathbf{1}$ and $\gamma_s(\mathbf{1}) = {m \choose s}$. 
+
+The notation can be adapted to also handle items with more than two score categories. Let $y_{ij}$ denote the dummy-coded response to item $i$; that is, $y_{ij}=1$ category $j \in \{0,\dots, m_i\}$ of item $i$ is picked and zero otherwise. Let $a_{ij}$ denote the number of points earned for a response in category $j$ such that $a_{i0}=0$. The IRT model becomes
+$$
+p(\mathbf{y}|t,\mathbf{b}) = \prod_i \frac{\prod_j \left( t^{a_{ij}}b_{ij}\right)^{y_{ij}}}{\sum_j t^{a_{ij}}b_{ij}}
+$$
+
+This is a nominal response model with fixed integer item-category scores. We use the letter $b$ for the item parameters but note that we have included a dummy parameter $b_{i0}=1$ for the lowest category. For a dichotomous item, $m_i=1$, so that $j\in\{0,1\}$, $a_{i0}=0$,  $a_{i1}=1$, and $b_{i1}=b_i$.  
+
+Using this notation, the test score distribution is:
+$$
+P(Y_{++}=s|t, \mathbf{b}) = \frac{t^{y_{++}} \gamma_s(\boldsymbol{b})}{\prod_i \left(\sum_j t^{a_{ij}}b_{ij}\right)},
+$$
+where $y_{++}=\sum_i \sum_j a_{ij} y_{ij} = x_+$.  and esf are defined as:
+$$
+\gamma_s(\mathbf{b}) = \sum_{\mathbf{y}:y_{++}=s} \prod_i \prod_j b^{y_{ij}}_{ij}
+$$
+It follows that:
+$$
+\prod^m_{i=1} \left(1+\sum^{m_i}_{j=1} t^{a_{ij}}b_{ij}\right) = \sum^{M}_{s=0} t^{s} \gamma_s(\boldsymbol{b})
+$$
+where $s$ now runs over values of $y_{++}$; that is, from zero to the highest test score $M=\sum_i a_{im_i}$. 
+
+To illustrate, consider $m=2$ items with three categores each; that is, $m_i=2$, and $a_{i1}=1$. Writing $\gamma_s$ as short-hand for $\gamma_s(\mathbf{b})$ the above identity says:
+$$
+\left(1+t^{a_{11}}b_{11} + t^{a_{21}}b_{21}\right)
+\left(1+t^{a_{11}}b_{11} + t^{a_{21}}b_{21}\right)=
+\gamma_0 t^0 + \gamma_1 t^1 + \gamma_2 t^2 + t^3 \gamma_3 + \gamma_4 t^2
+$$
+where
+\begin{align*}
+\gamma_0 &=1 \text{(by definition)}\\
+\gamma_1 &=b_{11}+b_{21}\\
+\gamma_2 &=b_{22}+b_{11}b_{21}+b_{12}\\
+\gamma_3 &=b_{11}b_{22}+b_{12}b_{21} \\
+\gamma_4 &=b_{12}b_{21}
+\end{align*}
+Looking at the subscripts, an easy trick is: $\gamma_s$ is the sum of the products of item parameters over all possible ways to obtain a score $s$. For example, a score of 2 can be obtained by a score of 2 on item 2, a score of 1 on both items or a score of 2 on item 1. Note that, for any score that is impossible, the corresponding esf is set to zero. 
+
+
+The esf are sums of products and calculating these is not trivial as rounding errors tend to accumulate. Fortunately, the esf satisfy the following recursive relation:
+$$
+ \gamma_s(\mathbf{b})
+ =
+ \sum^{m_i}_{j=0} \gamma_{s-a_{ij}}(\mathbf{b}^{(i)}) b_{ij},
+$$
+where $\mathbf{b}^{(i)}$ denotes the item parameters excluding the parameters that belong to item $i$. This recursion is the basis for a numerically stable algorithm known as _the sum (or summation)-algorithm_. Proposed by @andersen1972numerical, this algorithm is implemented in dexter's __elsym__ function.
+
+We illustrate the sum-algorithm with three Rasch items ordered in an arbitrary way. We begin the recursion with the first item: $\gamma^{[1]}_0 = b_{10} = 1$ and $\gamma^{[1]}_1 = b_{11}$, where the superscript indicates the number of items. Then, we add the second item:
+\begin{align*}
+\gamma^{[2]}_0 &= \gamma^{[1]}_{0}b_{20} = b_{10}b_{20} = 1\\
+\gamma^{[2]}_1 &= \gamma^{[1]}_{1}b_{20} + \gamma^{[1]}_{0}b_{21} = b_{11}b_{20} + b_{21}b_{10}=b_{11}+b_{21}\\
+\gamma^{[2]}_2 &=  \gamma^{[1]}_{1}b_{21} = b_{11}b_{21}
+\end{align*}
+Finally, we add the third item:
+\begin{align*}
+\gamma^{[3]}_0 &= \gamma^{[2]}_{0}b_{30} = b_{10}b_{20}b_{30} =  1\\
+\gamma^{[3]}_1 &= \gamma^{[2]}_{1}b_{30} + \gamma^{[2]}_{0}b_{31} = b_{11}b_{20}b_{30} + b_{21}b_{10}b_{30} +b_{10}b_{20}b_{31} = b_{11}+b_{21}+b_{31}\\
+\gamma^{[3]}_2 &= \gamma^{[2]}_{2}b_{30} + \gamma^{[2]}_{1}b_{31} = b_{11}b_{21}b_{30}+b_{11}b_{20}b_{31} + b_{21}b_{10}b_{31} 
+=b_{11}b_{21} + b_{11}b_{31} + b_{21}b_{31}\\
+\gamma^{[3]}_3 &= \gamma^{[2]}_{2}b_{31}  = b_{11}b_{21}b_{31}
+\end{align*}
+
+Now consider two ways to calculate the conditional test score distribution. First, using the identity in the previous section, we can write:
+$$
+p(X_+=s|t) = p(Y_{++}=s|t, \mathbf{b}) = \frac{t^{y_{++}} \gamma_s(\boldsymbol{b})}{\sum^M_{s=0} t^{s} \gamma_s(\mathbf{b})}
+$$
+This is the expression used by the __p_score__ function in dexter.  
+
+Second, we can also write:
+$$
+P(Y_{++}=s|t, \mathbf{b}) = \sum_{\mathbf{y}:y_+ = s} \prod_i \prod_j \pi_{ij}^{y_{ij}} = \gamma_s(\boldsymbol{\pi})
+$$
+where $\pi_{ij}$ is short-hand for $p(Y_{ij}=1|t) = p(X_i=j|t)$. Written in this way, the test score distribution is an esf, albeit with argument $\boldsymbol{\pi}$. The following R function uses this observation to calculate the score distribution:
+
+
+```r
+LW = function(Pi, a)
+{
+  first = which(a==0)
+  last = c(first[-1]-1,length(a))
+  dexter:::elsym(Pi,a,first,last)
+}
+```
+
+The __elsym__ function is internal to __dexter__, hence the three colons. This function actually implements the Lord-Wingersky algorithm, extended to polytomous items. Compared to the first solution, it has the advantage that it works for any valid $\boldsymbol{\pi}=(\pi_{10},\pi_{11},\dots, \pi_{m1})$ and $\mathbf{a}$ and could be used with any IRT model, not just the NRM implemented in __dexter__. 
+
+# References

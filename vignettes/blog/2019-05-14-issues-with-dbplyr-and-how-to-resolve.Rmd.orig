@@ -1,0 +1,23 @@
+---
+title: Temporary issues with predicates, and how to resolve
+author: Jesse Koops
+date: '2019-05-14'
+slug: issues-with-dbplyr-and-how-to-resolve
+categories:
+  - Psychometrics
+  - R
+tags: []
+---
+
+_Predicates_ are a useful and powerful feature in **dexter** allowing users to filter the data passed to almost any function on arbitrarily complex combinations of the variables in the data base.
+
+Depending on the package infrastructure, some users may have experienced problems with predicates recently. This is caused by changes in the most recent version of a dependency, **dbplyr 1.4**. We are talking to the developers of dbplyr. In the meanwhile, problems can be avoided by downgrading dbplyr to version 1.3. 
+
+Start a new R session and execute:
+
+```
+remove.packages(dbplyr)
+library(devtools)
+install_version("dbplyr", version="1.3.0")
+```
+

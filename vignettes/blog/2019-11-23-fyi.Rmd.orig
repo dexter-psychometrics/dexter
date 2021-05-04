@@ -1,0 +1,12 @@
+---
+title: fyi
+author: Ivailo Partchev
+date: '2019-11-23'
+slug: fyi
+categories:
+  - Psychometrics
+  - R
+tags: []
+---
+
+I have just received an email labelled _fyi_ from our new maintainer. From it I deduce that a new version of __dexter__ is on CRAN. I count three new features, two improvements, and three bug fixes. You may want to check it out, as I most certainly will.

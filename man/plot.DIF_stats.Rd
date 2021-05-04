@@ -28,3 +28,7 @@ Plotting produces an image of the matrix of pairwise DIF statistics.
 The statistics are standard normal deviates and colored to distinguish significant from non-significant values.
 If there is no DIF, a proportion alpha will be significant be change.
 }
+\references{
+Feskens, R., Fox, J. P., & Zwitser, R. (2019). Differential item functioning in PISA due to mode effects. 
+In Theoretical and Practical Advances in Computer-based Educational Measurement (pp. 231-247). Springer, Cham.
+}

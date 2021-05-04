@@ -11,7 +11,8 @@ importFrom(stats, "complete.cases", "cor", "quantile","var",
             "sd", "weighted.mean", "as.formula", "density",
             "cov", "mahalanobis", "model.matrix", "pchisq","rchisq",
             "rgamma", "runif", "setNames", 'rnorm',"chisq.test",
-           "smooth.spline", "coef", "lm", "predict", "dnorm", "qnorm")
+           "smooth.spline", "coef", "lm", "predict", "dnorm", "qnorm",
+           "rbeta","rbinom","cov2cor", "rWishart")
 importFrom(graphics, "plot", "axis", "image", "layout", "par", "lines", "hist",
            "text","legend","abline","segments","arrows","points", "rect","clip")
 importFrom(grDevices, "rainbow","colorRampPalette","col2rgb","rgb")
@@ -61,6 +62,7 @@ export(p_score)
 S3method(print,inf_func)
 S3method(print,exp_func)
 S3method(print,sim_func)
+S3method(print,pmf_func)
 
 #ability.R
 export(ability)
@@ -111,7 +113,6 @@ S3method(coef,tind)
 export(tia_tables)
 
 #standards.R
-
 export(standards_3dc)
 export(standards_db)
 S3method(plot,sts_par)

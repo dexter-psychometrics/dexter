@@ -1,4 +1,70 @@
 
+#' @rdname profiles
+profile_tables = function(parms, domains, item_property, design = NULL)
+{
+  check_string(item_property)
+  check_df(domains, c('item_id', item_property))
+  
+  if(length(unique(domains$item_id)) < nrow(domains))
+    stop('column domains$item_id must be unique')
+  # to do: adjust mst vignette or this will cause problems
+  parms = simplify_parms(parms,design=design,collapse_b = TRUE)
+  
+  domains$item_id = ffactor(as.character(domains$item_id), levels = levels(parms$items$item_id))
+  
+  if(all(is.na(domains$item_id)))
+    stop("none of the item id's in domains occurs in your parameters")
+  
+  if(anyNA(domains$item_id))
+  {
+    stop("some item_id's in domains do not occur in your parameters.
+            You can use coef(parms) to see which items are in your parameters")
+  }
+  
+  if(length(setdiff(design$item_id, domains$item_id))>0)
+  {
+    message('items without domains:')
+    print(as.character(setdiff(design$item_id, domains$item_id)))
+    stop('not all items in design are listed in domains')
+  }
+  
+  
+  profile_tables_(parms$items, parms$a,parms$b, parms$design, domains, item_property) %>%
+    mutate_if(is.factor, as.character) %>%
+    df_format()
+}
+
+# item_ids assumed factors (if not, may give warnings, messages)
+# items: df item_id, first, last
+# design: df booklet_id, item_id, first, last
+# domains: df item_id [item_property]
+# item_property: string
+profile_tables_ = function(items, a, b, design, domains, item_property)
+{
+  design = design %>% 
+    inner_join(domains[,c('item_id',item_property)], by='item_id') %>%
+    mutate(dcat = dense_rank(.data[[item_property]]))
+  
+  dcat = distinct(design, .data[[item_property]], dcat )
+  
+  design %>%
+    group_by(.data$booklet_id) %>%
+    do({
+      prof_lmx = E_profile(b,a,.$first,.$last, split(1:nrow(.), .$dcat))
+      
+      lapply(prof_lmx, function(mtx)
+      {
+        tibble(dcat=1:ncol(mtx), expected_domain_score = mtx[1,] )}
+      ) %>%
+        bind_rows(.id='booklet_score') %>%
+        mutate(booklet_score = as.integer(.data$booklet_score)-1L) %>%
+        inner_join(dcat, by='dcat')
+      
+    }) %>%
+    ungroup() %>%
+    select(-dcat)
+}
+
 # to~do: example
 ##########################################
 #' Profile analysis
@@ -8,7 +74,7 @@
 #'
 #' @param dataSrc a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score, 
 #' an arbitrarily named column containing an item property and optionally booklet_id
-#' @param parms An object returned by \code{\link{fit_enorm}} 
+#' @param parms An object returned by \code{\link{fit_enorm}} or a data.frame of item parameters
 #' @param predicate An optional expression to subset data in dataSrc, if NULL all data is used
 #' @param item_property the name of the item property used to define the domains. If \code{dataSrc} is a dexter db then the
 #' item_property must match a known item property. If datasrc is a data.frame, item_property must be equal to
@@ -46,21 +112,26 @@ profiles = function(dataSrc, parms, item_property, predicate=NULL, merge_within_
   env = caller_env()
   
   check_dataSrc(dataSrc)
-  check_parms(parms)
   check_string(item_property)
-
-
+  
+  if(inherits(parms,'prms'))
+    parms_check = coef(parms)[,c('item_id','item_score')]
+  else
+    parms_check = parms[,c('item_id','item_score')]
+  
   if(is_db(dataSrc))
     item_property = dbValid_colnames(item_property)
   
   respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, env=env, 
                            extra_columns = item_property, 
-                           parms_check=parms$inputs$ssIS[,c('item_id','item_score')],
+                           parms_check=parms_check,
                            merge_within_persons=merge_within_persons)
+  
+  parms = simplify_parms(parms,design=respData$design,collapse_b=TRUE)
   
   if(!is.integer(respData$x[[item_property]]))
     respData$x[[item_property]] = ffactor(respData$x[[item_property]])
-
+  
   if(is_db(dataSrc) && item_property %in% dbListFields(dataSrc,'dxitems'))
   {
     domains = dbGetQuery(dataSrc, paste("SELECT item_id,", item_property, "FROM dxitems;"))
@@ -76,17 +147,16 @@ profiles = function(dataSrc, parms, item_property, predicate=NULL, merge_within_
       stop("some items belong to multiple domains, this is not allowed")
   }
   
-  design = respData$design
-  
   respData = respData %>%
     polytomize(item_property, protect_x=!is_db(dataSrc)) 
   
   out = respData$x %>%
     inner_join(
-        profile_tables_(parms = parms, design = design,
-                       domains = domains,
-                       item_property = item_property),
-        by = c('booklet_id','booklet_score',item_id = item_property)) %>%
+      profile_tables_(items = parms$items, a=parms$a,b=parms$b,
+                      design = parms$design,
+                      domains = domains,
+                      item_property = item_property),
+      by = c('booklet_id','booklet_score',item_id = item_property)) %>%
     mutate_if(is.factor, as.character) %>%
     df_format()
   
@@ -95,105 +165,6 @@ profiles = function(dataSrc, parms, item_property, predicate=NULL, merge_within_
   
   out
 }
-  
-#' @rdname profiles
-profile_tables = function(parms, domains, item_property, design = NULL)
-{
-  check_parms(parms)
-  check_string(item_property)
-  check_df(domains, c('item_id', item_property))
-  check_df(design, 'item_id', nullable=TRUE)
-  
-
-  if(length(unique(domains$item_id)) < nrow(domains))
-    stop('column domains$item_id must be unique')
-  
-  if(is.null(design))
-  {
-    if(is.null(parms$inputs$design))
-    {
-      #this is used in mst, so we keep it a warning instead of an error
-      if(inherits(parms,'mst_enorm'))
-        message('Computing non-mst profile_tables over an mst design, did you mean to use profile_tables_mst?')
-      design = lapply(parms$inputs$bkList, function(bk) tibble(booklet_id=bk$booklet,item_id=bk$items)) %>% 
-        bind_rows()
-      
-      design$item_id = ffactor(design$item_id)
-    } else
-    {
-      design = parms$inputs$design
-    }
-  }  
-  
-  domains$item_id = ffactor(as.character(domains$item_id), levels = levels(design$item_id))
-  
-  if(all(is.na(domains$item_id)))
-    stop("none of the item id's in domains occurs in your parameters")
-  
-  if(anyNA(domains$item_id))
-  {
-    warning("some item_id's in domains do not occur in your parameters, these have been removed. 
-            You can use coef(parms) to see which items are in your parameters")
-    domains = filter(domains, !is.na(.data$item_id))
-  }
-
-  
-  if(!'booklet_id' %in% colnames(design)) 
-    design$booklet_id = 'all_items'
-
-  profile_tables_(parms, domains, item_property, design) %>%
-    mutate_if(is.factor, as.character) %>%
-    df_format()
-}
-
-profile_tables_ = function(parms, domains, item_property, design)
-{
-  
-  if(!is.factor(domains$item_id))
-    domains$item_id = ffactor(as.character(domains$item_id), levels = levels(design$item_id))
-  
-  if(length(setdiff(design$item_id, domains$item_id))>0)
-  {
-    message('items withou domains:')
-    print(as.character(setdiff(design$item_id, domains$item_id)))
-    stop('not all items in design are listed in domains')
-  }
-  
-  design = design %>% 
-    select(.data$booklet_id, .data$item_id) %>%
-    inner_join(domains[,c('item_id',item_property)], by='item_id') %>%
-    mutate(dcat = dense_rank(.data[[item_property]]))
-  
-  dcat = distinct(design, .data[[item_property]], dcat )
-  
-  b = if.else(parms$inputs$method == "Bayes", colMeans(parms$est$b), parms$est$b)
-  a = parms$inputs$ssIS$item_score
-
-  first = parms$inputs$ssI$first
-  last = parms$inputs$ssI$last
-  
-  parms$inputs$ssI %>% 
-    mutate(i = row_number()) %>%
-    inner_join(design, by='item_id') %>%
-    group_by(.data$booklet_id) %>%
-    do(
-        {
-          prof_lmx = E_profile(b,a,first,last, split(.$i, .$dcat))
-          
-          lapply(prof_lmx, function(mtx)
-          {
-            tibble(dcat=1:ncol(mtx), expected_domain_score = mtx[1,] )}
-          ) %>%
-            bind_rows(.id='booklet_score') %>%
-            mutate(booklet_score = as.integer(.data$booklet_score)-1L) %>%
-            inner_join(dcat, by='dcat')
-        }
-      ) %>%
-      ungroup() %>%
-      select(-dcat)
-}
-
-
 
 # A profile is a table with two rows (earned, not earned) and number of columns
 # equal to the number of subsets. As in Norman's Cito brochure.

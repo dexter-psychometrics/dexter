@@ -26,7 +26,7 @@ get_resp_matrix(dataSrc, qtpredicate = NULL, env = NULL)
 
 \item{extra_columns}{to be returned in addition to person_id, booklet_id, item_score, item_id}
 
-\item{summarised}{if TRUE, no item scores are returned, just sumscores}
+\item{summarised}{if TRUE, no item scores are returned, just booklet scores}
 
 \item{env}{environment for evaluation of qtpredicate, defaults to caller environment}
 

@@ -1,0 +1,11 @@
+#navbar li.dropdown.open ul{
+	height: auto;
+    max-height: 60vh;
+    overflow-x: auto;
+}
+
+iframe.shiny-app-inline{
+  width: 100%;
+  border: none;
+  height:750px;
+}

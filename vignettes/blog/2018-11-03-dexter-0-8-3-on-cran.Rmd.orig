@@ -1,0 +1,14 @@
+---
+title: dexter 0.8.3 on CRAN
+author: Ivailo Partchev
+date: '2018-11-03'
+slug: dexter-0-8-3-on-cran
+categories:
+  - Psychometrics
+  - R
+tags: []
+---
+
+We have just published a new version of **dexter**. Among the new features are functions to compute the test and information functions, and expected scores. Of course, these have always been computed internally, but we had not thought of adding user-level functions. Information functions are quite interesting -- expect a special entry on them very soon.
+
+Please ignore the short-lived version 0.8.2. It is the same as 0.8.3 except that we found a bug -- a very small one, a mere buglet, but we didn't like its sharp little teeth so it had to go.

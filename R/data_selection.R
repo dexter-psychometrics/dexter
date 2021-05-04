@@ -1,3 +1,6 @@
+# TO DO: rlang has an is_reference method, don't have to use home baked one in cpp
+# test and use
+
 
 #' Selecting data
 #' 

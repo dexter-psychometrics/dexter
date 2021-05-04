@@ -34,6 +34,24 @@ pg_tick = function(step=NULL, nsteps=NULL)
   
 pg_close = function() cat('\n')
 
+explicit_NA = function(x, replace_NA_with = c('<NA>','.NA.','<<NA>>','__NA__'))
+{
+  if(!is.character(x) || !anyNA(x))
+    return(x)
+  
+  for(v in replace_NA_with)
+  {
+    if(!v %in% x)
+    {
+      x[is.na(x)] = v
+      return(x)
+    }
+  }
+  stop('could not resolve NA values')
+  
+}
+
+
 ## Burnin and thinning for different purposes:
 # cal: Bayesian calibration
 # pv: plausible values
@@ -516,7 +534,7 @@ c2weights<-function(cIM)
 {
   hh=kronecker(t(cIM),cIM,'+')
   gg=eigen(hh)
-  out=gg$vectors[,which.max(gg$values)]
+  out=abs(gg$vectors[,which.max(gg$values)])
   av_indx=which.min(abs(out-mean(out)))
   return(out/out[av_indx])
 }
@@ -603,5 +621,33 @@ blockMatrixDiagonal<-function(...){
     index<-index+dimensions[k]
   }
   finalMatrix
+}
+
+#
+# mean and variance of Y|x if x,y is multivariate normal
+#
+# with mean mu and variance-covariance matrix sigma
+# @param m vector of means
+# @param sigma covariance matrix
+# @param y.ind indices dependent variable(s)
+# @param x.ind indices conditioning variables. If null its just all others
+# @param x.value value of conditioning variables
+# 
+condMoments = function(mu, sigma, y.ind, x.ind=NULL, x.value )
+{
+  if (is.null(x.ind)) x.ind = setdiff(1:length(mu), y.ind)
+  B = sigma[y.ind, y.ind]
+  C = sigma[y.ind, x.ind, drop = FALSE]
+  D = sigma[x.ind, x.ind]
+  CDinv = C %*% solve(D)
+  if (is.vector(x.value))
+  {
+    cMu = c(mu[y.ind] + CDinv %*% (x.value - mu[x.ind]))
+  }else
+  {
+    cMu = c(mu[y.ind] + CDinv %*% t(x.value - mu[x.ind]))
+  }
+  cVar = B - CDinv %*% t(C)
+  return(list(mu=cMu, sigma=cVar))
 }
 

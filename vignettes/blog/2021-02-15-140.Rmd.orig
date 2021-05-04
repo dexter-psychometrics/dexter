@@ -1,0 +1,31 @@
+---
+title: 140!
+author: Ivailo Partchev
+date: '2021-02-15'
+slug: '140'
+categories: []
+tags: []
+---
+
+Just a few lines to boast that (i) __dexter__ has been downloaded in 140 countries now, and (ii) that I have learned how to make nice maps with `tmap` and `leaflet`.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(RSQLite)
+library(sf)
+library(spData)
+library(tmap)
+library(htmlwidgets)
+library(htmltools)
+library(leaflet)
+
+db = dbConnect(SQLite(), '/Rdatasets/cranlogs.db')
+x='dexter'
+qu = paste('select iso_a2, count(*) as Downloads from',x,'group by iso_a2')
+tab = dbGetQuery(db, qu)
+wp = merge(world, tab, all.x=TRUE)
+wp = subset(wp, !(iso_a2=='AQ'))
+m = tm_shape(wp) + 
+    tm_polygons(col = "Downloads", style = "log10", palette = 'Oranges', id='name_long')
+tmap_leaflet(m) %>%
+    addTiles()
+```

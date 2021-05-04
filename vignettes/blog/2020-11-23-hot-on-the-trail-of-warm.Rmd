@@ -1,0 +1,297 @@
+---
+title: Hot on the Trail of Warm
+author: Timo Bechger, Ivailo Partchev (foreword)
+date: '2020-11-23'
+header-includes:
+- \usepackage{amsfonts}
+- \usepackage{amsmath}
+- \newcommand{\ind}{{\bot\negthickspace\negthickspace\bot\,}}
+- \newcommand{\Prob}{\overset{p}{\rightarrow}}
+bibliography: dexterMST.bib
+slug: hot-on-the-trail-of-warm
+categories: []
+tags: []
+---
+
+_Back in 1989, Thomas A. Warm (1937--2019) published [a paper](https://eric.ed.gov/?id=EJ401718) in Psychometrika that was to have an important influence on practical testing. It described a way to reduce the inherent bias in the maximum likelihood estimate of the person's ability, given the responses and the item parameters. All testing is ultimately about estimating ability, so the paper naturally got a lot of attention._
+
+_We are not aware of any subsequent publications by T.A., although we did find a highly readable [IRT primer](https://apps.dtic.mil/dtic/tr/fulltext/u2/a063072.pdf) on the Internet. Sadly, we also found an [obituary](https://obits.oklahoman.com/obituaries/oklahoman/obituary.aspx?pid=193693805&fhid=4206). It says that he was in the army and that he enjoyed Japanese drumming (who doesn't?), but there is no mention of psychometrics at all. Looking further, we found this picture on LinkedIn:_ 
+
+![](img/ThomasWarm.jpeg)
+
+_We don't know whether this elusiveness was due to the extreme modesty of a private person, or to the military status of some of his employers, such as the U.S. Coastal Guard Institute. But we feel that T.A. deserves some kind of tribute by our community, and Timo proposed to write one. Predictably, the formulae started pouring out immediately, but what nicer tribute for a scientist?_
+
+
+# Introduction
+Starting with the simplest non-trivial case, we assume that the test consists of $n$ equally difficult Rasch items with
+$$
+\pi(\theta) = \frac{\exp(\theta)}{1+\exp(\theta)},
+$$
+the probability to find the correct answer on any of the items. The ML estimate (MLE) of $\pi(\theta)$ is $\hat{\pi} = \frac{x_+}{n}$ where $x_+$ is the number of items answered correctly. From the invariance property of the MLE, it follows that 
+$$
+\hat{\theta} = \ln \frac{\frac{x_+}{n}}{1-\frac{x_+}{n}}
+$$
+is the MLE of ability. 
+
+Unfortunately, $\hat{\theta}$ is infinite for extreme scores; that is, $-\infty$ when $x_+=0$ or $+\infty$ when $x_+=n$. One could say that $\hat{\theta}$ is extremely biased and (under) over-estimates the ability corresponding to ($x_+=0$) $x_+=n$.  To reduce bias, Haldane (1956) suggested that we replace $\hat{\pi}$ by 
+$$
+\hat{\pi}^*=\frac{x_++\frac{1}{2}}{n+1}.
+$$ 
+If we do so, we find
+$$
+\hat{\theta}^* = \ln \frac{x_++\frac{1}{2}}{n+1-\left(x_+ + \frac{1}{2}\right)}
+$$
+which we will call _Haldane's estimate_. As Haldene's estimate is finite even for the extreme scores, it is obviously less biased than the MLE. 
+
+The Warm estimate was similarly developed to prevent small-sample bias but, apparently, using a very different approach. Specifically, the Warm estimator is a weighted maximum likelihood estimate (WMLE) that maximizes a weighted likelihood function $L(\theta)W(\theta)$. We obtain the Warm estimate when $W(\theta) = \sqrt{I(\theta)}$, where $I(\theta)$ is the test information function. Here,  
+$$
+L(\theta)\sqrt{I(\theta)} \propto \frac{e^{x_+\theta}}{(1+e^\theta)^{n}}\sqrt{ \frac{ne^{\theta}}{(1+e^{\theta})^2}}
+\propto\frac{e^{(x_++\frac{1}{2})\theta}}{(1+e^\theta)^{n+1}}
+$$
+As the right-hand side is the original likelihood function with $x_+$ replaced by $x_++1/2$ and $n$ replaced by $n+1$, it follows that the Warm estimate of ability equals Haldane's estimate; see also @verhelst1997logistic.
+
+This blog intends to explain the Warm estimate. We assume that the IRT model is a nominal response model. That is, a person with ability $\theta$ answers independently to different items and has a probability  
+$$
+P_{ij}(\theta) = \frac{b_{ij} e^{a_{ij}\theta}}{\sum_h b_{ih} e^{a_{ih}\theta}}
+$$
+to earn an item score of $a_{ij}$ on item $i$ where $b_{ij}$ is an item category parameter with $j=0, \dots, m_i$, $a_{i0}=0$ and $b_{i0}=1$. We focus on the estimation of $\theta$ and we assume both the $a_{ij}$ and $b_{ij}$ to be fixed. The IRT model is then a member of the exponential family with canonical parameter $\theta$ where the test score is a sufficient statistic for $\theta$. This includes the Rasch model and the OPLM as special case. If the $a_{ij}$ are fixed, it also includes the 2PL.
+
+#  Preliminaries
+
+We have a scalar parameter $\theta$ and a statistic $\hat{\theta}$. When estimating $\theta$, $\hat{\theta}$ is called an estimator and its observed value an estimate. For simplicity, we use the single term estimate and a single symbol; i.e., $\hat{\theta}$ for the MLE and $\hat{\theta}^*$ for the Warm estimate.
+
+## MLE, WMLE and the Warm estimate
+The MLE $\hat{\theta}$ is the value that maximizes the likelihood function or, equivalently, its natural logarithm the log-likelihood function $l(\theta)=\ln L(\theta)$. It is defined as the root of the score function:
+$$
+S(\theta) = \frac{d}{d\theta} l(\theta).
+$$
+
+The WMLE is the root $\hat{\theta}^*$ of the weighted score function 
+$$
+S^*(\theta) = \frac{d}{d\theta} \left[l(\theta) + w(\theta)\right]
+$$
+where $w(\theta)=\ln W(\theta)$ is the log-weight function. The Warm estimate is a special kind of WMLE where $w(\theta) = \frac{1}{2}\ln I(\theta)$. Note that $I(\theta) = -S'(\theta)$.
+
+## Bias
+Bias is the difference between the expected value of the estimate and the true value 
+$$
+B(\theta) = E_{\theta}[\hat{\theta}|\mathbf{x}] - \theta 
+$$
+where the expectation is taken with respect to the distribution of the data given the true value of ability.
+In the example with equivalent Rasch items, the MLE, $\hat{\pi} = x_+/n$, is an unbiased estimate of $\pi$. However, the estimate $\hat{\theta}$, although it is the MLE of $\theta$, was not unbiased. This is not surprising given that 
+$$
+E[\hat{\theta}] = E\left[\ln \frac{\hat{\pi}}{1-\hat{\pi}}\right] \neq \ln \frac{E[\hat{\pi}]}{1+E[\hat{\pi}]} =\theta. 
+$$
+An estimate of $\theta$ would only be unbiased if $\theta$ is a linear function of $\pi$. To obtain the Warm estimate, we essentially 'biased' the MLE of $\pi$ to obtain an estimate of $\theta$ that was less biased. 
+
+In general, the MLE is not unbiased but the bias is of order $1/n$:
+$$
+B(\hat{\theta}) = \frac{b(\theta)}{n}+o\left(\frac{1}{n}\right)
+$$
+So the bias vanishes as $n\rightarrow \infty$. Unfortunately, the number of items is typically small which is why we have to worry about bias. The term $b(\theta)/n$ is called the first-order bias.
+
+Note that the mean-squared error,
+$$
+E_{\theta}[(\hat{\theta}-\theta)^2] = Var_{\theta}(\hat{\theta})+B^2(\theta)
+$$ 
+is also of order $n^{-1}$ with its main contribution the variance since $B^2$ is of order $n^{-2}$. Thus, a biased estimator may be better than an unbiased one if it has smaller variance and hence smaller mean-squared error.
+
+
+# First-order bias of the MLE
+Using a Taylor-series expansion to approximate $S(\hat{\theta})$ around the true value $\theta$, Lord (1983) found:
+$$
+E[\hat{\theta}-\theta] = \frac{-J(\theta)}{2I^2(\theta)} +o(n^{-1})
+$$
+where $J(\theta)=I'(\theta)=-S''(\theta)$. Lord's result is an instance of a general result derived, for example, in @cox1974theoretical or, slightly easier, in @mardia1999bias. 
+
+Note that $I(\theta)=\sum_i I_i(\theta)$ with $I_i(\theta)$ the item information function. If we write $\bar{I}(\theta) = n^{-1}\sum_i I(\theta)$ for the average information per item, we find that
+$$
+b(\theta) = -\frac{\bar{J}(\theta)}{2\bar{I}^2(\theta)} =-\frac{d}{d\theta} \ln \sqrt{\bar{I}(\theta)}
+$$
+Thus, the first-order bias is zero at the value of $\theta$ where the (average) information function reaches its maximum value. It follows that first-order bias is smallest for those persons whose ability matches the difficulty of the test. For example, in the case of equally difficult Rasch items, 
+$$
+b(\theta) = -\frac{1-e^{\theta-\delta}}{2(1+e^{\theta-\delta})}
+$$
+which is zero when $\theta=\delta$ and the ability of the test taker matches exactly the difficulty of the items.
+
+# Correction or prevention
+Lord suggests to correct the MLE for first-order bias. That is, to use $\tilde{\theta} = \hat{\theta} - \frac{b(\theta)}{n}$ whose bias $B(\tilde{\theta})=o(n^{-1})$. @efron1975defining shows that this still holds if we substitute $\theta=\hat{\theta}$ for the true value. The problem is that this 'bias-corrected' estimate would be undefined when the ML estimates are infinite. 
+
+Like Haldane, Warm suggests instead a method to _prevent_ bias. Namely, to weight (or bias) the score function to _reduce_ the bias in the MLE. He found that:
+$$
+B(\theta^*) = \frac{1}{I(\theta)}\left[w'(\theta) - \frac{J(\theta)}{2I(\theta)}\right] + o(n^{-1})
+$$
+such that $B(\theta^*) = o(n^{-1})$ if we define $w(\theta) =\frac{1}{2}\ln I(\theta)$.  
+
+Warm also succeeded in showing that the asymptotic distribution of the WMLE equals that of the MLE. As $n$ grows to infinity, both estimates are normally distributed around the true value with variance $I(\theta)^{-1}$. 
+
+<!-- As an aside, we note that there are other ways to correct for bias. @quenouille1956notes noted that, if we leave the i-th item responses out of the original response pattern, the MLE has the same bias expression but with $n$ replaced by $n-1$. In light of this observation, he suggested the estimator -->
+<!-- $$ -->
+<!-- \tilde{\theta} = \hat{\theta}-(n-1)\left[\bar{\theta}-\hat{\theta}\right] -->
+<!-- $$ -->
+<!-- with $\bar{\theta}$ the average of the n possible _leave-one-out_ estimators has a bias that smaller than that of the MLE. This procedure is called the _Jackknife_ and $(n-1)\left[\bar{\theta}-\hat{\theta}\right]$ is the jackknife estimate of the bias. Unfortunately, the jackknife is cannot handle the problem of extreme scores. -->
+
+
+# The connection to Jeffrey's prior
+If $W(\theta)$ is a prior density function of $\theta$, the weighted likelihood is (proportional to) a posterior density function. It follows that $\hat{\theta}^*$ is a Bayesian modal estimate of $\theta$ when the prior $W(\theta) \propto \sqrt{\ln I(\theta)}$. This prior is is known as _Jeffreys prior_. 
+
+Jeffreys prior was named after the statistician who introduced it as a prior distribution that results in a posterior that is invariant under reparametrization @jeffreys1946invariant. Warm notes the connection but doesn't seem to believe that Jeffreys prior makes sense. He writes:
+
+> Suppose the same test was given to two groups of examinees, whose distributions of $\theta$ are different and known. Bayesians will be obliged to use different priors for the two groups. For WLE the same $w(\theta)$ would be used for both groups, because $w(\theta)$ is a function of the test only. Similarly, if two
+different tests of the same ability are given to a single group, Bayesians would use the same prior for both tests, whereas for WLE a different $w(\theta)$ would be used for each test.
+
+Personally, we see no objection to being ignorant of group differences and base our ability estimate on the test only. 
+
+# Calculating the Warm estimate in R
+The Warm estimate is not easy to calculate. 
+
+## Rasch model
+For the Rasch model it is relatively simple. The log-likelihood function is
+$$
+l(\theta) = x_+ \theta -\sum_i \ln(1+e^{\theta-\delta_i})
+$$
+The corresponding score function is
+\begin{align*}
+S(\theta) 
+= l'(\theta) &= x_+ - \sum_i \frac{e^{\theta-\delta_i}}{1+e^{\theta-\delta_i}} \\
+&= x_+ - \sum_i P_i(\theta) \\
+&= x_+ -E[X_+|\theta]
+\end{align*}
+As a property of the exponential family, this has the form $x_+ -E[X_+|\theta]$. Hence, finding the MLE of ability means finding the ability such that the expected test score equals the observed one. The information function is
+\begin{align*}
+I(\theta) 
+&= -S'(\theta) \\ 
+&= \sum_i P'_i(\theta)\\
+\end{align*}
+where $P'_i(\theta) = P_i(\theta)(1-P_i(\theta))$.
+Finally,
+$$
+J(\theta) = \sum_i P'_i(\theta)\left[1-2P_i(\theta)\right]\\
+$$
+The log-weighted score is thus:
+\begin{align*}
+S*(\theta) &= x_+ -E[X_+|\theta] + \frac{J(\theta)}{2I(\theta)}\\
+&=x_+ - \sum_i P_i(\theta) +\frac{\sum_i P'_i(\theta)\left[1-2P_i(\theta)\right]}
+{2\sum_h P_h(\theta)(1-P_h(\theta))}
+\end{align*}
+This leads to a very simple function.
+
+
+```r
+Warm_Rasch = function(test_score, delta)
+{
+  Sw = function(theta) 
+  {
+    Pi = 1/(exp(delta - theta)+1)
+    dPi = Pi*(1 - Pi)
+    I = sum(dPi)
+    J = sum(dPi*(1 - 2*Pi))
+    return(test_score - sum(Pi) + J/(2*I))
+  }
+  return(uniroot(Sw, interval=c(-10,10))$root)
+}
+```
+
+<!-- Haldane's estimate, assuming that the items are (about) equal is simple. For a test of 100 Rasch items with difficulties uniformly chosen between -1 and 1, a plot of Warm against Haldane shows that the two are very similar but Haldane's estimator pulls the extremes slightly more to the mean.   -->
+
+
+
+
+It is more complex for the full NRM allowing for polytomous items. We have already discussed the calculation of the information function in an [earlier blog entry](https://dexterities.netlify.app/2018/11/05/test-and-item-information-functions-in-dexter/). As before, let $x_{ij}=1$ be a dummy coded response where $x_{ij}=1$ if the response to item $i$ was scored in category $j$ was picked. Specifically, we derived:
+
+- The score function:
+$$
+S(\theta) = x_{++} - \sum_i \sum_j a_{ij}P_{ij}(\theta),
+$$ 
+where $x_{++}=\sum_i \sum_j x_{ij} a_{ij}$ is the test score and $\sum_i \sum_j P_{ih}(\theta)a_{ih} = E[X_{++}|\theta]$ is expectation.
+- The test information: $I(\theta) = \sum_i I_i(\theta)$ where
+$$
+I_i(\theta) 
+= \sum_j a^2_{ij} P_{ij}(\theta) -  \left(\sum_j a_{ij} P_{ij}(\theta)\right)^2
+$$
+is the item information. Note that $I(\theta) = E[X^2_{++}]-E[X_{++}|\theta]^2 = Var(X_{++}|\theta)$.
+
+We now need $J(\theta) = \sum_i J_i(\theta)$ where
+$$
+J_i(\theta) = I'_i(\theta) = \sum_j a^2_{ij} P'_{ij}(\theta) - 2\left(\sum_j a_{ij}P_{ij}(\theta)\right)\left(\sum_j a_{ij}P'_{ij}(\theta)\right)
+$$
+Noting that
+$$
+\frac{d}{d\theta} P_{ij}(\theta) = 
+P_{ij}(\theta)\left(a_{ij} - \sum_h a_{ih}P_{ih}(\theta)\right)
+$$
+we find, after some tedious but straightforward algebra, that we can write:
+$$
+J_i(\theta) = \sum_j a^3_{ij} P_{ij}(\theta) - 3\left(\sum_j a^2_{ij}P_{ij}(\theta)\right)\left(\sum_h a_{ih}P_{ih}(\theta)\right) +2\left(\sum_j a_{ij} P_{ij}(\theta)\right)^3
+$$
+
+All we need can be written in terms of sums $M_{ri} = \sum_j a^r_{ij}P_{ij}(\theta)$, for $r \in \{1,2,3\}$. which inspired the following function to calculate the Warm estimate using a **parms** object produced by **fit_enorm**.
+
+
+```r
+Warm = function(test_score, parms)
+{
+  a = parms$inputs$ssIS$item_score
+  b = parms$est$b
+  first = parms$inputs$ssI$first
+  last = parms$inputs$ssI$last
+  if (!(test_score %in% (0:sum(a[last])))) error("wrong test score")
+  
+  weighted_score = function(theta)
+  {  
+    nI=length(first)
+    I = J = matrix(0,nI, length(theta))
+    E = rep(0,length(theta))
+    for (i in 1:nI)
+    {
+      Fij = b[first[i]:last[i]]*exp(a[first[i]:last[i]]*theta)
+      Pi = Fij/sum(Fij)
+      M1 = Pi*a[first[i]:last[i]]
+      M2 = M1*a[first[i]:last[i]]
+      M3 = M2*a[first[i]:last[i]]
+      M1 = sum(M1)
+      M2 = sum(M2)
+      M3 = sum(M3)
+      E = E + M1
+      I[i,] = M2 - M1^2
+      J[i,] = M3 - 3*M1*M2 + 2*M1^3
+    }
+    test_score - E + sum(J)/(2*sum(I))
+  }
+  uniroot(weighted_score, interval=c(-10,10))$root
+}
+```
+
+The user-function **ability** in dexter will of course do the job using a dedicated method to locate the root of the weighted (log-) likelihood.
+
+# Conclusion
+In closing, we mention that @firth1993bias, independently of Warm, developed the idea beyond the exponential family. In these very capable hands, Warm's legacy was taken up and generalized by @kosmidis2009bias and implemented in an R package called _brgl_.
+
+
+# Appendix: First-order bias in the MLE
+We derive an expression for the first-order bias term $b(\theta)/n$. To this effect, we use a Taylor-series expansion to approximate $S(\hat{\theta})$ around the true ability $\theta$.
+$$
+S(\hat{\theta}) = S(\theta)+(\hat{\theta}-\theta)S'(\theta)+\frac{1}{2}(\hat{\theta}-\theta)^2S''(\theta) + o(n^{-1/2})= 0
+$$
+By definition, $S(\hat{\theta})=0$. Thus, if we take expectations on both sides we find:
+$$
+E[\hat{\theta}-\theta]S'(\theta) + \frac{1}{2}E[(\hat{\theta}-\theta)^2]S''(\theta) = 0
+$$
+Using:
+
+-   $E[S(\theta)] = 0$
+-   We consider the situation where all derivatives of $S$ are independent of data.
+-   $E[(\hat{\theta}-\theta)^2]=Var(\hat{\theta}) + o(n^{-1}) = \frac{1}{I(\theta)} + o(n^{-1})$, 
+
+we find that
+$$
+E[\hat{\theta}-\theta]S'(\theta) + \frac{S''(\theta)}{2I(\theta)} +o(n^{-1})= 0
+$$
+Rearranging shows that:
+$$
+E[\hat{\theta}-\theta] = \frac{-S''(\theta)}{2I^2(\theta)} +o(n^{-1})
+$$
+Since $I(\theta)=-S'(\theta)$, it follows that $S''(\theta)=-I'(\theta)$.
+
+# References
+

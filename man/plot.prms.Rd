@@ -31,7 +31,7 @@ Default = 0.95 for a 95\% confidence interval}
 \item{...}{further arguments to plot}
 }
 \value{
-Silently, a data.frame with observed an expected values.
+Silently, a data.frame with observed and expected values possibly useful to create a numerical fit measure.
 }
 \description{
 The plot shows 'fit' by comparing the expected score based on the model (grey line)

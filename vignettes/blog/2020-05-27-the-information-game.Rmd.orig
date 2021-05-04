@@ -1,0 +1,31 @@
+---
+title: The information game
+author: Ivailo Partchev
+date: '2020-05-27'
+slug: the-information-game
+categories:
+  - Psychometrics
+tags: []
+---
+
+A typical task in adaptive testing is to select, out of a precalibrated item pool, the most appropriate item to ask, given an interim estimate of ability, $\theta_0$. A popular approach is to select the item having the largest value of the item information function (IIF) at $\theta_0$.
+
+When the IRT model is the Rasch model, the item response function (IRF) is $$P(X=1|\theta,b)=\frac{1}{1+\exp(b-\theta)}$$ where $b$ is the item difficulty, and the IIF can be computed as $P(X=1|\theta,b)[1-P(X=1|\theta,b)]$. For all items, this function reaches a maximum of 0.25, encountered exactly where $\theta=b$ and $P(X=1|\theta,b)=0.5$. So picking the item with the maximum IIF is the same as picking the item for which a person of ability of $\theta_0$ has a probability of 0.5 to produce the correct answer.
+
+If we use the two-parameter logistic (2PL) model instead, the IRF is $$P(X=1|\theta,a,b)=\frac{1}{1+\exp[a(b-\theta)]}$$ where the new parameter $a$ is called the discrimination parameter, and the IIF can be computed as $a^2P(X=1|\theta,a,b)[1-P(X=1|\theta,a,b)]$. Note that while the contribution of the product, $P(1-P)$, remains bounded between 0 and 0.25, the influence of $a^2$ can become quite large -- for example, if $a=5$, $P(1-P)$ gets multiplied by 25, ten times the maximum value under the Rasch model. Selecting such an informative item gives us the happy feeling that our error of measurement will decrease a lot, but what happens to the person's probability to give the correct response?
+
+In our game, we have one person and two items. The person's ability is 0, represented with a vertical gray line. One of the item is fixed to be a Rasch item with $b=0$; its IRF is shown as a solid black curve, and its IIF as a dotted black curve. The second item, shown in red, is 2PL, and you can control its two parameters with the sliders. Initially, $a=1$ and $b=1$. 
+
+The purpose of the game is to find particularly awkward situations where the more informative item is the most inappropriate in the sense of:
+
+* having a difficulty as remote from $\theta=0$ as possible;
+
+* having a probability of a correct response at $\theta=0$ as low as possible.
+
+Can you find the sweet spots? I have just computed the answer to the second question but I am not telling (in fact, I can tell you the value of $P$: 0.0022, quite a bit off 0.5).
+
+<iframe src="https://vm66-1.shinyapps.io/theinfogame/" class="shiny-app-inline" style="height:600px;"></iframe>
+
+
+
+

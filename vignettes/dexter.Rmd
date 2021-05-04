@@ -18,7 +18,12 @@ img{ border:none;}
 
 ```{r setup, include=FALSE}
 library(knitr)
-opts_chunk$set(echo = TRUE,fig.align='center', fig.width=6, fig.height=5, dev='CairoPNG')
+opts_chunk$set(echo = TRUE,fig.align='center', fig.width=6, fig.height=5)
+
+if (requireNamespace("Cairo", quietly = TRUE)) 
+{
+   opts_chunk$set(dev='CairoPNG')
+}
 
 par_hook = function(before, options, envir)
 {
@@ -33,7 +38,7 @@ knit_hooks$set(par = par_hook)
 
 **Dexter** is an R [@R] package intended as a robust and fairly comprehensive system for managing and analyzing test data organized in booklets. It includes facilities for importing and managing test data, assessing and improving the quality of data through basic test-and-item analysis, fitting an IRT model, and computing various estimates of ability.
 
-**Dexter** differs from other psychometric software both in terms of the tools it includes as in those it omits. The data management component is quite developed to promote data integrity and prevent SQL injections and other mishaps. Many psychometric methods not found elsewhere are provided, such as Haberman's (2007) interaction model generalized for polytomous items, new methods for exploratory and confirmatory DIF analysis, support for the 3DC method of standard setting, and many more. On the other hand, there is no support for multivariate IRT models, 2PL and 3PL models and other methods sufficiently represented in other packages. The central IRT model is a polytomous generalization of the extended marginal Rasch model: we call it the Extended Nominal Response Model (ENORM). 
+**Dexter** differs from other psychometric software both in terms of the tools it includes as in those it omits. The data management component is quite developed to promote data integrity. Many psychometric methods not found elsewhere are provided, such as Haberman's (2007) interaction model generalized for polytomous items, new methods for exploratory and confirmatory DIF analysis, support for the 3DC method of standard setting, and many more. On the other hand, there is no support for multivariate IRT models, 2PL and 3PL models and other methods sufficiently represented in other packages. The central IRT model is a polytomous generalization of the extended marginal Rasch model: we call it the Extended Nominal Response Model (ENORM). 
 
 We believe that, at least in high-stakes tests, the scoring rules should be explicit, and that the psychometric model should be developed from the scoring rules, not vice versa. Correspondingly, a **dexter** project starts with the user supplying the scoring rules for all items in the test. These must be given as a data containing, in any order, three columns named _exactly_ `item_id`, `response`, and `item_score`. An example is provided with the package:
 
@@ -139,7 +144,7 @@ m = fit_inter(db, booklet_id=='agg')
 plot(m, "S1DoScold", show.observed=TRUE)
 ```
 
-This plot shows three item-total regressions. The pink dots show the observed regression: the average score on the item given the total score on the test. There are also two regression models: the interaction model is shown with a thicker but lighter line, and the Rasch model is shown with a thinner, darker line. The two regression lines cross where the data is the densest. In this case they are very similar -- when not, the dots tend to cluster around the regression line from the interaction model. The observed regression is not shown by default, so we had to change the `show.observed` parameter. The light gray 'curtains' are drawn by default at the 5% lowest and the 5% highest sum scores, directing the eye to where the 'action' really happens. A more detailed discussion of the item-total regressions may be found on [our blog](http://dexterities.netlify.com/2018/02/25/item-total-regressions-in-dexter/).
+This plot shows three item-total regressions. The pink dots show the observed regression: the average score on the item given the total score on the test. There are also two regression models: the interaction model is shown with a thicker but lighter line, and the Rasch model is shown with a thinner, darker line. The two regression lines cross where the data is the densest. In this case they are very similar -- when not, the dots tend to cluster around the regression line from the interaction model. The observed regression is not shown by default, so we had to change the `show.observed` parameter. The light gray 'curtains' are drawn by default at the 5% lowest and the 5% highest sum scores, directing the eye to where the 'action' really happens. A more detailed discussion of the item-total regressions may be found on [our blog](https://dexterities.netlify.app/2018/02/25/item-total-regressions-in-dexter/).
 
 We can show the response category probabilities instead of the expected item score:
 

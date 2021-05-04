@@ -165,6 +165,10 @@ PVrecycle <- function(b, a, first, last, mu, sigma, scoretb, A, alpha = -1.0) {
     .Call(`_dexter_PVrecycle`, b, a, first, last, mu, sigma, scoretb, A, alpha)
 }
 
+PV_sve <- function(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, pv_mat, pv_col_indx = 0L, niter = 1L) {
+    invisible(.Call(`_dexter_PV_sve`, b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, pv_mat, pv_col_indx, niter))
+}
+
 sampleIM <- function(bIM, cIM, a, first, last, scoretab) {
     .Call(`_dexter_sampleIM`, bIM, cIM, a, first, last, scoretab)
 }

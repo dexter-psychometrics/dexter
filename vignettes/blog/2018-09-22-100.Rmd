@@ -1,0 +1,14 @@
+---
+title: 100!
+author: Ivailo Partchev
+date: '2018-09-22'
+slug: '100'
+categories:
+  - Psychometrics
+  - R
+tags: []
+---
+
+![](img/100.gif)
+
+Perhaps not important, but on the other hand rather overwhelming -- according to the Rstudio logs, **dexter** has been downloaded in 100 different countries. Makes one wonder...

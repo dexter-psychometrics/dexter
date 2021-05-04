@@ -1,0 +1,213 @@
+---
+title: Analyzing continuous responses with dexter
+author: Timo Bechger and Ivailo Partchev
+date: '2020-12-22'
+bibliography: dexterMST.bib
+slug: analysing-continuous-responses-with-dexter
+categories: []
+tags: []
+---
+
+When we apply IRT to score tests, we most often use a model to map patterns of TRUE/FALSE responses onto a real-valued latent variable, the great advantage being that responses to different test forms can be represented on the same latent variable relatively easy. When all observed responses are continuous, most psychometricians will probably think first of factor analysis, structural equations and friends. Yet the world of IRT is more densely populated with continuous responses than anticipated.
+
+To start with, computer-administered testing systems such as [MathGarden](https://www.rekentuin.nl/) readily supply us with pairs of responses and response times. It is a bit awkward to model them simultaneously, since responses are usually discrete (with few categories) and response times continuous -- yet there exist a myriad of models, as the overview in @DeBoeck19 shows. To apply the same type of model to both responses and response times, @PARTCHEV201223 have chosen to split the latter at the median, either person- or item-wise.
+
+Second, item responses increasingly get scored by machine learning algorithms (e.g. @settles2020machine), whose output is typically a class membership probability. If classification is to be into two classes, the boundary is usually drawn at 0.5. One of the questions we ask ourselves in this blog is whether there can be a better way.
+
+Within more traditional testing, there have been attempts to avoid modeling guessing behavior with _ad hoc_ models by asking test takers about their perceived certainty that the chosen response is correct (@finetti1965methods, @dirkzwager2003multiple). These approaches also lead to responses that can be considered as continuous.
+
+The Rasch model for continuous responses must have been proposed many times in more or less obvious forms. As represented, for example, in @verhelst2019exponential:
+
+$$
+f(x_i|\theta) 
+=\frac{\exp(x_i[\theta-\delta_i])}{\int^1_0 \exp(s(\theta-\delta_i)) ds} 
+$$
+
+where $x_i$ is the (continuous) response to item $i$, $\theta$ is the latent ability, and $\delta_i$ is an item difficulty parameter. The similarity with the conventional Rasch model is obvious, except that we are now predicting a density rather than a probability. The assumption of local independence plays just as important a role, i.e., we can multiply over items to get at the likelihood for the entire response pattern. The integral in the denominator has a closed form:
+
+\begin{equation*}
+\int^1_0 \exp(s(\theta-\delta_i)) ds
+= 
+\begin{cases}
+\frac{\exp(\theta-\delta_i)-1}{\theta-\delta_i} & \text{if $\theta \neq \delta_i$} \\
+1 & \text{if $\theta = \delta_i$}
+\end{cases}
+\end{equation*}
+
+The model -- we shall call it henceforth the continuous Rasch model, or CRM -- is an exponential family model; like the Rasch model, it has the property that the person and item sum scores are sufficient statistics for the model parameters: the student ability, $\theta$, and the item difficulty, $\delta_i$.  Models discussed in @maris2012speed and @deonovic2020rasch can be shown to have the same structure. 
+
+In this blog, we capitalize on new insights in @deonovic2020rasch and @maris2020 to demonstrate how the CRM can be used for any type of continuous responses. We show how to plot the density, the probability function, and the expectation under the CRM, how to simulate data from it, and we explore the limits to which __dexter__ can be used to analyze continuous responses (hint: we plan to push these limits with a new package in the near future).
+
+## Density, probability function, and expectation of the CRM
+
+These can be calculated easily in R with the following functions:
+
+
+```r
+# probability density function
+dCR = function(x, eta=2)
+{ 
+  if (eta==0) 1
+  if (eta!=0) eta*exp(x*eta)/(exp(eta)-1)
+}
+
+# cumulative distribution function
+pCR = function(x,eta)
+{
+  (exp(x*eta)-1)/(exp(eta)-1)
+}
+
+# Expectation
+ECR = function(eta)
+{
+  dm = exp(eta)
+  dm = dm/(dm-1) - 1/eta
+  dm[is.na(dm)] = 0.5
+  dm
+}
+```
+
+The following graph shows them for various choices of $\eta_i=\theta-\delta_i$:
+
+<img src="data:image/png;base64,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" />
+
+Note that the expected score is monotone increasing in student ability, as it should be.
+
+## Simulating data from the CRM
+
+Simulated data conforming to the CRM can be generated by inversion sampling. Specifically,
+
+$$
+P(x_i \leq x) = \begin{cases}
+\frac{e^{x\eta_i}-1}{e^{\eta_i}-1} & \text{if $\eta_i \neq 0$}\\
+x & \text{if $\eta_i \neq 0$}
+\end{cases}
+$$
+where $x \in [0,1]$. This means that if we sample $u$ from a uniform distribution, 
+$$
+u^* = 
+\begin{cases}
+\frac{1}{\eta} \log\left(u(e^\eta - 1) + 1\right) & \text{if $\eta \neq 0$}\\
+u & \text{if $\eta \neq 0$}
+\end{cases}
+$$
+is an item response sampled from the CRM. 
+
+Sampling from the CRM can be thus done with a single line of code:
+
+
+```r
+rCR = function(theta, delta)
+{
+  eta = theta - delta
+  ifelse(eta!=0, (1/eta)*log(runif(nrow(X))*(exp(eta)-1)+1), runif(nrow(X)))
+}
+```
+
+The following code produces a data set in long format with 5000 persons answering to 100 items.
+
+
+```r
+n <- 100 #number of items
+N <- 5000 #number of persons
+delta <- runif(n, -1, 1) #difficulty 
+theta <- rnorm(N, 0, 1) #ability
+
+X <- data.frame(person_id = rep(1:N, each=n),    
+                 item_id = rep(1:n, N))
+
+X$response = rCR(theta[X$person_id], delta[X$item_id])
+```
+
+## Analyzing a binary response derived from the continuous one
+
+At the time of writing, __dexter__ has no provision to deal with continuous responses. Instead, we use the suggestion by @deonovic2020rasch to analyze binary responses derived from the continuous ones. How does this work? 
+
+With $x_i$ an observed continuous response, define two new variables:
+
+$$
+\begin{align}
+ y_{i1}&=(x_i>0.5)  \\
+ x_{i1}&=
+ \begin{cases}
+  x_i-0.5 & \text{ if } y_{i1}=1 \\
+  x_i & \text{ if } y_{i1}=0
+ \end{cases} 
+\end{align}
+$$
+
+These are conditionally independent sources of information on ability from which the original observations can be reconstructed; that is, given $\theta$, $Y_{i1}$ is independent of $X_{i1}$. Moreover, it is easy to show that the implied measurement model for $Y_{i1}$ is the Rasch model:
+
+$$
+ p(Y_{i1}=1|\theta)=p(X_i>0.5|\theta)
+ =
+ \frac{\exp(0.5(\theta-\delta_i))}
+      {1+\exp(0.5(\theta-\delta_i))}
+$$
+
+where the discrimination is equal to 0.5. The other variable, $X_{i1}$, is continuous and has the following distribution over the interval 0 to $1/2$:
+
+\begin{equation}
+ f(x_{i1}|\theta)
+ =
+ \frac{(\theta-\delta_i)\exp(x_{i1}(\theta-\delta_i))}{\exp(0.5(\theta-\delta_i))-1}
+\end{equation}
+
+Thus, both $X_{i1}$ and $X_i$ follow a CRM but the former has a different range for the values of the continuous response. 
+
+The proposal is to analyze the constructed dichotomous responses instead of the original continuous responses. The following code makes these responses and fits the Rasch model to them:
+
+
+```r
+library(dexter)
+Z = X
+Z$item_score = 1*(Z$response > 0.5)
+f = fit_enorm(Z)
+```
+
+Let us see whether we recover the parameters:
+
+<img src="data:image/png;base64,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" />
+
+Obviously, parameter recovery was quite good. Note that the discrimination was specified as 1, as a half is not allowed in __dexter__ -- thus, we estimate twice the abilities and difficulties that have been used to generate the data. 
+
+## Dyadic expansion
+
+We can continue the process and split up $x_{i1}$ into two new variables, $y_{i2}$ and $x_{i2}$, then split up $x_{i2}$, and so on. In this way, we recursively transform the continuous response intto a set of conditionally independent Rasch response variables, $y_{i1}, y_{i2}, \dots$. @deonovic2020rasch note that this corresponds to the dyadic expansion of $x_i$; that is,
+
+$$
+x_i = \frac{y_{i1}}{2^1} + \frac{y_{i2}}{2^2} + \frac{y_{i3}}{2^3} + ..
+$$
+
+The discrimination will halve in every step of the recursion, which means that each new item provides (four times) less information about ability than its predecessor. More specifically, the information function of the dyadic expansion of order $d$ can be defined as:
+
+$$
+I^{(d)}_i(\theta) = \sum^d_{j=1} I_{ij}(\theta)
+$$
+where
+$$
+I_{ij}(\theta) = \frac{1}{2^{2j}} \pi_{ij}(\theta)(1-\pi_{ij}(\theta))
+$$
+is the information function of the $j$-th Rasch item, with 
+
+$$
+\pi_{ij}(\theta) = \frac{\exp\left(\frac{1}{2^j}(\theta-\delta_i)\right)}{1+\exp\left(\frac{1}{2^j}(\theta-\delta_i)\right)}
+$$
+
+If $\theta=\delta_i$, we find that:
+
+$$
+I^{(d)}_i(\theta) = \frac{1}{4}\left(\frac{1}{4}+\frac{1}{16} +\frac{1}{64}+....\right) 
+= \frac{1}{4}\left(\sum^{\infty}_{i=0} 4^{-i} -1\right) = \frac{1}{12}
+$$
+
+It follows that the information provided by the first binary response, $1/16$, is already $75$ percent of what can be achieved under the CRM. We illustrate this with the next plot. Adding a second one would raise this to $93.75$ percent, a third to $98.44$ percent, etc. This suggests that three dichotomous items will suffice to capture most of the information in the continuous responses.
+
+
+<img src="data:image/png;base64,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" />
+
+The current version of __dexter__ does not allow different items to share the same difficulty parameter, such that data with more than one constructed item cannot be analyzed presently. However, we have some news. __dexter__ may soon have a little brother (or sister) dedicated to the analysis of response times, and models like the CRM will find their natural place there. We have the feeling that the use of response times in practical testing is lagging behind the current state of the methodology, and does not sufficiently exploit the wealth of information they contain. A companion to __dexter__ with the same slant towards the practitioner is probably overdue.
+
+And there is more, much more. The insights in the @maris2020 and  @deonovic2020rasch papers lead far beyond traditional testing and into the world of integrated learning systems with their specific concerns of cold starts, ability trackers, and so on. But it would take many more blogs and papers to give proper idea of the full potential -- so, for now, we say: Happy New Year! 
+
+## References

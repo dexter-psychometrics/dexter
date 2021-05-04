@@ -1,0 +1,188 @@
+---
+title: Comparing parameter estimates from dexter
+author: Timo Bechger and Remco Feskens
+date: '2018-06-11'
+slug: comparing-parameter-estimates-from-dexter
+categories: []
+tags: []
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE) #
+library(dexter)
+library(calibrate)
+library(latex2exp)
+library(dplyr)
+library(tidyr)
+```
+
+```{r, echo=FALSE}
+sim_Rasch = function(theta, delta, its=NULL, pers= NULL) {
+  n = length(theta)
+  m = length(delta)
+  if (is.null(its)) its = 1:m
+  if (is.null(pers)) pers = 1:n
+  data.frame(
+    person_id = rep(paste0('p',pers), m),
+    item_id = rep(paste0('i',its), each=n),
+    item_score = as.integer(rlogis(n*m, outer(theta, delta, "-")) > 0)
+  )
+}
+```
+
+
+# Introduction
+
+
+A critical user of __dexter__ might simulate data and then plot estimates of the item parameters against the true values to check whether __dexter__ works correctly. Her results might look like this:
+
+```{r, echo=FALSE, message=FALSE, fig.align='center', results='hide',fig.height=4, fig.width=4}
+theta = rnorm(1000, 0, 1)
+delta = runif(30,-1,2)
+smDat = sim_Rasch(theta, -(delta-delta[1]))
+prms = coef(fit_enorm(smDat))
+plot(delta, prms$beta[order(as.numeric(gsub("i","",prms$item_id)))], ylab="Estimates", xlab="True values")
+abline(0,1, lty=2, col="green")
+```
+
+After a moment of thought, the researcher finds that she is looking at item easiness, while __dexter__ reports item difficulties. After the sign has been reversed, the results look better but still not quite as expected:
+
+```{r, echo=FALSE, message=FALSE,fig.align='center', results='hide',fig.height=4,fig.width=6}
+par(mfrow=c(1,2))
+smDat = sim_Rasch(theta, delta-delta[1])
+prms = coef(fit_enorm(smDat))
+plot(delta, prms$beta[order(as.numeric(gsub("i","",prms$item_id)))], ylab="Estimates", xlab="True values")
+abline(0,1, lty=2, col="green")
+plot(delta-mean(delta), prms$beta[order(as.numeric(gsub("i","",prms$item_id)))], ylab="Estimates", xlab="True values")
+abline(0,1, lty=2, col="green")
+```
+
+The estimates in the left panel are not clustered around the identity line $x=y$, and appear to be biased. This time, however, our user notes that __dexter__ reports difficulties relative to the average difficulty, while the true values used to generate the data are relative to the first item. The right panel shows the picture after subtracting the mean from the true estimates. Now things look fine.
+
+This small example illustrates that to interpret parameter estimates a user must know what parameters are reported (that is, one should not compare easiness to difficulty), and on which scale. The first issue is that of _parameterization_, while the second refers to what is usually called __normalization__ i.e., what restrictions are imposed to identify the model.
+
+## Parameterization
+
+For simplicity, consider the Rasch model. __dexter__ uses the following parameterization to *communicate to users*:
+
+$$
+P(X_i = 1 |\theta, \beta_i) = \frac{\exp(\theta-\beta_i)}{1+\exp(\theta-\beta_i)},
+$$
+where $\theta$ represents person ability and $\beta_i$ the difficulty of item $i$; both parameters are real-valued. This parameterization is used for communication because it prevails in the literature. Besides, $\beta_i$ has an appealing interpretation as the value of ability where an incorrect and a correct answer are equally likely; that is, $P(X_i = 0 | \beta_i, \beta_i) = P(X_i = 1 | \beta_i, \beta_i) = 1/2$. 
+
+Internally, Dexter uses a different parameterization:
+$$
+P(X_i=1|t,b_i) = \frac{tb_i}{1+tb_i}
+$$
+
+where $t = \exp(\theta)$ and $b_i = \exp(-\beta_i)$ and both positive real numbers. This parameterization is more convenient for estimation. 
+
+The two expressions for the Rasch model look quite different but they describe the same model: for any $(\theta, \beta_i)$, there exist unique values $t$ and $b_i$ that give the same likelihood. We can use either one as we see fit. In any event, our user will have to make sure that she compares $\beta$ to $\beta$, and not apples to ... kiwis?
+
+## Normalization
+
+In the Rasch model, abilities and item difficulties are on the same scale but the origin of the scale is arbitrary. This is because $\theta^* = \theta - c$ and $\beta^*_i =  \beta_i - c$, for any constant $c$, give the same probabilities and thus the same likelihood such that, empirically, all values of c are (equally) good. More technically, the origin is said to be *not identifiable from the observations*. No amount of data will tell us what the origin should be. 
+
+Differences between items and/or persons are identified because they are independent of the origin, $c$. It follows that the common scale can be depicted as a line with estimated item difficulties and abilities as locations. As this image, sometimes called an item map, easily becomes cluttered, we show an example with only a few arbitrarily chosen items and persons:
+
+```{r, echo=FALSE, message=FALSE,fig.align='center', results='hide',fig.height=3,fig.width=6}
+plot(c(-2,3),c(0,0.2),xaxt='n',yaxt='n',bty='n',pch='',ylab='',xlab='ability-scale')
+lines(-1.4:2.6,rep(0.1,5),lty=2,col="gray")
+
+for (i in sample(1:30,3))
+text(prms$beta[i],0.05,prms$item_id[i],cex=0.8, adj=1, srt=90, pos = 3, xpd=NA)
+
+for (i in sample(1:1000,3))
+text(theta[i],0.13,paste0("p",i),cex=0.8, adj=1, srt=90, pos = 3, xpd=NA)
+```
+
+We have been careful to not put any numbers on the item map. This is because the origin is arbitrary, and so would be the numbers.
+
+To assign values to the parameters, we choose an arbitrary origin by imposing a restriction called *a normalization*. __dexter__ uses two normalizations, both on the item parameters. During estimation, the first item parameter is set to zero, i.e., $\delta_1 =0$, or $b_1 = 1$. For reporting, the package follows the OPLM tradition and sets the mean item difficulty to zero, i.e., $\sum_i \delta_i = 0$. The latter implies that estimates (i.e., abilities and difficulties) must be interpreted as relative to average difficulty. 
+
+## Comparing ability distributions
+
+That the latent scale has an arbitrary origin is well-known but, at the same time, easily overlooked. Consider an investigator who wishes to compare 15-year olds in two subsequent years; each group is given a test containing a set of common items called _the anchor_. 
+
+The researcher analyses the data from both years separately and looks at the ability distributions.
+
+```{r, echo=FALSE, message=FALSE,fig.align='center', results='hide',fig.height=4,fig.width=6}
+par(mfrow=c(1,2))
+prms = fit_enorm(smDat); prms1=prms
+pv1=plausible_values(smDat, prms)
+delta2 = c(delta[1:10]-delta[1], runif(20, 0, 1))
+smDat2 = sim_Rasch(theta, delta2, its=c(1:10,31:50), pers=1001:2000)
+prms2 = fit_enorm(smDat2)
+pv2=plausible_values(smDat2, prms2)
+plot.ecdf(pv1$PV1, col="red", main="ability")
+plot.ecdf(pv2$PV1, add=T, col="green")
+legend(-3, 0.9, c("year 1", "year 2"), col=c("red", "green"), cex=0.6, bty="n", lty=c(1,1))
+
+hh=spread(smDat, item_id, item_score)
+plot.ecdf(rowSums(hh[,paste0("i", 1:10)]), col="red", main="obs. scores")
+
+hh=spread(smDat2, item_id, item_score)
+plot.ecdf(rowSums(hh[,paste0("i", 1:10)]), add=T, col="green")
+
+```
+
+The ability distributions differ and it seems that pupils have changed. If, however, we look at the observed scores on the anchor, we see no difference in their distribution. How, then, can pupils change in ability yet score equally? Have the items become easier? Again, we simulated the data such that we know the answer: the change in ability is actually a change in scale and should not to be taken to mean that the groups differ. More precisely, in each analysis the origin is the average difficulty. The origins differ because the items differ. In practice, one may not be aware of this. 
+
+
+To avoid the problem, we have two options. The first is to analyse data from the second year fixing the parameters of the anchor items at the values found in the previous year. The second is to analyze the data simultaneously. The results are as follows:
+
+```{r, echo=FALSE, message=FALSE, fig.align='center', results='hide',fig.height=4, fig.width=6, warning=FALSE}
+par(mfrow=c(1,2))
+# fix parameters
+prms2 = fit_enorm(smDat2, fixed_params = prms)
+pv2=plausible_values(smDat2, prms2)
+plot.ecdf(pv1$PV1, col="red", main="fixed parms")
+plot.ecdf(pv2$PV1, add=T, col="green")
+legend(-3, 0.9, c("year 1", "year 2"), col=c("red", "green"), cex=0.6, bty="n", lty=c(1,1))
+
+## analyse simultaneously
+smDat_c = rbind(smDat,smDat2)
+prms = fit_enorm(smDat_c)
+pv = plausible_values(smDat_c, prms)
+o=as.numeric(gsub("p","", pv$person_id))
+plot.ecdf(pv$PV1[o<=1000], col="red", main="Simult. est.")
+plot.ecdf(pv$PV1[o>1000], add=T, col="green")
+legend(-3, 0.9, c("year 1", "year 2"), col=c("red", "green"), cex=0.6, bty="n", lty=c(1,1))
+
+```
+
+In both cases, the pictures now show that the distributions are indeed equal. Note that we can test whether the distributions are equal using a Kolmogorov-Smirnov test but this will be left for some other occasion.
+
+```{r, eval=FALSE, echo=FALSE}
+m_vals=NULL
+theta2=rnorm(1000, -0.2, 1.4)
+for (sm in 1:100)
+{
+  smDat = sim_Rasch(theta, delta-delta[1])
+  smDat2 = sim_Rasch(theta2, delta2, its=c(1:10,31:50), pers=1001:2000)
+  smDat = rbind(smDat,smDat2)
+  prms = fit_enorm(smDat)
+  pv = plausible_values(smDat, prms, nPV=100)
+  o=as.numeric(gsub("p","", pv$person_id))
+  tel=4
+  p_vals=NULL
+  for (ss in 1:100)
+  {
+    pp=pull(pv[tel])
+    p_vals=c(p_vals,ks.test(pp[o<=1000],pp[o>1000])$p.value)
+    tel=tel+1
+  }
+  m_vals=c(m_vals,mean(p_vals))
+}
+sum(m_vals<=0.05)/length(m_vals)
+```
+
+If we must choose, we would much prefer to estimate the parameters using all available data. If we fix the parameters of the anchor items at the values found in the first year, we do not make use of the responses on these items collected in the second year. This means that we willingly ignore information. Furthermore, we allow idiosyncrasies of the first sample to bias the results of future years. In general, the more data, the better the estimates.
+
+The idea to fix the parameters of the anchor items may have come up because it is convenient to have estimates of abilities and item parameters on the same scale, even when the item set changes over years. But, if the purpose is to fix the scale, there is no need to fix the difficulties of the anchor items. We can achieve the same if we fix, for example, the origin at the average ability in the first year. 
+
+## Conclusion
+
+Using a simplified context for illustration, we have tried to explain what it means that the ability scale in IRT does not have a definite origin. In closing, we advise researchers to avoid looking at things that are not identified by the observations. These include differences between items and persons and functions of these such as the item-total regressions or, indeed, the difference between ability distributions of different groups of respondents. Even than one should not forget that we are doing statistics and there is uncertainty in the estimates.
+

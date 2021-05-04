@@ -1,12 +1,12 @@
+# TO DO: if plausible values calls enorm, enorm should not do a progress bar
+# TO DO: progress bars sometimes have double % sign at end
+# TO DO: enorm bayes prog bar sometimes has gaps
+# TO DO: prog bars in group_by loop don't \r at the beginning and don't move to newline
+# (they rely on new prompt clearing the line, which is not good)
+# TO DO: group_by plausible score is far slower than sec plausible val and prbl plasuible scores
+# should we make grouped_by analysis to make things faster? 
+# (could also be bcs we take bayes enorm in each cnt in which case group by analysis does not help) 
 
-# @param parms An object returned by function \code{fit_enorm} and containing
-# parameter estimates. If parms is given the function provides plausible values conditional on the 
-# item parameters. These are considered known. If parms is Bayesian, a different random draw of the item parmaters 
-# is used to generate each plausible value (unless use_draw is set).
-#  If \code{parms} is \code{NULL}, Bayesian parameters are calculated from the data.
-
-
-##########################################
 #' Draw plausible values
 #'
 #' Draws plausible values based on test scores
@@ -107,7 +107,7 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
   if(is.null(parms))
   {
     respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, extra_columns=covariates, env=env)
-    parms = fit_enorm_(respData, method = 'Bayes', nIterations = nIter.enorm) 
+    parms = fit_enorm_(respData, method = 'Bayes', nDraws = nIter.enorm) 
     respData = get_resp_data(respData, summarised=TRUE, extra_columns=covariates, 
                              protect_x=!is_db(dataSrc))
   } else
@@ -167,7 +167,7 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
       group_by_at(covariates) %>%
       mutate(pop = group_number()) %>%
       ungroup() 
-
+#to do: pop moet anders worden genoemd, anders kan "pop" geen covariate zijn
   } else
   {
     # niet varierende pop toevoegen maakt code in pv eenvoudiger

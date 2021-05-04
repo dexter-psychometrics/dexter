@@ -1,2 +1,11 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^revdep$
+^docs$
+^README\.Rmd$
+^cran.comments
+^CRAN-RELEASE$
+^_pkgdown\.yml$
+^pkgdown$
+^\.github$
+^vignettes/blog

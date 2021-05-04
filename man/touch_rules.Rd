@@ -29,12 +29,12 @@ The rules should contain all rules that you want to change or add. This means th
 in a single multiple choice question, you typically have to change two rules.
 }
 \examples{
-\donttest{
+\dontrun{\donttest{
 # given that in your dexter project there is an mc item with id 'itm_01', 
 # which currently has key 'A' but you want to change it to 'C'.
 
 new_rules = data.frame(item_id='itm_01', response=c('A','C'), item_score=c(0,1))
 touch_rules(db, new_rules)
-}
+}}
 
 }

@@ -1,20 +1,36 @@
-# dexter 1.08
+# dexter 1.1.3
 
+* new website, see dexter-psychometrics.github.io/dexter
+
+# dexter 1.1.2
+
+* update per request from cran, no changes in functionality
+
+# dexter 1.1.1
+
+* profiles/profile_tables can now take a data.frame of item parameters
+* bugfix: mistakenly renormalized parameters when using a data.frame of polytomous item parameters 
+
+# dexter 1.0.8
+
+* added extra argument to `coef.prms` to retrieve variance-covariance matrix or posterior of
+item parameters
 * bugfix: x-axis scaled incorrectly when plotting parameters for Bayesian calibration
+* update examples for updated cran check in 3.4
 
-# dexter 1.07
+# dexter 1.0.7
 
 * adapting to an update in tibble
 
-# dexter 1.06
+# dexter 1.0.6
 
 * specific workarounds for (cran) solaris
 
-# dexter 1.05
+# dexter 1.0.5
 
 * Almost sure this release finally fixes the solaris issues
 
-# dexter 1.04
+# dexter 1.0.4
 
 * added systemrequirements to description in the hope that it will solve solaris issues
 

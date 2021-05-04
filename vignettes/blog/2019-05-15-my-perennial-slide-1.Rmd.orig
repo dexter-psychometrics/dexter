@@ -1,0 +1,43 @@
+---
+title: My perennial Slide 1
+author: Ivailo Partchev
+date: '2019-05-15'
+slug: my-perennial-slide-1
+categories:
+  - Psychometrics
+  - R
+tags: []
+---
+
+I have found out that, regardless of the immediate topic, it is usually easiest and most helpful to start my talks with the same slide. It shows a primitive roadmap of our discipline, like this:
+
+```{r, echo=FALSE, warning=FALSE}
+library(data.tree)
+testing = Node$new("Educational testing")
+assessment = testing$AddChild("Assessment")
+research = testing$AddChild("Research")
+summative = assessment$AddChild("Summative")
+formative = assessment$AddChild("Formative")
+substantive = research$AddChild("Substantive")
+methodological = research$AddChild("Methodological")
+
+SetGraphStyle(testing, rankdir = "LR")
+SetEdgeStyle(testing, arrowhead = "vee",  penwidth = 1)
+SetNodeStyle(testing, style = "rounded", shape = "box", 
+             fontname = "helvetica", fontcolor = "Firebrick")
+plot(testing)
+```
+
+Nothing that you didn't know. I knew it too, but it took me quite a pilgrimage to develop a feel for how important it is, to realize that the criteria for what is desirable, appropriate or even admissible are largely local. Now, that matters a lot.
+
+In assessment, we are focused on the individual. Regardless of how much statistical thinking is involved, it remains essentially idiographic. In producing a score for the individual, we try to remove as much uncertainty as possible -- typically, we go for the central tendency of the person's ability distribution, not for a random sample from it. Research has an extra statistical layer, being interested primarily in populations rather than individuals. Substantive research, which I see mostly in the shape of large-scale studies, is deeply concerned with two sampling processes: reproducing a finite population of individuals, which involves sampling methods and designs, variance estimation, sampling weights and the like; and sampling from the individual ability distributions with a realistic representation of their variability -- in other words, reliance on plausible values and scores.
+
+Summative assessment is the realm of high stakes exams. The mother of all criteria here is test fairness. This may involve a preoccupation with item exposure. Also, summative assessment should ideally be based on simple and transparent procedures, for the sake of accountability. Scoring rules should be simple, known in advance, and seen as fair. Most of this is irrelevant to formative assessment, where the purpose is to provide students with the feedback that is an essential part of the learning process. If somebody is kind enough to tell me where my weaknesses lie and which problem in the book I should try to solve next, I wouldn't care _how_ they know. 
+
+In methodological research, there is only one criterion: your peers must be convinced that it makes sense, and that it adds something new to the existing corpus of knowledge. Practical applicability is desirable but not an immediate concern.
+
+Hence, it is not productive to judge all activities in the realm of educational testing with the same set of criteria. For example, person fit might be of interest in a high stakes test; in a large scale survey emulating the same test, we would be concerned with the quality of sampling and with plausible values methodology instead.
+
+Even more interesting, and not unlike with humans, is is easier to relocate a psychometric method from one field to another than to change its nature. Look at computerized adaptive testing (CAT): applied in summative assessment, it has a number of issues, notably with item exposure. First, CAT vitally depends on having good estimates of the item parameters, and those are produced by exposing the items to a large number of examinees. Second, the algorithms tend to overexpose a limited number of items to the expense of the others, and the countermeasures are either intractable enough to require a computer simulation; or they tend to look at what was asked in other exams, which is unnerving. But redelegate CAT to formative assessment, and its flaws become features. For summative assessment, there are varieties of [multi-stage tests](https://dexterities.netlify.com/2018/07/13/dextermst) that can (at least in principle) work without needing to expose the items at all before actual testing has started. 
+
+In a word: there is no _one size fits all_ in educational testing.

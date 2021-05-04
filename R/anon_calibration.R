@@ -1,6 +1,6 @@
 
 
-elsym <- function(b,a,first,last,i1=0L,i2=0L)
+elsym = function(b,a,first,last,i1=0L,i2=0L)
 {
   n = length(first)
   ms = as.integer(sum(a[last]))
@@ -21,7 +21,7 @@ logL = function(parms, mean_gibbs=FALSE)
   if(is.matrix(b) && mean_gibbs)
     b=colMeans(b)
   
-  scoretab= split(parms$inputs$scoretab,parms$inputs$scoretab$booklet_id,drop=FALSE)
+  scoretab = split(parms$inputs$scoretab,parms$inputs$scoretab$booklet_id,drop=FALSE)
   design = split(parms$inputs$design, parms$inputs$design$booklet_id, drop=TRUE)
   
   llb = function(b)
@@ -253,16 +253,18 @@ NR_bkl = function(..., use_mean = FALSE)
 }
 
 
-calibrate_CML <- function(scoretab, design, sufI, a, first, last, nIter, fixed_b=NULL,progress = show_progress()) 
+calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fixed_b=NULL, 
+                          progress = show_progress(), NR=TRUE) 
 {
+  
+  
   if(tolower(Sys.info()['sysname'])=='sunos'){
     return(calibrate_CML_sol(scoretab, design, sufI, a, first, last, nIter, fixed_b))
   }
   
   use_mean = FALSE
-  # perhaps this first part should be moved to fit_enorm
-  
-  # bookkeeping
+
+  # bookkeeping, make counts for C functions
   # items per booklet
   nib = design %>%
     count(.data$booklet_id) %>%
@@ -302,7 +304,7 @@ calibrate_CML <- function(scoretab, design, sufI, a, first, last, nIter, fixed_b
     converged=FALSE
     iter=0
     
-    while ((!converged) && (iter<=nIter))
+    while (!converged && iter<=nIter)
     {
       iter=iter+1
       EsufI = E_bkl(b, a, bfirst, blast, scoretab$N, nscore, nib, use_mean=use_mean)
@@ -339,8 +341,8 @@ calibrate_CML <- function(scoretab, design, sufI, a, first, last, nIter, fixed_b
     H = matrix(0,length(a),length(a))
     converged=FALSE
     nr_iter=0
-    scale=1#to~do: ask timo, scale does not do anything at all
-    while ((!converged)&&(nr_iter<max_nr_iter))
+    scale=1 #to~do: ask timo, scale does not do anything at all
+    while (NR && !converged && nr_iter<max_nr_iter)
     {
       iter=iter+1
       nr_iter=nr_iter+1
@@ -386,7 +388,7 @@ calibrate_CML <- function(scoretab, design, sufI, a, first, last, nIter, fixed_b
     
     converged=FALSE
     iter=0
-    while ((!converged)&&(iter<=nIter))
+    while ( !converged && iter<=nIter)
     {
       iter=iter+1
       EsufI = E_bkl(b, a, bfirst, blast, scoretab$N, nscore, nib, use_mean=use_mean)
@@ -420,7 +422,7 @@ calibrate_CML <- function(scoretab, design, sufI, a, first, last, nIter, fixed_b
     converged=FALSE
     nr_iter=0
     scale=1
-    while ((!converged)&&(nr_iter<max_nr_iter))
+    while (NR && !converged && nr_iter<max_nr_iter)
     {
       iter=iter+1
       nr_iter=nr_iter+1
@@ -486,19 +488,27 @@ calibrate_CML <- function(scoretab, design, sufI, a, first, last, nIter, fixed_b
 # fixed_b: NULL or vector of length(b) with NA's for free parameters
 # TO DO: At this moment b and lambda are not consistent. b and delta are. We must recalculate the 
 # lambda' s using the renormalized b to solve this.
-calibrate_Bayes = function(scoretab, design, sufI, a, first, last,  nIter, fixed_b=NULL, progress = show_progress())
+calibrate_Bayes = function(scoretab, design, sufI, a, first, last,  nIter, fixed_b=NULL, 
+                           progress = show_progress(), 
+                           from = Gibbs.settings$from.cal, step = Gibbs.settings$step.cal,
+                           start_b=NULL)
 {
-  if(Gibbs.settings$start_b=='random' || tolower(Sys.info()['sysname'])=='sunos')
+  # decide on starting values
+  if(!is.null(start_b))
+  {
+    b = start_b
+  } else if(Gibbs.settings$start_b=='random' || tolower(Sys.info()['sysname'])=='sunos')
   {
     b = exp(runif(length(a), -1, 1))
     b[first] = 1
   } else
   {
-    b = calibrate_CML(scoretab, design, sufI, a, first, last, nIter, fixed_b)$b 
+    b = calibrate_CML(scoretab, design, sufI, a, first, last, fixed_b = fixed_b)$b 
   }
   prior_eta = 0.5
   prior_rho = 0.5
   
+  # bookkeeping: make counts and indexes for C function
   design = design %>%
     mutate(bn = dense_rank(.data$booklet_id) - 1L) %>%
     group_by(.data$bn) %>%
@@ -535,13 +545,15 @@ calibrate_Bayes = function(scoretab, design, sufI, a, first, last,  nIter, fixed
   if(is.null(fixed_b))
     fixed_b_vec = rep(NA_real_, length(b))
   
-  pgw = as.integer(if(progress) getOption("width") - nchar('| 100%') - 2 else 0)
+  # progress indicator from C
+  pgw = as.integer(if(progress) getOption("width") - nchar('| 100%') - 2 else 0) 
 
+  # end bookkeeping
   
   out = calibrate_Bayes_C(as.integer(a), as.integer(first-1L), as.integer(last-1L),
                          ib, bi, nbi, nib, bfirst, blast, bmax, m,
                          sufI, scoretab$N, b, fixed_b_vec, 
-                         Gibbs.settings$from.cal, Gibbs.settings$step.cal, 
+                         from, step, 
                          as.integer(nIter), prior_eta, prior_rho,
                          pgw)
 

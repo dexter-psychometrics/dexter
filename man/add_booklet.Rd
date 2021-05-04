@@ -54,7 +54,7 @@ If a person_id is not supplied, dexter will generate unique person_id's for each
 Any column whose name has an exact match in the scoring rules inputted with
 function \code{start_new_project} will be treated as an item; any column whose name has an 
 exact match in the person_properties will be treated as a person property. If a name matches both
-a person_property and an item, the item takes precedence. Columns other than items, person properties 
+a person_property and an item_id, the item takes precedence. Columns other than items, person properties 
 and person_id will be ignored.
 
 
@@ -72,7 +72,7 @@ If there are missing rows (e.g. there are only 9 rows for a person-booklet where
 is not defined in your rules and \code{auto_add_unknown_rules} is set to FALSE (the default). Please also note
 that the booklet_design for any specific booklet is derived from the distinct combination of booklet_id and item_id
 in \code{data} the first time that booklet is encountered. If subsequent calls to \code{add_response_data} 
-contain data with more/different items for this same booklet, this will cause an error. 
+contain data with more or different items for this same booklet, this will cause an error. 
 
 
 Note that responses are always treated as strings (in both functions), and \code{NA}

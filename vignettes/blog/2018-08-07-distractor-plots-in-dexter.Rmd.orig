@@ -1,0 +1,51 @@
+---
+title: Distractor plots in dexter
+author: Ivailo Partchev
+date: '2018-08-07'
+bibliography: dexterMST.bib
+slug: distractor-plots-in-dexter
+categories:
+  - Psychometrics
+  - R
+tags: []
+---
+
+In a [previous post](http://dexterities.netlify.com/2018/02/25/item-total-regressions-in-dexter/), I wrote about three kinds of item-total regressions available in __dexter__: the empirical one, and the smoothed versions under the Rasch model and the interaction model. In fact, there is one more item-total regression, available through the `distractor_plot` command and the Shiny interfaces in __dexter__ and __dextergui__. This will be the topic today.
+
+Unlike the latter two regressions, this one does not involve a global model for the data (Rasch or interaction model): it is local. We use the `density` function in R (@R) to estimate the density of the total scores twice over the same support: for all persons, and for the persons who have given a certain response to the item. Together with the marginal frequency of the response, this is all we need to apply the Bayes rule and compute the density of the response given the total score. This is the item-total regression we need.
+
+We call this a distractor plot because we apply it to all possible responses to the item, including non-response, and not just to the (modelled) correct response. This provides valuable insights into the quality of item writing, including trivial annoyances such as a wrong key. We don't have to believe that multiple choice items are the pinnacle of creation but, if we do use them, we must make sure that they are written well and graded correctly. Good writing means, among other things, that along with the correct response(s) the item must contain a sufficient number of sufficiently plausible wrong alternatives ('distractors').
+
+@Moses2017 gives a nice historical overview of the use of similar graphics, from the first item-total regressions drawn by Thurstone in 1925 to the graphs used routinely at ETS. He also provides examples (drawn from @Livingston2004) of items that are too easy, too difficult, or simply not appropriate for a given group of examinees. Let us also mention the computer program TestGraf98 (@TestGraf) whose functionality has been reproduced in the R package, __KernelSmoothIRT__ (@ksIRT).
+
+I will only give a couple of examples. The first one illustrates the situation I described above. Only one of the distractors is plausible, while the other two are so weak that nobody ever chooses them. Solving the item then turns, for the less able students, into coin flipping.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(dexter)
+db = open_project('~/Dropbox/ALLRET.db')
+distractor_plot(db, item='RT006_AN', booklet_id=='TF30', main='Weak distractors')
+```
+
+Note that the distractor plot is not a proper item-total regression in the sense that a total score of 0 does not necessarily go with an item score of zero; similar for the full score. In this respect, it resembles the trace lines of the 2PL and 3PL models. Just as with the other item-total regressions, we have provided curtains, drawn by default at the 5th and 95th percentile of the total score distribution. Most of the interesting (and statistically stable) stuff happens where the curtains are open.
+
+My example data set does not contain any items with wrong keys, and I am too lazy to fake one, although it is not difficult: all I would need to do is use the `touch_rules` function. It is also easy to foresee what would happen: the curve for the correct response will have a negative slope. To help discover such cases more easily, the legend for the curves shows the original response and, in brackets, the score that it is assigned by the current scoring rules. I have already given away the recipe for correcting any wrong rules.
+
+The following example is even more messy. Thankfully, the curve for the correct response is monotone increasing, but one of the distractors is possibly too attractive and peaks in the middle, a bit like the middle category in a partial credit model. Note that the rate of non-response seems to increase slightly with the total score, which I think is also a bad sign.
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+distractor_plot(db, item='RT225_AN', booklet_id=='TF30', main='A messy item')
+```
+
+To conclude, I will show something that not everybody does: a good item. 
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+distractor_plot(db, item='RT177_AN', booklet_id=='TF30', main='This one is much nicer')
+```
+
+
+Note the high correlations of the item score with the total score and the rest score (the total omitting the item), neatly shown at the bottom as Rit and Rir.
+
+When an item has been included in more than one booklet, the default behaviour is to display the distractor plots side by side. The position of the item in each booklet is shown in the default plot title, which may help explain unexpected differences. For example, if an item's difficulty is higher when the item is placed towards the end of the test, this would be a sign of speededness.
+
+##References

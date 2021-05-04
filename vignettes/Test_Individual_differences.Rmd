@@ -16,8 +16,12 @@ img{ border:none;}
 
 ```{r setup, include=FALSE}
 library(knitr)
-opts_chunk$set(echo = TRUE, dev='CairoPNG')
+opts_chunk$set(echo = TRUE)
 
+if (requireNamespace("Cairo", quietly = TRUE)) 
+{
+   opts_chunk$set(dev='CairoPNG')
+}
 par_hook = function(before, options, envir)
 {
   if(before)

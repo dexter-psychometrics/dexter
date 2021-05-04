@@ -73,12 +73,13 @@ that was used to fit the items.}
 }
 }
 \description{
-Computes estimates of ability for persons or booklets
+Computes estimates of ability for persons or for booklet scores
 }
 \details{
 MLE estimates of ability will produce an NA for
 the minimum (=0) or the maximum score on a booklet. If this is undesirable, 
-we advise to use EAP with Jeffreys prior.
+we advise to use WLE. The WLE was proposed by Warm (1989) to reduce bias in the MLE and is also known
+as the Warm estimator.
 }
 \examples{
 \dontrun{
@@ -97,5 +98,8 @@ legend("topleft", legend = c("EAP normal prior", "EAP Jeffreys prior", "MLE"), b
 close_project(db)
 }
 
-
+}
+\references{
+Warm, T. A. (1989). Weighted likelihood estimation of ability in item response theory. 
+Psychometrika, 54(3), 427-450.
 }

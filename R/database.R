@@ -20,7 +20,13 @@ dbRunScript = function(db, fn)
 }
 
 
-dbExists = function(db, query, data) (nrow(dbGetQuery_param(db, query, data)) > 0)
+dbExists = function(db, query, data=NULL){
+  if(is.null(data))
+    nrow(dbGetQuery(db, query)) > 0
+  else
+    nrow(dbGetQuery_param(db, query, data)) > 0
+  
+} 
 
 dbCheck_reserved_colnames = function(nm)
 {
@@ -73,7 +79,7 @@ project_CreateTables = function(db, person_properties=NULL)
     }
   }
 }
-
+# to do: depende on database, this is sqlite specific
 sql_data_type = function(value)
 {
   if(is.date(value))    return(' DATE ')
@@ -81,6 +87,7 @@ sql_data_type = function(value)
   if(is.time(value))    return(' DATETIME ')
   if(is.integer(value)) return(' INTEGER ')
   if(is.numeric(value)) return(' DOUBLE PRECISION ')
+  if(is.logical(value)) return(' INTEGER ')
   " TEXT "
 }
 

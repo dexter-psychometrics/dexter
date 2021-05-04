@@ -1,16 +1,22 @@
 
 # returns a simplified parms object mainly useful for person ability estimation
-# parms can be enorm prms or a parms object
+# parms can be data frame or a parms object
 #
 # returns list: a, b, design (including first and last), items(including first and last)
-simplify_parms = function(parms, design=NULL, use_draw=NULL, collapse_b=FALSE)
+simplify_parms = function(parms, design=NULL, use_draw=NULL, collapse_b=FALSE,
+                          zero_indexed=FALSE)
 {
-  if(!is.null(design) && !('booklet_id' %in% colnames(design)))
-    design = mutate(design, booklet_id='all_items')
-  
   check_df(design, 'item_id', nullable=TRUE)
+  if(!is.null(design))
+  {
+    if(!('booklet_id' %in% colnames(design)))
+      design$booklet_id='all_items'
+    design = design[,c('booklet_id','item_id')]
+  }
+  
   if(inherits(parms, 'mst_enorm') && !'design' %in% names(parms$inputs))
   {
+    # to do: warnign oid? wanneer kan mst designveilig worden gebruikt?
     if(is.null(design))
       design = lapply(parms$inputs$bkList,function(bk) tibble(item_id=bk$items)) %>%
         bind_rows(.id='booklet_id')
@@ -33,6 +39,9 @@ simplify_parms = function(parms, design=NULL, use_draw=NULL, collapse_b=FALSE)
     {
       b = parms$est$b
     } 
+    
+    fl = parms$inputs$ssI[,c('item_id','first','last')]
+    
     if(is.null(design))
     {
       design = parms$inputs$design
@@ -46,7 +55,7 @@ simplify_parms = function(parms, design=NULL, use_draw=NULL, collapse_b=FALSE)
         print(setdiff(as.character(old_itm), levels(parms$inputs$ssI$item_id)))
         stop('items without parameters') 
       }
-      design = inner_join(design, parms$inputs$ssI[,c('item_id','first','last')], by='item_id')
+      design = inner_join(design, fl, by='item_id')
     }
   } else
   {
@@ -77,8 +86,15 @@ simplify_parms = function(parms, design=NULL, use_draw=NULL, collapse_b=FALSE)
       design = inner_join(design, fl, by='item_id')
     }
   }
+  if(zero_indexed)
+  {
+    fl$first = fl$first - 1L
+    fl$last = fl$last - 1L
+    design$first = design$first - 1L
+    design$last = design$last - 1L
+  }
   
-  list(a=a,b=b,design=design)
+  list(a=a, b=b, design=design, items = fl)
 }
 
 
@@ -94,6 +110,7 @@ transform.df.parms = function(parms.df, out.format = c('b','beta','eta'), includ
   # start with many checks
   out.format = match.arg(out.format)
   colnames(parms.df) = tolower(colnames(parms.df))
+  parms.df=ungroup(parms.df)
   
   if('delta' %in% colnames(parms.df))
     parms.df = rename(parms.df, beta = 'delta')
@@ -244,7 +261,7 @@ beta2eta_ <-function(a, beta, first, last)
     {
       for (j in (first[i]+1):last[i]) 
       {
-        eta[j] = eta[j] + beta[j-1]*a[j-1]
+        eta[j] = eta[j] + beta[first[i]]*a[first[i]]
         for (g in (first[i]+1):j)
         {
           eta[j] = eta[j] + beta[g]*(a[g]-a[g-1])

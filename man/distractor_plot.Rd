@@ -31,7 +31,7 @@ response on the total score.}
 \item{curtains}{100*the tail probability of the sum scores to be shaded. Default is 10.
 Set to 0 to have no curtains shown at all.}
 
-\item{adjust}{factor to adjust the smoothing bandwith respective to the default value}
+\item{adjust}{factor to adjust the smoothing bandwidth respective to the default value}
 
 \item{col}{vector of colors to use for plotting}
 

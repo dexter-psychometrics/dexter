@@ -1,0 +1,16 @@
+---
+title: dexter 0.8.5 on CRAN
+author: Ivailo Partchev
+date: '2019-04-26'
+slug: dexter-0-8-5-on-cran
+categories:
+  - Psychometrics
+  - R
+tags: []
+---
+
+The title says it all, and here are some details from the NEWS file:
+
+* new function `design_info()` returns extensive information about incomplete test designs. Functions `design_as_network()` and `design_is_connected()` are deprecated.
+
+* correction for a bug which caused NA's in plausible values for booklets with 1 respondent and nPV>1

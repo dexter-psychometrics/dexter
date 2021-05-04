@@ -32,7 +32,7 @@
 #' inferred from the scr file since anything other than 1 is most often a mistake.
 #' 
 #' @examples
-#'\donttest{
+#'\dontrun{\donttest{
 #' db = start_new_project_from_oplm('test.db',
 #'    'path_to_scr_file', 'path_to_dat_file', 
 #'    booklet_position=c(1,3), responses_start=101,
@@ -42,7 +42,7 @@
 #'    item_global_on_off==1 & item_local_on_off==1 & booklet_on_off==1)
 #' 
 #' 
-#'}
+#'}}
 start_new_project_from_oplm = function(dbname, scr_path, dat_path, 
                                        booklet_position = NULL, responses_start = NULL, response_length = 1, 
                                        person_id = NULL, missing_character = c(' ','9'), use_discrim=FALSE,
@@ -249,10 +249,11 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
 #' that were calibrated in oplm.
 #' 
 #' @examples
+#' \dontrun{
 #' \donttest{
 #' par = read_oplm_par('/parameters.PAR')
 #' f = fit_enorm(db, fixed_params=par)
-#' }
+#' }}
 read_oplm_par = function(par_path){
   if(grepl('\\.par$',par_path,perl=TRUE, ignore.case=TRUE))
   {

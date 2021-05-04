@@ -18,8 +18,7 @@
 #' @details The data driven direct consensus (3DC) method of standard setting was invented by Gunter Maris and described in Keuning et. al. (2017).
 #' To easily apply this procedure, we advise to use the free digital 3DC application. This application 
 #' can be downloaded from the Cito website, see the 
-#' \href{http://www.cito.com/our-expertise/implementation/3dc}{3DC application download page}. 
-
+#' \href{https://www.cito.com/our-expertise/implementation/3dc}{3DC application download page}. 
 #' If you want to apply the 3DC method using paper forms instead, you can use the function plot3DC to generate the forms
 #' from the 3DC database.
 #' 
@@ -104,7 +103,7 @@ standards_3dc = function(parms, design)
 #' 
 #' This function creates an export (an sqlite database file) which can be used by the 3DC application. This is a free application with which
 #' a standard setting session can be facilitated through a LAN network using the Chrome browser.
-#' The 3DC application can be downloaded from \href{http://www.cito.com/our-expertise/implementation/3dc}{3DC application download page}
+#' The 3DC application can be downloaded from \href{https://www.cito.com/our-expertise/implementation/3dc}{3DC application download page}
 #' 
 #' 
 #' @param par.sts an object containing parameters for the 3DC standard setting procedure produced by

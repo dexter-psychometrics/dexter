@@ -643,6 +643,27 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// PV_sve
+void PV_sve(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first, const arma::ivec& bk_last, const arma::ivec& bcni, const arma::ivec& booklet_id, const arma::ivec& booklet_score, const arma::vec& mu, const double sigma, arma::mat& pv_mat, const int pv_col_indx, const int niter);
+RcppExport SEXP _dexter_PV_sve(SEXP bSEXP, SEXP aSEXP, SEXP bk_firstSEXP, SEXP bk_lastSEXP, SEXP bcniSEXP, SEXP booklet_idSEXP, SEXP booklet_scoreSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP pv_matSEXP, SEXP pv_col_indxSEXP, SEXP niterSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type bk_first(bk_firstSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type bk_last(bk_lastSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type bcni(bcniSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type booklet_id(booklet_idSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type booklet_score(booklet_scoreSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< const double >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type pv_mat(pv_matSEXP);
+    Rcpp::traits::input_parameter< const int >::type pv_col_indx(pv_col_indxSEXP);
+    Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
+    PV_sve(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, pv_mat, pv_col_indx, niter);
+    return R_NilValue;
+END_RCPP
+}
 // sampleIM
 arma::imat sampleIM(const arma::vec& bIM, const arma::vec& cIM, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const arma::ivec& scoretab);
 RcppExport SEXP _dexter_sampleIM(SEXP bIMSEXP, SEXP cIMSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP scoretabSEXP) {
@@ -702,6 +723,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dexter_theta_wle_sec", (DL_FUNC) &_dexter_theta_wle_sec, 4},
     {"_dexter_IJ_c", (DL_FUNC) &_dexter_IJ_c, 8},
     {"_dexter_PVrecycle", (DL_FUNC) &_dexter_PVrecycle, 9},
+    {"_dexter_PV_sve", (DL_FUNC) &_dexter_PV_sve, 12},
     {"_dexter_sampleIM", (DL_FUNC) &_dexter_sampleIM, 6},
     {NULL, NULL, 0}
 };

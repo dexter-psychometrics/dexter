@@ -1,0 +1,16 @@
+---
+title: 'dexter 0.8.1 submitted'
+author: Ivailo Partchev
+date: '2018-08-21'
+slug: dexter-0-8-1-submitted
+categories:
+  - Psychometrics
+  - R
+tags: []
+---
+
+We have just submitted dexter 0.8.1 to CRAN. The main difference with regard to 0.8.0 is speed in estimating person abilities. Thanks to C, ML estimation of ability is about 40 times faster than before. Even more important, in absolute gain of time, is the 15x speed up in the computation of plausible values and plausible scores. This could be achieved by implementing the clever recycling algorithms discussed by Maarten Marsman in his PhD dissertation, Plausible Values in Statistical Inference (2014).
+
+The speed-up factors cited above are approximate. We have not done a state-of-the-art measurement. In fact, we strongly believe that speed considerations should not be allowed to prevail when discussing methodology. However, when a method has been shown to be optimal in the context of _large scale_ surveys, as is the case with plausible values, and when that method turns out to be computationally intensive, a considerable acceleration does have some relevance. We will return to this in one of the future posts.
+
+Other novelties in 0.8.1 are a new plot method for item parameters, and the possibility to read in response data in a format described variously as long, tidy, or normalized. 

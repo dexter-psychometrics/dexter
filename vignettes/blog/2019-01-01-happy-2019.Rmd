@@ -1,0 +1,10 @@
+---
+title: Happy 2019!
+author: Ivailo Partchev
+date: '2019-01-01'
+slug: happy-2019
+categories: []
+tags: []
+---
+
+On behalf of the **dexter** team, best wishes for a happy, healthy and prosperous New Year to all our users! They seem to be in 113 countries for **dexter**, 87 countries for **dextergui**, and 80 countries for **dexterMST**, according to the current Rstudio stats. I look at these numbers with awe, and I am sure we'll all keep giving our best!

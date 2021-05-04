@@ -82,7 +82,7 @@ plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL,
   if(is.null(parms))
   {
     nIter.enorm  = Gibbs.settings$from.pv + Gibbs.settings$step.pv*(nPS.needed-1)
-    parms = fit_enorm_(respData, method='Bayes', nIterations = nIter.enorm)
+    parms = fit_enorm_(respData, method='Bayes', nDraws = nIter.enorm)
     
   } else if(inherits(parms,'prms') && parms$inputs$method != 'CML')
   {

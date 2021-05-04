@@ -40,7 +40,8 @@ responses in the list. NA values will be treated as the string "NA"'.
 \examples{
 \donttest{
 head(verbAggrRules)
-db = start_new_project(verbAggrRules, "verbAggression.db", 
+db_name = tempfile(fileext='.db')
+db = start_new_project(verbAggrRules, db_name, 
                        person_properties = list(gender = "unknown"))
 }
 

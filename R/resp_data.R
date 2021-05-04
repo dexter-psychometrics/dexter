@@ -26,7 +26,7 @@ ffactor = function (x, levels=NULL, as_int=FALSE)
 #' @param dataSrc data.frame, integer matrix, dexter database or `dx_resp_data` object
 #' @param qtpredicate quoted predicate
 #' @param extra_columns to be returned in addition to person_id, booklet_id, item_score, item_id
-#' @param summarised if TRUE, no item scores are returned, just sumscores
+#' @param summarised if TRUE, no item scores are returned, just booklet scores
 #' @param env environment for evaluation of qtpredicate, defaults to caller environment
 #' @param protect_x best set TRUE (default)
 #' @param retain_person_id whether to retain the original person_id levels or just use arbitrary integers
@@ -573,7 +573,7 @@ resp_data.from_matrix = function(X, summarised = FALSE, retain_person_id = TRUE,
   class(out$design$item_id) =  'factor' 
   levels(out$design$item_id) = colnames(X)
   
-  if(retain_person_id && !is.null(rownames(X)))
+  if(retain_person_id && !is.null(rownames(X)) && !any(duplicated(rownames(X))))
   {
     class(out$x$person_id) = 'factor'
     levels(out$x$person_id) = rownames(X)
@@ -627,7 +627,8 @@ polytomize = function(respData, item_property, protect_x=TRUE)
 {
   if(!is.factor(respData$x[[item_property]]))
   {
-    respData$x[[item_property]] = ffactor(respData$x[[item_property]]) # knowing the levels would make this faster
+    respData$x[[item_property]] = ffactor(respData$x[[item_property]])
+    levels(respData$x[[item_property]]) = explicit_NA(levels(respData$x[[item_property]]))
   } else if(protect_x)
   {
     respData$x[[item_property]] = duplicate(respData$x[[item_property]])
@@ -728,16 +729,22 @@ anti_join.dx_resp_data = function(respData, y, by, .recompute_sumscores = FALSE)
 }
 
 
-
+# to do: this should create new test scores if INDICES is an item property, no?
 # INDICES must be one string that indicates column in respData$x
+# assumed that the operation is booklet_safe in the sense that it does not create more booklets
+# in subgroups
 by.dx_resp_data = function (data, INDICES, FUN, ..., simplify = TRUE) 
 {
-  dsg = data$design
   smr = data$summarised
   args = list(...)
   by(data$x, pull(data$x, INDICES), function(x)
   {
-    r = list(summarised = smr, design = dsg, x=x)
+    if(smr)
+      r = list(summarised = TRUE, design = semi_join(data$design, x, by='booklet_id'), x=x)
+    else
+      r = list(summarised = FALSE, design = distinct(x,.data$booklet_id,.data$item_id), x=x)
+    
+
     class(r) = append('dx_resp_data', class(r))
     do.call(FUN, append(list(r),args))
   }, 

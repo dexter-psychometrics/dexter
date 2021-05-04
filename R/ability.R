@@ -4,7 +4,7 @@
 ##########################################
 #' Estimate abilities
 #'
-#' Computes estimates of ability for persons or booklets
+#' Computes estimates of ability for persons or for booklet scores
 #'
 #' @param dataSrc a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score
 #' @param parms object produced by \code{\link{fit_enorm}} or a data.frame with columns item_id, item_score and, 
@@ -37,7 +37,8 @@
 #' 
 #' @details MLE estimates of ability will produce an NA for
 #' the minimum (=0) or the maximum score on a booklet. If this is undesirable, 
-#' we advise to use EAP with Jeffreys prior.
+#' we advise to use WLE. The WLE was proposed by Warm (1989) to reduce bias in the MLE and is also known
+#' as the Warm estimator.
 #'
 #' @examples
 #' \dontrun{
@@ -56,6 +57,9 @@
 #' close_project(db)
 #' }
 #' 
+#' @references
+#' Warm, T. A. (1989). Weighted likelihood estimation of ability in item response theory. 
+#' Psychometrika, 54(3), 427-450. 
 #' 
 ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), prior=c("normal", "Jeffreys"), 
                    use_draw=NULL, npv=500, mu=0, sigma=4, standard_errors=FALSE, merge_within_persons=FALSE)

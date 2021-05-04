@@ -31,14 +31,14 @@ Note that is is not possible to add new items with this function,
 use \code{\link{touch_rules}} if you want to add new items to your project.
 }
 \examples{
-\dontrun{
+\dontrun{\donttest{
 db = start_new_project(verbAggrRules, "verbAggression.db")
 head(verbAggrProperties)
 add_item_properties(db, verbAggrProperties)
 get_items(db) 
 
 close_project(db)
-}
+}}
 
 }
 \seealso{

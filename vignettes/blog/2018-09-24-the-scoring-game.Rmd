@@ -1,0 +1,23 @@
+---
+title: The scoring game
+author: Ivailo Partchev
+date: '2018-09-24'
+slug: the-scoring-game
+categories:
+  - Psychometrics
+tags: []
+---
+
+Meet Tommy Redd and Jimmy Greene, two school friends who are inseparable and only argue about tests. When they take a test, Jimmy Greene always gets the two easiest items correct, while Tommy Redd somehow manages to answer the two hardest ones correctly but falters on the easy ones. Under classical test theory, both get the same total score of 2, and the Rasch model also gives them the same theta value, as shown on the plot in its initial state. This makes Tommy a bit unhappy because he feels that he deserves more credit for solving more difficult items than Jimmy.
+
+With the discovery of the 2PL, 3PL, 4PL ... models we can fulfil Tommy’s wish or, indeed, any wish. Play with the controls for the slope parameters of the five items to give:
+
+* more credit to Tommy
+* more credit to Jimmy
+* _a lot more_ credit to Jimmy
+* the same credit to both
+
+Note that the response patterns and the item difficulties remain unchanged. Discuss the phenomenon with some participants in a high-stakes exam.
+
+
+<iframe scrolling="no" frameborder="no" src="https://edeschipper.shinyapps.io/thescoringgame/" style="width:800px;height:800px">

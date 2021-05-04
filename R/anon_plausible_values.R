@@ -1,10 +1,12 @@
-
+#############################################################################
+# R functions to generate plausible values
+############################################################################
 
 
 # score is a vector of scores
 # if alpha > 0, mu and sigma should have length 2
 # returned is a matrix with for each score (=row) npv plausible values
-pv_recycle = function(b,a,first,last,score,npv,mu,sigma,alpha=-1,A=NULL)
+pv_recycle = function(b, a, first, last, score, npv, mu, sigma, alpha=-1, A=NULL)
 {
   if (any(sigma<0)) stop('prior standard deviation must be positive')
   if(alpha<=0 && (length(mu)!=1 || length(sigma)!=1)) stop('alpha<0, mu and sigma should be length 1')
@@ -82,9 +84,7 @@ pv_recycle_sorted = function(b,a,first,last,score,npv,mu,sigma,alpha=-1,A=NULL, 
 
 
 
-
-
-####################### FUNCTIONS TO UPDATE PRIOR of PLAUSIBLE VALUES
+####################### FUNCTIONS TO UPDATE PRIOR of PLAUSIBLE VALUES #####
 
 # Given samples of plausible values from one or more normal distributions
 # this function samples means and variances of plausible values from their posterior
@@ -116,22 +116,25 @@ update_pv_prior = function(pv, pop, mu, sigma)
   return(list(mu=mu, sigma=sigma))
 }
 
-# Given samples of plausible values from an hierarchical model with >=2 groups
-# this function samples means and variances of plausible values from their posterior
-# It updates the prior used in sampling plausible values. 
-#
-# Based on code provided by Gelman, A., & Hill, J. (2006). Data analysis using regression and 
-# multilevel/hierarchical models. Cambridge university press.
+# Update prior for plausible values as an hierarchical normal model
 #
 # @param pv       vector of plausible values
 # @param pop      vector of group membership indices
 # @param mu       vector of current group means
 # @param sigma    vector of current standard deviations; assumed equal in each group
-# @param mu.a     current overal mean of group means
+# @param mu.a     current overall mean of group means
 # @param sigma.a  current standard deviation of group means
 #
 # @return       a sample of p, mu, sigma, mu.a, and sigma.a
+#
+# @details      Given samples of plausible values from an hierarchical model with >=2 groups
+# this function samples means and variances of plausible values from their posterior
+# It updates the prior used in sampling plausible values. Our implementation is based on code 
+# provided by Gelman, A., & Hill, J. (2006). Data analysis using regression and 
+# multilevel/hierarchical models. Cambridge university press.
+#
 # to do: test n>=5, anders geen sd update
+# to do: Allow within group variance to be different
 update_pv_prior_H = function(pv, pop, mu, sigma, mu.a, sigma.a)
 {
   J =length(unique(pop))
@@ -152,71 +155,105 @@ update_pv_prior_H = function(pv, pop, mu, sigma, mu.a, sigma.a)
 }
 
 
-# Given samples of plausible values from a mixture of two normal distributions
-# this function samples means and variances of plausible values from their posterior
-# It updates the prior used in sampling plausible values. 
-#
-# Loosely based on Chapter 6 of 
-# Marin, J-M and Robert, Ch, P. (2014). Bayesian essentials with R. 2nd Edition. Springer: New-York
-# but works surpringly better than the official implementation in bayess
+# Update prior for plausible values as a mixture of two normals
 #
 # @param pv     vector of plausible values
-# @param p  vector of group membership probabilities
+# @param p      vector of group membership probabilities
 # @param mu     current means of each group
 # @param sigma  current standard deviation of each group
+# @param prior.dist  Hyper-prior: Normal or Jeffreys
 #
-# @return       a sample of p, mu and sigma
-update_pv_prior_mixnorm = function (pv, p, mu, sigma) {
+# @return       a sample of p, mu and sigma and latent group membership
+#
+# @details      Given a sample of plausible values from a mixture of two normal distributions
+# this function produces one sample of means and variances of plausible values from their posterior
+#
+# Straightforward implementation using conjugate priors. See Chapter 6 of 
+# Marin, J-M and Robert, Ch, P. (2014). Bayesian essentials with R. 
+# 2nd Edition. Springer: New-York. Or Section 6.2.1 of 
+# Frühwirth-Schnatter, S. (2006). Finite mixture and Markov switching models. Springer.
+#
+# Our implementation of Jeffreys prior based on Marsman, M., et al. (2018) An introduction to network 
+# psychometrics: Relating Ising network models to item response theory models. 
+# Multivariate behavioral research 53.1 (2018): 15-35.
+#
+update_pv_prior_mixnorm = function (pv, p, mu, sigma, prior.dist=c('normal','Jeffreys')) 
+{
+  prior.dist = match.arg(prior.dist)
   n = length(pv)
-  z = rep(0, n)
-  nj = c(0,0); 
-  l = rep(1,2)
-  v = rep(5,2)
-  # Burnin and nr of Iterations with 0<Bin<nIter
-  Bin = 1 
-  nIter = 2
-  
-  mug = sig = pgr = matrix(0,nIter,2)
-  mug[1,] = mu
-  sig[1,] = sigma
-  pgr[1,] = p
   mean_pv = mean(pv)
   var_pv = var(pv)
-  for (i in 1:nIter)
+  z = rep(0, n)
+  nj = c(0,0); 
+
+  if (prior.dist == 'normal')
   {
-    ## latent group membership
+     ## hyper-prior
+    l = rep(1,2)
+    v = rep(5,2)
+
+      ## latent group membership
     for (t in 1:n)
     {
-      prob = pgr[i,]*dnorm(pv[t], mean = mug[i,], sd = sig[i,])
+      prob = p*dnorm(pv[t], mean = mu, sd = sigma)
       if (sum(prob)==0) prob=c(0.5,0.5)
-      z[t] = sample(1:2, size = 1, prob=prob)
+      z[t] = sample(c(1,2), size = 1, prob=prob)
     }
 
-    ## Means
+      ## Means
     for (j in 1:2)
     {
-      nj[j]  = sum(z==j) 
-      mug[i,j]  = rnorm(1, mean = (l[j]*mug[i,j]+nj[j]*mean(pv[z==j]))/(l[j]+nj[j]), 
-                        sd = sqrt(sig[i,j]^2/(nj[j]+l[j])))
+        nj[j]  = sum(z==j) 
+        mu[j]  = rnorm(1, mean = (l[j]*mean_pv+nj[j]*mean(pv[z==j]))/(l[j]+nj[j]), 
+                           sd = sqrt(sigma[j]^2/(nj[j]+l[j])))
     }
-    ## Vars 4=var_pv
+    
+      ## Variance
     for (j in 1:2) 
     {
-      if (nj[j]>1)
-      {
-        var_pvj = var(pv[z==j])
-        sig[i,j] = sqrt(1/rgamma(1, shape = 0.5*(v[j]+nj[j]) ,
-                                 rate = 0.5*(var_pv + nj[j]*var_pvj + 
+        if (nj[j]>1)
+        {
+          var_pvj = var(pv[z==j])
+          sigma[j] = sqrt(1/rgamma(1, shape = 0.5*(v[j]+nj[j]) ,
+                                      rate = 0.5*(var_pv + nj[j]*var_pvj + 
                                                (l[j]*nj[j]/(l[j]+nj[j]))*(mean_pv - mean(pv[z==j]))^2)))
-      }
+        }
     }
-    ## membership probabilities
+  
+      ## membership probabilities
     p = rgamma(2, shape = nj + 1, scale = 1)
-    pgr[i,] = p/sum(p)
+    p = p/sum(p)
   }
-  return(list(p = colMeans(pgr[Bin:nIter,]), mu = colMeans(mug[Bin:nIter,]), sigma = colMeans(sig[Bin:nIter,]), grp = z))
+  
+  if (prior.dist == 'Jeffreys')
+  {
+      ## latent group membership
+      prob = p[1] * dnorm(pv, mu[1], sigma[1])
+      prob = prob / (prob + (1-p[1]) * dnorm(pv, mu[2], sigma[2]))
+      z = rbinom (n, 1, prob) + 1
+    
+        ## Means
+      for (j in 1:2)
+      {
+        nj[j]  = sum(z==j) 
+        mu[j]  = rnorm(1, mean = mean(pv[z==j]), 
+                       sd = sigma[j]/sqrt(nj[j]))
+      }
+        ## Variances
+      for (j in 1:2) 
+      {
+        if (nj[j]>1) sigma[j] = 1/sqrt(rgamma(1, nj[j]/2, sum((pv[z==j]-mu[j])^2)/2 ))
+      }
+    
+        # Membership probabilities
+      p[1] = rbeta(1, nj[1] + 0.5, nj[2] + 0.5)
+      p[2] = 1-p[1]
+  }
+
+  return(list(p = p, mu = mu, sigma = sigma, grp = z))
 }
 
+####################### MAIN FUNCTION TO GENERATE PLAUSIBLE VALUES
 
 # Plausible values. 
 # @param x                tibble(booklet_id <char or int>, person_id <char>, booklet_score <int>, pop <int>)
@@ -345,3 +382,28 @@ pv = function(x, design, b, a, nPV, from = NULL, by = NULL, prior.dist = c("norm
   }
 }
 
+
+# borrowed the following from mvtnorm source for the time being
+# so we don't have to import a whole package
+# will make a cpp implementation for next version so this can be reomved
+rmvnorm = function(n,mean,sigma)
+{
+  ev = eigen(sigma, symmetric = TRUE)
+  R = t(ev$vectors %*% (t(ev$vectors) * sqrt(pmax(ev$values, 0))))
+  retval = matrix(rnorm(n * ncol(sigma)), nrow = n, byrow = TRUE) %*% R
+  retval = sweep(retval, 2, mean, "+")
+  colnames(retval) = names(mean)
+  retval
+}
+
+
+update_MVNprior = function(pvs,Sigma)
+{
+  m_pv = colMeans(pvs)
+  nP = nrow(pvs)
+  mu = rmvnorm(1, mean=m_pv,sigma=Sigma/nP)
+  
+  S=(t(pvs)-m_pv)%*%t(t(pvs)-m_pv)
+  Sigma = solve(rWishart(1,nP-1,solve(S))[,,1]) 
+  return(list(mu = mu, Sigma = Sigma))
+}

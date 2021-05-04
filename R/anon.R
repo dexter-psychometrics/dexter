@@ -5,9 +5,9 @@
 # For a vector of thetas it returns:
 # l = a matrix (nbr of response cats * length of theta) of the likelihood or log-likelihood if log=TRUE
 # I = a vector of the information function computed at each theta = sum(P'^2/PQ)
-# J = something sum(P'P"/PQ) 
-# The vector theta can be a set of quadrature points or 
-# estimates to compute their SE
+# J = a vector of the derivative of the information function at each theta
+#
+# The vector theta can be a set of quadrature points or estimates to compute their SE
 #
 # Note: can not deal with Inf or NA values in theta
 IJ_ = function(b, a, first, last, theta, log=FALSE)

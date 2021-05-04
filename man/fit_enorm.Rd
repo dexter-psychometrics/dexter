@@ -9,8 +9,9 @@ fit_enorm(
   predicate = NULL,
   fixed_params = NULL,
   method = c("CML", "Bayes"),
-  nIterations = 1000,
-  merge_within_persons = FALSE
+  nDraws = 1000,
+  merge_within_persons = FALSE,
+  nIterations = NULL
 )
 }
 \arguments{
@@ -24,10 +25,11 @@ a data.frame with parameters, see details.}
 \item{method}{If CML, the estimation method will be Conditional Maximum Likelihood;
 otherwise, a Gibbs sampler will be used to produce a sample from the posterior}
 
-\item{nIterations}{Number of Gibbs samples when estimation method is Bayes. The maximum 
-number of iterations when using CML.}
+\item{nDraws}{Number of Gibbs samples when estimation method is Bayes.}
 
 \item{merge_within_persons}{whether to merge different booklets administered to the same person, enabling linking over persons as well as booklets.}
+
+\item{nIterations}{deprecated}
 }
 \value{
 An object of type \code{prms}. The prms object can be cast to a data.frame of item parameters 
@@ -49,7 +51,11 @@ Each type corresponds to a different parametrization of the model.
 }
 \references{
 Maris, G., Bechger, T.M. and San-Martin, E. (2015) A Gibbs sampler for the (extended) marginal Rasch model. 
-Psychometrika. 2015; 80(4): 859-879.
+Psychometrika. 80(4), 859-879. 
+
+Koops, J. and Bechger, T.M. and Maris, G. (in press); Bayesian inference for multistage and other 
+incomplete designs. In Research for Practical Issues and Solutions in Computerized Multistage Testing.
+Routledge, London.
 }
 \seealso{
 functions that accept a prms object as input: \code{\link{ability}}, \code{\link{plausible_values}}, 

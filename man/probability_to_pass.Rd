@@ -11,14 +11,14 @@ probability_to_pass(
   pass_fail,
   predicate = NULL,
   target_booklets = NULL,
-  nIterations = 1000
+  nDraws = 1000
 )
 }
 \arguments{
 \item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}
 
 \item{parms}{parameters returned from fit_enorm. If uncertainty about parameter estimation should be included
-in the computations, use `method='Bayes'` and nIterations equal or larger than nIterations in probability_to_pass}
+in the computations, use `method='Bayes'` and nDraws equal or larger than nDraws in probability_to_pass}
 
 \item{ref_items}{vector with id's of items in the reference set, they must all occur in dataSrc}
 
@@ -30,7 +30,7 @@ in the computations, use `method='Bayes'` and nIterations equal or larger than n
 if NULL (default) this will be derived from the dataSrc and the probability to pass will be computed 
 for each test score for each booklet in your data.}
 
-\item{nIterations}{The function uses an Markov-Chain Monte-Carlo method to calculate the probability to pass and this is the number of Monte-Carlo samples used.}
+\item{nDraws}{The function uses an Markov-Chain Monte-Carlo method to calculate the probability to pass and this is the number of Monte-Carlo samples used.}
 }
 \value{
 An object of type \code{p2pass}. Use \code{coef()} to extract the 

@@ -30,5 +30,5 @@ but can be changed in the 3DC application}
 \description{
 This function creates an export (an sqlite database file) which can be used by the 3DC application. This is a free application with which
 a standard setting session can be facilitated through a LAN network using the Chrome browser.
-The 3DC application can be downloaded from \href{http://www.cito.com/our-expertise/implementation/3dc}{3DC application download page}
+The 3DC application can be downloaded from \href{https://www.cito.com/our-expertise/implementation/3dc}{3DC application download page}
 }

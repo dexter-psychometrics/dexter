@@ -23,8 +23,9 @@ so that they can be used to fix a new calibration in Dexter on an existing scale
 that were calibrated in oplm.
 }
 \examples{
+\dontrun{
 \donttest{
 par = read_oplm_par('/parameters.PAR')
 f = fit_enorm(db, fixed_params=par)
-}
+}}
 }

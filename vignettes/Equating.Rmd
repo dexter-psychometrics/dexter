@@ -14,8 +14,13 @@ img{ border:none;}
 </style>
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, dev='CairoPNG') 
+library(knitr)
+opts_chunk$set(echo = TRUE)
 
+if (requireNamespace("Cairo", quietly = TRUE)) 
+{
+   opts_chunk$set(dev='CairoPNG')
+}
 library(dplyr)
 library(ggplot2)
 ```
@@ -194,7 +199,7 @@ data[501:nP, 1:20] = NA
 ref_items = items[1:40]
 target_items = items[21:60]
 
-p = fit_enorm(data, method='Bayes', nIterations = 5000)
+p = fit_enorm(data, method='Bayes', nDraws = 5000)
 
 pp = probability_to_pass(data, p,
                          ref_items = ref_items, pass_fail = 23,
@@ -233,7 +238,7 @@ As a start, we use the function `probability_to_pass` to estimate, for each scor
 
 
 ```{r, message=FALSE, fig.align='center', results='hide',fig.height=4,fig.width=4}
-p_sm = fit_enorm(db_sm, method='Bayes', nIterations = 5000)
+p_sm = fit_enorm(db_sm, method='Bayes', nDraws = 5000)
 
 ou_e = probability_to_pass(db_sm, p_sm,
                            ref_items = ref_items, 

@@ -50,7 +50,8 @@ utils::globalVariables(c("."))
 #' @examples
 #'\donttest{
 #' head(verbAggrRules)
-#' db = start_new_project(verbAggrRules, "verbAggression.db", 
+#' db_name = tempfile(fileext='.db')
+#' db = start_new_project(verbAggrRules, db_name, 
 #'                        person_properties = list(gender = "unknown"))
 #' }
 #' 
@@ -209,8 +210,10 @@ keys_to_rules = function(keys, include_NA_rule = FALSE)
     })
   } else {
     if (any(keys$key>keys$noptions)) stop("You have out-of-range keys")
-    r = keys %>% group_by(.data$item_id) %>% do({
-      y = tibble(response=1:.$noptions[1], item_score=0)
+    r = keys %>% 
+      group_by(.data$item_id) %>% 
+      do({
+      y = tibble(response=as.character(1:.$noptions[1]), item_score=0)
       y$item_score[.$key[1]] = 1
       y
     })
@@ -248,13 +251,13 @@ keys_to_rules = function(keys, include_NA_rule = FALSE)
 #' The rules should contain all rules that you want to change or add. This means that in case of a key error
 #' in a single multiple choice question, you typically have to change two rules.
 #' @examples 
-#'\donttest{
+#'\dontrun{\donttest{
 #' # given that in your dexter project there is an mc item with id 'itm_01', 
 #' # which currently has key 'A' but you want to change it to 'C'.
 #' 
 #' new_rules = data.frame(item_id='itm_01', response=c('A','C'), item_score=c(0,1))
 #' touch_rules(db, new_rules)
-#' }
+#' }}
 #' 
 touch_rules = function(db, rules)
 {
@@ -368,7 +371,7 @@ touch_rules = function(db, rules)
 #' Any column whose name has an exact match in the scoring rules inputted with
 #' function \code{start_new_project} will be treated as an item; any column whose name has an 
 #' exact match in the person_properties will be treated as a person property. If a name matches both
-#' a person_property and an item, the item takes precedence. Columns other than items, person properties 
+#' a person_property and an item_id, the item takes precedence. Columns other than items, person properties 
 #' and person_id will be ignored.
 #' 
 #' 
@@ -386,7 +389,7 @@ touch_rules = function(db, rules)
 #' is not defined in your rules and \code{auto_add_unknown_rules} is set to FALSE (the default). Please also note
 #' that the booklet_design for any specific booklet is derived from the distinct combination of booklet_id and item_id
 #' in \code{data} the first time that booklet is encountered. If subsequent calls to \code{add_response_data} 
-#' contain data with more/different items for this same booklet, this will cause an error. 
+#' contain data with more or different items for this same booklet, this will cause an error. 
 #' 
 #' 
 #' Note that responses are always treated as strings (in both functions), and \code{NA}
@@ -664,14 +667,14 @@ add_response_data = function(db, data, auto_add_unknown_rules = FALSE, missing_v
 #'  possible uses of item_properties
 #'
 #' @examples 
-#' \dontrun{
+#' \dontrun{\donttest{
 #' db = start_new_project(verbAggrRules, "verbAggression.db")
 #' head(verbAggrProperties)
 #' add_item_properties(db, verbAggrProperties)
 #' get_items(db) 
 #' 
 #' close_project(db)
-#' }
+#' }}
 #'
 add_item_properties = function(db, item_properties=NULL, default_values=NULL) {
   
@@ -1036,7 +1039,7 @@ design_info = function(dataSrc, predicate = NULL)
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
 
-  check_dataSrc(dataSrc)
+  #check_dataSrc(dataSrc) # removed, prevents design being inputted
 
   # parms objects
   if(inherits(dataSrc,'list') && !is.null(dataSrc$inputs$design))
@@ -1051,7 +1054,7 @@ design_info = function(dataSrc, predicate = NULL)
     out$design = dataSrc %>%
       distinct(.data$booklet_id, .data$item_id, .keep_all=TRUE)
     
-    out$design = out$design[,intersect(colnames(out$design, c('booklet_id','item_id','item_position')))]
+    out$design = out$design[,intersect(colnames(out$design), c('booklet_id','item_id','item_position'))]
     out$design$n_persons = NA_integer_
   } else
   {

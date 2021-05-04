@@ -158,7 +158,8 @@ arma::mat ittotmat0_C(const arma::vec& b, const arma::ivec& a, const arma::vec& 
 						int indx = s-a[j];
 						if ( indx >= 0 && indx < (nscores - a[last[it]]) ) 
 						{
-							pi.at(k,s) = exp(log(eta[j]) + log(gi[indx]) - log(g[s]));
+							//pi.at(k,s) = exp(log(eta[j]) + log(gi[indx]) - log(g[s]));
+							pi.at(k,s) = eta[j] * (gi[indx]/g[s]);
 						}
 						k++;
 					}

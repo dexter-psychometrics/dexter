@@ -62,6 +62,7 @@ std::string ppoint(SEXP x)
 
 
 // assumed there are no double responses
+// to do: can be faster if we unroll the loop
 // [[Rcpp::export]]
 void fill_resp_matrix(const IntegerVector& person_id, const IntegerVector& item_id, const IntegerVector& item_score, arma::imat& out)
 {

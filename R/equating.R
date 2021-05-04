@@ -11,14 +11,14 @@
 #'
 #' @param dataSrc a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score
 #' @param parms parameters returned from fit_enorm. If uncertainty about parameter estimation should be included
-#' in the computations, use `method='Bayes'` and nIterations equal or larger than nIterations in probability_to_pass
+#' in the computations, use `method='Bayes'` and nDraws equal or larger than nDraws in probability_to_pass
 #' @param ref_items vector with id's of items in the reference set, they must all occur in dataSrc
 #' @param pass_fail pass-fail score on the reference set, the lowest score with which one passes
 #' @param predicate An optional expression to subset data in dataSrc, if NULL all data is used
 #' @param target_booklets The target test booklet(s). A data.frame with columns booklet_id (if multiple booklets) and item_id, 
 #' if NULL (default) this will be derived from the dataSrc and the probability to pass will be computed 
 #' for each test score for each booklet in your data.
-#' @param nIterations The function uses an Markov-Chain Monte-Carlo method to calculate the probability to pass and this is the number of Monte-Carlo samples used. 
+#' @param nDraws The function uses an Markov-Chain Monte-Carlo method to calculate the probability to pass and this is the number of Monte-Carlo samples used. 
 #' @return An object of type \code{p2pass}. Use \code{coef()} to extract the 
 #' probablity to pass for each booklet and score. Use \code{plot()} to plot 
 #' the probabilities, sensitivity and specificity or a ROC-curve. 
@@ -30,7 +30,7 @@
 #' @seealso The function used to plot the results: \code{\link{plot.p2pass}}
 
 probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate = NULL, 
-                                 target_booklets = NULL, nIterations = 1000)
+                                 target_booklets = NULL, nDraws = 1000)
 {
   check_dataSrc(dataSrc)
   check_num(pass_fail, 'integer', .min=0, .length=1)
@@ -83,13 +83,13 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
   {
     n_bayes = nrow(parms$est$b)
     # can do always use all bayes iterations?
-    if(n_bayes<nIterations)
+    if(n_bayes<nDraws)
     {
-      warning('nIterations set to ', n_bayes, '. See the help page for details')
-      nIterations = n_bayes
+      warning('nDraws set to ', n_bayes, '. See the help page for details')
+      nDraws = n_bayes
     }
-    iter_set = round(seq(1, n_bayes, n_bayes/nIterations))
-    iter_set  = iter_set + (n_bayes - iter_set[nIterations])
+    iter_set = round(seq(1, n_bayes, n_bayes/nDraws))
+    iter_set  = iter_set + (n_bayes - iter_set[nDraws])
     ref_theta = sapply(iter_set, function(iter)
     {
       theta_MLE(b[iter,],a, ref_first, ref_last)$theta[pass_fail+1]
@@ -113,7 +113,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
     
     max_score = sum(a[dsg$last])
     ref_range = (pass_fail:max_score) + 1
-    probs = matrix(0,max_score+1, nIterations)
+    probs = matrix(0,max_score+1, nDraws)
     
     if (parms$inputs$method == "Bayes")
     {
@@ -133,8 +133,8 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
     {
       eq_score = min(which(theta_MLE(b,a,dsg$first, dsg$last)$theta >= ref_theta))-1 
       
-      spv = pv_recycle(b, a, dsg$first, dsg$last, scores, npv=nIterations, mu=new_mu, sigma=new_sigma)
-      for (iter in 1:nIterations)
+      spv = pv_recycle(b, a, dsg$first, dsg$last, scores, npv=nDraws, mu=new_mu, sigma=new_sigma)
+      for (iter in 1:nDraws)
       {
         prf = pscore(spv[,iter], b, a, ref_first, ref_last)
         probs[,iter] = apply(prf, 2, function(x) sum(x[ref_range]))

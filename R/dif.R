@@ -50,6 +50,7 @@ OverallDIF_ <- function(beta1, beta2, acov1, acov2)
 #' Bechger, T. M. and Maris, G (2015); A Statistical Test for Differential Item Pair Functioning. 
 #' Psychometrika. Vol. 80, no. 2, 317-340.
 #' 
+#' 
 #' @seealso A plot of the result is produced by the function \code{\link{plot.DIF_stats}}
 #' 
 #' @examples
@@ -146,6 +147,10 @@ print.DIF_stats <- function(x, ...)
 #' @param itemsY character vector of item id's for the Y axis
 #' @param alpha significance level used to color the plot (two sided)
 #' @param ... further arguments to plot
+#' 
+#' @references
+#' Feskens, R., Fox, J. P., & Zwitser, R. (2019). Differential item functioning in PISA due to mode effects. 
+#' In Theoretical and Practical Advances in Computer-based Educational Measurement (pp. 231-247). Springer, Cham.
 #' 
 #' @details
 #' Plotting produces an image of the matrix of pairwise DIF statistics. 

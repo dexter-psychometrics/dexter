@@ -22,7 +22,7 @@ To learn more about dexter, start with the vignettes: `browseVignettes(package="
 \seealso{
 Useful links:
 \itemize{
-  \item \url{http://dexterities.netlify.com}
+  \item \url{https://dexterities.netlify.app/}
   \item Report bugs at \url{https://github.com/jessekps/dexter/issues}
 }
 

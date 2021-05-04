@@ -27,7 +27,13 @@ div.crop img{
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, dev='CairoPNG')
+library(knitr)
+opts_chunk$set(echo = FALSE)
+
+if (requireNamespace("Cairo", quietly = TRUE)) 
+{
+   opts_chunk$set(dev='CairoPNG')
+}
 library(dexter)
 library(latticeExtra)
 fq = c(10,12,30,20,40,24,15,18,14)

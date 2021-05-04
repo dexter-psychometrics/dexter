@@ -16,8 +16,12 @@ img{ border:none;}
 
 ```{r setup, include=FALSE}
 library(knitr)
-opts_chunk$set(echo = TRUE, dev='CairoPNG')
+opts_chunk$set(echo = TRUE)
 
+if (requireNamespace("Cairo", quietly = TRUE)) 
+{
+  opts_chunk$set(dev='CairoPNG')
+}
 par_hook = function(before, options, envir)
 {
   if(before)
@@ -100,7 +104,7 @@ sim_PV(theta, delta[1:20])
 sim_PV(theta, delta)
 ```
 
-The remarkable thing about plausible values is that they will _eventually_ reproduce the true distribution of ability: perhaps sooner, if the prior is specified correctly, or later, if it is not. The price that we had to pay in this example was merely administer a longer test. For a more detailed discussion of this valuable property we refer to @MarsmanPV.
+The remarkable thing about plausible values is that they will _eventually_ reproduce the true distribution of ability: perhaps sooner, if the prior is specified correctly, or later, if it is not. The price that we had to pay in this example was merely administer a longer test. For a more detailed discussion of this valuable property we refer to @MarsmanPV.  
 
 Observe that the gray bands are not wide, suggesting little uncertainty in determining the ECDF of ability. It may be more realistic to take the uncertainty in the item parameters into account. To do this, we will use a Gibbs sampler to draw 50 samples from the posterior distribution of the item parameters, and we will pick one of these at random each time we produce a plausible value. 
 
@@ -112,7 +116,7 @@ sim_PV2 = function(theta, delta) {
   nit = length(delta)
   sim_func = r_score( tibble(item_id=1:nit, item_score=1, delta=delta))
   simulated_data = sim_func(theta)
-  parms = fit_enorm(simulated_data, method="Bayes", nIterations = 50)
+  parms = fit_enorm(simulated_data, method="Bayes", nDraws = 50)
   
   plot(x=c(min(theta)-.5, max(theta)+.5), y=0:1, main=paste(nit, "items"), bty='l', type='n',
        xlab=bquote(theta), ylab = bquote(Fn(theta)))
@@ -136,7 +140,7 @@ sim_PV2(theta, delta)
 
 The results show a small increase in variance but, with 300 persons, the item parameters have been estimated very precisely. Note that the user can accomplish the same goal by calling `plausible_values` without parms.
 
-To simulate abilities from a bi-modal distribution we assumed that the data consist of two groups of subjects; each with a different distribution of ability. If we had been aware of the presence of two groups we could have done better by specifying a different prior in each group. To this aim, the `plausible_values` function has the option to provide covariates. These covariates are assumed to be discrete and define groups. Each group will be allowed a possibly different (normal) prior. To show how this is done and also to illustrate that it is effective, we now include the group-membership in the model.
+To simulate abilities from a bi-modal distribution we assumed that the data consist of two groups of subjects; each with a different distribution of ability. To speed-up convergence to the true distribution, dexter allow the user to specify a mixture of two normals as a prior. A mixture of two normal distributions provides a flexible prior that can be bimodal but also skewed. If we had been aware of the presence of two groups we could have done even better by specifying a different prior in each group. To this aim, the `plausible_values` function has the option to provide covariates. These covariates are assumed to be discrete and define groups. Each group will be allowed a possibly different (normal) prior. To show how this is done and also to illustrate that it is effective, we now include the group-membership in the model.
 
 ```{r make_pv3, fig.align='center',fig.width=7,par=list(mfrow=c(1,3))}
 
