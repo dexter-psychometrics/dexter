@@ -208,7 +208,7 @@
             
             <h4 class="date">2021-05-04</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/jessekps/dexter/blob/master/vignettes/DIF_vignette.Rmd"><code>vignettes/DIF_vignette.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/DIF_vignette.Rmd"><code>vignettes/DIF_vignette.Rmd</code></a></small>
       <div class="hidden name"><code>DIF_vignette.Rmd</code></div>
 
     </div>
@@ -223,7 +223,7 @@ img{ border:none;}
 <a href="#test-differential-items-functioning" class="anchor"></a>Test Differential Items Functioning</h2>
 <p>Based on the theory given in <span class="citation">Bechger and Maris (2015)</span>, the function <code><a href="../reference/DIF.html">DIF()</a></code> tests for differential items function (DIF) under an extended nominal response model. We illustrate how it works using the verbal aggression data.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dexterities.netlify.app/">dexter</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dexter-psychometrics.github.io/dexter/">dexter</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
 
 <span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="../reference/start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="st">":memory:"</span>, person_properties<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>gender<span class="op">=</span><span class="st">""</span><span class="op">)</span><span class="op">)</span>

@@ -208,7 +208,7 @@
             
             <h4 class="date">2018-09-11</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/jessekps/dexter/blob/master/vignettes/blog/2018-08-31-dexter-meets-pisa-the-market-basket-approach.Rmd"><code>vignettes/blog/2018-08-31-dexter-meets-pisa-the-market-basket-approach.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/blog/2018-08-31-dexter-meets-pisa-the-market-basket-approach.Rmd"><code>vignettes/blog/2018-08-31-dexter-meets-pisa-the-market-basket-approach.Rmd</code></a></small>
       <div class="hidden name"><code>2018-08-31-dexter-meets-pisa-the-market-basket-approach.Rmd</code></div>
 
     </div>
@@ -229,7 +229,7 @@
 <p>In the context of an international comparative survey like PISA, <span class="citation">Zwitser, Glaser, and Maris (2017)</span> go one step further and propose to predict the missing scores from country-specific IRT models. A country-specific model will achieve better fit and predict better than an overall model. Once the missing scores have been filled in in the best way possible, we apply the same summary function to all national data sets. It is a popular one, and available in basic R: <code>rowSums</code>.</p>
 <p>On to work, then.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dexterities.netlify.app/">dexter</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dexter-psychometrics.github.io/dexter/">dexter</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org">ggplot2</a></span><span class="op">)</span>
 <span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="../../reference/open_project.html">open_project</a></span><span class="op">(</span><span class="st">'/Rdatasets/pisa2012.db'</span><span class="op">)</span></code></pre></div>

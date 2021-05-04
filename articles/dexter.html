@@ -208,7 +208,7 @@
             
             <h4 class="date">2021-05-04</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/jessekps/dexter/blob/master/vignettes/dexter.Rmd"><code>vignettes/dexter.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/dexter.Rmd"><code>vignettes/dexter.Rmd</code></a></small>
       <div class="hidden name"><code>dexter.Rmd</code></div>
 
     </div>
@@ -223,7 +223,7 @@ img{ border:none;}
 <p>We believe that, at least in high-stakes tests, the scoring rules should be explicit, and that the psychometric model should be developed from the scoring rules, not vice versa. Correspondingly, a <strong>dexter</strong> project starts with the user supplying the scoring rules for all items in the test. These must be given as a data containing, in any order, three columns named <em>exactly</em> <code>item_id</code>, <code>response</code>, and <code>item_score</code>. An example is provided with the package:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dexterities.netlify.app/">dexter</a></span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dexter-psychometrics.github.io/dexter/">dexter</a></span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="fl">10</span><span class="op">)</span></code></pre></div>
 <pre><code>##        item_id response item_score
 ## 1  S1WantCurse        0          0
@@ -654,50 +654,50 @@ img{ border:none;}
 <tr class="odd">
 <td align="left">S1DoCurse</td>
 <td align="right">1</td>
-<td align="right">-1.327</td>
-<td align="right">0.153</td>
-<td align="right">-1.647</td>
-<td align="right">-1.045</td>
+<td align="right">-1.334</td>
+<td align="right">0.149</td>
+<td align="right">-1.638</td>
+<td align="right">-1.046</td>
 </tr>
 <tr class="even">
 <td align="left">S1DoCurse</td>
 <td align="right">2</td>
-<td align="right">-0.622</td>
-<td align="right">0.145</td>
-<td align="right">-0.918</td>
-<td align="right">-0.355</td>
+<td align="right">-0.641</td>
+<td align="right">0.140</td>
+<td align="right">-0.936</td>
+<td align="right">-0.384</td>
 </tr>
 <tr class="odd">
 <td align="left">S1DoScold</td>
 <td align="right">1</td>
-<td align="right">-0.675</td>
-<td align="right">0.145</td>
-<td align="right">-0.940</td>
-<td align="right">-0.401</td>
+<td align="right">-0.674</td>
+<td align="right">0.146</td>
+<td align="right">-0.947</td>
+<td align="right">-0.402</td>
 </tr>
 <tr class="even">
 <td align="left">S1DoScold</td>
 <td align="right">2</td>
-<td align="right">-0.256</td>
-<td align="right">0.158</td>
-<td align="right">-0.542</td>
-<td align="right">0.083</td>
+<td align="right">-0.245</td>
+<td align="right">0.163</td>
+<td align="right">-0.562</td>
+<td align="right">0.043</td>
 </tr>
 <tr class="odd">
 <td align="left">S1DoShout</td>
 <td align="right">1</td>
-<td align="right">0.310</td>
-<td align="right">0.149</td>
-<td align="right">0.036</td>
-<td align="right">0.627</td>
+<td align="right">0.305</td>
+<td align="right">0.148</td>
+<td align="right">0.010</td>
+<td align="right">0.576</td>
 </tr>
 <tr class="even">
 <td align="left">S1DoShout</td>
 <td align="right">2</td>
-<td align="right">0.385</td>
-<td align="right">0.209</td>
-<td align="right">-0.057</td>
-<td align="right">0.750</td>
+<td align="right">0.388</td>
+<td align="right">0.204</td>
+<td align="right">0.012</td>
+<td align="right">0.812</td>
 </tr>
 </tbody>
 </table>
