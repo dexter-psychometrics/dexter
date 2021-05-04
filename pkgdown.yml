@@ -1,0 +1,45 @@
+pandoc: 2.7.3
+pkgdown: 1.6.1
+pkgdown_sha: ~
+articles:
+  DIF_vignette: DIF_vignette.html
+  Equating: Equating.html
+  Plausible_Values: Plausible_Values.html
+  Test_Individual_differences: Test_Individual_differences.html
+  blog/2017-12-13-hello: 2017-12-13-hello.html
+  blog/2018-02-25-item-total-regressions-in-dexter: 2018-02-25-item-total-regressions-in-dexter.html
+  blog/2018-05-25-equating-a-pass-fail-score-with-dexter: 2018-05-25-equating-a-pass-fail-score-with-dexter.html
+  blog/2018-06-11-comparing-parameter-estimates-from-dexter: 2018-06-11-comparing-parameter-estimates-from-dexter.html
+  blog/2018-07-13-dextermst: 2018-07-13-dextermst.html
+  blog/2018-08-07-distractor-plots-in-dexter: 2018-08-07-distractor-plots-in-dexter.html
+  blog/2018-08-21-dexter-0-8-1-submitted: 2018-08-21-dexter-0-8-1-submitted.html
+  blog/2018-08-31-dexter-meets-pisa-the-market-basket-approach: 2018-08-31-dexter-meets-pisa-the-market-basket-approach.html
+  blog/2018-09-22-100: 2018-09-22-100.html
+  blog/2018-09-24-the-scoring-game: 2018-09-24-the-scoring-game.html
+  blog/2018-10-15-random-variation-and-power-in-profile-plots: 2018-10-15-random-variation-and-power-in-profile-plots.html
+  blog/2018-11-03-dexter-0-8-3-on-cran: 2018-11-03-dexter-0-8-3-on-cran.html
+  blog/2018-11-05-test-and-item-information-functions-in-dexter: 2018-11-05-test-and-item-information-functions-in-dexter.html
+  blog/2019-01-01-happy-2019: 2019-01-01-happy-2019.html
+  blog/2019-01-03-dexter-0-8-4-is-out: 2019-01-03-dexter-0-8-4-is-out.html
+  blog/2019-04-26-dexter-0-8-5-on-cran: 2019-04-26-dexter-0-8-5-on-cran.html
+  blog/2019-05-11-visualising-differential-item-pair-functioning-the-lazy-cook-way: 2019-05-11-visualising-differential-item-pair-functioning-the-lazy-cook-way.html
+  blog/2019-05-12-aspects-of-the-aspects-ratio: 2019-05-12-aspects-of-the-aspects-ratio.html
+  blog/2019-05-14-issues-with-dbplyr-and-how-to-resolve: 2019-05-14-issues-with-dbplyr-and-how-to-resolve.html
+  blog/2019-05-15-my-perennial-slide-1: 2019-05-15-my-perennial-slide-1.html
+  blog/2019-06-27-120-100-100: 2019-06-27-120-100-100.html
+  blog/2019-08-26-dexter-is-1-again: 2019-08-26-dexter-is-1-again.html
+  blog/2019-11-23-fyi: 2019-11-23-fyi.html
+  blog/2020-01-01-happy-new-year: 2020-01-01-happy-new-year.html
+  blog/2020-01-15-my-more-or-less-coherent-views-on-model-fit: 2020-01-15-my-more-or-less-coherent-views-on-model-fit.html
+  blog/2020-03-06-local-in-dependence-and-polytomization: 2020-03-06-local-in-dependence-and-polytomization.html
+  blog/2020-05-15-calculating-the-score-distribution-giving-ability: 2020-05-15-calculating-the-score-distribution-giving-ability.html
+  blog/2020-05-27-the-information-game: 2020-05-27-the-information-game.html
+  blog/2020-11-23-hot-on-the-trail-of-warm: 2020-11-23-hot-on-the-trail-of-warm.html
+  blog/2020-12-22-analysing-continuous-responses-with-dexter: 2020-12-22-analysing-continuous-responses-with-dexter.html
+  blog/2020-12-22-happy-new-year: 2020-12-22-happy-new-year.html
+  blog/2021-01-14-and-have-you-seen-the-rasch-sampler: 2021-01-14-and-have-you-seen-the-rasch-sampler.html
+  blog/2021-02-15-140: 2021-02-15-140.html
+  dexter: dexter.html
+  profile-plots: profile-plots.html
+last_built: 2021-05-04T08:16Z
+
