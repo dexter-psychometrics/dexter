@@ -34,6 +34,60 @@ pg_tick = function(step=NULL, nsteps=NULL)
   
 pg_close = function() cat('\n')
 
+
+prog_bar = setRefClass('prog_bar',
+  fields = list(nsteps='integer', step='integer', pshow='logical', w='integer', l='integer',p='integer',
+                dxpg='logical'),
+  methods = list(
+    finalize = function()
+    {
+      options(dexter.progress=dxpg)
+      if(pshow) cat('\n')
+    },
+    initialize = function(nsteps_=-1L, prog_show=show_progress())
+    {
+      nsteps <<- as.integer(nsteps_)
+      pshow <<- prog_show
+      p <<- -1L
+      l <<- -1L
+      step <<- 0L
+      dxpg <<- as.logical(options(dexter.progress=FALSE))
+      
+      if(pshow)
+      {
+        if(!is.null(nsteps))
+        {
+          w <<- getOption("width") - nchar('| 100%') - 2L
+          draw_perc()
+        } else
+        {
+          cat('|')
+        }
+      }
+    },
+    draw_perc = function()
+    {
+      old = l+p
+      p <<- as.integer(100*step/nsteps)
+      l <<- as.integer(w * step/nsteps)
+      if(old != l+p)
+      {
+        cat(sprintf('\r|%s%s| %3i%%',strrep('=',l),strrep(' ',w-l),p))
+      }
+    },
+    tick = function(nticks=1L)
+    {
+      step <<- step + as.integer(nticks)
+      if(pshow)
+      {
+        if(is.null(nsteps)) cat('=')
+        else draw_perc()
+      }
+    } 
+  ))
+
+
+
 explicit_NA = function(x, replace_NA_with = c('<NA>','.NA.','<<NA>>','__NA__'))
 {
   if(!is.character(x) || !anyNA(x))

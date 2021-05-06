@@ -967,7 +967,7 @@ get_design = function(dataSrc,
   design = 
     if(is_db(dataSrc))
     {
-      dbGetQuery(dataSrc,'SELECT booklet_id, item_id, item_position 
+      dbGetQuery(dataSrc,'SELECT * 
                             FROM dxbooklet_design
                                 ORDER BY booklet_id, item_position;')
     } else if(inherits(dataSrc, 'list') && !is.null(dataSrc$inputs$design))
@@ -993,12 +993,14 @@ get_design = function(dataSrc,
   {
     if(!'item_position' %in% colnames(design))
       stop('Cannot make wide format becasue item position is missing in input')
+
     rows = match.arg(rows)
     columns = match.arg(columns)
     if(rows == columns) stop('rows may not be equal to columns')
     val_col = setdiff(c('booklet_id','item_id','item_position'), c(rows, columns))
 
     design %>%
+        select(.data$item_id,.data$item_position,.data$booklet_id) %>%
         spread(key = columns, value = val_col, fill = fill) %>%
         arrange_at(rows) %>%
         df_format()

@@ -28,7 +28,7 @@ Dexter is an R package for psychometric analysis of data from educational and ps
 install.packages('dexter')
 ```
 
-If you encounter a bug, please post a minimal reproducible example on [github](https://github.com/jessekps/dexter/issues). We post news and examples on a [blog](https://dexterities.netlify.app), it's also the place for general questions.
+If you encounter a bug, please post a minimal reproducible example on [github](https://github.com/dexter-psychometrics/dexter/issues). We post news and examples on a [website and blog](https://dexter-psychometrics.github.io/dexter).
 
 ## Example
 

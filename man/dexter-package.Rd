@@ -22,8 +22,19 @@ To learn more about dexter, start with the vignettes: `browseVignettes(package="
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://dexterities.netlify.app/}
-  \item Report bugs at \url{https://github.com/jessekps/dexter/issues}
+  \item \url{https://dexter-psychometrics.github.io/dexter/}
+  \item Report bugs at \url{https://github.com/dexter-psychometrics/dexter/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Jesse Koops \email{jesse.koops@cito.nl}
+
+Authors:
+\itemize{
+  \item Gunter Maris
+  \item Timo Bechger
+  \item Ivailo Partchev
 }
 
 }

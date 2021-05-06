@@ -1,4 +1,4 @@
-# TO DO: if plausible values calls enorm, enorm should not do a progress bar
+
 # TO DO: progress bars sometimes have double % sign at end
 # TO DO: enorm bayes prog bar sometimes has gaps
 # TO DO: prog bars in group_by loop don't \r at the beginning and don't move to newline
@@ -75,7 +75,6 @@ plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL
   check_dataSrc(dataSrc)
   check_num(nPV, .length=1, .min=1)
   
-  # pipe seems to cause problems on apple in pv vignette, so this is nested
   df_format(
     mutate_if(
       plausible_values_(dataSrc, parms, qtpredicate=qtpredicate, covariates=covariates, nPV=nPV, 
@@ -91,7 +90,7 @@ plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL
 
 plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=NULL, nPV=1, use_draw=NULL, 
                              env=NULL, prior.dist = c("normal", "mixture"),
-                             merge_within_persons=merge_within_persons)
+                             merge_within_persons=merge_within_persons, progress = show_progress())
 {
   if(is.null(env)) env = caller_env()
   from = Gibbs.settings$from.pv
@@ -101,17 +100,26 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
   
   prior.dist = match.arg(prior.dist)
 
-  if(show_progress())
-    pg_start()
+
   
   if(is.null(parms))
   {
+    if(progress) cat('(1/2) estimating item parameters\n')
+    
     respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, extra_columns=covariates, env=env)
-    parms = fit_enorm_(respData, method = 'Bayes', nDraws = nIter.enorm) 
+    parms = fit_enorm_(respData, method = 'Bayes', nDraws = nIter.enorm, progress = progress) 
     respData = get_resp_data(respData, summarised=TRUE, extra_columns=covariates, 
                              protect_x=!is_db(dataSrc))
+    if(progress)
+    {
+      cat('(2/2) estimating plausible values\n')
+      pg_start()
+    }  
   } else
   {
+    if(progress)
+      pg_start()
+    
     if(inherits(parms,'data.frame'))
     {
       parms = transform.df.parms(parms,'b', TRUE)
@@ -126,7 +134,9 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
                              parms_check=pcheck,
                              merge_within_persons=FALSE)
   }
-  # to do: use the new function
+  
+  
+  # to do: use simplify_parms
   if(inherits(parms,'data.frame'))
   {
     fl = parms %>%
@@ -179,6 +189,9 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
          design, b, a, nPV, from = from, by = step, prior.dist=prior.dist)
   
   colnames(y) = c('booklet_id','person_id','booklet_score',paste0('PV',1:nPV))
+  
+  if(progress)
+    pg_close()
   
   if(is.null(covariates))
   {

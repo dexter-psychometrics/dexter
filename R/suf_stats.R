@@ -1,8 +1,7 @@
 
 
-#TO DO: make check on scores optional so that plot.prms does not hang for subgroups
-# without score variation, minimum score, etc.
-get_sufStats_nrm = function(respData)
+
+get_sufStats_nrm = function(respData, check_sanity=TRUE)
 {
   mx = max(respData$x$item_score)
   if(is.na(mx))
@@ -11,12 +10,14 @@ get_sufStats_nrm = function(respData)
   design = respData$design
   
   # to~do: I think we need tests with at least three items, fischer criterium
-  if(nrow(design) == 1) 
-    stop('There are responses to only one item in your selection, this cannot be calibrated.') 
-  
-  if(!is_connected(design))
-    stop('Your design is not connected')  
-  
+  if(check_sanity)
+  {
+    if(nrow(design) == 1) 
+      stop('There are responses to only one item in your selection, this cannot be calibrated.') 
+    
+    if(!is_connected(design))
+      stop('Your design is not connected')   
+  }
   
   #if this happens to be more than the number of distinct items it does not matter much
   # do not use distinct(item_id), there may be gaps
@@ -40,21 +41,22 @@ get_sufStats_nrm = function(respData)
     arrange(.data$item_id)
   
   
-  
-  if(any(ssI$first == ssI$last)) 
+  if(check_sanity)
   {
-    message('Items without score variation:')
-    print(as.character(ssI$item_id[ssI$first == ssI$last]))
-    stop('One or more items are without score variation')
+    if(any(ssI$first == ssI$last)) 
+    {
+      message('Items without score variation:')
+      print(as.character(ssI$item_id[ssI$first == ssI$last]))
+      stop('One or more items are without score variation')
+    }
+    if(any(ssIS$item_score[ssI$first] !=0))
+    {
+      # to do: check in interaction model
+      message('Items without a zero score category')
+      print(as.character(ssI$item_id[ssIS$item_score[ssI$first] !=0]))
+      stop('Minimum score for an item must be zero')
+    }
   }
-  if(any(ssIS$item_score[ssI$first] !=0))
-  {
-    # to do: check in interaction model
-    message('Items without a zero score category')
-    print(as.character(ssI$item_id[ssIS$item_score[ssI$first] !=0]))
-    stop('Minimum score for an item must be zero')
-  }
-  
   sufs$ssI = ssI
   
   sufs$design = design %>%

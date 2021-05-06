@@ -130,7 +130,7 @@ In practice, item parameters are not known. Let us repeat the exercise but this 
 
 ```{r}
 prms = fit_enorm(db, booklet_id=="1652" & geslacht=="f", 
-                 method = "Bayes", nIterations = 515)
+                 method = "Bayes", nDraws = 515)
 ```
 The number of iterations, 515, is the number we need to produce a posterior sample of size 100 if we use a burn-in of 20 and thereafter choose every fifth-th sample to get rid of auto-correlations.
 

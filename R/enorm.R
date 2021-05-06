@@ -256,7 +256,7 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
       }) %>%
       ungroup() 
     
-    x$inputs$plt = get_sufStats_nrm(respData)$plt
+    x$inputs$plt = get_sufStats_nrm(respData, check_sanity=FALSE)$plt
   }
   
 

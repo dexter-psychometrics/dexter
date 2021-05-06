@@ -36,7 +36,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
   check_num(pass_fail, 'integer', .min=0, .length=1)
   check_df(target_booklets, 'item_id', nullable=TRUE)
   design=target_booklets
-  
+
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
   respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, env=env)
@@ -58,22 +58,26 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
     if(!('booklet_id' %in% colnames(design))) 
       design$booklet_id = 'target items'
   }
-  
+  n_booklets = n_distinct(design$booklet_id)
+  pgb = prog_bar((nDraws+2) * n_booklets)
+
   ref_ssI = parms$inputs$ssI %>% 
     semi_join(ref_items, by = 'item_id') %>% 
     arrange(.data$first)
   
-  ref_first = pull(ref_ssI, 'first')
-  ref_last = pull(ref_ssI, 'last')
+  ref_first = ref_ssI$first
+  ref_last = ref_ssI$last
   
   # Get mean and sd of ability in sample
-  pv = plausible_values(respData, parms)
+  pv = plausible_values_(respData, parms)
   new_mu = mean(pv$PV1)
   new_sigma = sd(pv$PV1)
   
+  pgb$tick(n_booklets)
+  
   ssI = design %>%
     inner_join(parms$inputs$ssI, by = 'item_id') %>% 
-      arrange(.data$booklet_id, .data$first)
+    arrange(.data$booklet_id, .data$first)
   
   a = parms$inputs$ssIS$item_score
   b = parms$est$b
@@ -94,7 +98,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
     {
       theta_MLE(b[iter,],a, ref_first, ref_last)$theta[pass_fail+1]
     })
-      
+
   } else
   {
     ref_theta = theta_MLE(b,a,ref_first,ref_last)$theta[pass_fail+1]
@@ -105,39 +109,58 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
     scores = 0:sum(a[dsg$last])
     p_new = plausible_scores(respData, parms=parms, items = dsg$item_id) %>%
         count(.data$PS1) %>%
-        full_join(tibble(PS1 = as.integer(0:sum(a[dsg$last]))), by='PS1') %>%
-        mutate(n = coalesce(n,0L)) %>%
+        right_join(tibble(PS1 = as.integer(0:sum(a[dsg$last]))), by='PS1') %>%
+        mutate(n = coalesce(.data$n,0L)) %>%
+        arrange(.data$PS1) %>%
         pull(.data$n)
     
     p_new = p_new/sum(p_new)
+    
+    pgb$tick()
     
     max_score = sum(a[dsg$last])
     ref_range = (pass_fail:max_score) + 1
     probs = matrix(0,max_score+1, nDraws)
     
+    # some constants for cpp func
+    first0 = dsg$first - 1L
+    last0 = dsg$last - 1L
+    bcni = c(0L,length(first0))
+    cbk = integer(length(scores))
+    cmu = rep(new_mu,length(scores))
+    
     if (parms$inputs$method == "Bayes")
     {
       eq_score = rep(-1L, length(iter_set))
       tel = 1
+      # start values
+      spv = matrix(theta_jEAP(colMeans(b),a,dsg$first, dsg$last)$theta,ncol=1)
       for (iter in iter_set)
       {
-        eq_score[tel] = min(which(theta_MLE(b[iter,],a, dsg$first, dsg$last)$theta >= ref_theta[tel])) - 1 
-
-        spv = pv_recycle(b[iter,], a,dsg$first, dsg$last, scores, npv=1, mu=new_mu, sigma=new_sigma)
-
+        eq_score[tel] = min(which(theta_MLE(b[iter,],a, dsg$first, dsg$last)$theta >= ref_theta[tel])) - 1
+        #spv = pv_recycle_sorted(b[iter,], a,dsg$first, dsg$last, scores, npv=1, mu=new_mu, sigma=new_sigma)
+        PV_sve(b[iter,],a, first0, last0, bcni,cbk, scores, cmu, new_sigma,spv, niter=50L)
+        
         prf = pscore(spv, b[iter,],a,ref_first,ref_last)
         probs[,tel] = apply(prf, 2, function(x) sum(x[ref_range]))
         tel=tel+1
+        pgb$tick()
       }
     } else
     {
       eq_score = min(which(theta_MLE(b,a,dsg$first, dsg$last)$theta >= ref_theta))-1 
       
-      spv = pv_recycle(b, a, dsg$first, dsg$last, scores, npv=nDraws, mu=new_mu, sigma=new_sigma)
+      #spv = pv_recycle_sorted(b, a, dsg$first, dsg$last, scores, npv=nDraws, mu=new_mu, sigma=new_sigma)
+      # start values
+      spv = matrix(theta_jEAP(b,a,dsg$first, dsg$last)$theta,ncol=1)
+      
       for (iter in 1:nDraws)
       {
-        prf = pscore(spv[,iter], b, a, ref_first, ref_last)
+        PV_sve(b,a, first0, last0, bcni,cbk, scores, cmu, new_sigma,spv, niter=50L)
+        prf = pscore(spv, b, a, ref_first, ref_last)
+        #prf = pscore(spv[,iter], b, a, ref_first, ref_last)
         probs[,iter] = apply(prf, 2, function(x) sum(x[ref_range]))
+        pgb$tick()
       }
     }
     
@@ -199,8 +222,7 @@ coef.p2pass = function(object, ...)
 {
   lapply(object$est, function(bk)
     {
-      bk$prob_to_pass[,c('score_new','probability_to_pass','true_positive','sensitivity',
-                         'specificity','specificity','proportion')]
+      select(bk$prob_to_pass,!ends_with('rate'))
     }
   ) %>%
     bind_rows(.id = 'booklet_id') %>%
@@ -241,11 +263,13 @@ plot.p2pass = function(x, what = c('all','equating','sens/spec', 'roc'), booklet
                  pch = 16, bty='l', col='grey40')
       ovr = list(x = bk_results[[bkl]]$prob_to_pass$score_new, 
                  y = bk_results[[bkl]]$prob_to_pass$probability_to_pass)
-      do.call(plot, merge_arglists(user.args, dflt, ovr))
+      args = merge_arglists(user.args, dflt, ovr)
+      do.call(plot, args)
       if( x$inputs$method == 'Bayes')
       {
         breaks = seq(min(bk_results[[bkl]]$equated_score)-.5, max(bk_results[[bkl]]$equated_score)+.5)
         hist(bk_results[[bkl]]$equated_score, add=TRUE, freq=FALSE, breaks=breaks)
+        do.call(points,args)
       } else
       {
         abline(v=bk_results[[bkl]]$equated_score)

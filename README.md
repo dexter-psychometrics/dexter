@@ -15,9 +15,9 @@ install.packages('dexter')
 ```
 
 If you encounter a bug, please post a minimal reproducible example on
-[github](https://github.com/jessekps/dexter/issues). We post news and
-examples on a [blog](https://dexterities.netlify.app), it’s also the
-place for general questions.
+[github](https://github.com/dexter-psychometrics/dexter/issues). We post
+news and examples on a [website and
+blog](https://dexter-psychometrics.github.io/dexter).
 
 Example
 -------
@@ -96,9 +96,9 @@ head(pv)
 
 | booklet\_id | person\_id  |  booklet\_score|         PV1|         PV2|         PV3|         PV4|         PV5|
 |:------------|:------------|---------------:|-----------:|-----------:|-----------:|-----------:|-----------:|
-| verb\_agg   | dx\_0000001 |              13|  -1.1786824|  -1.3833165|  -1.0008358|  -0.9959936|  -0.8437848|
-| verb\_agg   | dx\_0000002 |              28|   0.3580404|   0.3585479|   0.1231038|   0.4052475|  -0.7093408|
-| verb\_agg   | dx\_0000003 |               4|  -2.8890364|  -1.8880712|  -2.7836238|  -2.1644630|  -2.1182144|
-| verb\_agg   | dx\_0000004 |              19|  -0.4643743|  -0.5013221|  -0.4507560|  -0.4164355|  -1.0307969|
-| verb\_agg   | dx\_0000005 |               7|  -1.6674313|  -1.5603326|  -1.6937758|  -1.2779853|  -1.6300234|
-| verb\_agg   | dx\_0000006 |              25|   0.0862120|   0.3463346|  -0.2961962|  -0.3580133|   0.0350544|
+| verb\_agg   | dx\_0000001 |              13|  -1.0616680|  -0.9219415|  -0.8161716|  -0.8717352|  -0.6656054|
+| verb\_agg   | dx\_0000002 |              28|  -0.1858848|  -0.0366271|   0.3216584|   0.0263411|   0.3838943|
+| verb\_agg   | dx\_0000003 |               4|  -1.9804484|  -2.4675297|  -2.5928338|  -2.1755638|  -1.7619598|
+| verb\_agg   | dx\_0000004 |              19|  -0.2550607|  -0.4989645|  -0.4322568|  -0.2495976|  -0.3305588|
+| verb\_agg   | dx\_0000005 |               7|  -2.4189426|  -1.5473985|  -1.2680878|  -1.3221576|  -1.3139852|
+| verb\_agg   | dx\_0000006 |              25|   0.3409678|  -0.2472593|  -0.0050744|  -0.3793325|  -0.2298762|
