@@ -39,6 +39,7 @@ reference:
       - ability
       - plausible_values
       - plausible_scores
+      - latent_cor
       - probability_to_pass
       - plot.p2pass
       - individual_differences

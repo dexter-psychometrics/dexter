@@ -64,6 +64,8 @@ S3method(print,exp_func)
 S3method(print,sim_func)
 S3method(print,pmf_func)
 
+export(latent_cor)
+
 #ability.R
 export(ability)
 export(ability_tables)

@@ -635,106 +635,18 @@ print.sim_func = function(x,...) cat('function to simulate item scores: (x_i1, .
 print.pmf_func = function(x,...) cat('Conditional score distribution function: P(x_+|theta)\n')
 
 
-# Estimates latent correlations
-#
-#
-# @param dataSrc a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score
-# @param predicate An optional expression to subset data, if NULL all data is used
-# @param item_property An item property to distinguish the different scales.
-# @param quick If true, a estimate based on attenuated correlations between plausible values is produced.
-# @param nIterations Number of iterations for plausible values
-# 
-# @return Correlation matrix and corresponding standard deviations
-
-latent_cor = function(dataSrc, predicate=NULL, item_property, quick=FALSE, nIterations=20)
-{
-  check_dataSrc(dataSrc)
-  qtpredicate = eval(substitute(quote(predicate)))
-  env = caller_env()
-  if(!inherits(dataSrc,'data.frame')) item_property = tolower(item_property)
-  
-  columns = c('person_id','item_id','item_score', item_property)
-  respData = get_responses_(dataSrc, qtpredicate, env=env, columns = columns)
-  respData[[item_property]] = as.character(respData[[item_property]])
-  respData = split(respData, respData[[item_property]])
-  nD = length(respData)
-  
-  # fit models and make scores
-  models = lapply(respData, fit_enorm)
-  scores = lapply(respData, get_testscores)
-  
-  nP =  nrow(scores[[1]])
-  from = 10
-  by = 2
-  which.keep = seq(from,(from-by)*(from>by)+by*nIterations,by=by)
-  nIter=max(which.keep)
-  
-  ## starting values
-  reliab = matrix(0,nD)
-  sd_pv = rep(0,nD)
-  mean_pv = rep(0,nD)
-  for (i in 1:nD)
-  {
-    pv = plausible_values(respData[[i]],models[[i]],nPV = 2)
-    reliab[i] = cor(pv$PV1,pv$PV2)
-    sd_pv[i] = sd(pv$PV1)
-    mean_pv[i] = mean(pv$PV1)
-  }
-  
-  acor = matrix(1,nD,nD)
-  for (i in 1:(nD-1))
-  {
-    ab1=ability(respData[[i]],models[[i]], method="EAP", prior="Jeffreys")$theta
-    for (j in ((i+1):nD)){
-      ab2=ability(respData[[j]],models[[j]], method="EAP", prior="Jeffreys")$theta
-      acor[i,j] = cor(ab1,ab2)/sqrt(reliab[i]*reliab[j])
-      acor[j,i] = acor[i,j]
-    }
-  }
-  out_sd=matrix(0,nD,nD)
-  out_cor = acor
-  
-  if (!quick)
-  {
-    prior = list(mu=mean_pv, Sigma = diag(1.7*sd_pv) %*% acor %*% diag(1.7*sd_pv))
-  
-    pv = matrix(0,nP,nD)
-    store = matrix(0, length(which.keep), length(as.vector(prior$Sigma)))
-    tel = 1
-    for (i in 1:nIter)
-    {
-      for (d in 1:nD)
-      {
-        sim_proposal = r_score(models[[d]])
-        cons = condMoments(prior$mu, prior$Sigma, d, x.value=pv[,-d])  
-        for (p in 1:nP)
-        {
-          ascore=-1
-          while (ascore!=scores[[d]]$booklet_score[p])
-          {
-            atheta = rnorm(1,cons$mu[p], sqrt(cons$sigma))
-            ascore = sum(sim_proposal(atheta))
-          }
-          pv[p,d] = atheta
-        }
-      }
-      prior = update_MVNprior(pv,prior$Sigma)
-
-      if (i%in%which.keep){
-        store[tel,] = as.vector(cov2cor(prior$Sigma))
-        tel=tel+1
-      }
-    }
-    out_sd=matrix(apply(store,2,sd),nD,nD)
-    diag(out_sd)=0
-    out_cor = matrix(colMeans(store),nD,nD)
-  }
-  return(list(cor = out_cor, sd=out_sd))
-}
-
-
-
-latent_cor2 = function(dataSrc, predicate=NULL, item_property, quick=FALSE, nIterations=100, 
+#' Estimates latent correlations
+#'
+#'
+#' @param dataSrc a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score
+#' @param predicate An optional expression to subset data, if NULL all data is used
+#' @param item_property An item property to distinguish the different scales.
+#' @param quick If true, a estimate based on attenuated correlations between plausible values is produced.
+#' @param nIterations Number of iterations for plausible values
+#' @param use only complete.obs at this time. Respondents who don't have a score for one or more scales are removed.
+#' 
+#' @return Correlation matrix and corresponding standard deviations
+latent_cor = function(dataSrc, predicate=NULL, item_property, quick=FALSE, nIterations=100, 
                        use="complete.obs")
 {
   check_dataSrc(dataSrc)

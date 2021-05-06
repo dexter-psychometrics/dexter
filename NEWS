@@ -1,6 +1,9 @@
 # dexter 1.1.3
 
 * new website, see dexter-psychometrics.github.io/dexter
+* new function `latent_cor` which does what the name implies
+* speed improvements in `probability_to_pass` 
+* bugfix in `pobability_to_pass` which occurred when not all scores were achieved
 
 # dexter 1.1.2
 
