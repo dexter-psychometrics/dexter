@@ -7,6 +7,7 @@ articles:
   Plausible_Values: Plausible_Values.html
   Test_Individual_differences: Test_Individual_differences.html
   blog/2017-12-13-hello: 2017-12-13-hello.html
+  blog/2018-02-09-dexter-is-1: 2018-02-09-dexter-is-1.html
   blog/2018-02-25-item-total-regressions-in-dexter: 2018-02-25-item-total-regressions-in-dexter.html
   blog/2018-05-25-equating-a-pass-fail-score-with-dexter: 2018-05-25-equating-a-pass-fail-score-with-dexter.html
   blog/2018-06-11-comparing-parameter-estimates-from-dexter: 2018-06-11-comparing-parameter-estimates-from-dexter.html
@@ -41,5 +42,5 @@ articles:
   blog/2021-02-15-140: 2021-02-15-140.html
   dexter: dexter.html
   profile-plots: profile-plots.html
-last_built: 2021-05-07T06:58Z
+last_built: 2021-05-07T07:47Z
 

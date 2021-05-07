@@ -622,7 +622,7 @@ img{ border:none;}
 <code class="sourceCode R"><span class="va">m</span> <span class="op">=</span> <span class="fu"><a href="../reference/fit_inter.html">fit_inter</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">booklet_id</span><span class="op">==</span><span class="st">'agg'</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">"S1DoScold"</span>, show.observed<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
 <p><img src="dexter_files/figure-html/unnamed-chunk-14-1.png" width="576" style="display: block; margin: auto;"></p>
-<p>This plot shows three item-total regressions. The pink dots show the observed regression: the average score on the item given the total score on the test. There are also two regression models: the interaction model is shown with a thicker but lighter line, and the Rasch model is shown with a thinner, darker line. The two regression lines cross where the data is the densest. In this case they are very similar – when not, the dots tend to cluster around the regression line from the interaction model. The observed regression is not shown by default, so we had to change the <code>show.observed</code> parameter. The light gray ‘curtains’ are drawn by default at the 5% lowest and the 5% highest sum scores, directing the eye to where the ‘action’ really happens. A more detailed discussion of the item-total regressions may be found on <a href="https://dexterities.netlify.app/2018/02/25/item-total-regressions-in-dexter/">our blog</a>.</p>
+<p>This plot shows three item-total regressions. The pink dots show the observed regression: the average score on the item given the total score on the test. There are also two regression models: the interaction model is shown with a thicker but lighter line, and the Rasch model is shown with a thinner, darker line. The two regression lines cross where the data is the densest. In this case they are very similar – when not, the dots tend to cluster around the regression line from the interaction model. The observed regression is not shown by default, so we had to change the <code>show.observed</code> parameter. The light gray ‘curtains’ are drawn by default at the 5% lowest and the 5% highest sum scores, directing the eye to where the ‘action’ really happens. A more detailed discussion of the item-total regressions may be found on <a href="blog/2018-02-25-item-total-regressions-in-dexter">our blog</a>.</p>
 <p>We can show the response category probabilities instead of the expected item score:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">'S1DoCurse'</span>, summate<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
@@ -654,50 +654,50 @@ img{ border:none;}
 <tr class="odd">
 <td align="left">S1DoCurse</td>
 <td align="right">1</td>
-<td align="right">-1.342</td>
-<td align="right">0.150</td>
-<td align="right">-1.630</td>
-<td align="right">-1.043</td>
+<td align="right">-1.341</td>
+<td align="right">0.168</td>
+<td align="right">-1.680</td>
+<td align="right">-1.022</td>
 </tr>
 <tr class="even">
 <td align="left">S1DoCurse</td>
 <td align="right">2</td>
-<td align="right">-0.638</td>
-<td align="right">0.146</td>
-<td align="right">-0.936</td>
-<td align="right">-0.352</td>
-</tr>
-<tr class="odd">
-<td align="left">S1DoScold</td>
-<td align="right">1</td>
-<td align="right">-0.676</td>
-<td align="right">0.145</td>
-<td align="right">-0.953</td>
-<td align="right">-0.395</td>
-</tr>
-<tr class="even">
-<td align="left">S1DoScold</td>
-<td align="right">2</td>
-<td align="right">-0.256</td>
-<td align="right">0.156</td>
-<td align="right">-0.560</td>
-<td align="right">0.051</td>
-</tr>
-<tr class="odd">
-<td align="left">S1DoShout</td>
-<td align="right">1</td>
-<td align="right">0.312</td>
+<td align="right">-0.625</td>
 <td align="right">0.144</td>
-<td align="right">0.033</td>
-<td align="right">0.591</td>
+<td align="right">-0.907</td>
+<td align="right">-0.346</td>
+</tr>
+<tr class="odd">
+<td align="left">S1DoScold</td>
+<td align="right">1</td>
+<td align="right">-0.681</td>
+<td align="right">0.146</td>
+<td align="right">-0.967</td>
+<td align="right">-0.397</td>
+</tr>
+<tr class="even">
+<td align="left">S1DoScold</td>
+<td align="right">2</td>
+<td align="right">-0.257</td>
+<td align="right">0.157</td>
+<td align="right">-0.551</td>
+<td align="right">0.043</td>
+</tr>
+<tr class="odd">
+<td align="left">S1DoShout</td>
+<td align="right">1</td>
+<td align="right">0.320</td>
+<td align="right">0.141</td>
+<td align="right">0.050</td>
+<td align="right">0.586</td>
 </tr>
 <tr class="even">
 <td align="left">S1DoShout</td>
 <td align="right">2</td>
-<td align="right">0.403</td>
-<td align="right">0.202</td>
+<td align="right">0.401</td>
+<td align="right">0.211</td>
 <td align="right">0.022</td>
-<td align="right">0.783</td>
+<td align="right">0.808</td>
 </tr>
 </tbody>
 </table>
