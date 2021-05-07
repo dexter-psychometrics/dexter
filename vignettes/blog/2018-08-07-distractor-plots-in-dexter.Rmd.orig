@@ -10,7 +10,7 @@ categories:
 tags: []
 ---
 
-In a [previous post](http://dexterities.netlify.com/2018/02/25/item-total-regressions-in-dexter/), I wrote about three kinds of item-total regressions available in __dexter__: the empirical one, and the smoothed versions under the Rasch model and the interaction model. In fact, there is one more item-total regression, available through the `distractor_plot` command and the Shiny interfaces in __dexter__ and __dextergui__. This will be the topic today.
+In a [previous post](2018-02-25/item-total-regressions-in-dexter), I wrote about three kinds of item-total regressions available in __dexter__: the empirical one, and the smoothed versions under the Rasch model and the interaction model. In fact, there is one more item-total regression, available through the `distractor_plot` command and the Shiny interfaces in __dexter__ and __dextergui__. This will be the topic today.
 
 Unlike the latter two regressions, this one does not involve a global model for the data (Rasch or interaction model): it is local. We use the `density` function in R (@R) to estimate the density of the total scores twice over the same support: for all persons, and for the persons who have given a certain response to the item. Together with the marginal frequency of the response, this is all we need to apply the Bayes rule and compute the density of the response given the total score. This is the item-total regression we need.
 
@@ -22,7 +22,7 @@ I will only give a couple of examples. The first one illustrates the situation I
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 library(dexter)
-db = open_project('~/Dropbox/ALLRET.db')
+db = open_project('/Rdatasets/ALLRET.db')
 distractor_plot(db, item='RT006_AN', booklet_id=='TF30', main='Weak distractors')
 ```
 

@@ -2,11 +2,11 @@
 title: Item-total regressions in dexter
 author: Ivailo Partchev
 date: '2018-02-25'
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Item-total regressions in dexter}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+slug: item-total-regressions-in-dexter
+categories:
+  - Psychometrics
+  - R
+tags: []
 ---
 
 ```{r setup, include=FALSE}
@@ -17,7 +17,7 @@ Regression is the conditional expectation of a variable given the value of anoth
 
 ```{r,echo=FALSE, message=FALSE}
 library(dexter)
-db=open_project('/Rdatasets/ALLRET.db')
+db=open_project('ALLRET.db')
 x = fit_inter(db, booklet_id=='TF30')
 plt = x$inputs$plt[x$inputs$plt$item_id=="RT045_AN",]
 plot(plt$booklet_score,plt$meanScore,col="coral",pch=20, 
@@ -58,7 +58,7 @@ There are three item-test regressions on the plot: the observed one, shown as pi
 Here are some more examples, presented in pairs:
 
 ```{r, echo=FALSE, fig.show='hold', fig.width=3.5, fig.height=3.5}
-ps = open_project('/Rdatasets/pisa12_math.db')
+ps = open_project('pisa12_math.db')
 m = fit_inter(ps, booklet_id=='B01')
 plot(x, items=c('RT045_AN'), curtains=0, show.observed=TRUE, 
      main='Small sample (472)',cex=.8)
@@ -76,7 +76,7 @@ plot(m, items=c("PM949Q03"), curtains=0, show.observed=TRUE, main='RM fits less 
 The data comes from the large sample (actually, PISA 2012, one of the mathematics booklets), and the interaction model is very close to the empirical regression. The numbers in the brackets are the Wald tests of fit, to be interpreted as normal deviates. 
 
 ```{r, echo=FALSE, fig.show='hold', fig.width=3.5, fig.height=3.5, message=FALSE}
-ex = open_project('/Rdatasets/example.db')
+ex = open_project('example.db')
 touch_rules(ex, data.frame(item_id='Item_10',response=c('A','B'),item_score=c(1,0)))
 im = fit_inter(ex, booklet_id=='Part1')
 plot(im, items=c('Item_01'), curtains=0, show.observed=TRUE, main='Correct key',cex=.8)

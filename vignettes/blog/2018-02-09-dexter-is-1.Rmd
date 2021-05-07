@@ -1,0 +1,28 @@
+---
+title: dexter is 1!
+author: Ivailo Partchev
+date: '2018-02-09'
+slug: dexter-is-1
+categories:
+  - Psychometrics
+tags: []
+---
+
+Today is exactly a year since we [presented](https://eeecon.uibk.ac.at/psychoco/2017/program.html) our R package, dexter, for the first time at the 2017 Psychoco workshop in Vienna. Having partaken of the birthday cake ![](img/dexterCake.jpg), I (Ivailo) now concentrate on [this year's edition](https://eeecon.uibk.ac.at/psychoco/2018/index.html) of Psychoco, where I will present a talk on item-total regressions in dexter. The slides, or a short informal paper, will be posted here after the workshop.
+
+I wish to close, once and for all, the topic of the package's name. __dexter__ is named after my ex-neighbours' dog ![](img/realDexter.JPG). I was searching for an acronym, preferably not mirt (there are at least three programs under that name already), I looked out of the window, and the name was found. Unfortunately, I could not take a better picture before they moved out, but yes, this is the Real Dexter. 
+
+We have absolutely nothing to do with that [other character](http://www.imdb.com/title/tt0773262/). We meant __dexter__ as in dexterous and dexterity, and the [Urban Dictionary](https://www.urbandictionary.com/define.php?term=Dexter) is also full of praise:
+
+>>A sweet, caring, out going guy that is a good friend. Dexters are good boyfriends. 
+>>Probably the best anyone could ever have (...)  Everything about them is perfect.
+
+>>a sexually attractive male specimen.
+>>(_damn, that guy is so dexter_)
+
+>>When something is killer
+>>(_Baby, you're looking Dexter today._)
+
+Anyway -- killer or not, we hope that __dexter__ might be useful to you, and we are working hard to bring it up to version 1.0.0.
+
+

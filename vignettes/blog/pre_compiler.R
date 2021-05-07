@@ -9,7 +9,9 @@ library(dplyr)
 # > pre_compile('ExponentialFamily_Blog.Rmd.orig')
 # static images should be included in blog/img and be referred to with 'img/...'
 # to do: this does not work anymore since moving to dexter-psychometrics
-
+# refer to blog form within blog [](name), or from vignette [](blog/name)
+# refer to vignette from blog [](../name)
+# refer to function `function_name`
 # I read all datasets from /Rdatasets/... 
 # since not all of them can be made public it can be any dir on your computer outside of 
 # the dexter directory but it's easier if we all keep to /Rdatasets
@@ -118,13 +120,19 @@ compile_all = function()
 
 compile_all_new = function()
 {
-  f = list.files('vignettes/blog',pattern='Rmd\\.orig$',full.names=FALSE)
-  x = list.files('vignettes/blog',pattern='Rmd$',full.names=FALSE) %>% 
-    gsub('Rmd$','Rmd.orig',.)
+  orig = list.files('vignettes/blog',pattern='Rmd\\.orig$',full.names=FALSE)
+  rmd = list.files('vignettes/blog',pattern='Rmd$',full.names=FALSE)
+  names(rmd) = gsub('Rmd$','Rmd.orig',rmd)
   
-  f=setdiff(f,x)
+  p = function(f) file.path('vignettes','blog',f)
   
-  invisible(sapply(f,pre_compile))
+  for(f in orig)
+  {
+    if(!f %in% names(rmd) || file.mtime(p(orig)) > file.mtime(p(rmd[f])))
+    {
+      pre_compile(f)
+    } 
+  }
 }
 
 blog_yaml = function()

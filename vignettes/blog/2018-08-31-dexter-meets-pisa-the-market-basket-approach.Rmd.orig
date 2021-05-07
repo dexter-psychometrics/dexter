@@ -10,7 +10,7 @@ categories:
 tags: []
 ---
 
-In this part, we show how to use **dexter** to apply the market basket approach [@Mislevy98] to the mathematics domain in PISA 2012, following the logic in @Zwitser2017. Once we have read in the data and created the **dexter** database, as shown [here](http://dexterities.netlify.com/2018/08/21/dexter-meets-pisa-1/), this takes only several lines of code. Still, the article will be a bit longer as the market basket approach deserves some attention on its own.
+In this part, we show how to use **dexter** to apply the market basket approach [@Mislevy98] to the mathematics domain in PISA 2012, following the logic in @Zwitser2017. Once we have read in the data and created the **dexter** database, as shown [here](2018-08-21-dexter-meets-pisa-1), this takes only several lines of code. Still, the article will be a bit longer as the market basket approach deserves some attention on its own.
 
 The market basket approach has been borrowed from economics -- more precisely, from the study of inflation and purchasing power. To confuse matters further, the machine learning field has appropriated the term to denote something completely different -- we can ignore this except that their version is the more likely to show up on top in a Google search. 
 
@@ -43,7 +43,7 @@ library(ggplot2)
 db = open_project('/Rdatasets/pisa2012.db')
 ```
 
-Note that the nice data base that we created [last time](http://dexterities.netlify.com/2018/08/21/dexter-meets-pisa-1/) is available and ready for analysis, including the item property that determines which items go into the basket. Once again: these are the items that were administered in all countries, though not necessarily to all students within a country.
+Note that the nice data base that we created [last time](2018-08-21-dexter-meets-pisa-1) is available and ready for analysis, including the item property that determines which items go into the basket. Once again: these are the items that were administered in all countries, though not necessarily to all students within a country.
 
 As a start, let us draw some plausible values (one per person is enough). This is basically the PISA approach, and even if we don't get exactly their numbers, it is some basis for comparison. First, extract response data with two extra variables added: (i) the country (`cnt`), which will be necessary for country-specific IRT modeling, and (ii) `in_basket`, the item property that indicates whether an item belongs to the market basket (most do). Then, select just the responses to the items in the basket:
 

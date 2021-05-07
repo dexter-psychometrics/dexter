@@ -6,4 +6,4 @@ slug: happy-new-year
 categories: []
 tags: []
 ---
-![](/img/h2020-600.png)
+![](img/h2020-600.png)

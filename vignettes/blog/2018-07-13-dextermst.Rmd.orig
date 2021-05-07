@@ -227,7 +227,7 @@ plot(fi, item_id='item21')
 plot(fi, item_id='item45')
 ```
 
-The plots are similar to those in __dexter__ except that some scores are ruled out due to the design of the test. The interaction model can only be fitted on one booklet at a time, but this includes the rather complicated MST booklets. A more detailed discussion of the item-total regressions may be found in __dexter__'s vignettes or on [our blog](http://dexterities.netlify.com/2018/02/25/item-total-regressions-in-dexter/).
+The plots are similar to those in __dexter__ except that some scores are ruled out due to the design of the test. The interaction model can only be fitted on one booklet at a time, but this includes the rather complicated MST booklets. A more detailed discussion of the item-total regressions may be found in __dexter__'s vignettes or on [our blog](2018-02-25-item-total-regressions-in-dexter).
 
 ### Estimate the IRT model
 
