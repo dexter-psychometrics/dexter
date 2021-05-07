@@ -256,8 +256,8 @@
 
     <pre class="usage"><span class='fu'>latent_cor</span><span class='op'>(</span>
   <span class='va'>dataSrc</span>,
-  predicate <span class='op'>=</span> <span class='cn'>NULL</span>,
   <span class='va'>item_property</span>,
+  predicate <span class='op'>=</span> <span class='cn'>NULL</span>,
   quick <span class='op'>=</span> <span class='cn'>FALSE</span>,
   nIterations <span class='op'>=</span> <span class='fl'>100</span>,
   use <span class='op'>=</span> <span class='st'>"complete.obs"</span>
@@ -271,12 +271,12 @@
       <td><p>a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score</p></td>
     </tr>
     <tr>
-      <th>predicate</th>
-      <td><p>An optional expression to subset data, if NULL all data is used</p></td>
-    </tr>
-    <tr>
       <th>item_property</th>
       <td><p>An item property to distinguish the different scales.</p></td>
+    </tr>
+    <tr>
+      <th>predicate</th>
+      <td><p>An optional expression to subset data, if NULL all data is used</p></td>
     </tr>
     <tr>
       <th>quick</th>
