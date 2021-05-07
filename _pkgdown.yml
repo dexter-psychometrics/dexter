@@ -71,7 +71,7 @@ navbar:
     - reference
     - articles
     - blog
-    - news
+    - about
     right: github
   components:
     home:
@@ -85,7 +85,10 @@ navbar:
       href: articles/dexter.html
     github:
       icon: fab fa-github fa-lg
-      href: https://github.com/jessekps/dexter/
+      href: https://github.com/dexter-psychometrics/dexter
+    about:
+      text: About
+      href: articles/blog/about.html
     articles:
       text: Vignettes
       menu:
@@ -95,8 +98,7 @@ navbar:
         href: articles/Equating.html
       - text: Plausible Values in Dexter
         href: articles/Plausible_Values.html
-      - text: 'How Members of Different Groups Obtain the Same Test Score: Profile
-          Plots in Dexter'
+      - text: 'How Members of Different Groups Obtain the Same Test Score: Profile Plots in Dexter'
         href: articles/profile-plots.html
       - text: 'One theta to rule them all: Test Individual Differences'
         href: articles/Test_Individual_differences.html

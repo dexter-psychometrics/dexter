@@ -142,6 +142,7 @@ blog_yaml = function()
 
   
   fls = tibble(fn=list.files('vignettes/blog',pattern='.Rmd$',full.names=FALSE)) %>%
+    filter(grepl('^\\d',fn)) %>%
     mutate(fn=gsub('\\.Rmd$','',fn)) %>%
     mutate(bn = gsub('^\\d{4}-\\d{2}-\\d{2}-','',fn)) %>%
     mutate(bn=gsub('(?<=\\d)-(?=\\d)','.',bn,perl=TRUE)) %>%
