@@ -1,4 +1,6 @@
 
+# to do: dexterities links
+
 library(stringr)
 library(RCurl)
 library(dplyr)
@@ -6,6 +8,8 @@ library(dplyr)
 # precompile blog function to prevent missing packages on git
 # > pre_compile('ExponentialFamily_Blog.Rmd.orig')
 # static images should be included in blog/img and be referred to with 'img/...'
+# to do: this does not work anymore since moving to dexter-psychometrics
+
 # I read all datasets from /Rdatasets/... 
 # since not all of them can be made public it can be any dir on your computer outside of 
 # the dexter directory but it's easier if we all keep to /Rdatasets

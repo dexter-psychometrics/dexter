@@ -6,8 +6,8 @@
 \usage{
 latent_cor(
   dataSrc,
-  predicate = NULL,
   item_property,
+  predicate = NULL,
   quick = FALSE,
   nIterations = 100,
   use = "complete.obs"
@@ -16,9 +16,9 @@ latent_cor(
 \arguments{
 \item{dataSrc}{a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score}
 
-\item{predicate}{An optional expression to subset data, if NULL all data is used}
-
 \item{item_property}{An item property to distinguish the different scales.}
+
+\item{predicate}{An optional expression to subset data, if NULL all data is used}
 
 \item{quick}{If true, a estimate based on attenuated correlations between plausible values is produced.}
 

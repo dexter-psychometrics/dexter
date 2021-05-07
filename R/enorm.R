@@ -639,14 +639,14 @@ print.pmf_func = function(x,...) cat('Conditional score distribution function: P
 #'
 #'
 #' @param dataSrc a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score
-#' @param predicate An optional expression to subset data, if NULL all data is used
 #' @param item_property An item property to distinguish the different scales.
+#' @param predicate An optional expression to subset data, if NULL all data is used
 #' @param quick If true, a estimate based on attenuated correlations between plausible values is produced.
 #' @param nIterations Number of iterations for plausible values
 #' @param use only complete.obs at this time. Respondents who don't have a score for one or more scales are removed.
 #' 
 #' @return Correlation matrix and corresponding standard deviations
-latent_cor = function(dataSrc, predicate=NULL, item_property, quick=FALSE, nIterations=100, 
+latent_cor = function(dataSrc, item_property, predicate=NULL,  quick=FALSE, nIterations=100, 
                        use="complete.obs")
 {
   check_dataSrc(dataSrc)

@@ -7,9 +7,9 @@ categories: []
 tags: []
 ---
 
-![](/img/dx100.png)
+![](img/dx100.png)
 
-Back in February 2018, we [wrote](https://dexterities.netlify.com/2018/02/09/dexter-is-1/) about the first birthday of **dexter**. Our little dear has now reached yet another stage of maturity: [**dexter 1.0.0**](https://cran.r-project.org/web/packages/dexter/index.html) is available on CRAN. A new version of **dextergui** to match is on its way.
+Back in February 2018, we [wrote](2018-02-09-dexter-is-1) about the first birthday of **dexter**. Our little dear has now reached yet another stage of maturity: **dexter 1.0.0** is available on CRAN. A new version of **dextergui** to match is on its way.
 
 There are no dramatic changes or additions, but the whole package has been revised, and all non-R parts rewritten in C++ for improved consistency and yet more speed! And even the remotest corners have been cleaned by the new maintainer, Jesse Koops, in the most ~~obsessive~~ thorough way. Same package, totally new experience. 
 
