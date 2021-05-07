@@ -178,6 +178,9 @@
       <a href="../../articles/blog/2018-02-25-item-total-regressions-in-dexter">item total regressions in dexter</a>
     </li>
     <li>
+      <a href="../../articles/blog/2018-02-09-dexter-is-1">dexter is 1</a>
+    </li>
+    <li>
       <a href="../../articles/blog/2017-12-13-hello">hello</a>
     </li>
   </ul>
@@ -345,7 +348,7 @@ S*(\theta) &amp;= x_+ -E[X_+|\theta] + \frac{J(\theta)}{2I(\theta)}\\
   <span class="kw"><a href="https://rdrr.io/r/base/function.html">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/uniroot.html">uniroot</a></span><span class="op">(</span><span class="va">Sw</span>, interval<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>,<span class="fl">10</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">root</span><span class="op">)</span>
 <span class="op">}</span></code></pre></div>
 <!-- Haldane's estimate, assuming that the items are (about) equal is simple. For a test of 100 Rasch items with difficulties uniformly chosen between -1 and 1, a plot of Warm against Haldane shows that the two are very similar but Haldane's estimator pulls the extremes slightly more to the mean.   -->
-<p>It is more complex for the full NRM allowing for polytomous items. We have already discussed the calculation of the information function in an <a href="https://dexterities.netlify.app/2018/11/05/test-and-item-information-functions-in-dexter/">earlier blog entry</a>. As before, let <span class="math inline">\(x_{ij}=1\)</span> be a dummy coded response where <span class="math inline">\(x_{ij}=1\)</span> if the response to item <span class="math inline">\(i\)</span> was scored in category <span class="math inline">\(j\)</span> was picked. Specifically, we derived:</p>
+<p>It is more complex for the full NRM allowing for polytomous items. We have already discussed the calculation of the information function in an <a href="2018-11-05-test-and-item-information-functions-in-dexter">earlier blog entry</a>. As before, let <span class="math inline">\(x_{ij}=1\)</span> be a dummy coded response where <span class="math inline">\(x_{ij}=1\)</span> if the response to item <span class="math inline">\(i\)</span> was scored in category <span class="math inline">\(j\)</span> was picked. Specifically, we derived:</p>
 <ul>
 <li>The score function: <span class="math display">\[
 S(\theta) = x_{++} - \sum_i \sum_j a_{ij}P_{ij}(\theta),

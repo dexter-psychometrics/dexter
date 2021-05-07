@@ -178,6 +178,9 @@
       <a href="articles/blog/2018-02-25-item-total-regressions-in-dexter">item total regressions in dexter</a>
     </li>
     <li>
+      <a href="articles/blog/2018-02-09-dexter-is-1">dexter is 1</a>
+    </li>
+    <li>
       <a href="articles/blog/2017-12-13-hello">hello</a>
     </li>
   </ul>
@@ -226,42 +229,84 @@
 <span class="co"># Classical test theory</span>
 <span class="va">tia</span> <span class="op">=</span> <span class="fu"><a href="reference/tia_tables.html">tia_tables</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span>
 
-<span class="va">tia</span><span class="op">$</span><span class="va">testStats</span></code></pre></div>
+<span class="va">tia</span><span class="op">$</span><span class="va">booklets</span></code></pre></div>
 <table class="table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 9%">
+<col style="width: 7%">
+<col style="width: 14%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 21%">
+<col style="width: 12%">
+</colgroup>
 <thead><tr class="header">
-<th align="left">booklet_id</th>
-<th align="right">nItems</th>
-<th align="right">alpha</th>
-<th align="right">meanP</th>
-<th align="right">meanRit</th>
-<th align="right">meanRir</th>
-<th align="right">maxTestScore</th>
-<th align="right">N</th>
+<th style="text-align: left;">
+booklet_id
+</th>
+<th style="text-align: right;">
+n_items
+</th>
+<th style="text-align: right;">
+alpha
+</th>
+<th style="text-align: right;">
+mean_pvalue
+</th>
+<th style="text-align: right;">
+mean_rit
+</th>
+<th style="text-align: right;">
+mean_rir
+</th>
+<th style="text-align: right;">
+max_booklet_score
+</th>
+<th style="text-align: right;">
+n_persons
+</th>
 </tr></thead>
 <tbody><tr class="odd">
-<td align="left">verb_agg</td>
-<td align="right">24</td>
-<td align="right">0.888</td>
-<td align="right">0.339</td>
-<td align="right">0.527</td>
-<td align="right">0.468</td>
-<td align="right">48</td>
-<td align="right">316</td>
+<td style="text-align: left;">
+verb_agg
+</td>
+<td style="text-align: right;">
+24
+</td>
+<td style="text-align: right;">
+0.888
+</td>
+<td style="text-align: right;">
+0.339
+</td>
+<td style="text-align: right;">
+0.527
+</td>
+<td style="text-align: right;">
+0.468
+</td>
+<td style="text-align: right;">
+48
+</td>
+<td style="text-align: right;">
+316
+</td>
 </tr></tbody>
 </table>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">tia</span><span class="op">$</span><span class="va">itemStats</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="va">tia</span><span class="op">$</span><span class="va">items</span><span class="op">)</span></code></pre></div>
 <table class="table">
 <thead><tr class="header">
 <th align="left">booklet_id</th>
 <th align="left">item_id</th>
-<th align="right">meanScore</th>
-<th align="right">sdScore</th>
-<th align="right">maxScore</th>
+<th align="right">mean_score</th>
+<th align="right">sd_score</th>
+<th align="right">max_score</th>
 <th align="right">pvalue</th>
 <th align="right">rit</th>
 <th align="right">rir</th>
-<th align="right">n</th>
+<th align="right">n_persons</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
@@ -457,61 +502,61 @@
 <td align="left">verb_agg</td>
 <td align="left">dx_0000001</td>
 <td align="right">13</td>
-<td align="right">-1.0616680</td>
-<td align="right">-0.9219415</td>
-<td align="right">-0.8161716</td>
-<td align="right">-0.8717352</td>
-<td align="right">-0.6656054</td>
+<td align="right">-0.9505271</td>
+<td align="right">-1.2622800</td>
+<td align="right">-1.3092606</td>
+<td align="right">-0.9385121</td>
+<td align="right">-1.0107025</td>
 </tr>
 <tr class="even">
 <td align="left">verb_agg</td>
 <td align="left">dx_0000002</td>
 <td align="right">28</td>
-<td align="right">-0.1858848</td>
-<td align="right">-0.0366271</td>
-<td align="right">0.3216584</td>
-<td align="right">0.0263411</td>
-<td align="right">0.3838943</td>
+<td align="right">0.3843105</td>
+<td align="right">0.4266506</td>
+<td align="right">-0.2573231</td>
+<td align="right">0.4172153</td>
+<td align="right">0.2274623</td>
 </tr>
 <tr class="odd">
 <td align="left">verb_agg</td>
 <td align="left">dx_0000003</td>
 <td align="right">4</td>
-<td align="right">-1.9804484</td>
-<td align="right">-2.4675297</td>
-<td align="right">-2.5928338</td>
-<td align="right">-2.1755638</td>
-<td align="right">-1.7619598</td>
+<td align="right">-1.8126859</td>
+<td align="right">-1.6491577</td>
+<td align="right">-2.2782751</td>
+<td align="right">-1.6018220</td>
+<td align="right">-1.8556320</td>
 </tr>
 <tr class="even">
 <td align="left">verb_agg</td>
 <td align="left">dx_0000004</td>
 <td align="right">19</td>
-<td align="right">-0.2550607</td>
-<td align="right">-0.4989645</td>
-<td align="right">-0.4322568</td>
-<td align="right">-0.2495976</td>
-<td align="right">-0.3305588</td>
+<td align="right">-0.4177323</td>
+<td align="right">-0.0513622</td>
+<td align="right">-0.1707532</td>
+<td align="right">0.2492121</td>
+<td align="right">-0.5798864</td>
 </tr>
 <tr class="odd">
 <td align="left">verb_agg</td>
 <td align="left">dx_0000005</td>
 <td align="right">7</td>
-<td align="right">-2.4189426</td>
-<td align="right">-1.5473985</td>
-<td align="right">-1.2680878</td>
-<td align="right">-1.3221576</td>
-<td align="right">-1.3139852</td>
+<td align="right">-1.3379007</td>
+<td align="right">-2.1090646</td>
+<td align="right">-1.3493621</td>
+<td align="right">-1.8811472</td>
+<td align="right">-1.3996091</td>
 </tr>
 <tr class="even">
 <td align="left">verb_agg</td>
 <td align="left">dx_0000006</td>
 <td align="right">25</td>
-<td align="right">0.3409678</td>
-<td align="right">-0.2472593</td>
-<td align="right">-0.0050744</td>
-<td align="right">-0.3793325</td>
-<td align="right">-0.2298762</td>
+<td align="right">-0.1734033</td>
+<td align="right">-0.0129172</td>
+<td align="right">-0.0249781</td>
+<td align="right">-0.0833049</td>
+<td align="right">-0.3722655</td>
 </tr>
 </tbody>
 </table>
