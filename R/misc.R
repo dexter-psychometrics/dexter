@@ -700,7 +700,9 @@ condMoments = function(mu, sigma, y.ind, x.ind=NULL, x.value )
     cMu = c(mu[y.ind] + CDinv %*% (x.value - mu[x.ind]))
   }else
   {
-    cMu = c(mu[y.ind] + CDinv %*% t(x.value - mu[x.ind]))
+    nP = nrow(x.value)
+    cMu = rep(0,nP)
+    for (i in 1:nP) cMu[i] = mu[y.ind] + CDinv %*% (x.value[i,] - mu[x.ind])
   }
   cVar = B - CDinv %*% t(C)
   return(list(mu=cMu, sigma=cVar))
