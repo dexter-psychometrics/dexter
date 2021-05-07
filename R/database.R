@@ -79,7 +79,7 @@ project_CreateTables = function(db, person_properties=NULL)
     }
   }
 }
-# to do: depende on database, this is sqlite specific
+
 sql_data_type = function(value)
 {
   if(is.date(value))    return(' DATE ')

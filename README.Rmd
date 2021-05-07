@@ -44,22 +44,22 @@ add_booklet(db, verbAggrData, booklet_id = "verb_agg")
 # Classical test theory
 tia = tia_tables(db)
 
-tia$testStats
+tia$booklets
 ```
 
 
 
 
 ```{r, echo=FALSE}
-kable(tia$testStats, digits=3,table.attr='class="myTable"')
+kable(tia$booklets, digits=3,table.attr='class="myTable"')
 ```
 
 ```{r, eval=FALSE}
-head(tia$itemStats)
+head(tia$items)
 ```
 
 ```{r, echo=FALSE}
-kable(head(tia$itemStats), digits=3)
+kable(head(tia$items), digits=3)
 ```
 
 

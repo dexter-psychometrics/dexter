@@ -740,7 +740,7 @@ add_item_properties = function(db, item_properties=NULL, default_values=NULL) {
             item_properties)
       cat(paste(length(pnames), 'item properties for', n, 'items added or updated\n'))
     }
-  })# to do: message unknown items
+  })
 }
 
 

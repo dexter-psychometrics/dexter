@@ -1,11 +1,4 @@
 
-# TO DO: progress bars sometimes have double % sign at end
-# TO DO: enorm bayes prog bar sometimes has gaps
-# TO DO: prog bars in group_by loop don't \r at the beginning and don't move to newline
-# (they rely on new prompt clearing the line, which is not good)
-# TO DO: group_by plausible score is far slower than sec plausible val and prbl plasuible scores
-# should we make grouped_by analysis to make things faster? 
-# (could also be bcs we take bayes enorm in each cnt in which case group by analysis does not help) 
 
 #' Draw plausible values
 #'
@@ -175,17 +168,17 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
     group_number = (function(){i = 0L; function() i <<- i+1L })()
     x = x %>% 
       group_by_at(covariates) %>%
-      mutate(pop = group_number()) %>%
+      mutate(pop__ = group_number()) %>%
       ungroup() 
 #to do: pop moet anders worden genoemd, anders kan "pop" geen covariate zijn
   } else
   {
     # niet varierende pop toevoegen maakt code in pv eenvoudiger
-    x$pop = 1L
+    x$pop__ = 1L
   }
   design = split(design, design$booklet_id, drop=TRUE)
   
-  y = pv(x[,c('booklet_id','person_id','booklet_score','pop')], 
+  y = pv(select(x, .data$booklet_id, .data$person_id, .data$booklet_score, pop = .data$pop__),
          design, b, a, nPV, from = from, by = step, prior.dist=prior.dist)
   
   colnames(y) = c('booklet_id','person_id','booklet_score',paste0('PV',1:nPV))

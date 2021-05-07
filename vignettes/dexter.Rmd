@@ -106,21 +106,21 @@ tt = tia_tables(db)
 At the test (form) level, we have some basic information for each booklet: the number of persons and the number of items, coefficient alpha, the average p-value and the average correlation between item scores and total scores: 
 
 ```{r, eval=FALSE}
-tt$testStats
+tt$booklets
 ```
 
 ```{r, echo=FALSE}
-kable(tt$testStats, digits=3)
+kable(tt$booklets, digits=3)
 ```
 
 At item level, there are the mean scores, the p-values (mean scores rescaled between 0 and 1 for comparability across items), the correlation of each item with the total score and the rest score for the booklets. This table can be shown in a variety of ways: for each booklet separately, averaged across booklets, or in a format that facilitates comparisons of items between booklets:
 
 ```{r, eval=FALSE}
-tt$itemStats
+tt$items
 ```
 
 ```{r, echo=FALSE}
-kable(tt$itemStats, digits=3)
+kable(tt$items, digits=3)
 ```
 
 Finally, _distractor plots_ provide visual information at response level. This is a non-parametric regression of the probability of each response (including non-response) on the total score, particularly useful to detect issues with multiple choice items due to wrong keys or, simply, sub-optimal item writing. Our example data is not cognitive, so the distractor plots resemble the trace lines of partial credit items:
@@ -144,7 +144,7 @@ m = fit_inter(db, booklet_id=='agg')
 plot(m, "S1DoScold", show.observed=TRUE)
 ```
 
-This plot shows three item-total regressions. The pink dots show the observed regression: the average score on the item given the total score on the test. There are also two regression models: the interaction model is shown with a thicker but lighter line, and the Rasch model is shown with a thinner, darker line. The two regression lines cross where the data is the densest. In this case they are very similar -- when not, the dots tend to cluster around the regression line from the interaction model. The observed regression is not shown by default, so we had to change the `show.observed` parameter. The light gray 'curtains' are drawn by default at the 5% lowest and the 5% highest sum scores, directing the eye to where the 'action' really happens. A more detailed discussion of the item-total regressions may be found on [our blog](blog/2018-02-25-item-total-regressions-in-dexter).
+This plot shows three item-total regressions. The pink dots show the observed regression: the average score on the item given the total score on the test. There are also two regression models: the interaction model is shown with a thicker but lighter line, and the Rasch model is shown with a thinner, darker line. The two regression lines cross where the data is the densest. In this case they are very similar -- when not, the dots tend to cluster around the regression line from the interaction model. The observed regression is not shown by default, so we had to change the `show.observed` parameter. The light gray 'curtains' are drawn by default at the 5% lowest and the 5% highest sum scores, directing the eye to where the 'action' really happens. A more detailed discussion of the item-total regressions may be found on [our blog](https://dexter-psychometrics.github.io/dexter/articles/blog/2018-02-25-item-total-regressions-in-dexter).
 
 We can show the response category probabilities instead of the expected item score:
 

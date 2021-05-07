@@ -17,8 +17,8 @@
 #' @param max_scores use the observed maximum item score or the theoretical maximum items score 
 #' according to the scoring rules in the database to compute pvalues and maximum scores
 #' @return A list containing:
-#' \item{testStats}{a data.frame of statistics at test level} 
-#' \item{itemStats}{a data.frame (or list if type='compared') of statistics at item level}
+#' \item{booklets}{a data.frame of statistics at booklet level} 
+#' \item{items}{a data.frame (or list if type='compared') of statistics at item level}
 #'
 tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compared'),
                       max_scores = c('observed','theoretical')) 
@@ -100,8 +100,17 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
               maxTestScore=sum(.data$maxScore),
               N=max(.data$n)) %>%
     ungroup() %>%
-    mutate_if(is.factor, as.character)
+    mutate_if(is.factor, as.character) %>%
+    df_format()
   
-  list(itemStats=itemStats, testStats=df_format(testStats))
+  # new names since version 1.0.3 may 2021, old are kept for backward compatibility
+  booklets = rename(testStats, n_items=.data$nItems, mean_pvalue=.data$meanP,
+                    mean_rit=.data$meanRit, mean_rir=.data$meanRir, 
+                    max_booklet_score=.data$maxTestScore, n_persons=.data$N)
+  
+  items = rename(itemStats, mean_score = .data$meanScore,
+                 sd_score=.data$sdScore, max_score=.data$maxScore, n_persons=.data$n)
+  
+  list(booklets=booklets,items=items,itemStats=itemStats, testStats=testStats)
 }
 

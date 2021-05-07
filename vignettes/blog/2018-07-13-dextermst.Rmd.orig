@@ -391,12 +391,12 @@ Note that the colors indicate whether the items occurred in <span style="color:r
 <span style="color:rgb(255,0,0);">module 2</span> or <span style="color:rgb(0,205,0);">module 3</span>. It will be clear that the modules are appropriately, albeit not perfectly, ordered in difficulty. Judging from the p-values, the (simulated) respondents would have been comfortable with the test.
 
 ```{r, eval=FALSE}
-tia_tables(get_responses_mst(db))$testStats %>%
+tia_tables(get_responses_mst(db))$booklets %>%
   select(booklet_id, meanP)
 ```
 
 ```{r, echo=TRUE}
-tia_tables(get_responses_mst(db))$testStats %>%
+tia_tables(get_responses_mst(db))$booklets %>%
   select(booklet_id, meanP) %>%
   kable(caption='mean item correct')
 

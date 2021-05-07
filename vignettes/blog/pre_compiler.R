@@ -9,7 +9,8 @@ library(dplyr)
 # > pre_compile('ExponentialFamily_Blog.Rmd.orig')
 # static images should be included in blog/img and be referred to with 'img/...'
 # to do: this does not work anymore since moving to dexter-psychometrics
-# refer to blog form within blog [](name), or from vignette [](blog/name)
+# refer to blog form within blog [](name)
+# refer to blog from vignette: full link [](https://dexter-psychometrics.github.io/dexter/articles/blog/...)
 # refer to vignette from blog [](../name)
 # refer to function `function_name`
 # I read all datasets from /Rdatasets/... 
@@ -128,7 +129,7 @@ compile_all_new = function()
   
   for(f in orig)
   {
-    if(!f %in% names(rmd) || file.mtime(p(orig)) > file.mtime(p(rmd[f])))
+    if(!f %in% names(rmd) || file.mtime(p(f)) > file.mtime(p(rmd[f])))
     {
       pre_compile(f)
     } 

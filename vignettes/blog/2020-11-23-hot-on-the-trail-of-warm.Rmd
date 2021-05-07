@@ -197,7 +197,7 @@ Warm_Rasch = function(test_score, delta)
 
 
 
-It is more complex for the full NRM allowing for polytomous items. We have already discussed the calculation of the information function in an [earlier blog entry](https://dexterities.netlify.app/2018/11/05/test-and-item-information-functions-in-dexter/). As before, let $x_{ij}=1$ be a dummy coded response where $x_{ij}=1$ if the response to item $i$ was scored in category $j$ was picked. Specifically, we derived:
+It is more complex for the full NRM allowing for polytomous items. We have already discussed the calculation of the information function in an [earlier blog entry](2018-11-05-test-and-item-information-functions-in-dexter). As before, let $x_{ij}=1$ be a dummy coded response where $x_{ij}=1$ if the response to item $i$ was scored in category $j$ was picked. Specifically, we derived:
 
 - The score function:
 $$
