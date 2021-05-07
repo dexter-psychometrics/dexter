@@ -68,6 +68,7 @@ prog_bar = setRefClass('prog_bar',
     draw_perc = function()
     {
       old = l+p
+      if(step > nsteps) step <<- nsteps
       p <<- as.integer(100*step/nsteps)
       l <<- as.integer(w * step/nsteps)
       if(old != l+p)
