@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Estimates latent correlations — latent_cor • dexter</title>
+<title>Latent correlations — latent_cor • dexter</title>
 
 
 <!-- jquery -->
@@ -41,8 +41,11 @@
   <link href="../extra.css" rel="stylesheet">
   
 
-<meta property="og:title" content="Estimates latent correlations — latent_cor" />
-<meta property="og:description" content="Estimates latent correlations" />
+<meta property="og:title" content="Latent correlations — latent_cor" />
+<meta property="og:description" content="Estimates correlations between latent traits. Use an item_property to distinguish the different scales. 
+This function uses plausible values so results may differ slightly between calls. 
+Note: this is a new and slightly experimental function and therefore still a bit slow. It will probably 
+become faster in future versions of dexter." />
 
 
 
@@ -251,21 +254,23 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Estimates latent correlations</h1>
+    <h1>Latent correlations</h1>
     <small class="dont-index">Source: <a href='https://github.com/dexter-psychometrics/dexter/blob/master/R/enorm.R'><code>R/enorm.R</code></a></small>
     <div class="hidden name"><code>latent_cor.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Estimates latent correlations</p>
+    <p>Estimates correlations between latent traits. Use an item_property to distinguish the different scales. 
+This function uses plausible values so results may differ slightly between calls. 
+Note: this is a new and slightly experimental function and therefore still a bit slow. It will probably 
+become faster in future versions of dexter.</p>
     </div>
 
     <pre class="usage"><span class='fu'>latent_cor</span><span class='op'>(</span>
   <span class='va'>dataSrc</span>,
   <span class='va'>item_property</span>,
   predicate <span class='op'>=</span> <span class='cn'>NULL</span>,
-  quick <span class='op'>=</span> <span class='cn'>FALSE</span>,
-  nIterations <span class='op'>=</span> <span class='fl'>100</span>,
+  nDraws <span class='op'>=</span> <span class='fl'>500</span>,
   use <span class='op'>=</span> <span class='st'>"complete.obs"</span>
 <span class='op'>)</span></pre>
 
@@ -285,12 +290,8 @@
       <td><p>An optional expression to subset data, if NULL all data is used</p></td>
     </tr>
     <tr>
-      <th>quick</th>
-      <td><p>If true, a estimate based on attenuated correlations between plausible values is produced.</p></td>
-    </tr>
-    <tr>
-      <th>nIterations</th>
-      <td><p>Number of iterations for plausible values</p></td>
+      <th>nDraws</th>
+      <td><p>Number of draws for plausible values</p></td>
     </tr>
     <tr>
       <th>use</th>
@@ -300,7 +301,7 @@
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Correlation matrix and corresponding standard deviations</p>
+    <p>List containing a correlation matrix and corresponding standard deviations</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
