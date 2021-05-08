@@ -631,9 +631,12 @@ print.sim_func = function(x,...) cat('function to simulate item scores: (x_i1, .
 print.pmf_func = function(x,...) cat('Conditional score distribution function: P(x_+|theta)\n')
 
 
-#' Estimates latent correlations
+#' Latent correlations
 #'
-#' Note: this function is very experimental
+#' Estimates correlations between latent traits. Use an item_property to distinguish the different scales. 
+#' This function uses plausible values so results may differ slightly between calls. 
+#' Note: this is a new and slightly experimental function and therefore still a bit slow. It will probably 
+#' become faster in future versions of dexter.
 #'
 #' @param dataSrc a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score
 #' @param item_property An item property to distinguish the different scales.
@@ -641,11 +644,12 @@ print.pmf_func = function(x,...) cat('Conditional score distribution function: P
 #' @param nDraws Number of draws for plausible values
 #' @param use only complete.obs at this time. Respondents who don't have a score for one or more scales are removed.
 #' 
-#' @return Correlation matrix and corresponding standard deviations
+#' @return List containing a correlation matrix and corresponding standard deviations
 #' 
 latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, use="complete.obs")
 {
   check_dataSrc(dataSrc)
+  check_num(nDraws, 'integer', .length=1, .min=1)
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
   
@@ -654,6 +658,11 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, use="c
   
   if(use != "complete.obs")
     stop("only 'complete.obs' is currently implemented")
+  
+  from = 5
+  by = 2
+  which.keep = seq(from,(from-by)*(from>by)+by*nDraws,by=by)
+  nIter=max(which.keep)
   
   if(is.matrix(dataSrc))
   {
@@ -668,7 +677,8 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, use="c
   lvl = levels(respData$x[[item_property]])
   nd = length(lvl)
   
-  pgb = prog_bar(nDraws + 4*nd)
+  pgb = prog_bar(nIter + 4*nd)
+  on.exit({pgb$close()})
   
   respData$x = respData$x %>%
     group_by(.data$person_id) %>%
@@ -731,14 +741,6 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, use="c
     models[[d]]$bcni = c(0L,cumsum(table(as.integer(models[[d]]$design$booklet_id))))
   }
   
-  from = 5
-  by = 2
-  which.keep = seq(from,(from-by)*(from>by)+by*nDraws,by=by)
-  nIter=max(which.keep)
-
-  colm_pv = matrix(0,nIter,nd)
-  colm_prior = matrix(0,nIter,nd)
-  
   prior = list(mu=mean_pv, Sigma = diag(1.7*sd_pv) %*% acor %*% diag(1.7*sd_pv))
   
   store = matrix(0, length(which.keep), length(as.vector(prior$Sigma)))
@@ -748,9 +750,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, use="c
     for (d in 1:nd)
     {
       cons = condMoments(prior$mu, prior$Sigma, d, x.value=pv[,-d]) 
-      colm_pv[i,] = mean(pv[,d])
-      colm_prior[i,d] = mean(cons$mu)
-      
+
       PV_sve(models[[d]]$b, models[[d]]$a, models[[d]]$design$first, models[[d]]$design$last, 					
              models[[d]]$bcni,
              respData[[d]]$x$booklet_id, respData[[d]]$x$booklet_score, cons$mu, sqrt(cons$sigma),
@@ -759,11 +759,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, use="c
     
     
     prior = try({update_MVNprior(pv,prior$Sigma)})
-    if(inherits(prior,'try-error'))
-    {
-      print(prior)
-      break
-    }
+
     if (i %in% which.keep){
       store[tel,] = as.vector(cov2cor(prior$Sigma))
       tel=tel+1
@@ -774,5 +770,5 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, use="c
   diag(out_sd)=0
   out_cor = matrix(colMeans(store),nd,nd)
 
-  return(list(cor = out_cor, sd=out_sd, colm_pv=colm_pv,colm_prior=colm_prior))
+  return(list(cor = out_cor, sd=out_sd))
 }

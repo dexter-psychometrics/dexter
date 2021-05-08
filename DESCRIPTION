@@ -17,18 +17,18 @@ LazyData: yes
 Depends:
     R (>= 3.4)
 Imports:
-    RSQLite (>= 2.1),
+    RSQLite (>= 2.2.7),
     DBI (>= 1.0.0),
     MASS (>= 7.3),
     tidyr (>= 0.8.3),
     rlang (>= 0.4.1),    
-    dplyr (>= 0.8.3),
+    dplyr (>= 1.0.0),
     Rcpp (>= 1.0.1),
     graphics,
     grDevices,
     methods,
     utils
-LinkingTo: Rcpp, RcppArmadillo (>= 0.9.3)
+LinkingTo: Rcpp, RcppArmadillo (>= 0.10.0)
 RoxygenNote: 7.1.1
 Suggests:
     knitr,

@@ -2,14 +2,13 @@
 % Please edit documentation in R/enorm.R
 \name{latent_cor}
 \alias{latent_cor}
-\title{Estimates latent correlations}
+\title{Latent correlations}
 \usage{
 latent_cor(
   dataSrc,
   item_property,
   predicate = NULL,
-  quick = FALSE,
-  nIterations = 100,
+  nDraws = 500,
   use = "complete.obs"
 )
 }
@@ -20,15 +19,16 @@ latent_cor(
 
 \item{predicate}{An optional expression to subset data, if NULL all data is used}
 
-\item{quick}{If true, a estimate based on attenuated correlations between plausible values is produced.}
-
-\item{nIterations}{Number of iterations for plausible values}
+\item{nDraws}{Number of draws for plausible values}
 
 \item{use}{only complete.obs at this time. Respondents who don't have a score for one or more scales are removed.}
 }
 \value{
-Correlation matrix and corresponding standard deviations
+List containing a correlation matrix and corresponding standard deviations
 }
 \description{
-Estimates latent correlations
+Estimates correlations between latent traits. Use an item_property to distinguish the different scales. 
+This function uses plausible values so results may differ slightly between calls. 
+Note: this is a new and slightly experimental function and therefore still a bit slow. It will probably 
+become faster in future versions of dexter.
 }

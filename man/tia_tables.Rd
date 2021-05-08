@@ -27,8 +27,8 @@ according to the scoring rules in the database to compute pvalues and maximum sc
 }
 \value{
 A list containing:
-\item{testStats}{a data.frame of statistics at test level} 
-\item{itemStats}{a data.frame (or list if type='compared') of statistics at item level}
+\item{booklets}{a data.frame of statistics at booklet level} 
+\item{items}{a data.frame (or list if type='compared') of statistics at item level}
 }
 \description{
 Show simple Classical Test Analysis statistics

@@ -34,12 +34,12 @@ pg_tick = function(step=NULL, nsteps=NULL)
   
 pg_close = function() cat('\n')
 
-
+# to do: use this prog bar everywhere instead of simple one above
 prog_bar = setRefClass('prog_bar',
   fields = list(nsteps='integer', step='integer', pshow='logical', w='integer', l='integer',p='integer',
                 dxpg='logical'),
   methods = list(
-    finalize = function()
+    close = function()
     {
       options(dexter.progress=dxpg)
       if(pshow) cat('\n')
@@ -52,7 +52,7 @@ prog_bar = setRefClass('prog_bar',
       l <<- -1L
       step <<- 0L
       dxpg <<- as.logical(options(dexter.progress=FALSE))
-      
+
       if(pshow)
       {
         if(!is.null(nsteps))
@@ -69,7 +69,7 @@ prog_bar = setRefClass('prog_bar',
     {
       old = l+p
       if(step > nsteps) step <<- nsteps
-      p <<- as.integer(100*step/nsteps)
+      p <<- as.integer(100L*step/nsteps)
       l <<- as.integer(w * step/nsteps)
       if(old != l+p)
       {

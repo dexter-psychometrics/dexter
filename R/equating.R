@@ -60,6 +60,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
   }
   n_booklets = n_distinct(design$booklet_id)
   pgb = prog_bar((nDraws+2) * n_booklets)
+  on.exit({pgb$close()})
 
   ref_ssI = parms$inputs$ssI %>% 
     semi_join(ref_items, by = 'item_id') %>% 

@@ -10,8 +10,7 @@ fit_enorm(
   fixed_params = NULL,
   method = c("CML", "Bayes"),
   nDraws = 1000,
-  merge_within_persons = FALSE,
-  nIterations = NULL
+  merge_within_persons = FALSE
 )
 }
 \arguments{
@@ -28,8 +27,6 @@ otherwise, a Gibbs sampler will be used to produce a sample from the posterior}
 \item{nDraws}{Number of Gibbs samples when estimation method is Bayes.}
 
 \item{merge_within_persons}{whether to merge different booklets administered to the same person, enabling linking over persons as well as booklets.}
-
-\item{nIterations}{deprecated}
 }
 \value{
 An object of type \code{prms}. The prms object can be cast to a data.frame of item parameters 
