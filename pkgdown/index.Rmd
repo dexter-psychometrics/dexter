@@ -1,0 +1,164 @@
+---
+output:
+  md_document:
+    variant: markdown_github
+editor_options: 
+  chunk_output_type: console
+---
+
+<!-- index.md is generated from index.Rmd. Please edit that file -->
+
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(echo = FALSE,message=FALSE,warn=FALSE)
+library(RCurl)
+coalesce = function(...,default=NULL)
+{
+  for(a in list(...))
+  {
+    if(!is.null(a) && ! is.na(a))
+      return(a)
+  }
+  default
+}
+
+opt_get = function(opt,default=NULL) coalesce(opts_current$get(opt),opts_chunk$get(opt),default)
+
+
+plot_self_contained = function(..., plot_fun=plot)
+{
+  fw = opt_get("fig.width")
+  fh = opt_get("fig.height")
+  w = opt_get("out.width",paste0(fw,'in'))
+  h = opt_get("out.height",paste0(fh,'in'))
+  ex = opt_get("out.extra",'')
+  
+  fn = tempfile(fileext='.png')
+  png(fn, units='in',width=fw,height=fh,res=72,type='cairo-png')
+  do.call(plot_fun,list(...))
+  dev.off()
+  bits = base64Encode(readBin(fn, "raw", file.info(fn)[1, "size"]), "txt")
+  unlink(fn)
+  img = sprintf('<img src="data:image/png;base64,%s" style="width: %s; height: %s;%s"></img>', bits, w, h, ex)
+  asis_output(img)
+}
+
+```
+
+```{r, results='hide'}
+library(dexter)
+library(dplyr)
+db = start_new_project(verbAggrRules, ":memory:",person_properties=list(gender="unknown"))
+add_booklet(db, verbAggrData, "agg")
+add_item_properties(db, verbAggrProperties)
+
+library(dexterMST)
+
+items = data.frame(item_id=sprintf("item%02i",1:70), item_score=1, delta=sort(runif(70,-1,1)))
+
+design = data.frame(item_id=sprintf("item%02i",1:70),
+                    module_id=rep(c('M4','M2','M5','M1','M6','M3', 'M7'),each=10))
+
+routing_rules = routing_rules = mst_rules(
+ `124` = M1[0:5] --+ M2[0:10] --+ M4, 
+ `125` = M1[0:5] --+ M2[11:15] --+ M5,
+ `136` = M1[6:10] --+ M3[6:15] --+ M6,
+ `137` = M1[6:10] --+ M3[16:20] --+ M7)
+
+theta = rnorm(3000)
+
+dat = sim_mst(items, theta, design, routing_rules,'all')
+dat$test_id='sim_test'
+dat$response=dat$item_score
+
+
+scoring_rules = data.frame(
+  item_id = rep(items$item_id,2), 
+  item_score= rep(0:1,each=nrow(items)),
+  response= rep(0:1,each=nrow(items))) # dummy respons
+  
+
+dbm = create_mst_project(":memory:")
+add_scoring_rules_mst(dbm, scoring_rules)
+
+create_mst_test(dbm,
+                test_design = design,
+                routing_rules = routing_rules,
+                test_id = 'sim_test',
+                routing = "all")
+
+add_response_data_mst(dbm, dat)
+
+
+
+```
+
+```{r, out.width='4cm',out.height='3.5cm',out.extra='display:inline-block;',fig.show='hold'}
+m = fit_inter(db, booklet_id=='agg')
+
+plot_self_contained(m,items="S1DoScold" )
+
+
+f=fit_enorm(db,method='Bayes')
+ref_items = get_items(db) %>% filter(blame=='Self') %>% pull(item_id)
+p2p = probability_to_pass(db,f,ref_items,pass_fail=16)
+plot_self_contained(p2p,what='eq',main='')
+
+
+plot_self_contained(db, item_property='mode', covariate='gender',plot_fun=profile_plot)
+
+m = fit_inter_mst(dbm,'sim_test','125' )
+
+plot_self_contained(dbm, plot_fun=design_plot)
+
+plot_self_contained(m,item_id='item11')
+
+
+```
+
+
+
+
+## Dexter
+
+**Dexter** is an R package for managing and analyzing data from educational tests and other projects involving individual assessment. 
+
+
+
+## What does it do?
+
+* Easily create a data base tailored to the specific structure of test data
+* Safeguard data integrity through a variety of checks; easily recover from wrong answer keys and other human errors
+* Classical test and item analysis
+* Assess the fit of the Rasch / partial credit model through comparison against both the observed data and a more flexible model; identify problematic items
+* Calibrate the test with either conditional maximum likelihood (CML) or MCMC methods
+* Estimate ability with CML or MCMC methods, produce conversion tables, draw plausible values
+* Apply a variety of mostly novel methods for DIF analysis, equating pass/fail limits and more.
+
+## What does it not do?
+
+**Dexter** caters for the needs of researchers and practitioners in summative assessment (high stakes exams) and educational surveys where the goal is to take a snapshot of a person or a population. It is not specifically intended for formative assessment where new, computer-based learning environments call for dynamic tracking of ability.
+
+## How does it differ from other psychometric packages?
+
+Packages differ in scope and purpose. **Dexter** is targeted at practical testing. This is evident in the strong emphasis on data management and in the attention given to 'details' whose relevance only becomes apparent in practice.
+
+Testing, especially high stake exams, involves both a measurement side, preoccupied with validity and reliability, and a contest side where the focus is on being fair and understandable. **Dexter** tries very hard to achieve the necessary balance between the two goals. All models have sufficient statistics, fit statistics and graphs are based on observable quantities, scoring rules are transparent. There are no attempts to improve fit with models that are nearly or actually unidentifiable.
+
+## Infrastructure
+
+**Dexter** covers most needs for practical analysis of summative tests in R. Three other related packages offer extensions for special circumstances.
+
+* [dextergui](https://cran.r-project.org/package=dextergui) offers a Graphical User Interface for the main functions of dexter for people who have not yet mastered R. (In additon it can also be useful to navigate very large projects).
+* [dexterMST](https://cran.r-project.org/package=dexterMST) extends data management and CML estimation for Multi-Stage Tests.
+* [dexterMML](https://github.com/dexter-psychometrics/dexterMML) uses MML estimation for situations where CML is not possible, like fully adaptive or random tests. We try to avoid those circumstances but, unfortunately, as a psychometrician you are not always in control of the design of a test.
+
+
+## Getting started
+
+Dexter can be installed from CRAN in the normal way. The [dexter fundamentals](articles/dexter.html) vignette gives an accessible yet comprehensive introduction to dexter.
+
+
+
+

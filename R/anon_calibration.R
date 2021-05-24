@@ -253,15 +253,15 @@ NR_bkl = function(..., use_mean = FALSE)
 }
 
 
-calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fixed_b=NULL, 
-                          progress = show_progress(), NR=TRUE) 
+calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fixed_b=NULL, NR=TRUE) 
 {
-  
-  
   if(tolower(Sys.info()['sysname'])=='sunos'){
     return(calibrate_CML_sol(scoretab, design, sufI, a, first, last, nIter, fixed_b))
   }
   
+  pb = get_prog_bar()
+  on.exit({close_prog_bar()})
+
   use_mean = FALSE
 
   # bookkeeping, make counts for C functions
@@ -320,7 +320,7 @@ calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fix
         next
       } 
       b = b*sufI/EsufI
-      if(progress) pg_tick()
+      pb$tick()
     }
     
     ie_iter=iter
@@ -373,7 +373,7 @@ calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fix
         next 
       }
       b = nb
-      if(progress) pg_tick()
+      pb$tick()
       if (nr_iter==2) scale=1
     }
     if (!converged) warning(paste('Newton-Raphson not Converged in',as.character(nr_iter),"iterations"))
@@ -406,7 +406,7 @@ calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fix
       } 
       
       b[update_set] = b[update_set]*sufI[update_set]/EsufI[update_set]
-      if(progress) pg_tick()
+      pb$tick()
     }
     
     ie_iter=iter
@@ -455,7 +455,7 @@ calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fix
       }
       b = nb
       
-      if(progress) pg_tick()
+      pb$tick()
       scale=1
     }
 
@@ -489,7 +489,6 @@ calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fix
 # TO DO: At this moment b and lambda are not consistent. b and delta are. We must recalculate the 
 # lambda' s using the renormalized b to solve this.
 calibrate_Bayes = function(scoretab, design, sufI, a, first, last,  nIter, fixed_b=NULL, 
-                           progress = show_progress(), 
                            from = Gibbs.settings$from.cal, step = Gibbs.settings$step.cal,
                            start_b=NULL)
 {
@@ -507,6 +506,9 @@ calibrate_Bayes = function(scoretab, design, sufI, a, first, last,  nIter, fixed
   }
   prior_eta = 0.5
   prior_rho = 0.5
+  
+  pb = get_prog_bar(nsteps = nIter)
+  on.exit({close_prog_bar()})
   
   # bookkeeping: make counts and indexes for C function
   design = design %>%
@@ -545,17 +547,14 @@ calibrate_Bayes = function(scoretab, design, sufI, a, first, last,  nIter, fixed
   if(is.null(fixed_b))
     fixed_b_vec = rep(NA_real_, length(b))
   
-  # progress indicator from C
-  pgw = as.integer(if(progress) getOption("width") - nchar('| 100%') - 2 else 0) 
-
   # end bookkeeping
   
   out = calibrate_Bayes_C(as.integer(a), as.integer(first-1L), as.integer(last-1L),
                          ib, bi, nbi, nib, bfirst, blast, bmax, m,
                          sufI, scoretab$N, b, fixed_b_vec, 
                          from, step, 
-                         as.integer(nIter), prior_eta, prior_rho,
-                         pgw)
+                         as.integer(nIter), pb$cpp_prog_init(),
+                         prior_eta, prior_rho)
 
   report = toOPLM(a, out$b, first, last, H=NULL,fixed_b=fixed_b)
   

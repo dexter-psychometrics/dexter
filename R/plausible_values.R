@@ -59,9 +59,6 @@ plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL
                             nPV=1, use_draw=NULL, prior.dist = c("normal", "mixture"),
                             merge_within_persons=FALSE)
 {
-  dplyr_prog = options(dplyr.show_progress=FALSE)
-  on.exit(options(dplyr.show_progress=dplyr_prog))
-  
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
   prior.dist = match.arg(prior.dist)
@@ -83,36 +80,30 @@ plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL
 
 plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=NULL, nPV=1, use_draw=NULL, 
                              env=NULL, prior.dist = c("normal", "mixture"),
-                             merge_within_persons=merge_within_persons, progress = show_progress())
+                             merge_within_persons=merge_within_persons)
 {
   if(is.null(env)) env = caller_env()
   from = Gibbs.settings$from.pv
   step = Gibbs.settings$step.pv # burnin and thinning for pvs
   nIter.enorm = from + step*(nPV-1) # nr. of posterior samples of item parameters needed
-
   
   prior.dist = match.arg(prior.dist)
-
-
   
+  pb = get_prog_bar(nsteps=if(is.null(parms)) 100 else 120, 
+                    retrieve_data = is_db(dataSrc))
+  on.exit({close_prog_bar()})
+
   if(is.null(parms))
   {
-    if(progress) cat('(1/2) estimating item parameters\n')
-    
     respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, extra_columns=covariates, env=env)
-    parms = fit_enorm_(respData, method = 'Bayes', nDraws = nIter.enorm, progress = progress) 
+    pb$open_sub_bar(20)
+    parms = fit_enorm_(respData, method = 'Bayes', nDraws = nIter.enorm) 
     respData = get_resp_data(respData, summarised=TRUE, extra_columns=covariates, 
                              protect_x=!is_db(dataSrc))
-    if(progress)
-    {
-      cat('(2/2) estimating plausible values\n')
-      pg_start()
-    }  
+    pb$open_sub_bar(100)
+
   } else
   {
-    if(progress)
-      pg_start()
-    
     if(inherits(parms,'data.frame'))
     {
       parms = transform.df.parms(parms,'b', TRUE)
@@ -170,7 +161,6 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
       group_by_at(covariates) %>%
       mutate(pop__ = group_number()) %>%
       ungroup() 
-#to do: pop moet anders worden genoemd, anders kan "pop" geen covariate zijn
   } else
   {
     # niet varierende pop toevoegen maakt code in pv eenvoudiger
@@ -182,9 +172,6 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
          design, b, a, nPV, from = from, by = step, prior.dist=prior.dist)
   
   colnames(y) = c('booklet_id','person_id','booklet_score',paste0('PV',1:nPV))
-  
-  if(progress)
-    pg_close()
   
   if(is.null(covariates))
   {

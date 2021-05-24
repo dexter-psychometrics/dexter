@@ -746,7 +746,7 @@ by.dx_resp_data = function (data, INDICES, FUN, ..., simplify = TRUE)
     
 
     class(r) = append('dx_resp_data', class(r))
-    do.call(FUN, append(list(r),args))
+    do.call(FUN, append(list(dataSrc = r),args))
   }, 
   simplify = simplify)
 }

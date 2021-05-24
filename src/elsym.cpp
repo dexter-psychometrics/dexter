@@ -1,4 +1,5 @@
 #include <RcppArmadillo.h>
+#include "progress.h"
 
 using namespace arma;
 
@@ -428,14 +429,16 @@ Rcpp::List calibrate_Bayes_C(const arma::ivec& a, const arma::ivec& first, const
 				 const arma::ivec& sufI, const arma::ivec& bkscoretab,
 				 const arma::vec& b_in,  const arma::vec& fixed_b, 
 				 const int from, const int step, const int ndraws,
-				 const double prior_eta=0.5,
-				 const double prior_rho=0.5,
-				 const int pgw=0)
+				 const arma::ivec progress_init,
+				 const double prior_eta=0.5, const double prior_rho=0.5)
 {
 
 	const bool free_calibration = all(fixed_b != fixed_b); // NA != NA
 	const int nIter = ndraws * step + from;
 	const int max_cat = max(last-first)+1;
+	
+	progress pb(ndraws, progress_init);
+	
 	// cumulatives for bookkeeping
 	const int nI = nbi.n_elem;
 	ivec cnbi(nI+1);
@@ -459,8 +462,6 @@ Rcpp::List calibrate_Bayes_C(const arma::ivec& a, const arma::ivec& first, const
 	vec y(max_cat, fill::zeros), z(nB, fill::zeros);
 	vec bklambda(bkscoretab.n_elem, fill::ones);	// to do: fill 0 lijkt beter, onmogelijke scores?
 	mat bklambdax(ndraws, bkscoretab.n_elem);
-	
-	std::string pb(pgw+1, ' ');
 	
 	std::vector<long double> g(max_bscore+1);
 	vec pi_k(max_bscore+1, fill::zeros);
@@ -559,12 +560,9 @@ Rcpp::List calibrate_Bayes_C(const arma::ivec& a, const arma::ivec& first, const
 			Rcpp::checkUserInterrupt();
 			bklambdax.row(row_index) = bklambda.t();
 			bx.row(row_index++) = b.t();
-			if(pgw>0)
-			{	
-				pb.replace((pgw * row_index) / ndraws, 1,  "=");
-				Rprintf("\r|%s| %3i%%", pb.c_str(), (100 * row_index) / ndraws);
-			}			
+			pb.tick();
 		}
+		
 	}
 	return Rcpp::List::create(Rcpp::Named("b") = bx, Rcpp::Named("lambda") = bklambdax);
 }

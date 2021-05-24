@@ -29,9 +29,6 @@
 plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, 
                             covariates=NULL, keep.observed=TRUE, nPS=1,merge_within_persons=FALSE)  
 {
-  dplyr_prog = options(dplyr.show_progress=FALSE)
-  on.exit(options(dplyr.show_progress=dplyr_prog))
-  
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
   check_dataSrc(dataSrc)
@@ -56,6 +53,9 @@ plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL,
   keep.which = seq(from,(from-step)*(from>step)+step*nPS,by=step)
   nPS.needed = max(keep.which) # Given from and step, this many PS must be generated
   
+  pb = get_prog_bar(nsteps=if(is.null(parms)) 100 else 120, 
+                    retrieve_data = is_db(dataSrc))
+  on.exit({close_prog_bar()})
   
   if(is.null(parms))
   {
@@ -82,6 +82,7 @@ plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL,
   if(is.null(parms))
   {
     nIter.enorm  = Gibbs.settings$from.pv + Gibbs.settings$step.pv*(nPS.needed-1)
+    pb$open_sub_bar(20)
     parms = fit_enorm_(respData, method='Bayes', nDraws = nIter.enorm)
     
   } else if(inherits(parms,'prms') && parms$inputs$method != 'CML')
@@ -99,8 +100,9 @@ plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL,
   }  
   
   # now we make plausible values using all responses we have
-  # change: use mixture by default
+  pb$open_sub_bar(70) 
   pv = plausible_values_(respData, parms = parms, covariates = covariates, nPV = nPS.needed)
+  pb$close_sub_bar()
   
   # clean up items
   if(is.null(items))
@@ -145,7 +147,7 @@ plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL,
       left_join(respData$x,  by=c("person_id", "booklet_id")) %>%
       mutate(booklet_score = coalesce(.data$booklet_score, 0L))
   }
-  
+  pb$tick()
   if(keep.observed)
   {
     # we need to have a list of booklets containing first and last

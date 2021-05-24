@@ -380,8 +380,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // calibrate_Bayes_C
-Rcpp::List calibrate_Bayes_C(const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const arma::ivec& ib, const arma::ivec& bi, const arma::ivec& nbi, const arma::ivec& nib, arma::ivec& bfirst, arma::ivec& blast, const arma::ivec& bmax, const arma::ivec& m, const arma::ivec& sufI, const arma::ivec& bkscoretab, const arma::vec& b_in, const arma::vec& fixed_b, const int from, const int step, const int ndraws, const double prior_eta, const double prior_rho, const int pgw);
-RcppExport SEXP _dexter_calibrate_Bayes_C(SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP ibSEXP, SEXP biSEXP, SEXP nbiSEXP, SEXP nibSEXP, SEXP bfirstSEXP, SEXP blastSEXP, SEXP bmaxSEXP, SEXP mSEXP, SEXP sufISEXP, SEXP bkscoretabSEXP, SEXP b_inSEXP, SEXP fixed_bSEXP, SEXP fromSEXP, SEXP stepSEXP, SEXP ndrawsSEXP, SEXP prior_etaSEXP, SEXP prior_rhoSEXP, SEXP pgwSEXP) {
+Rcpp::List calibrate_Bayes_C(const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const arma::ivec& ib, const arma::ivec& bi, const arma::ivec& nbi, const arma::ivec& nib, arma::ivec& bfirst, arma::ivec& blast, const arma::ivec& bmax, const arma::ivec& m, const arma::ivec& sufI, const arma::ivec& bkscoretab, const arma::vec& b_in, const arma::vec& fixed_b, const int from, const int step, const int ndraws, const arma::ivec progress_init, const double prior_eta, const double prior_rho);
+RcppExport SEXP _dexter_calibrate_Bayes_C(SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP ibSEXP, SEXP biSEXP, SEXP nbiSEXP, SEXP nibSEXP, SEXP bfirstSEXP, SEXP blastSEXP, SEXP bmaxSEXP, SEXP mSEXP, SEXP sufISEXP, SEXP bkscoretabSEXP, SEXP b_inSEXP, SEXP fixed_bSEXP, SEXP fromSEXP, SEXP stepSEXP, SEXP ndrawsSEXP, SEXP progress_initSEXP, SEXP prior_etaSEXP, SEXP prior_rhoSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -403,10 +403,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int >::type from(fromSEXP);
     Rcpp::traits::input_parameter< const int >::type step(stepSEXP);
     Rcpp::traits::input_parameter< const int >::type ndraws(ndrawsSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec >::type progress_init(progress_initSEXP);
     Rcpp::traits::input_parameter< const double >::type prior_eta(prior_etaSEXP);
     Rcpp::traits::input_parameter< const double >::type prior_rho(prior_rhoSEXP);
-    Rcpp::traits::input_parameter< const int >::type pgw(pgwSEXP);
-    rcpp_result_gen = Rcpp::wrap(calibrate_Bayes_C(a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, bkscoretab, b_in, fixed_b, from, step, ndraws, prior_eta, prior_rho, pgw));
+    rcpp_result_gen = Rcpp::wrap(calibrate_Bayes_C(a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, bkscoretab, b_in, fixed_b, from, step, ndraws, progress_init, prior_eta, prior_rho));
     return rcpp_result_gen;
 END_RCPP
 }

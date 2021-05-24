@@ -72,9 +72,12 @@ DIF = function(dataSrc, person_property, predicate=NULL)
   check_dataSrc(dataSrc)
   check_string(person_property)
   
-  if(!inherits(dataSrc,'data.frame'))
+  if(is_db(dataSrc))
     person_property = tolower(person_property)
 
+  pb = get_prog_bar(retrieve_data = is_db(dataSrc))
+  on.exit({close_prog_bar()})
+  
   respData = get_resp_data(dataSrc, qtpredicate, extra_columns = person_property, env = env) 
 
   respData$x[[person_property]] = ffactor(as.character(respData$x[[person_property]]))
@@ -96,10 +99,8 @@ DIF = function(dataSrc, person_property, predicate=NULL)
       anti_join(tibble(item_id=problems), by='item_id', .recompute_sumscores = TRUE)
   }
   
-
   ## 2. Estimate models with fit_enorm using CML
   models = by(respData, person_property, fit_enorm)
-  
 
   
   ## 4. Call overallDIF_ and PairDIF_
@@ -115,9 +116,7 @@ DIF = function(dataSrc, person_property, predicate=NULL)
     arrange(.data$item_id, .data$item_score) %>%
     mutate(item_id=as.character(.data$item_id))
   
-  
-  if(show_progress()) pg_close()
-  
+
   ## 5. Report D and DIF_stats and inputs
   ou = list(DIF_overall = DIF_stats, DIF_pair = DIF_mats$D, Delta_R = DIF_mats$Delta_R, 
             group_labels = names(models), items = items)

@@ -35,7 +35,11 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
   check_dataSrc(dataSrc)
   check_num(pass_fail, 'integer', .min=0, .length=1)
   check_df(target_booklets, 'item_id', nullable=TRUE)
+  check_character(ref_items)
   design=target_booklets
+  
+  pb = get_prog_bar(nsteps=nDraws+10,retrieve_data = is_db(dataSrc))
+  on.exit({close_prog_bar()})
 
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
@@ -59,8 +63,8 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
       design$booklet_id = 'target items'
   }
   n_booklets = n_distinct(design$booklet_id)
-  pgb = prog_bar((nDraws+2) * n_booklets)
-  on.exit({pgb$close()})
+  pb$set_nsteps(10+(nDraws+10)*n_booklets)
+  
 
   ref_ssI = parms$inputs$ssI %>% 
     semi_join(ref_items, by = 'item_id') %>% 
@@ -70,11 +74,10 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
   ref_last = ref_ssI$last
   
   # Get mean and sd of ability in sample
+  pb$open_sub_bar(10)
   pv = plausible_values_(respData, parms)
   new_mu = mean(pv$PV1)
   new_sigma = sd(pv$PV1)
-  
-  pgb$tick(n_booklets)
   
   ssI = design %>%
     inner_join(parms$inputs$ssI, by = 'item_id') %>% 
@@ -82,6 +85,9 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
   
   a = parms$inputs$ssIS$item_score
   b = parms$est$b
+  
+  max_ref_score = sum(a[ref_last])
+  ref_range = (pass_fail:max_ref_score) + 1L
   
   # some common summary statistics
   if (parms$inputs$method == "Bayes")
@@ -105,8 +111,10 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
     ref_theta = theta_MLE(b,a,ref_first,ref_last)$theta[pass_fail+1]
   }
   
+
   bk_results = lapply(split(ssI, ssI$booklet_id), function(dsg)
   {
+    pb$open_sub_bar(10)
     scores = 0:sum(a[dsg$last])
     p_new = plausible_scores(respData, parms=parms, items = dsg$item_id) %>%
         count(.data$PS1) %>%
@@ -115,12 +123,10 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
         arrange(.data$PS1) %>%
         pull(.data$n)
     
+    pb$close_sub_bar()
+    
     p_new = p_new/sum(p_new)
-    
-    pgb$tick()
-    
     max_score = sum(a[dsg$last])
-    ref_range = (pass_fail:max_score) + 1
     probs = matrix(0,max_score+1, nDraws)
     
     # some constants for cpp func
@@ -145,7 +151,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
         prf = pscore(spv, b[iter,],a,ref_first,ref_last)
         probs[,tel] = apply(prf, 2, function(x) sum(x[ref_range]))
         tel=tel+1
-        pgb$tick()
+        pb$tick()
       }
     } else
     {
@@ -161,7 +167,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
         prf = pscore(spv, b, a, ref_first, ref_last)
         #prf = pscore(spv[,iter], b, a, ref_first, ref_last)
         probs[,iter] = apply(prf, 2, function(x) sum(x[ref_range]))
-        pgb$tick()
+        pb$tick()
       }
     }
     
@@ -215,7 +221,7 @@ print.p2pass = function(x,...)
 #' \item{booklet_id}{id of the target booklet}
 #' \item{score_new}{score on the target booklet}
 #' \item{probability_to_pass}{probability to pass on the reference test given score_new}
-#' \item{true_positive}{percentages that correctly passes}
+#' \item{true_positive}{proportion that correctly passes}
 #' \item{sensitivity}{The proportion of positives that are correctly identified as such}
 #' \item{specificity}{The proportion of negatives that are correctly identified as such}
 #' \item{proportion}{proportion in sample with score_new}}

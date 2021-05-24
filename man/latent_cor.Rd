@@ -13,15 +13,18 @@ latent_cor(
 )
 }
 \arguments{
-\item{dataSrc}{a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score}
+\item{dataSrc}{A connection to a dexter database or a data.frame with columns: person_id, item_id, item_score and 
+the item_property}
 
-\item{item_property}{An item property to distinguish the different scales.}
+\item{item_property}{The name of the item property used to define the domains. If \code{dataSrc} is a dexter db then the
+item_property must match a known item property. If datasrc is a data.frame, item_property must be equal to
+ one of its column names.}
 
 \item{predicate}{An optional expression to subset data, if NULL all data is used}
 
 \item{nDraws}{Number of draws for plausible values}
 
-\item{use}{only complete.obs at this time. Respondents who don't have a score for one or more scales are removed.}
+\item{use}{Only complete.obs at this time. Respondents who don't have a score for one or more scales are removed.}
 }
 \value{
 List containing a correlation matrix and corresponding standard deviations

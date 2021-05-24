@@ -6,7 +6,7 @@ title: About dexter
 .dont-index{ display: none !important;}
 </style>
 
-**Dexter** saw the daylight in 2017 at Cito, with some financial help from the Dutch ministry of education, culture, and science. Dexter is developed by [Gunter Maris](https://metior.consulting/abou-us/), [Timo Bechger](https://metior.consulting/abou-us/), Jesse Koops, and Ivailo Partchev. 
+**Dexter** saw the daylight in 2017 at Cito, with some financial help from the Dutch ministry of education, culture, and science. Dexter is developed by [Gunter Maris](https://metior.consulting/about-us/), [Timo Bechger](https://metior.consulting/about-us/), Jesse Koops, and Ivailo Partchev. 
 
 
 Timo and Gunter work at [Metior](https://metior.consulting/), a consulting firm and research center specialized in psychometrics for assessment and learning.

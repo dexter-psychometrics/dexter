@@ -105,8 +105,8 @@ NR_booklets <- function(b, a, first, last, scoretab, n_score, nit, max_par_bk, E
     invisible(.Call(`_dexter_NR_booklets`, b, a, first, last, scoretab, n_score, nit, max_par_bk, EsufI, H))
 }
 
-calibrate_Bayes_C <- function(a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, bkscoretab, b_in, fixed_b, from, step, ndraws, prior_eta = 0.5, prior_rho = 0.5, pgw = 0L) {
-    .Call(`_dexter_calibrate_Bayes_C`, a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, bkscoretab, b_in, fixed_b, from, step, ndraws, prior_eta, prior_rho, pgw)
+calibrate_Bayes_C <- function(a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, bkscoretab, b_in, fixed_b, from, step, ndraws, progress_init, prior_eta = 0.5, prior_rho = 0.5) {
+    .Call(`_dexter_calibrate_Bayes_C`, a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, bkscoretab, b_in, fixed_b, from, step, ndraws, progress_init, prior_eta, prior_rho)
 }
 
 meanElSym <- function(b, a, first, last, item1, item2, nI, mS, g) {

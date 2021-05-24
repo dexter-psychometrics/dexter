@@ -17,7 +17,7 @@ A data.frame with columns:
 \item{booklet_id}{id of the target booklet}
 \item{score_new}{score on the target booklet}
 \item{probability_to_pass}{probability to pass on the reference test given score_new}
-\item{true_positive}{percentages that correctly passes}
+\item{true_positive}{proportion that correctly passes}
 \item{sensitivity}{The proportion of positives that are correctly identified as such}
 \item{specificity}{The proportion of negatives that are correctly identified as such}
 \item{proportion}{proportion in sample with score_new}}

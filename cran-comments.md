@@ -1,5 +1,5 @@
 
-Made cairo conditional in vignettes as per request from prof Brian Ripley
+just a regular update
 
 kind regards,
 Jesse

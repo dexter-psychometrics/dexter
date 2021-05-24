@@ -12,82 +12,6 @@
   invisible()
 }
 
-show_progress = function()
-{
-  is.null(getOption("knitr.in.progress")) && getOption("dexter.progress", FALSE) && interactive()
-}
-
-pg_start = function() cat('|')
-
-pg_tick = function(step=NULL, nsteps=NULL)
-{
-  if(is.null(step) || is.null(nsteps))
-  {
-    cat('=')
-  } else
-  {
-    w = getOption("width") - nchar('| 100%') - 2L
-    l = as.integer(w * step/nsteps)
-    cat(sprintf('\r|%s%s| %3i%%',strrep('=',l),strrep(' ',w-l),as.integer(100*step/nsteps)))
-  }
-}
-  
-pg_close = function() cat('\n')
-
-# to do: use this prog bar everywhere instead of simple one above
-prog_bar = setRefClass('prog_bar',
-  fields = list(nsteps='integer', step='integer', pshow='logical', w='integer', l='integer',p='integer',
-                dxpg='logical'),
-  methods = list(
-    close = function()
-    {
-      options(dexter.progress=dxpg)
-      if(pshow) cat('\n')
-    },
-    initialize = function(nsteps_=-1L, prog_show=show_progress())
-    {
-      nsteps <<- as.integer(nsteps_)
-      pshow <<- prog_show
-      p <<- -1L
-      l <<- -1L
-      step <<- 0L
-      dxpg <<- as.logical(options(dexter.progress=FALSE))
-
-      if(pshow)
-      {
-        if(!is.null(nsteps))
-        {
-          w <<- getOption("width") - nchar('| 100%') - 2L
-          draw_perc()
-        } else
-        {
-          cat('|')
-        }
-      }
-    },
-    draw_perc = function()
-    {
-      old = l+p
-      if(step > nsteps) step <<- nsteps
-      p <<- as.integer(100L*step/nsteps)
-      l <<- as.integer(w * step/nsteps)
-      if(old != l+p)
-      {
-        cat(sprintf('\r|%s%s| %3i%%',strrep('=',l),strrep(' ',w-l),p))
-      }
-    },
-    tick = function(nticks=1L)
-    {
-      step <<- step + as.integer(nticks)
-      if(pshow)
-      {
-        if(is.null(nsteps)) cat('=')
-        else draw_perc()
-      }
-    } 
-  ))
-
-
 
 explicit_NA = function(x, replace_NA_with = c('<NA>','.NA.','<<NA>>','__NA__'))
 {
@@ -349,24 +273,49 @@ check_dataSrc = function(x)
 }
 
 
-check_num = function(x, type=c('numeric','integer'), name = deparse(substitute(x)), 
-                     nullable = FALSE, .length = NULL, .min=NULL )
+check_vector = function(x, type=c('character','numeric','integer'), name = deparse(substitute(x)), 
+                        nullable = FALSE, .length = NULL, .min=NULL )
 {
   if(nullable && is.null(x))
     return(NULL)
   
   type = match.arg(type)
-  if(!is.numeric(x))
-    stop("Argument '",name, "' must be ", type)
   
-  if(type=='integer' && !(is.integer(x) || all(x %% 1 == 0)))
-     stop("Argument '",name, "' must be an integer")
+  if(!is.vector(x) || is.list(x))
+    stop("Argument '",name, "' must be a vector of type ", type, call.=FALSE)
+  
+  if(type != 'character')
+  {
+    if(!is.numeric(x))
+      stop("Argument '",name, "' must be ", type, call.=FALSE)
+  
+    if(type=='integer' && !(is.integer(x) || all(x %% 1 == 0)))
+       stop("Argument '",name, "' must be an integer", call.=FALSE)
+    
+    if(!is.null(.min) && any(x<.min))
+      stop("Argument '",name, "' must be >= ", .min, call.=FALSE)
+  }
+  
 
   if(!is.null(.length) && length(x) != .length )  
-    stop("Argument '",name, "' must have length ", .length)
+    stop("Argument '",name, "' must have length ", .length,, call.=FALSE)
+ 
+}
   
-  if(!is.null(.min) && any(x<.min))
-    stop("Argument '",name, "' must be >= ", .min)
+  
+check_num = function(x, type=c('numeric','integer'), name = deparse(substitute(x)), 
+                     nullable = FALSE, .length = NULL, .min=NULL )
+{
+  type=match.arg(type)
+  name=force(name)
+  check_vector(x,type=type,name=name,nullable=nullable,.length=.length,.min=.min)
+}
+
+
+check_character = function(x, name = deparse(substitute(x)), nullable = FALSE, .length = NULL)
+{
+  name=force(name)
+  check_vector(x,type='character',name=name,nullable=nullable,.length=.length)
 }
 
 check_string = function(x, name = deparse(substitute(x)), nullable = FALSE)
@@ -375,7 +324,7 @@ check_string = function(x, name = deparse(substitute(x)), nullable = FALSE)
     return(NULL)
   
   if(!is.character(x) && length(x)!=1)
-    stop("Argument '",name, "' must be a string of length 1")
+    stop("Argument '",name, "' must be a string of length 1", call.=FALSE)
 }
 
 
