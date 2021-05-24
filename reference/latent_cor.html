@@ -279,11 +279,14 @@ become faster in future versions of dexter.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>dataSrc</th>
-      <td><p>a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score</p></td>
+      <td><p>A connection to a dexter database or a data.frame with columns: person_id, item_id, item_score and 
+the item_property</p></td>
     </tr>
     <tr>
       <th>item_property</th>
-      <td><p>An item property to distinguish the different scales.</p></td>
+      <td><p>The name of the item property used to define the domains. If <code>dataSrc</code> is a dexter db then the
+item_property must match a known item property. If datasrc is a data.frame, item_property must be equal to
+ one of its column names.</p></td>
     </tr>
     <tr>
       <th>predicate</th>
@@ -295,7 +298,7 @@ become faster in future versions of dexter.</p>
     </tr>
     <tr>
       <th>use</th>
-      <td><p>only complete.obs at this time. Respondents who don't have a score for one or more scales are removed.</p></td>
+      <td><p>Only complete.obs at this time. Respondents who don't have a score for one or more scales are removed.</p></td>
     </tr>
     </table>
 
