@@ -635,7 +635,8 @@ print.pmf_func = function(x,...) cat('Conditional score distribution function: P
 #' @param nDraws Number of draws for plausible values
 #' @param use Only complete.obs at this time. Respondents who don't have a score for one or more scales are removed.
 #' 
-#' @return List containing a correlation matrix and corresponding standard deviations
+#' @return List containing a estimated correlation matrix, the corresponding standard deviations, 
+#' and the lower and upper limits of a 95% highest posterior density interval
 #' 
 latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, use="complete.obs")
 {
@@ -759,9 +760,12 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, use="c
     }
     pb$tick()
   }
-  out_sd=matrix(apply(store,2,sd),nd,nd)
+  out_sd = matrix(apply(store,2,sd),nd,nd)
   diag(out_sd)=0
   out_cor = matrix(colMeans(store),nd,nd)
+  tmp = t(apply(store,2,hpdens))
+  out_hpd_l = matrix(tmp[,1], nd, nd)
+  out_hpd_h = matrix(tmp[,2], nd, nd)
 
-  return(list(cor = out_cor, sd=out_sd))
+  return(list(cor = out_cor, sd=out_sd, hpd_l = out_hpd_l, hpd_h = out_hpd_h))
 }
