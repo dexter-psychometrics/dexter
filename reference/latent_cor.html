@@ -271,6 +271,7 @@ become faster in future versions of dexter.</p>
   <span class='va'>item_property</span>,
   predicate <span class='op'>=</span> <span class='cn'>NULL</span>,
   nDraws <span class='op'>=</span> <span class='fl'>500</span>,
+  hpd <span class='op'>=</span> <span class='fl'>0.95</span>,
   use <span class='op'>=</span> <span class='st'>"complete.obs"</span>
 <span class='op'>)</span></pre>
 
@@ -297,6 +298,11 @@ item_property must match a known item property. If datasrc is a data.frame, item
       <td><p>Number of draws for plausible values</p></td>
     </tr>
     <tr>
+      <th>hpd</th>
+      <td><p>width of Bayesian highest posterior density interval around the correlations, 
+value must be between 0 and 1.</p></td>
+    </tr>
+    <tr>
       <th>use</th>
       <td><p>Only complete.obs at this time. Respondents who don't have a score for one or more scales are removed.</p></td>
     </tr>
@@ -304,7 +310,8 @@ item_property must match a known item property. If datasrc is a data.frame, item
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>List containing a correlation matrix and corresponding standard deviations</p>
+    <p>List containing a estimated correlation matrix, the corresponding standard deviations, 
+and the lower and upper limits of the highest posterior density interval</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
