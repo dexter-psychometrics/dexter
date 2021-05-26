@@ -150,9 +150,9 @@ Testing, especially high stake exams, involves both a measurement side, preoccup
 
 **Dexter** covers most needs for practical analysis of summative tests in R. Three other related packages offer extensions for special circumstances.
 
-* [dextergui](https://cran.r-project.org/package=dextergui) offers a Graphical User Interface for the main functions of dexter for people who have not yet mastered R. (In additon it can also be useful to navigate very large projects).
+* [dextergui](https://cran.r-project.org/package=dextergui) offers a Graphical User Interface for the main functions of dexter for people who have not yet mastered R. 
 * [dexterMST](https://cran.r-project.org/package=dexterMST) extends data management and CML estimation for Multi-Stage Tests.
-* [dexterMML](https://github.com/dexter-psychometrics/dexterMML) uses MML estimation for situations where CML is not possible, like fully adaptive or random tests. We try to avoid those circumstances but, unfortunately, as a psychometrician you are not always in control of the design of a test.
+* [dexterMML](https://github.com/dexter-psychometrics/dexterMML) uses MML estimation for situations where CML is not possible, like fully adaptive or random tests. 
 
 
 ## Getting started

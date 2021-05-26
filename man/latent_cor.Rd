@@ -9,6 +9,7 @@ latent_cor(
   item_property,
   predicate = NULL,
   nDraws = 500,
+  hpd = 0.95,
   use = "complete.obs"
 )
 }
@@ -24,10 +25,14 @@ item_property must match a known item property. If datasrc is a data.frame, item
 
 \item{nDraws}{Number of draws for plausible values}
 
+\item{hpd}{width of Bayesian highest posterior density interval around the correlations, 
+value must be between 0 and 1.}
+
 \item{use}{Only complete.obs at this time. Respondents who don't have a score for one or more scales are removed.}
 }
 \value{
-List containing a correlation matrix and corresponding standard deviations
+List containing a estimated correlation matrix, the corresponding standard deviations, 
+and the lower and upper limits of the highest posterior density interval
 }
 \description{
 Estimates correlations between latent traits. Use an item_property to distinguish the different scales. 

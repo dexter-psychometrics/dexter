@@ -274,7 +274,7 @@ check_dataSrc = function(x)
 
 
 check_vector = function(x, type=c('character','numeric','integer'), name = deparse(substitute(x)), 
-                        nullable = FALSE, .length = NULL, .min=NULL )
+                        nullable = FALSE, .length = NULL, .min=NULL, .max=NULL )
 {
   if(nullable && is.null(x))
     return(NULL)
@@ -294,21 +294,24 @@ check_vector = function(x, type=c('character','numeric','integer'), name = depar
     
     if(!is.null(.min) && any(x<.min))
       stop("Argument '",name, "' must be >= ", .min, call.=FALSE)
+    
+    if(!is.null(.max) && any(x>.max))
+      stop("Argument '",name, "' must be <= ", .max, call.=FALSE)
   }
   
 
   if(!is.null(.length) && length(x) != .length )  
-    stop("Argument '",name, "' must have length ", .length,, call.=FALSE)
+    stop("Argument '",name, "' must have length ", .length, call.=FALSE)
  
 }
   
   
 check_num = function(x, type=c('numeric','integer'), name = deparse(substitute(x)), 
-                     nullable = FALSE, .length = NULL, .min=NULL )
+                     nullable = FALSE, .length = NULL, .min=NULL, .max=NULL )
 {
   type=match.arg(type)
   name=force(name)
-  check_vector(x,type=type,name=name,nullable=nullable,.length=.length,.min=.min)
+  check_vector(x,type=type,name=name,nullable=nullable,.length=.length,.min=.min,.max=.max)
 }
 
 

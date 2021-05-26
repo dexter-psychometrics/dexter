@@ -164,6 +164,7 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
 
 
 # to~do: is there a better plot for calibrate bayes?
+
 #' Plot for the extended nominal Response model
 #' 
 #' The plot shows 'fit' by comparing the expected score based on the model (grey line)
@@ -633,15 +634,18 @@ print.pmf_func = function(x,...) cat('Conditional score distribution function: P
 #'  one of its column names.
 #' @param predicate An optional expression to subset data, if NULL all data is used
 #' @param nDraws Number of draws for plausible values
+#' @param hpd width of Bayesian highest posterior density interval around the correlations, 
+#'  value must be between 0 and 1.
 #' @param use Only complete.obs at this time. Respondents who don't have a score for one or more scales are removed.
 #' 
 #' @return List containing a estimated correlation matrix, the corresponding standard deviations, 
-#' and the lower and upper limits of a 95% highest posterior density interval
+#' and the lower and upper limits of the highest posterior density interval
 #' 
-latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, use="complete.obs")
+latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.95, use="complete.obs")
 {
   check_dataSrc(dataSrc)
   check_num(nDraws, 'integer', .length=1, .min=1)
+  check_num(hpd,  .length=1, .min=1/nDraws,.max=1)
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
   
@@ -752,7 +756,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, use="c
     }
     
     
-    prior = try({update_MVNprior(pv,prior$Sigma)})
+    prior = update_MVNprior(pv,prior$Sigma)
 
     if (i %in% which.keep){
       store[tel,] = as.vector(cov2cor(prior$Sigma))
@@ -762,10 +766,9 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, use="c
   }
   out_sd = matrix(apply(store,2,sd),nd,nd)
   diag(out_sd)=0
-  out_cor = matrix(colMeans(store),nd,nd)
-  tmp = t(apply(store,2,hpdens))
-  out_hpd_l = matrix(tmp[,1], nd, nd)
-  out_hpd_h = matrix(tmp[,2], nd, nd)
+  pd = t(apply(store,2,hpdens, conf=hpd))
+  res = list(cor = matrix(colMeans(store),nd,nd), sd = out_sd,
+             hpd_l = matrix(pd[,1], nd, nd), hpd_h = matrix(pd[,2], nd, nd))
 
-  return(list(cor = out_cor, sd=out_sd, hpd_l = out_hpd_l, hpd_h = out_hpd_h))
+  lapply(res, function(x){colnames(x) = rownames(x) = names(models); x})
 }
