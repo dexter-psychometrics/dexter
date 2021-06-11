@@ -301,6 +301,11 @@ according to the scoring rules in the database to compute pvalues and maximum sc
 <dt>booklets</dt><dd><p>a data.frame of statistics at booklet level</p></dd> 
 <dt>items</dt><dd><p>a data.frame (or list if type='compared') of statistics at item level</p></dd>
 
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+
+    <p>The returned list also contains the elements 'testStats' and 'itemStats'. These contain the same information
+as 'booklets' and 'items' but using obsolete (mixed camelCase and snake_case) variable names. These will
+be removed in the future and users are advised to not use these in newer code.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
