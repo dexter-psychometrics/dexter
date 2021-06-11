@@ -176,14 +176,14 @@ db_get_testscores = function(db, qtpredicate=NULL, columns=c('booklet_id','perso
   }
   
   respData = dbGetQuery(db, 
-               paste("SELECT", paste(used_columns, collapse=','),
+               paste("SELECT", paste(union(used_columns,'item_score'), collapse=','),
                         "FROM", cte))
   
   qtpredicate = correct_symbol_case(qtpredicate, used_columns,env=env)
   
   # this is a worse case scenario, it will take very long compared to using C, as a to do?
   return(
-    respData[eval_tidy(qtpredicate, data=respData, env=env), columns] %>%
+    respData[eval_tidy(qtpredicate, data=respData, env=env), union(columns,'item_score')] %>%
       group_by_at(columns) %>%
       summarise(booklet_score = sum(.data$item_score)) %>%
       ungroup())

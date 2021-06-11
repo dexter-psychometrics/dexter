@@ -12,6 +12,14 @@ ffactor = function (x, levels=NULL, as_int=FALSE)
   }
 }
 
+stop_no_param = function(items)
+{
+  cat('\n')
+  message("no parameters for these items and/or scores")
+  print(no_par)
+  stop("no parameters for some items and/or scores in your data", call.=FALSE) 
+}
+
 
 
 #' Functions for developers
@@ -166,13 +174,8 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
         
         no_par = dplyr::intersect(itm_sc, no_par)
 
-        
         if(nrow(no_par) > 0)
-        {
-          message("no parameters for these items and/or scores")
-          print(no_par)
-          stop("no parameters for some items and/or scores in your data")
-        }
+          stop_no_param(no_par)
       }
     }
     out = list(x=x, design=design, summarised=TRUE, merge_within_persons = merge_within_persons)
@@ -245,11 +248,7 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
           anti_join(x, by=c('item_id','item_score'))
       }
       if(NROW(itm_scr)>0)
-      {
-        message("no parameters for these items and/or scores")
-        print(itm_scr)
-        stop("no parameters for some items and/or scores in your data")
-      }
+        stop_no_param(itm_scr)
     }
     
     if(!is_person_booklet_sorted(x$booklet_id, x$person_id))
@@ -384,11 +383,7 @@ resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
                                     parms_check[parms_check$item_score>0, c('item_id','item_score')])}) 
     
     if(nrow(uncalibrated) > 0)
-    {
-      message("no parameters for these items and/or scores:")
-      print(uncalibrated)
-      stop("no parameters for some items and/or scores in your data")
-    }
+      stop_no_param(uncalibrated)
   }
   
   if(!is.integer(x$person_id) && !is.factor(x$person_id))

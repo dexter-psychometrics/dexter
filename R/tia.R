@@ -20,6 +20,11 @@
 #' \item{booklets}{a data.frame of statistics at booklet level} 
 #' \item{items}{a data.frame (or list if type='compared') of statistics at item level}
 #'
+#' @details 
+#' The returned list also contains the elements 'testStats' and 'itemStats'. These contain the same information
+#' as 'booklets' and 'items' but using obsolete (mixed camelCase and snake_case) variable names. These will
+#' be removed in the future and users are advised to not use these in newer code.
+#'
 tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compared'),
                       max_scores = c('observed','theoretical')) 
 {
@@ -108,8 +113,15 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
                     mean_rit=.data$meanRit, mean_rir=.data$meanRir, 
                     max_booklet_score=.data$maxTestScore, n_persons=.data$N)
   
-  items = rename(itemStats, mean_score = .data$meanScore,
+  items = if(type != 'compared')
+  {
+    rename(itemStats, mean_score = .data$meanScore,
                  sd_score=.data$sdScore, max_score=.data$maxScore, n_persons=.data$n)
+  } else
+  {
+    itemStats
+  }
+  
   
   list(booklets=booklets,items=items,itemStats=itemStats, testStats=testStats)
 }

@@ -34,3 +34,8 @@ A list containing:
 Show simple Classical Test Analysis statistics
 at item and test level
 }
+\details{
+The returned list also contains the elements 'testStats' and 'itemStats'. These contain the same information
+as 'booklets' and 'items' but using obsolete (mixed camelCase and snake_case) variable names. These will
+be removed in the future and users are advised to not use these in newer code.
+}

@@ -429,8 +429,9 @@ translate_sql_lang = function(call, variant)
   if(name == '%in%')
   {
     type3 = typeof(call[[3]])
+    type3_is_vec = type3 %in% c('integer','double','character','logical','Date','POSIXct','POSIXlt')
     if(type3 == 'symbol' ||
-       (type3 %in% c('integer','double','character','logical','Date','POSIXct','POSIXlt') && length(call[[3]]) == 1))
+       (type3_is_vec && length(call[[3]]) == 1))
     {
       return(paste(translate_sql(call[[2]], variant), 'IN(', translate_sql(call[[3]],variant),')'))
     }

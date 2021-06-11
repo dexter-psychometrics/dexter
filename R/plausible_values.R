@@ -65,12 +65,11 @@ plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL
   check_dataSrc(dataSrc)
   check_num(nPV, .length=1, .min=1)
   
-  df_format(
-    mutate_if(
-      plausible_values_(dataSrc, parms, qtpredicate=qtpredicate, covariates=covariates, nPV=nPV, 
+  plausible_values_(dataSrc, parms, qtpredicate=qtpredicate, covariates=covariates, nPV=nPV, 
                       use_draw=use_draw, env=env,prior.dist = prior.dist ,
-                      merge_within_persons=merge_within_persons), 
-    is.factor, as.character))
+                      merge_within_persons=merge_within_persons) %>%
+    mutate_if(is.factor, as.character) %>%
+    df_format()
 }
 
 # to~do: ignore covariate when (some) groups contain to few, <5 say, persons. Add warning.
