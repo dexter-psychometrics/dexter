@@ -61,7 +61,7 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
   if(is.null(env)) env = caller_env()
 
   pb = get_prog_bar(retrieve_data = is_db(dataSrc), nsteps = if.else(method=='Bayes',nDraws,NULL))
-  on.exit({close_prog_bar()})
+  on.exit({pb$close()})
 
   respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, env=env, retain_person_id=FALSE,
                            merge_within_persons = merge_within_persons)
@@ -655,8 +655,8 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   if(use != "complete.obs")
     stop("only 'complete.obs' is currently implemented")
   
-  pb = get_prog_bar(nDraws, retrieve_data = is_db(dataSrc))
-  on.exit({close_prog_bar()})
+  pb = get_prog_bar(nDraws, retrieve_data = is_db(dataSrc), lock=TRUE)
+  on.exit({pb$close()})
   
   from = 5
   by = 2
@@ -687,7 +687,6 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   
   
   np = max(respData$x$person_id)
-  
   respData = lapply(split(respData$x, respData$x[[item_property]]), get_resp_data)
   models = lapply(respData, fit_enorm)
   abl = mapply(ability, respData, models, SIMPLIFY=FALSE,
@@ -708,7 +707,6 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   reliab = rep(0,nd)
   sd_pv = rep(0,nd)
   mean_pv = rep(0,nd)
-  pb$open_sub_bar(2*nd)
   for (i in 1:nd)
   {
     pvs = plausible_values(respData[[i]],models[[i]],nPV = 2)
@@ -717,7 +715,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
     mean_pv[i] = mean(pvs$PV1)
     pv[pvs$person_id,i] = pvs$PV1
   }
-  pb$close_sub_bar()
+  pb$tick(2*nd)
   
   for (i in 1:(nd-1))
   {

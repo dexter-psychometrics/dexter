@@ -260,7 +260,7 @@ calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fix
   }
   
   pb = get_prog_bar()
-  on.exit({close_prog_bar()})
+  on.exit({pb$close()})
 
   use_mean = FALSE
 
@@ -508,7 +508,7 @@ calibrate_Bayes = function(scoretab, design, sufI, a, first, last,  nIter, fixed
   prior_rho = 0.5
   
   pb = get_prog_bar(nsteps = nIter)
-  on.exit({close_prog_bar()})
+  on.exit({pb$close()})
   
   # bookkeeping: make counts and indexes for C function
   design = design %>%

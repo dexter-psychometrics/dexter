@@ -88,18 +88,18 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
   
   prior.dist = match.arg(prior.dist)
   
-  pb = get_prog_bar(nsteps=if(is.null(parms)) 100 else 120, 
+  pb = get_prog_bar(nsteps=if(is.null(parms)) 120 else 100, 
                     retrieve_data = is_db(dataSrc))
-  on.exit({close_prog_bar()})
+  on.exit({pb$close()})
 
   if(is.null(parms))
   {
     respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, extra_columns=covariates, env=env)
-    pb$open_sub_bar(20)
+    pb$new_area(20)
     parms = fit_enorm_(respData, method = 'Bayes', nDraws = nIter.enorm) 
     respData = get_resp_data(respData, summarised=TRUE, extra_columns=covariates, 
                              protect_x=!is_db(dataSrc))
-    pb$open_sub_bar(100)
+    pb$new_area(100)
 
   } else
   {

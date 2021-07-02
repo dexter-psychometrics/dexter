@@ -229,6 +229,16 @@ weighted_quantile = function(x,w,probs)
   
 }
 
+# variance of total sample by combining group variances
+combined_var = function(means,vars,n)
+{
+  if(length(vars)<=1L)
+    return(vars)
+  q = (n-1)*vars + n*means^2
+  (sum(q) - sum(n)* weighted.mean(means,n)^2)/(sum(n)-1)
+}
+
+
 
 # non vectorized version of ifelse
 if.else = function(test, yes, no)

@@ -277,7 +277,7 @@ pv = function(x, design, b, a, nPV, from = NULL, by = NULL, prior.dist = c("norm
   if (is.null(by))   by = Gibbs.settings$step.pv
   
   pb = get_prog_bar(nsteps = n_prior_updates+nPV)
-  on.exit({close_prog_bar()})
+  on.exit({pb$close()})
   
 
   if (prior.dist == "mixture")

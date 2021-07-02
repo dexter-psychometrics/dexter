@@ -1,7 +1,7 @@
 Package: dexter
 Type: Package
 Title: Data Management and Analysis of Tests
-Version: 1.1.3
+Version: 1.1.4
 Authors@R: c(
     person("Gunter","Maris", role="aut"),
     person("Timo","Bechger", role="aut"),

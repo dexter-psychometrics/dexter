@@ -20,7 +20,7 @@ struct progress
 		l=0;
 		step=0;
 		if(w>0)
-			fmt = std::string("\r|%-") + std::to_string(w) + std::string("s|% 3i%%");	
+			fmt = std::string("\r|%-") + std::to_string(w) + std::string("s| %3i%%");	
 	}
 	void draw_perc()
 	{

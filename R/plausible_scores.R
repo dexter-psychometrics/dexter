@@ -53,9 +53,9 @@ plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL,
   keep.which = seq(from,(from-step)*(from>step)+step*nPS,by=step)
   nPS.needed = max(keep.which) # Given from and step, this many PS must be generated
   
-  pb = get_prog_bar(nsteps=if(is.null(parms)) 100 else 120, 
+  pb = get_prog_bar(nsteps=if(is.null(parms)) 120 else 100, 
                     retrieve_data = is_db(dataSrc))
-  on.exit({close_prog_bar()})
+  on.exit({pb$close()})
   
   if(is.null(parms))
   {
@@ -82,7 +82,7 @@ plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL,
   if(is.null(parms))
   {
     nIter.enorm  = Gibbs.settings$from.pv + Gibbs.settings$step.pv*(nPS.needed-1)
-    pb$open_sub_bar(20)
+    pb$new_area(20)
     parms = fit_enorm_(respData, method='Bayes', nDraws = nIter.enorm)
     
   } else if(inherits(parms,'prms') && parms$inputs$method != 'CML')
@@ -100,9 +100,9 @@ plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL,
   }  
   
   # now we make plausible values using all responses we have
-  pb$open_sub_bar(70) 
+  pb$new_area(80) 
   pv = plausible_values_(respData, parms = parms, covariates = covariates, nPV = nPS.needed)
-  pb$close_sub_bar()
+  pb$close_area()
   
   # clean up items
   if(is.null(items))

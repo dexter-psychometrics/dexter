@@ -39,7 +39,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
   design=target_booklets
   
   pb = get_prog_bar(nsteps=nDraws+10,retrieve_data = is_db(dataSrc))
-  on.exit({close_prog_bar()})
+  on.exit({pb$close()})
 
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
@@ -74,7 +74,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
   ref_last = ref_ssI$last
   
   # Get mean and sd of ability in sample
-  pb$open_sub_bar(10)
+  pb$new_area(10)
   pv = plausible_values_(respData, parms)
   new_mu = mean(pv$PV1)
   new_sigma = sd(pv$PV1)
@@ -114,7 +114,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
 
   bk_results = lapply(split(ssI, ssI$booklet_id), function(dsg)
   {
-    pb$open_sub_bar(10)
+    pb$new_area(10)
     scores = 0:sum(a[dsg$last])
     p_new = plausible_scores(respData, parms=parms, items = dsg$item_id) %>%
         count(.data$PS1) %>%
@@ -123,7 +123,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
         arrange(.data$PS1) %>%
         pull(.data$n)
     
-    pb$close_sub_bar()
+    pb$close_area()
     
     p_new = p_new/sum(p_new)
     max_score = sum(a[dsg$last])

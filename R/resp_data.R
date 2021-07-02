@@ -16,7 +16,7 @@ stop_no_param = function(items)
 {
   cat('\n')
   message("no parameters for these items and/or scores")
-  print(no_par)
+  print(items)
   stop("no parameters for some items and/or scores in your data", call.=FALSE) 
 }
 

@@ -10,11 +10,11 @@
 #' @param dataSrc a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score
 #' @param predicate An optional expression to subset data, if NULL all data is used
 #' @param type How to present the item level statistics: \code{raw} for each test booklet 
-#' separately, \code{averaged} averaged over the test booklet in which the item is included,
+#' separately, \code{averaged} booklets are ignored, with the exception of rit and rir which are averaged over the test booklets,
 #' with the number of persons as weights, or \code{compared}, in which case the pvalues, 
 #' correlations with the sum score (rit), and correlations with the rest score (rit) are 
 #' shown in separate tables and compared across booklets
-#' @param max_scores use the observed maximum item score or the theoretical maximum items score 
+#' @param max_scores use the observed maximum item score or the theoretical maximum item score 
 #' according to the scoring rules in the database to compute pvalues and maximum scores
 #' @return A list containing:
 #' \item{booklets}{a data.frame of statistics at booklet level} 
@@ -65,7 +65,7 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
       group_by(.data$item_id) %>%
       summarise( nBooklets=n(),
                  meanScore=weighted.mean(.data$meanScore, w=.data$n),
-                 sdScore=weighted.mean(.data$sdScore, w=.data$n),
+                 sdScore = sqrt(combined_var(.data$meanScore, .data$sdScore^2, .data$n)),
                  maxScore = max(.data$maxScore),
                  pvalue=weighted.mean(.data$pvalue, w=.data$n),
                  rit=weighted.mean(.data$rit, w=.data$n, na.rm=TRUE),

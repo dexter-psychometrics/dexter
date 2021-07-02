@@ -76,7 +76,7 @@ DIF = function(dataSrc, person_property, predicate=NULL)
     person_property = tolower(person_property)
 
   pb = get_prog_bar(retrieve_data = is_db(dataSrc))
-  on.exit({close_prog_bar()})
+  on.exit({pb$close()})
   
   respData = get_resp_data(dataSrc, qtpredicate, extra_columns = person_property, env = env) 
 
