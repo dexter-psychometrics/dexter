@@ -17,12 +17,12 @@ tia_tables(
 \item{predicate}{An optional expression to subset data, if NULL all data is used}
 
 \item{type}{How to present the item level statistics: \code{raw} for each test booklet 
-separately, \code{averaged} averaged over the test booklet in which the item is included,
+separately, \code{averaged} booklets are ignored, with the exception of rit and rir which are averaged over the test booklets,
 with the number of persons as weights, or \code{compared}, in which case the pvalues, 
 correlations with the sum score (rit), and correlations with the rest score (rit) are 
 shown in separate tables and compared across booklets}
 
-\item{max_scores}{use the observed maximum item score or the theoretical maximum items score 
+\item{max_scores}{use the observed maximum item score or the theoretical maximum item score 
 according to the scoring rules in the database to compute pvalues and maximum scores}
 }
 \value{

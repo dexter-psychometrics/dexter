@@ -69,7 +69,13 @@ expect_valid_respData = function(respData, msg='respData')
               info = sprintf("%s - x$isumSscore is not an integer but '%s'",
                              info, typeof(respData$x$item_id)))
   
-  # to do: check factor levels
+  # check factor levels
+  expect_true(n_distinct(respData$design$booklet_id) == nlevels(respData$design$booklet_id),
+              info="empty levels in booklet_id")
+  expect_true(n_distinct(respData$design$item_id) == nlevels(respData$design$item_id),
+              info='empty levels in item_id')
+  
+  
   
   if(!respData$summarised)
   {
@@ -227,6 +233,21 @@ test_that('get responses works correctly with predicates',
   expect_true(dexter:::df_identical(r1, r2))
   close_project(db)
 
+})
+
+test_that('empty levels are resolved',{
+  dat = matrix(sample(0:2,100,TRUE),10,10)
+  dat[1,] = NA
+  dat[,3] = NA
+  dat[5,5] = NA
+  r1 = get_resp_data(dat)
+  expect_valid_respData(r1)
+  
+  x=r1$x
+  levels(x$item_id) = c(levels(x$item_id),'aap','bla')
+  r2=get_resp_data(x)
+  expect_valid_respData(r2)
+  expect_equal_respData(r1,r2)
 })
    
 

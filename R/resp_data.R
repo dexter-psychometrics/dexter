@@ -3,6 +3,14 @@
 # faster factor, does not handle or check for NA values
 ffactor = function (x, levels=NULL, as_int=FALSE) 
 {
+  if(is.factor(x))
+  {
+    f = if(is.null(levels)) factor(x) else factor(x,levels=levels)
+    if(as_int)
+      return(as.integer(f))
+    return(f)
+  }
+  
   if(is.null(levels))
   {
     fast_factor(x, as_int)
@@ -371,8 +379,7 @@ resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
   
   pointers = lapply(x, ppoint)
   
-  if(!is.factor(x$item_id))
-    x$item_id = ffactor(x$item_id)
+  x$item_id = ffactor(x$item_id)
   
   x$item_score = as.integer(x$item_score) 
   
@@ -391,8 +398,7 @@ resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
 
   if('booklet_id' %in% all_columns)
   {
-    if(!is.factor(x$booklet_id))
-      x$booklet_id = ffactor(x$booklet_id)
+    x$booklet_id = ffactor(x$booklet_id)
     
     if(merge_within_persons)
     { 
@@ -573,6 +579,25 @@ resp_data.from_matrix = function(X, summarised = FALSE, retain_person_id = TRUE,
     class(out$x$person_id) = 'factor'
     levels(out$x$person_id) = rownames(X)
   } 
+  
+  if(length(levels(out$design$booklet_id)) > n_distinct(out$design$booklet_id))
+  {
+    # rows with all NA responses in input matrix, some repair necessary
+    if(summarised)
+      out$x = semi_join(out$x, out$design, by='booklet_id')
+
+    out$x$booklet_id = droplevels(out$x$booklet_id)
+    out$design$booklet_id = droplevels(out$design$booklet_id)
+  }
+  if(length(levels(out$design$item_id)) > n_distinct(out$design$item_id))
+  {
+    # columns with all NA, some repair necessary
+    out$design$item_id = droplevels(out$design$item_id)
+    if(!summarised)
+      out$x$item_id = droplevels(out$x$item_id)
+  }
+  
+  
   out$summarised = summarised
   class(out) = append('dx_resp_data', class(out))
   out
