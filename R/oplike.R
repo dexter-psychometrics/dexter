@@ -239,11 +239,11 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
 #' Read item parameters from oplm PAR or CML files
 #'
 #' @param par_path path to a file in the (binary) OPLM PAR format or the human readable CML format
-#' @return depends on the input. For .PAR files a tibble with columns: item_id, item_score, beta, nbr,
+#' @return depends on the input. For .PAR files a data.frame with columns: item_id, item_score, beta, nbr,
 #' for .CML files also several statistics columns that are outputted by OPLM as part of the calibration.
 #' 
 #' @details
-#' It is occasionally useful to calibrate new items on an existing scale. This
+#' It is very occasionally useful to calibrate new items on an existing scale. This
 #' function offers the possibility to read parameters from the proprietary oplm format 
 #' so that they can be used to fix a new calibration in Dexter on an existing scale of items
 #' that were calibrated in oplm.

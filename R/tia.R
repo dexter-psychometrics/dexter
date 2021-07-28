@@ -64,7 +64,7 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
     itemStats = ti %>% 
       group_by(.data$item_id) %>%
       summarise( nBooklets=n(),
-                 meanScore=weighted.mean(.data$meanScore, w=.data$n),
+                 w_meanScore=weighted.mean(.data$meanScore, w=.data$n),
                  sdScore = sqrt(combined_var(.data$meanScore, .data$sdScore^2, .data$n)),
                  maxScore = max(.data$maxScore),
                  pvalue=weighted.mean(.data$pvalue, w=.data$n),
@@ -73,6 +73,7 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
                  n=sum(.data$n)) %>%
       ungroup() %>%
       mutate_if(is.factor, as.character) %>%
+      rename(meanScore=.data$w_meanScore) %>%
       df_format()
   } else
   {
