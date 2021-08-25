@@ -554,7 +554,7 @@ Rcpp::List calibrate_Bayes_C(const arma::ivec& a, const arma::ivec& first, const
 		{
 			b.elem(find_finite(fixed_b)) = fixed_b.elem(find_finite(fixed_b));
 		}
-		b.replace(datum::nan, 1); // na'tjes even gelaten, wil ze kunnen zien
+		b.replace(datum::nan, 1); 
 		if(iter >= from && (iter-from) % step == 0)
 		{
 			Rcpp::checkUserInterrupt();

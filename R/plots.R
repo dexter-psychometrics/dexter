@@ -239,6 +239,20 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
   invisible(df_format(rsp_colors))
 }
 
+pp_segments = function(maxA, maxB, psbl, col='lightgray',cex=0.6)
+{
+  clip(0,maxA,0,maxB) 
+  segments(0L, psbl, psbl, 0L, col=col, xpd=FALSE)
+  h = strheight('1',cex=cex)
+
+  y = par('usr')[3] + h/2
+  psblx = psbl[psbl<=maxA]
+  text(psblx - y, y, psblx, cex=.6,col=col, xpd=TRUE,adj=c(0.4,0.4))
+  
+  psbly = psbl[psbl>maxA]
+  text(maxA - y,psbly-maxA+y, psbly,col=col,xpd=TRUE,cex=cex)
+}
+
 #' Profile plot
 #'
 #'
@@ -361,9 +375,9 @@ profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, mod
           merge_arglists(user.args, 
                          default=default.args,
                          override=list(x=c(0,maxA), y=c(0,maxB),type="n")))
-  clip(0,maxA,0,maxB) 
-  segments(0L, psbl, psbl, 0L, col='gray', xpd=FALSE)
-  text(pmin(maxA,psbl)+.4, pmax(0, psbl-maxA)-.4,psbl,cex=.6,col="lightgray", xpd=TRUE)
+  
+  pp_segments(maxA,maxB,psbl)
+  
   
   colors = qcolors(length(tt), col)
   

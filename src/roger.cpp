@@ -393,65 +393,70 @@ arma::vec PVrecycle(const arma::vec& b, const arma::ivec& a, const arma::ivec& f
 					const arma::vec& mu, const arma::vec& sigma, arma::ivec& scoretb, const arma::ivec& A, const double alpha = -1.0)
 {
   
-  int nP = accu(scoretb);
-  const int nI = first.n_elem;
-  const int maxA = max(a(conv_to<uvec>::from(last))); 
-  const ivec cscoretb = cumsum(scoretb);
-  
-  int x, k;
-  double u, atheta;
-  vec p(maxA+3, fill::zeros);  
-  vec lookup(maxA+1);
-  lookup[0] = 1.0;
-  
-  vec theta(nP);
-  
-  // observed maximum score
-  int max_score = scoretb.n_elem - 1;  
-  
-  for(;max_score>=0; max_score--)
-	if(scoretb[max_score] > 0)
-		break;
-
-  
-  while(nP > 0)
-  {
-	atheta = draw_theta(mu, sigma, alpha);
-	for(int j=1;j<=maxA;j++) 
-		lookup[j] = std::exp(j*atheta);
-    x=0;
-    for (int i=0;i<nI;i++)
-    {
-		p[0] = b[first[i]]; //  exp(0)==1
-        k=1;
-        for (int j=first[i]+1;j<=last[i];j++) // note the +1
-        {
-			p[k] = p[k-1] + b[j]*lookup[a[j]]; // previously: p[k]=p[k-1]+b[j]*exp(a[j]*atheta);
-            k++;
-        }
-        u=p[k-1]*R::runif(0,1);
-        k=0;
-        while (u > p[k])
-			k++;
-        if (k > 0) 
-			x += A[first[i]+k];
-			
-		if(x > max_score)
+	int nP = accu(scoretb);
+	const int nI = first.n_elem;
+	const int maxA = max(a(conv_to<uvec>::from(last))); 
+	const ivec cscoretb = cumsum(scoretb);
+	  
+	int x, k;
+	double u, atheta;
+	vec p(maxA+3, fill::zeros);  
+	vec lookup(maxA+1);
+	lookup[0] = 1.0;
+	  
+	vec theta(nP);
+	  
+	// observed maximum score
+	int max_score = scoretb.n_elem - 1;  
+	  
+	for(;max_score>=0; max_score--)
+		if(scoretb[max_score] > 0)
 			break;
-    }
-	if(scoretb[x] > 0)
-	{
-		theta[cscoretb[x] - scoretb[x]] = atheta;
-		scoretb[x]--;
-		nP--;
 
-		if(x==max_score && scoretb[x] == 0)
-			for(;max_score>=0; max_score--)
-				if(scoretb[max_score] > 0)
-					break;
+	int cntr = 0;
+	while(nP > 0)
+	{
+		atheta = draw_theta(mu, sigma, alpha);
+		for(int j=1;j<=maxA;j++) 
+			lookup[j] = std::exp(j*atheta);
+		x=0;
+		for (int i=0;i<nI;i++)
+		{
+			p[0] = b[first[i]]; //  exp(0)==1
+			k=1;
+			for (int j=first[i]+1;j<=last[i];j++) // note the +1
+			{
+				p[k] = p[k-1] + b[j]*lookup[a[j]]; 
+				k++;
+			}
+			u=p[k-1]*R::runif(0,1);
+			k=0;
+			while (u > p[k])
+				k++;
+			if (k > 0) 
+				x += A[first[i]+k];
+				
+			if(x > max_score)
+				break;
+		}	
+		if(scoretb[x] > 0)
+		{
+			theta[cscoretb[x] - scoretb[x]] = atheta;
+			scoretb[x]--;
+			nP--;
+
+			if(x==max_score && scoretb[x] == 0)
+				for(;max_score>=0; max_score--)
+					if(scoretb[max_score] > 0)
+						break;
+		}
+		if(++cntr > 50000)
+		{
+			Rcpp::checkUserInterrupt();
+			cntr = 0;
+		}		
 	}
-  }
-  return theta;
+	return theta;
 }
 
 
@@ -518,7 +523,7 @@ void PV_slow(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first
 	vec pv(pv_mat.colptr(pv_col_indx),np, false, true);
 	
 	double theta=0;
-	
+	int cntr=0;
 	for(int prs=0; prs<np; prs++)
 	{
 		const int bk = booklet_id[prs];
@@ -547,8 +552,14 @@ void PV_slow(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first
 					k++;
 				x += a[bk_first[i]+k];
 			}
+			if(++cntr > 50000)
+			{
+				Rcpp::checkUserInterrupt();
+				cntr = 0;
+			}
 		}
 		pv[prs] = theta;
+
 	}
 }
 
