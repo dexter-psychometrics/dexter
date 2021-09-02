@@ -114,13 +114,18 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
                     mean_rit=.data$meanRit, mean_rir=.data$meanRir, 
                     max_booklet_score=.data$maxTestScore, n_persons=.data$N)
   
-  items = if(type != 'compared')
+  if(type == 'raw')
   {
-    rename(itemStats, mean_score = .data$meanScore,
+    items = rename(itemStats, mean_score = .data$meanScore,
                  sd_score=.data$sdScore, max_score=.data$maxScore, n_persons=.data$n)
+  } else if(type == 'averaged')
+  {
+    items = rename(itemStats, mean_score = .data$meanScore,
+                   sd_score=.data$sdScore, max_score=.data$maxScore, n_persons=.data$n,
+                   n_booklets = .data$nBooklets)
   } else
   {
-    itemStats
+    items = itemStats
   }
   
   

@@ -14,10 +14,10 @@ importFrom(stats, "complete.cases", "cor", "quantile","var",
            "smooth.spline", "coef", "lm", "predict", "dnorm", "qnorm",
            "rbeta","rbinom","cov2cor", "rWishart")
 importFrom(graphics, "plot", "axis", "image", "layout", "par", "lines", "hist",
-           "text","legend","abline","segments","arrows","points", "rect","clip")
+           "text","legend","abline","segments","arrows","points", "rect","clip","strheight")
 importFrom(grDevices, "rainbow","colorRampPalette","col2rgb","rgb")
 importFrom(methods, "is", "new")
-importFrom(utils, "str", "head", "person", "tail", "modifyList","setTxtProgressBar", "txtProgressBar")
+importFrom(utils, "str", "head", "person", "tail", "modifyList")
 importFrom(MASS, "lmsreg")
 
 
