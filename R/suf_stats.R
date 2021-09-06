@@ -43,19 +43,22 @@ get_sufStats_nrm = function(respData, check_sanity=TRUE)
   
   if(check_sanity)
   {
+    err = FALSE
     if(any(ssI$first == ssI$last)) 
     {
       message('Items without score variation:')
       print(as.character(ssI$item_id[ssI$first == ssI$last]))
-      stop('One or more items are without score variation')
+      err = TRUE
     }
     if(any(ssIS$item_score[ssI$first] !=0))
     {
-      # to do: check in interaction model
+
       message('Items without a zero score category')
       print(as.character(ssI$item_id[ssIS$item_score[ssI$first] !=0]))
-      stop('Minimum score for an item must be zero')
+      err = TRUE
     }
+    if(err)
+      stop('Some items have only one response category or lack a zero score category',call.=FALSE)
   }
   sufs$ssI = ssI
   

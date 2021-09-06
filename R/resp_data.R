@@ -253,7 +253,8 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
       {
         itm_scr$item_id = ffactor(itm_scr$item_id, levels=design$item_id)
         itm_scr = itm_scr %>%
-          anti_join(x, by=c('item_id','item_score'))
+          semi_join(x, by=c('item_id','item_score'))
+        # bugfix: anti => semi keeping socres found in data
       }
       if(NROW(itm_scr)>0)
         stop_no_param(itm_scr)
