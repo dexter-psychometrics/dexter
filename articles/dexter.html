@@ -212,7 +212,7 @@
       <h1 data-toc-skip>Dexter: The Fundamentals</h1>
                         <h4 class="author">Ivailo Partchev, Jesse Koops, Timo Bechger, Gunter Maris</h4>
             
-            <h4 class="date">2021-09-16</h4>
+            <h4 class="date">2021-09-19</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/dexter.Rmd"><code>vignettes/dexter.Rmd</code></a></small>
       <div class="hidden name"><code>dexter.Rmd</code></div>
@@ -226,7 +226,7 @@ img{ border:none;}
 </style>
 <p><strong>Dexter</strong> is an R <span class="citation">(R Development Core Team 2005)</span> package intended as a robust and fairly comprehensive system for managing and analyzing test data organized in booklets. It includes facilities for importing and managing test data, assessing and improving the quality of data through basic test-and-item analysis, fitting an IRT model, and computing various estimates of ability.</p>
 <p><strong>Dexter</strong> differs from other psychometric software both in terms of the tools it includes as in those it omits. The data management component is quite developed to promote data integrity. Many psychometric methods not found elsewhere are provided, such as Haberman’s (2007) interaction model generalized for polytomous items, new methods for exploratory and confirmatory DIF analysis, support for the 3DC method of standard setting, and many more. On the other hand, there is no support for multivariate IRT models, 2PL and 3PL models and other methods sufficiently represented in other packages. The central IRT model is a polytomous generalization of the extended marginal Rasch model: we call it the Extended Nominal Response Model (ENORM).</p>
-<p>We believe that, at least in high-stakes tests, the scoring rules should be explicit, and that the psychometric model should be developed from the scoring rules, not vice versa. Correspondingly, a <strong>dexter</strong> project starts with the user supplying the scoring rules for all items in the test. These must be given as a data containing, in any order, three columns named <em>exactly</em> <code>item_id</code>, <code>response</code>, and <code>item_score</code>. An example is provided with the package:</p>
+<p>We believe that, at least in high-stakes tests, the scoring rules should be explicit, and that the psychometric model should be developed from the scoring rules, not vice versa. Correspondingly, a <strong>dexter</strong> project starts with the user supplying the scoring rules for all items in the test. These must be given as a data frame containing, in any order, three columns named <em>exactly</em> <code>item_id</code>, <code>response</code>, and <code>item_score</code>. An example is provided with the package:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org">dplyr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://dexter-psychometrics.github.io/dexter/">dexter</a></span><span class="op">)</span>
@@ -670,50 +670,50 @@ img{ border:none;}
 <tr class="odd">
 <td align="left">S1DoCurse</td>
 <td align="right">1</td>
-<td align="right">-1.347</td>
-<td align="right">0.157</td>
-<td align="right">-1.669</td>
-<td align="right">-1.060</td>
+<td align="right">-1.341</td>
+<td align="right">0.147</td>
+<td align="right">-1.628</td>
+<td align="right">-1.065</td>
 </tr>
 <tr class="even">
 <td align="left">S1DoCurse</td>
 <td align="right">2</td>
 <td align="right">-0.632</td>
-<td align="right">0.141</td>
-<td align="right">-0.897</td>
-<td align="right">-0.346</td>
+<td align="right">0.144</td>
+<td align="right">-0.908</td>
+<td align="right">-0.366</td>
 </tr>
 <tr class="odd">
 <td align="left">S1DoScold</td>
 <td align="right">1</td>
-<td align="right">-0.686</td>
-<td align="right">0.140</td>
-<td align="right">-0.951</td>
-<td align="right">-0.409</td>
+<td align="right">-0.677</td>
+<td align="right">0.142</td>
+<td align="right">-0.955</td>
+<td align="right">-0.415</td>
 </tr>
 <tr class="even">
 <td align="left">S1DoScold</td>
 <td align="right">2</td>
-<td align="right">-0.251</td>
-<td align="right">0.158</td>
-<td align="right">-0.552</td>
-<td align="right">0.051</td>
+<td align="right">-0.248</td>
+<td align="right">0.156</td>
+<td align="right">-0.575</td>
+<td align="right">0.032</td>
 </tr>
 <tr class="odd">
 <td align="left">S1DoShout</td>
 <td align="right">1</td>
-<td align="right">0.315</td>
-<td align="right">0.146</td>
-<td align="right">0.011</td>
-<td align="right">0.588</td>
+<td align="right">0.321</td>
+<td align="right">0.147</td>
+<td align="right">0.045</td>
+<td align="right">0.606</td>
 </tr>
 <tr class="even">
 <td align="left">S1DoShout</td>
 <td align="right">2</td>
-<td align="right">0.385</td>
-<td align="right">0.207</td>
-<td align="right">-0.016</td>
-<td align="right">0.793</td>
+<td align="right">0.389</td>
+<td align="right">0.221</td>
+<td align="right">-0.100</td>
+<td align="right">0.755</td>
 </tr>
 </tbody>
 </table>
