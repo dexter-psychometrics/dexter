@@ -806,11 +806,22 @@ get_resp_matrix = function(dataSrc, qtpredicate=NULL, env=NULL)
   {
     x = get_responses_(dataSrc, qtpredicate = qtpredicate, columns = c('person_id','item_id','item_score'), env = env) 
 
-    if(!is.factor(x$person_id))
+    if(is.factor(x$person_id))
+    {
+      x$person_id = droplevels(x$person_id)
+    } else
+    {
       x$person_id = ffactor(x$person_id)
+    }
     
-    if(!is.factor(x$item_id))
+    if(is.factor(x$item_id))
+    {
+      x$item_id = droplevels(x$item_id)
+    } else
+    {
       x$item_id = ffactor(x$item_id)
+    }
+      
   }
   out = matrix(NA_integer_, nlevels(x$person_id),nlevels(x$item_id))
   fill_resp_matrix(x$person_id, x$item_id, x$item_score, out)

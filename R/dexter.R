@@ -842,11 +842,24 @@ get_rules = function(db)
 #'
 #' @param db a connection to a dexter database, i.e. the output of \code{start_new_project}
 #' or \code{open_project}
-#' @return A data frame with columns: booklet_id, n_persons and n_items.
+#' @return A data frame with columns: booklet_id, n_persons, n_items and booklet_max_score. 
+#' booklet_max_score gives the maximum theoretically possible score according to the scoring rules
 #'
 get_booklets = function(db) {
-  dbGetQuery(db, 'SELECT dxbooklets.*, n_items, n_persons FROM dxbooklets 
-                    INNER JOIN dxbooklet_stats USING(booklet_id) ORDER BY booklet_id; ')
+  bk = dbGetQuery(db, 'SELECT dxbooklets.*, n_items, n_persons FROM dxbooklets 
+                        INNER JOIN dxbooklet_stats USING(booklet_id) ORDER BY booklet_id;')
+  if(!'booklet_max_score' %in% colnames(bk))
+  {
+    ms = dbGetQuery(db,
+      "WITH I AS (SELECT item_id, MAX(item_score) AS ms
+        FROM dxscoring_rules GROUP BY item_id)
+      
+      SELECT booklet_id, SUM(ms) AS booklet_max_score
+        FROM dxbooklet_design INNER JOIN I USING(item_id)
+          GROUP BY booklet_id;")
+    bk = inner_join(bk,ms,by='booklet_id')
+  }
+  bk
 }
 
 
