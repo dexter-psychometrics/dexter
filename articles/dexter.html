@@ -212,7 +212,7 @@
       <h1 data-toc-skip>Dexter: The Fundamentals</h1>
                         <h4 class="author">Ivailo Partchev, Jesse Koops, Timo Bechger, Gunter Maris</h4>
             
-            <h4 class="date">2021-09-19</h4>
+            <h4 class="date">2021-10-27</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/dexter.Rmd"><code>vignettes/dexter.Rmd</code></a></small>
       <div class="hidden name"><code>dexter.Rmd</code></div>
@@ -283,8 +283,8 @@ img{ border:none;}
 <p>Of course, the <code>item_id</code> must be exactly as specified in the scoring rules. Functions like <code>get_booklets</code>, <code>get_items</code> and <code>get_persons</code> help users keep track of what has been entered in the database:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/get_booklets.html">get_booklets</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></code></pre></div>
-<pre><code>##   booklet_id n_items n_persons
-## 1        agg      24       316</code></pre>
+<pre><code>##   booklet_id n_items n_persons booklet_max_score
+## 1        agg      24       316                48</code></pre>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_items.html">get_items</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <pre><code>##       item_id behavior mode blame situation
@@ -670,50 +670,50 @@ img{ border:none;}
 <tr class="odd">
 <td align="left">S1DoCurse</td>
 <td align="right">1</td>
-<td align="right">-1.341</td>
-<td align="right">0.147</td>
-<td align="right">-1.628</td>
-<td align="right">-1.065</td>
+<td align="right">-1.317</td>
+<td align="right">0.159</td>
+<td align="right">-1.605</td>
+<td align="right">-0.983</td>
 </tr>
 <tr class="even">
 <td align="left">S1DoCurse</td>
 <td align="right">2</td>
-<td align="right">-0.632</td>
-<td align="right">0.144</td>
-<td align="right">-0.908</td>
-<td align="right">-0.366</td>
+<td align="right">-0.631</td>
+<td align="right">0.138</td>
+<td align="right">-0.907</td>
+<td align="right">-0.369</td>
 </tr>
 <tr class="odd">
 <td align="left">S1DoScold</td>
 <td align="right">1</td>
-<td align="right">-0.677</td>
+<td align="right">-0.672</td>
 <td align="right">0.142</td>
-<td align="right">-0.955</td>
-<td align="right">-0.415</td>
+<td align="right">-0.938</td>
+<td align="right">-0.402</td>
 </tr>
 <tr class="even">
 <td align="left">S1DoScold</td>
 <td align="right">2</td>
-<td align="right">-0.248</td>
-<td align="right">0.156</td>
-<td align="right">-0.575</td>
-<td align="right">0.032</td>
+<td align="right">-0.257</td>
+<td align="right">0.161</td>
+<td align="right">-0.550</td>
+<td align="right">0.054</td>
 </tr>
 <tr class="odd">
 <td align="left">S1DoShout</td>
 <td align="right">1</td>
-<td align="right">0.321</td>
+<td align="right">0.311</td>
 <td align="right">0.147</td>
-<td align="right">0.045</td>
-<td align="right">0.606</td>
+<td align="right">0.027</td>
+<td align="right">0.584</td>
 </tr>
 <tr class="even">
 <td align="left">S1DoShout</td>
 <td align="right">2</td>
-<td align="right">0.389</td>
-<td align="right">0.221</td>
-<td align="right">-0.100</td>
-<td align="right">0.755</td>
+<td align="right">0.394</td>
+<td align="right">0.213</td>
+<td align="right">-0.008</td>
+<td align="right">0.827</td>
 </tr>
 </tbody>
 </table>
