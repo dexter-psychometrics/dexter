@@ -136,9 +136,7 @@ calibrate_CML_sol = function(scoretab, design, sufI, a, first, last, nIter, fixe
   bk_design = split(design, design$booklet_id,drop=TRUE)
   bk_scoretab = split(scoretab, scoretab$booklet_id,drop=TRUE)
   
-  pb = get_prog_bar()
-  on.exit({pb$close()})
-  
+
   if (is.null(fixed_b)) # if no fixed parameters
   {
     nn= sum(sufI)
@@ -161,7 +159,6 @@ calibrate_CML_sol = function(scoretab, design, sufI, a, first, last, nIter, fixe
       {
         return(calibrate_Bayes(scoretab, design, sufI, a, first, last,  nIter, fixed_b=fixed_b))
       }
-      pb$tick()
     }
     ie_iter=iter
     if (!converged) warning(paste('Implicit Equations not Converged in',as.character(nIter),"iterations"))
@@ -213,10 +210,9 @@ calibrate_CML_sol = function(scoretab, design, sufI, a, first, last, nIter, fixe
         return(calibrate_Bayes(scoretab, design, sufI, a, first, last,  nIter, fixed_b=fixed_b))
       }
       
-      pb$tick()
       if (nr_iter==2) scale=1
     }
-    close(pb)
+
     if (!converged) warning(paste('Newton-Raphson not Converged in',as.character(nr_iter),"iterations"))
   }else  ### if fixed parameters
   {
@@ -232,7 +228,7 @@ calibrate_CML_sol = function(scoretab, design, sufI, a, first, last, nIter, fixe
     
     converged=FALSE
     iter=0
-    pb = txtProgressBar(min=0, max=nIter)
+
     while ((!converged)&&(iter<=nIter))
     {
       iter=iter+1
@@ -247,7 +243,7 @@ calibrate_CML_sol = function(scoretab, design, sufI, a, first, last, nIter, fixe
       {
         return(calibrate_Bayes(scoretab, design, sufI, a, first, last,  nIter, fixed_b=fixed_b))
       }
-      pb$tick()
+
     }
     ie_iter=iter
     if (!converged) warning(paste('Implicit Equations not Converged in',as.character(nIter),"iterations"))
@@ -291,10 +287,9 @@ calibrate_CML_sol = function(scoretab, design, sufI, a, first, last, nIter, fixe
         return(calibrate_Bayes(scoretab, design, sufI, a, first, last,  nIter, fixed_b=fixed_b))
       }
       
-      pb$tick()
       scale=1
     }
-    close(pb)
+
     if (!converged) warning(paste('Newton-Raphson not Converged in',as.character(nr_iter),"iterations"))
   }
   

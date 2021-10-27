@@ -38,7 +38,7 @@ the score given theta}
 }
 }
 \description{
-returns information function, expected score function, score distribution, or score simulation function 
+returns information function, expected score function, score simulation function, or score distribution 
 for a single item, an arbitrary group of items or all items
 }
 \examples{

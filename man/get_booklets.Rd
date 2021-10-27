@@ -11,7 +11,8 @@ get_booklets(db)
 or \code{open_project}}
 }
 \value{
-A data frame with columns: booklet_id, n_persons and n_items.
+A data frame with columns: booklet_id, n_persons, n_items and booklet_max_score. 
+booklet_max_score gives the maximum theoretically possible score according to the scoring rules
 }
 \description{
 Retrieve information about the booklets entered in the db so far

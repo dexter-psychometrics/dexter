@@ -89,10 +89,10 @@ test_that('calibration of verbal aggression dataset matches oplm results, with f
   
   # check for correct error message
   # no score variation
-  expect_error(fit_enorm(db, item_score == 1), regexp='score.+variation')
+  expect_error(fit_enorm(db, item_score == 1), regexp='one response category')
   # no 0 score category
   expect_output(
-    expect_error(fit_enorm(db, item_score > 0 | item_id!='S1DoShout'), regexp='minimum.+must.+(zero)|0', ignore.case=TRUE),
+    expect_error(fit_enorm(db, item_score > 0 | item_id!='S1DoShout'), regexp='zero score category', ignore.case=TRUE),
     regexp='S1DoShout')
   
   # this is a hard calibration, many booklets. Takes too long on solaris

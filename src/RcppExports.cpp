@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // fast_factor
 SEXP fast_factor(SEXP x, bool as_int);
 RcppExport SEXP _dexter_fast_factor(SEXP xSEXP, SEXP as_intSEXP) {
