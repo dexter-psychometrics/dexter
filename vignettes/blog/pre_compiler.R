@@ -131,6 +131,7 @@ compile_all_new = function()
   {
     if(!f %in% names(rmd) || file.mtime(p(f)) > file.mtime(p(rmd[f])))
     {
+      print(f)
       pre_compile(f)
     } 
   }

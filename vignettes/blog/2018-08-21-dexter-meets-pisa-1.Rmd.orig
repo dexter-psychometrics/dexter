@@ -8,6 +8,8 @@ categories:
   - Psychometrics
   - R
 tags: []
+editor_options: 
+  chunk_output_type: console
 ---
 
 We could have issued a **WARNING: This ~~bag~~ package is not a toy!** But we can do better. In a series of posts, we will discuss how to use **dexter** to analyze data from large scale educational assessments, such as PISA. The task is a rather imposing one, not only in the amount of data to be crunched, but mostly in the number of issues to discuss. 
@@ -24,22 +26,24 @@ The first step is to download the scored cognitive item response data file from 
 
 ```{r,  message=FALSE, warning=FALSE}
 library(dexter)
-library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(readr)
 library(SAScii)
 url1 = "http://www.oecd.org/pisa/pisaproducts/INT_COG12_S_DEC03.zip"
 url2 = "http://www.oecd.org/pisa/pisaproducts/PISA2012_SAS_scored_cognitive_item.sas"
 
-zipfile = 'cogn.zip'
+zipfile = tempfile(fileext='.zip')
 download.file(url1, zipfile)
 fname = unzip(zipfile, list=TRUE)$Name[1]
 unzip(zipfile, files = fname, overwrite=TRUE)
+unlink(zipfile)
 ```
 
 Next, parse the data into a data frame (a tibble, to be more precise) by using the SAS control file and the `parse.SAScii()` function from the `SAScii` package. For the sake of simplicity, we recode both codes for missing values (i.e., 7 for N/A, and 8 for 'not reached') to `NA`, although we admit that it could be worth to pay more attention to the structure of the missing values. This is, however, beyond the scope of this paper.
 
 ```{r,  message=FALSE, warning=FALSE}
 dict_scored <- parse.SAScii(sas_ri = url2)
-unlink(zipfile)
 
 data_scored <- read_fwf(
   file = fname, 
@@ -62,7 +66,7 @@ rules = gather(data_scored, key='item_id', value='response', starts_with('PM')) 
 
 head(rules)
 
-db = start_new_project(rules, "pisa2012.db", covariates=list(
+db = start_new_project(rules, "/Rdatasets/pisa2012.db", person_properties=list(
     cnt = '<unknown country>',
     schoolid = '<unknown country>',
     stidstd = '<unknown student>'
@@ -73,14 +77,12 @@ db = start_new_project(rules, "pisa2012.db", covariates=list(
 Now we can add the data, booklet by booklet:
 
 ```{r, message=FALSE, warning=FALSE}
-data_scored %>% 
-  group_by(BOOKID) %>%
-  do({
-    rsp = select_if(., function(x) !all(is.na(x)))
-    booklet_id = .$BOOKID[1]
-    add_booklet(db, rsp, booklet_id)
-    data.frame()
-  })
+for(bkdata in split(data_scored, data_scored$BOOKID))
+{
+  # remove columns tahta only have NA values
+  bkrsp = bkdata[,apply(bkdata,2,function(x) !all(is.na(x)))]
+  add_booklet(db, bkrsp, booklet_id = bkdata$BOOKID[1])
+}
 
 rm(data_scored)
 ```
@@ -88,16 +90,18 @@ rm(data_scored)
 At some later stage, we will discuss a _market basket approach_ to the definition and estimation of competence [@Mislevy98; @Zwitser2017]. For our purposes, the market basket is the subset of items that is administered in _every_ country (though not to every student, as we have a multi-booklet design within each country). We are not dealing with the market basket approach now, but we will compute an item property, 'item belongs / does not belong to the basket', and we will add it to the data base for later use: 
 
 ```{r, message=FALSE, warning=FALSE}
-item_by_cnt = get_responses(db, columns=c('person_id', 'item_id', 'item_score', 'cnt')) %>% 
-  group_by(cnt,item_id) %>%
-  summarise() 
+item_by_cnt = get_responses(db, columns=c('item_id', 'cnt')) %>% 
+  distinct()
 
 market_basket = Reduce(intersect, split(item_by_cnt$item_id, item_by_cnt$cnt))
 
-item_properties = dbGetQuery(db, "SELECT item_id FROM dxItems") %>% 
-  mutate(in_basket = item_id %in% market_basket)
+add_item_properties(db, 
+                    tibble(item_id = market_basket, in_basket = 1),
+                    default_values = list(in_basket = 0L))
+```
 
-add_item_properties(db, item_properties)
+```{r}
+DBI::dbExecute(db,'VACUUM;')
 ```
 
 Our data base is complete now (took only a couple of minutes), and we can, and should, do some exploratory analysis to assess the quality of the items and identify possible problems. In a PISA study, this step is usually done at national level, and involves the computation of various statistics derived from classical test theory (CTT). __dexter__ has excellent facilities for this kind of analysis, but they are best employed in interactive mode. The two interactive functions, `iTIA` and `iModels`, are set up such that all vital computations are performed at the beginning. This means that, with a survey of this size, one must wait for about a minute for a CTT analysis of all booklets, including test and item level statistics and distractor plots; after that, results can be browsed without noticeable delay. The waiting time for a deeper analysis of a separate booklet, including the three item-total regressions, is about a couple of seconds. 
@@ -123,7 +127,7 @@ The plausible values in the original PISA study are drawn with a prior distribut
 The algorithm used in **dexter** is based on composition (sample a proposal value, simulate data from it, accept if the simulated sum score matches the observed one), and uses recycling for higher speed (rejected values are saved for some other persons). See @MM for details.
 
 ```{r, message=FALSE, warning=FALSE}
-system.time({pv = plausible_values(db, parms=item_parms, nPV=5)})
+pv = plausible_values(db, parms=item_parms, nPV=5)
 head(pv)
 ```
 
@@ -141,7 +145,7 @@ First, download the student questionnaire file, which contains, along with a hug
 url3 = 'http://www.oecd.org/pisa/pisaproducts/INT_STU12_DEC03.zip'
 url4 = 'http://www.oecd.org/pisa/pisaproducts/PISA2012_SAS_student.sas'
  
-zipfile = 'quest.zip'
+zipfile = tempfile(fileext='.zip')
 download.file(url3, zipfile)
 fname = unzip(zipfile, list=TRUE)$Name[1]
 unzip(zipfile, files = fname, overwrite=TRUE)
@@ -165,11 +169,10 @@ From the **dexter** data base, extract student identification variables and add 
 
 
 ```{r, message=FALSE, warning=FALSE}
-ids = get_persons(db)
-scores = ids %>% 
-  left_join(pv, by='person_id') %>% 
+scores = get_persons(db) %>% 
+  inner_join(pv, by='person_id') %>% 
   setNames(toupper(names(.))) %>% 
-  inner_join(data_quest)
+  inner_join(data_quest, by = c("CNT", "SCHOOLID", "STIDSTD"))
 ```
 
 Using just the first PV out of five, compare unweighted and weighted country means:
@@ -191,11 +194,12 @@ To estimate country means and their standard estimates as in PISA, we use packag
 
 ```{r, message=FALSE, warning=FALSE}
 library(survey)
+
 ds =  svrepdesign(repweights = '^W_FSTR',
       weights = ~W_FSTUWT,
       combined.weights = TRUE,
       data = scores)
-rm(scores,ps1,ps2,pv,ids,data_quest)
+
 ```
 
 The following function will do all computations explained in the PISA Technical Manual. Essentially, we compute, for each country and for each of the five PV, a large number of differently weighted means. The replicate weights are chosen such that, in each replication, the data for half of the schools is ignored while the data for the other half is doubled; the replications differ in which schools fall into the two halves. The uncertainty due to having a sample of schools and students rather than the whole population is reflected in the differences between replications, while the uncertainty due to psychometric measurement is reflected in differences between the five PV. The two kinds of error, sampling variance and imputation variance, are then combined with a simple formula (see the arrow in the code):
