@@ -299,39 +299,44 @@ Psychometrika. Vol. 80, no. 2, 317-340.</p>
     <div class='dont-index'><p>A plot of the result is produced by the function <code><a href='plot.DIF_stats.html'>plot.DIF_stats</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='va'>db</span> <span class='op'>=</span> <span class='fu'><a href='start_new_project.html'>start_new_project</a></span><span class='op'>(</span><span class='va'>verbAggrRules</span>, <span class='st'>":memory:"</span>, person_properties<span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>gender<span class='op'>=</span><span class='st'>'unknown'</span><span class='op'>)</span><span class='op'>)</span>
-<span class='fu'><a href='add_booklet.html'>add_booklet</a></span><span class='op'>(</span><span class='va'>db</span>, <span class='va'>verbAggrData</span>, <span class='st'>"agg"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='message'>no column `person_id` provided, automatically generating unique person id's</span></div><div class='output co'>#&gt; $items
-#&gt;  [1] "S1DoCurse"   "S1DoScold"   "S1DoShout"   "S1WantCurse" "S1WantScold"
-#&gt;  [6] "S1WantShout" "S2DoCurse"   "S2DoScold"   "S2DoShout"   "S2WantCurse"
-#&gt; [11] "S2WantScold" "S2WantShout" "S3DoCurse"   "S3DoScold"   "S3DoShout"  
-#&gt; [16] "S3WantCurse" "S3WantScold" "S3WantShout" "S4DoCurse"   "S4DoScold"  
-#&gt; [21] "S4DoShout"   "S4WantCurse" "S4WantScold" "S4WantShout"
-#&gt; 
-#&gt; $person_properties
-#&gt; [1] "gender"
-#&gt; 
-#&gt; $columns_ignored
-#&gt; [1] "anger"
-#&gt; </div><div class='input'><span class='va'>dd</span> <span class='op'>=</span> <span class='fu'>DIF</span><span class='op'>(</span><span class='va'>db</span>,person_property<span class='op'>=</span><span class='st'>"gender"</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>dd</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Test for DIF: Chi-square = 114.752, df = 47, p = &lt; 0.0006</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>dd</span><span class='op'>)</span>
-</div><div class='img'><img src='DIF-1.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span><span class='op'>(</span><span class='va'>dd</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; List of 5
-#&gt;  $ DIF_overall :List of 3
-#&gt;   ..$ stat: num 115
-#&gt;   ..$ df  : num 47
-#&gt;   ..$ p   : num 1.36e-07
-#&gt;  $ DIF_pair    : num [1:48, 1:48] 0 -0.603 -0.77 -0.789 0.103 ...
-#&gt;  $ Delta_R     : num [1:48, 1:48] 0 -0.3571 -0.397 -0.4113 0.0522 ...
-#&gt;  $ group_labels: chr [1:2] "Female" "Male"
-#&gt;  $ items       :'data.frame':	48 obs. of  2 variables:
-#&gt;   ..$ item_id   : chr [1:48] "S1DoCurse" "S1DoCurse" "S1DoScold" "S1DoScold" ...
-#&gt;   ..$ item_score: int [1:48] 1 2 1 2 1 2 1 2 1 2 ...
-#&gt;  - attr(*, "class")= chr [1:2] "DIF_stats" "list"</div><div class='input'>
-<span class='fu'><a href='close_project.html'>close_project</a></span><span class='op'>(</span><span class='va'>db</span><span class='op'>)</span>
-
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='va'>db</span> <span class='op'>=</span> <span class='fu'><a href='start_new_project.html'>start_new_project</a></span><span class='op'>(</span><span class='va'>verbAggrRules</span>, <span class='st'>":memory:"</span>, person_properties<span class='op'>=</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>gender<span class='op'>=</span><span class='st'>'unknown'</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='add_booklet.html'>add_booklet</a></span><span class='op'>(</span><span class='va'>db</span>, <span class='va'>verbAggrData</span>, <span class='st'>"agg"</span><span class='op'>)</span></span>
+<span class='r-msg co'><span class='r-pr'>#&gt;</span> no column `person_id` provided, automatically generating unique person id's</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> $items</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [1] "S1DoCurse"   "S1DoScold"   "S1DoShout"   "S1WantCurse" "S1WantScold"</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  [6] "S1WantShout" "S2DoCurse"   "S2DoScold"   "S2DoShout"   "S2WantCurse"</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [11] "S2WantScold" "S2WantShout" "S3DoCurse"   "S3DoScold"   "S3DoShout"  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [16] "S3WantCurse" "S3WantScold" "S3WantShout" "S4DoCurse"   "S4DoScold"  </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [21] "S4DoShout"   "S4WantCurse" "S4WantScold" "S4WantShout"</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> $person_properties</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "gender"</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> $columns_ignored</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "anger"</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> </span>
+<span class='r-in'><span class='va'>dd</span> <span class='op'>=</span> <span class='fu'>DIF</span><span class='op'>(</span><span class='va'>db</span>,person_property<span class='op'>=</span><span class='st'>"gender"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>dd</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Test for DIF: Chi-square = 114.752, df = 47, p = &lt; 0.0006</span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/graphics/plot.default.html'>plot</a></span><span class='op'>(</span><span class='va'>dd</span><span class='op'>)</span></span>
+<span class='r-plt img'><img src='DIF-1.png' alt='' width='700' height='433' /></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/utils/str.html'>str</a></span><span class='op'>(</span><span class='va'>dd</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> List of 5</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  $ DIF_overall :List of 3</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   ..$ stat: num 115</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   ..$ df  : num 47</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   ..$ p   : num 1.36e-07</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  $ DIF_pair    : num [1:48, 1:48] 0 -0.603 -0.77 -0.789 0.103 ...</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  $ Delta_R     : num [1:48, 1:48] 0 -0.3571 -0.397 -0.4113 0.0522 ...</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  $ group_labels: chr [1:2] "Female" "Male"</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  $ items       :'data.frame':	48 obs. of  2 variables:</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   ..$ item_id   : chr [1:48] "S1DoCurse" "S1DoCurse" "S1DoScold" "S1DoScold" ...</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   ..$ item_score: int [1:48] 1 2 1 2 1 2 1 2 1 2 ...</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>  - attr(*, "class")= chr [1:2] "DIF_stats" "list"</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'><a href='close_project.html'>close_project</a></span><span class='op'>(</span><span class='va'>db</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

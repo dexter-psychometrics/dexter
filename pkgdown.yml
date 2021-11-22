@@ -14,6 +14,7 @@ articles:
   blog/2018-07-13-dextermst: 2018-07-13-dextermst.html
   blog/2018-08-07-distractor-plots-in-dexter: 2018-08-07-distractor-plots-in-dexter.html
   blog/2018-08-21-dexter-0-8-1-submitted: 2018-08-21-dexter-0-8-1-submitted.html
+  blog/2018-08-21-dexter-meets-pisa-1: 2018-08-21-dexter-meets-pisa-1.html
   blog/2018-08-31-dexter-meets-pisa-the-market-basket-approach: 2018-08-31-dexter-meets-pisa-the-market-basket-approach.html
   blog/2018-09-22-100: 2018-09-22-100.html
   blog/2018-09-24-the-scoring-game: 2018-09-24-the-scoring-game.html
@@ -43,5 +44,5 @@ articles:
   blog/about: about.html
   dexter: dexter.html
   profile-plots: profile-plots.html
-last_built: 2021-10-27T09:50Z
+last_built: 2021-11-22T09:36Z
 

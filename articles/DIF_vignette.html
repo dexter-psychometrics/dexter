@@ -212,7 +212,7 @@
       <h1 data-toc-skip>Exploring Differential Items Functioning with Dexter</h1>
                         <h4 class="author">Timo Bechger</h4>
             
-            <h4 class="date">2021-10-27</h4>
+            <h4 class="date">2021-11-22</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/DIF_vignette.Rmd"><code>vignettes/DIF_vignette.Rmd</code></a></small>
       <div class="hidden name"><code>DIF_vignette.Rmd</code></div>
@@ -259,7 +259,7 @@ img{ border:none;}
 <p>As usual in DIF testing, the procedure we have described is exploratory and there is no guarantee that the results can be interpreted easily. Furthermore, the plots will become cluttered when there are many items. If possible, we therefore recommend to use the profile plots. Note that with three groups, the procedure can be applied to each pair of groups but this will not take us very far when there are many more groups.</p>
 <p>Finally, note that sorting can help to make the picture more interpretable. For example, we can sort on ‘want’ versus ‘do’:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">items</span> <span class="op">=</span> <span class="fu"><a href="../reference/get_items.html">get_items</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span> <span class="op">%&gt;%</span>
+<code class="sourceCode R"><span class="va">items</span> <span class="op">=</span> <span class="fu"><a href="../reference/get_items.html">get_items</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span><span class="op">(</span><span class="va">mode</span>, <span class="va">item_id</span><span class="op">)</span>
   
 <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">dif_gender</span>, items<span class="op">=</span><span class="va">items</span><span class="op">$</span><span class="va">item_id</span><span class="op">)</span></code></pre></div>
