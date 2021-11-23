@@ -30,6 +30,8 @@ pre_compile = function(blog_file_name)
   if(!check_sanity(file.path('vignettes','blog',blog_file_name)))
     stop("sanity check found problems")
   
+  find_install_libs(file.path('vignettes','blog',blog_file_name))
+  
   newf = file.path('vignettes','blog',gsub('\\.orig$','',blog_file_name))
   # select = dplyr::select
   # knitr::knit(file.path('vignettes','blog',blog_file_name), output = newf,
@@ -104,12 +106,15 @@ find_install_libs = function(file_names)
 {
   libs = sapply(file_names, function(fn) {
     txt = suppressWarnings({paste(readLines(fn),collapse='\n')})
-    str_match_all(txt,'library\\((\\w+)\\)')[[1]][,2]
+    str_match_all(txt,'library\\(([^\\)]+)\\)')[[1]][,2]
   }) %>%
     unlist() %>%
     unique()
   
-  install.packages(setdiff(libs, rownames(installed.packages())))  
+  libs = setdiff(libs, rownames(installed.packages()))
+  if(length(libs)>0)
+    install.packages(libs)  
+  invisible(NULL)
 }
 
 

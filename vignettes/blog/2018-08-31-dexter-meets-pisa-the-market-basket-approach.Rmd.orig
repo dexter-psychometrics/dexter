@@ -39,7 +39,6 @@ On to work, then.
 ```{r,  message=FALSE, warning=FALSE}
 library(dexter)
 library(dplyr)
-library(ggplot2)
 db = open_project('/Rdatasets/pisa2012.db')
 ```
 
@@ -48,20 +47,28 @@ Note that the nice data base that we created [last time](2018-08-21-dexter-meets
 As a start, let us draw some plausible values (one per person is enough). This is basically the PISA approach, and even if we don't get exactly their numbers, it is some basis for comparison. First, extract response data with two extra variables added: (i) the country (`cnt`), which will be necessary for country-specific IRT modeling, and (ii) `in_basket`, the item property that indicates whether an item belongs to the market basket (most do). Then, select just the responses to the items in the basket:
 
 ```{r, message=FALSE, warning=FALSE, results='hide'}
-pv = plausible_values(db, predicate = in_basket==1, nPV=1, covariates='cnt')
+pv = plausible_values(db, nPV=1, covariates='cnt')
 ```
 
-For the country-specific estimation, we have to trick a bit. We know in advance that there are two instances in which an item did not get a correct response in one country, so we have to do a minimal adjustment to be able to fit the IRT model. Other than that, all we have to do is group the data by country and execute the `plausible_scores` function in a `do`:
+For the country-specific estimation, we have to trick a bit. We know in advance that there are three instances in which an item did not get a single correct response in a particular country, so we have to do a minimal adjustment to be able to fit the IRT model. Other than that, all we have to do is group the data by country and execute the `plausible_scores` function in a `do`:
 
 ```{r, message=FALSE, warning=FALSE, results='hide'}
+basket = get_items(db) %>% 
+  filter(in_basket == 1) %>%
+  pull(item_id)
+
+basket = setdiff(basket, 
+                 c('PM828Q01','PM909Q01', 'PM985Q03'))
+
+
 resp = get_responses(db, columns=c('person_id', 'item_id', 'item_score', 'cnt'))
 
 ps = resp %>%
-  filter( !( (cnt=="VNM" & item_id=="PM828Q01") | 
+  filter( !( (cnt=="VNM" & item_id=='PM828Q01') | 
              (cnt=='JOR' & item_id=='PM909Q01') |
              (cnt=='BRA' & item_id=='PM985Q03')) ) %>%
   group_by(cnt) %>%
-  do({plausible_scores(., nPS=1)})
+  do({plausible_scores(., items = basket, nPS=1)})
 ```
 
 
@@ -69,7 +76,7 @@ Almost done. Combine the plausible values and the plausible scores, group by cou
 
 ```{r, message=FALSE, warning=FALSE}
 league = ps %>%
-  left_join(pv, by=c('cnt','person_id')) %>%
+  inner_join(pv, by=c('cnt','person_id')) %>%
   group_by(cnt) %>%
   summarise(Traditional=mean(PV1, na.rm=TRUE), Basket=mean(PS1))
 plot(league$Traditional, league$Basket, xlab="Traditional", ylab="Market basket")
