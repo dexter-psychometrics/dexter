@@ -125,10 +125,6 @@ add_item_properties(db,
 ```
 
 
-```r
-DBI::dbExecute(db,'VACUUM;')
-```
-
 ```
 ## [1] 0
 ```
@@ -200,6 +196,7 @@ url3 = 'http://www.oecd.org/pisa/pisaproducts/INT_STU12_DEC03.zip'
 url4 = 'http://www.oecd.org/pisa/pisaproducts/PISA2012_SAS_student.sas'
  
 zipfile = tempfile(fileext='.zip')
+options(timeout = max(300, getOption("timeout")))
 download.file(url3, zipfile)
 fname = unzip(zipfile, list=TRUE)$Name[1]
 unzip(zipfile, files = fname, overwrite=TRUE)
@@ -274,18 +271,12 @@ pvby = function(formula, by, design, FUN, ...) {
    m   = 1 + 1 / npv
    est = svyby(formula, by, design, FUN, ...)
    nv = attr(est,"svyby")$nstats
-   e  = coef(est)
-   ne = length(e)
-   d  = c(ne %/% nv, nv %/% npv, npv)   
-   e = array(e, dim = d)
-   v = array(SE(est)^2, dim = d)
-   estimate = apply(e, 1:2, mean)
-   sampvar  = apply(v, 1:2, mean)
-   impuvar  = apply(e, 1:2, var)
+   e = est[,2:(nv+1)]
+   v = est[,(nv+2):(nv+nv+1)]^2
+   estimate = apply(e, 1, mean)
+   sampvar  = apply(v, 1, mean)
+   impuvar  = apply(e, 1, var)
    stderr   = sqrt(sampvar + m * impuvar) # <======
-   rownames(estimate) = rownames(stderr) = rownames(SE(est))
-   colnames(estimate) = paste("stat", 1:ncol(estimate), sep = "")
-   colnames(stderr) = paste("SE", 1:ncol(stderr), sep = "")
    res = cbind(estimate, stderr)
    res
 }
