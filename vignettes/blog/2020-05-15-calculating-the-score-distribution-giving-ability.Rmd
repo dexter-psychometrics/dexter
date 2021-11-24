@@ -2,7 +2,7 @@
 title: Calculating the score distribution given ability
 author: Timo Bechger
 date: '2020-05-15'
-bibliography: dexterMST.bib
+bibliography: dexter.bib
 slug: calculating-the-score-distribution-giving-ability
 categories:
   - Psychometrics

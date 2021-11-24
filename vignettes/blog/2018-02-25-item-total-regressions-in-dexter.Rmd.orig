@@ -17,7 +17,7 @@ Regression is the conditional expectation of a variable given the value of anoth
 
 ```{r,echo=FALSE, message=FALSE}
 library(dexter)
-db=open_project('ALLRET.db')
+db=open_project('/Rdatasets/ALLRET.db')
 x = fit_inter(db, booklet_id=='TF30')
 plt = x$inputs$plt[x$inputs$plt$item_id=="RT045_AN",]
 plot(plt$booklet_score,plt$meanScore,col="coral",pch=20, 

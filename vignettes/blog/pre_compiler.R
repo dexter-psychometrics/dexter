@@ -95,6 +95,8 @@ check_sanity = function(fn)
     print(ddd)
     sane = FALSE
   }
+  
+  # check for files that are not in Rdatasets
   # will add more whenever dexter has a (soft) deprecation or similar
   sane
 }
@@ -157,6 +159,60 @@ blog_yaml = function()
     arrange(desc(fn))
   
   cat(paste(fls$yml,collapse='\n'))
+}
+
+
+blurb_info = function(fns, n_lines=10)
+{
+  lapply(fns, function(fn)
+  {
+    lines = readLines(file.path('vignettes','blog',fn))
+    lines = lines[nchar(trimws(lines))>0]
+    start = max(which(grepl('^---',lines))) + 1
+    if(startsWith(lines[start],'#')) start = start+1
+    end = min(start + n_lines - 1,length(lines))
+    if(end != length(lines))
+    {
+      if(sum(lines[start:end]=='$$') %% 2 == 1)
+      {
+        end = end + min(which(lines[(end+1):length(lines)] == '$$'))
+      }
+      if(sum(startsWith(lines[start:end],'```')) %% 2 == 1)
+      {
+        end = end + min(which(lines[(end+1):length(lines)] == '```'))
+      }
+    }
+
+    tibble(
+      filename = fn,
+      blurb = paste(lines[start:end],collapse='\n'),
+      abbreviated = end != length(lines),
+      author = gsub(' * ',', ', trimws(str_extract(lines[startsWith(lines,'author:')][1],'(?<=:).+')) , fixed=TRUE),
+      title = trimws(str_extract(lines[startsWith(lines,'title:')][1],'(?<=:).+')),
+      href = gsub('.Rmd','',fn,fixed=TRUE)
+    )
+  }) %>%
+    bind_rows()
+}
+
+
+
+make_blog_index = function()
+{
+  fn = list.files('vignettes/blog',pattern='.Rmd$',full.names=FALSE)
+  fn = fn[grepl('^\\d',fn)]
+  
+  content = blurb_info(fn, 4) %>%
+    mutate(rdmore = if_else(abbreviated,sprintf('<a href="%s">read more...</a>',href),'')) %>%
+    mutate(txt = sprintf('<h2><a href="%s">%s</a></h2><p class="blog-authors">%s</p><p>\n%s\n</p>%s',
+                         href,title,author,blurb,rdmore)) %>%
+    arrange(desc(filename)) %>%
+    pull(txt)
+  
+  style = 'img{max-width:8cm;max-height:8cm;display:block;}\n#refs{display:none;}\np.blog-authors{font-style:italic}'
+  
+  cat(sprintf('---\ntitle: Dexterities\nbibliography: dexter.bib\n---\n\n<style>\n%s\n</style>\n\n%s', style, paste(content,collapse='\n')),
+      file='vignettes/blog/index.Rmd')
 }
 
 

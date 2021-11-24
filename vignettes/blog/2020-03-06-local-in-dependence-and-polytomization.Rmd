@@ -2,7 +2,7 @@
 title: Local (in)dependence and polytomization
 author: Timo Bechger
 date: '2020-03-06'
-bibliography: dexterMST.bib
+bibliography: dexter.bib
 slug: local-in-dependence-and-polytomization
 categories:
   - Psychometrics

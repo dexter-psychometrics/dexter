@@ -7,7 +7,7 @@ header-includes:
 - \usepackage{amsmath}
 - \newcommand{\ind}{{\bot\negthickspace\negthickspace\bot\,}}
 - \newcommand{\Prob}{\overset{p}{\rightarrow}}
-bibliography: dexterMST.bib
+bibliography: dexter.bib
 slug: hot-on-the-trail-of-warm
 categories: []
 tags: []

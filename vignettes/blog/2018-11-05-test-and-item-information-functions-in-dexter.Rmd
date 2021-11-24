@@ -2,7 +2,7 @@
 title: Test and item information functions in dexter
 author: Timo Bechger * Jesse Koops * Ivailo Partchev
 date: '2018-11-05'
-bibliography: dexterMST.bib
+bibliography: dexter.bib
 slug: test-and-item-information-functions-in-dexter
 categories:
   - Psychometrics

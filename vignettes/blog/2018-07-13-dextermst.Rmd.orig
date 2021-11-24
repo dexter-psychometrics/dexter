@@ -2,7 +2,7 @@
 title: "dexterMST: dexter for Multi-Stage Tests"
 author: Timo Bechger, Jesse Koops, Robert Zwitser, Ivailo Partchev, Gunter Maris
 date: '2018-07-13'
-bibliography: dexterMST.bib
+bibliography: dexter.bib
 slug: dextermst
 categories:
   - Psychometrics

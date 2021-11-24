@@ -3,7 +3,7 @@ title: And have you seen the Rasch sampler?
 author: Ivailo Partchev
 date: '2021-01-14'
 slug: and-have-you-seen-the-rasch-sampler
-bibliography: dexterMST.bib
+bibliography: dexter.bib
 categories:
   - Psychometrics
   - R
