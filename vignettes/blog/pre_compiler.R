@@ -5,19 +5,7 @@ library(stringr)
 library(RCurl)
 library(dplyr)
 
-# precompile blog function to prevent missing packages on git
-# > pre_compile('ExponentialFamily_Blog.Rmd.orig')
-# static images should be included in blog/img and be referred to with 'img/...'
-# to do: this does not work anymore since moving to dexter-psychometrics
-# refer to blog form within blog [](name)
-# refer to blog from vignette: full link [](https://dexter-psychometrics.github.io/dexter/articles/blog/...)
-# refer to vignette from blog [](../name)
-# refer to function `function_name`
-# I read all datasets from /Rdatasets/... 
-# since not all of them can be made public it can be any dir on your computer outside of 
-# the dexter directory but it's easier if we all keep to /Rdatasets
-# dont use webshot or knitr::include_app( but an iframe
-# internal function call in calculating score distribution, no contract with the user
+
 pre_compile = function(blog_file_name)
 {
   options(dplyr.summarise.inform=FALSE)
@@ -144,23 +132,6 @@ compile_all_new = function()
   }
 }
 
-blog_yaml = function()
-{
-  s = function(n=6) paste0(rep(' ',n),collapse='')
-
-  
-  fls = tibble(fn=list.files('vignettes/blog',pattern='.Rmd$',full.names=FALSE)) %>%
-    filter(grepl('^\\d',fn)) %>%
-    mutate(fn=gsub('\\.Rmd$','',fn)) %>%
-    mutate(bn = gsub('^\\d{4}-\\d{2}-\\d{2}-','',fn)) %>%
-    mutate(bn=gsub('(?<=\\d)-(?=\\d)','.',bn,perl=TRUE)) %>%
-    mutate(bn=gsub('-',' ',bn,fixed=TRUE)) %>%
-    mutate(yml = paste0(s(6),'- text: ',bn,'\n',s(8),'href: articles/blog/',fn)) %>%
-    arrange(desc(fn))
-  
-  cat(paste(fls$yml,collapse='\n'))
-}
-
 
 blurb_info = function(fns, n_lines=10)
 {
@@ -196,22 +167,22 @@ blurb_info = function(fns, n_lines=10)
 }
 
 
-
 make_blog_index = function()
 {
   fn = list.files('vignettes/blog',pattern='.Rmd$',full.names=FALSE)
   fn = fn[grepl('^\\d',fn)]
   
   content = blurb_info(fn, 4) %>%
-    mutate(rdmore = if_else(abbreviated,sprintf('<a href="%s">read more...</a>',href),'')) %>%
-    mutate(txt = sprintf('<h2><a href="%s">%s</a></h2><p class="blog-authors">%s</p><p>\n%s\n</p>%s',
-                         href,title,author,blurb,rdmore)) %>%
+    mutate(rdmore = if_else(abbreviated,sprintf('[read more...](%s)',href),'')) %>%
+    mutate(txt = sprintf('\n## [%s](%s)\n<p class="blog-authors">%s</p><p>\n%s\n</p>%s',
+                         title,href,author,blurb,rdmore)) %>%
     arrange(desc(filename)) %>%
     pull(txt)
   
-  style = 'img{max-width:8cm;max-height:8cm;display:block;}\n#refs{display:none;}\np.blog-authors{font-style:italic}'
+  style = 'img{max-width:8cm;max-height:8cm;display:block;}\n#refs{display:none;}\nsmall.dont-index{display:none;}\np.blog-authors{font-style:italic}'
+  pream = 'title: Dexterities\nbibliography: dexter.bib'
   
-  cat(sprintf('---\ntitle: Dexterities\nbibliography: dexter.bib\n---\n\n<style>\n%s\n</style>\n\n%s', style, paste(content,collapse='\n')),
+  cat(sprintf('---\n%s\n---\n\n<style>\n%s\n</style>\n\n%s', pream, style, paste(content,collapse='\n')),
       file='vignettes/blog/index.Rmd')
 }
 

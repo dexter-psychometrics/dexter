@@ -406,7 +406,7 @@ r_score_IM = function(m, scores)
     s[1:scoretab[1],] = 0
   
   if(scoretab[maxs+1]>0)
-    s[(nrow(s)-scoretab[maxs+1]+1):nrow(s),] = a[last]
+    s[(nrow(s)-scoretab[maxs+1]+1):nrow(s),] = matrix(a[last], nrow=scoretab[maxs+1], ncol = ncol(s), byrow=TRUE)
   
   colnames(s) = m$inputs$ssI$item_id
   
