@@ -1,3 +1,7 @@
+# dexter 1.1.5
+
+* slight change in implementation of DIF. If both datasets do not contain some items, they are now removed after calibration instead of before, making calibration more precise in incomplete designs.
+
 # dexter 1.1.4
 
 * changed sd_score for items in tia_tables() for type='averaged' to the actual sd rather than a weighted average of sd over booklets (which was the case in previous versions) 

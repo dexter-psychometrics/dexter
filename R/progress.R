@@ -15,7 +15,7 @@ get_prog_bar = function(nsteps=NULL, retrieve_data=FALSE, prog_show = show_progr
                         type = if.else(is.null(nsteps),'indeterminate','determinate'),
                         lock=FALSE)
 {
-  caller = as.character(sys.call(-1)[[1]])
+  caller = paste(as.character(sys.call(-1)[[1]]),collapse='_')
   type = match.arg(type)
   if(is.null(global_prog$bar))
   {
@@ -37,7 +37,7 @@ progress_bar = setRefClass('prog_bar',
   methods = list(
     close = function()
     {
-      caller = as.character(sys.call(-1)[[1]])
+      caller = paste(as.character(sys.call(-1)[[1]]),collapse='_')
       if(caller == areas[[1]]$caller)
       {
         areas <<- areas[1]
@@ -86,16 +86,16 @@ progress_bar = setRefClass('prog_bar',
     },
     permission = function()
     {
-      !locked || pcaller == as.character(sys.call(-2)[[1]])
+      !locked || pcaller == paste(as.character(sys.call(-2)[[1]]),collapse='_')
     },
     lock = function()
     {
-      if(pcaller == as.character(sys.call(-1)[[1]]))
+      if(pcaller == paste(as.character(sys.call(-1)[[1]]),collapse='_'))
         locked <<- TRUE
     },
     unlock = function()
     {
-      if(pcaller == as.character(sys.call(-1)[[1]]))
+      if(pcaller == paste(as.character(sys.call(-1)[[1]]),collapse='_'))
         locked <<- FALSE
     },
     close_area = function()
@@ -115,7 +115,7 @@ progress_bar = setRefClass('prog_bar',
     {
       if(permission())
       {
-        caller = as.character(sys.call(-1)[[1]])
+        caller = paste(as.character(sys.call(-1)[[1]]),collapse='_')
         if(caller == areas[[length(areas)]]$caller)
           close_area()
         areas[[length(areas)+1]] <<- list(nsteps=nsteps, step=0L, caller=caller, steps_allocated = steps_allocated)

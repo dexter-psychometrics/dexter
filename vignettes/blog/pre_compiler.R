@@ -132,6 +132,40 @@ compile_all_new = function()
   }
 }
 
+# is it safe to cut after line ...
+blurb_safe_cut = function(lines)
+{
+  tag_open = c()
+  in_math = FALSE
+  in_code = FALSE
+  safe = logical(length(lines))
+  lines = trimws(lines)
+  for(i in seq_along(lines))
+  {
+    l = lines[i]
+    if(l=='$$')
+    {
+      in_math = !in_math
+    } else if(startsWith(l,'```'))
+    {
+      in_code = !in_code
+    } else if(!startsWith(l,'<img src="data:') && !startsWith(l,'<!') && !in_code && !in_math)
+    {
+      tags = str_extract_all(l,'<[^>]+>')[[1]]
+      tags_start = grepl('^<\\w', tags)
+      tags = str_extract(tags, '\\w+(?= |>)') 
+      
+      for(j in seq_along(tags))
+      {
+        if(tags_start[j]) tag_open = c(tags[j],tag_open)
+        else if(tags[j]==tag_open[1]) tag_open = tag_open[-1]
+        else stop('invalid html')
+      }
+    }
+    safe[i] = !in_code && !in_math && length(tag_open)==0
+  }
+  safe
+}
 
 blurb_info = function(fns, n_lines=10)
 {
@@ -139,27 +173,26 @@ blurb_info = function(fns, n_lines=10)
   {
     lines = readLines(file.path('vignettes','blog',fn))
     lines = lines[nchar(trimws(lines))>0]
-    start = max(which(grepl('^---',lines))) + 1
-    if(startsWith(lines[start],'#')) start = start+1
-    end = min(start + n_lines - 1,length(lines))
+    start = which(grepl('^---',lines))[2] + 1
+    
+    pre_amble = lines[1:(start-1)]
+    
+    if(startsWith(lines[start],'#')) start = start + 1
+    
+    lines = lines[- (1:(start-1))]
+    
+    end = min(n_lines, length(lines))
     if(end != length(lines))
     {
-      if(sum(lines[start:end]=='$$') %% 2 == 1)
-      {
-        end = end + min(which(lines[(end+1):length(lines)] == '$$'))
-      }
-      if(sum(startsWith(lines[start:end],'```')) %% 2 == 1)
-      {
-        end = end + min(which(lines[(end+1):length(lines)] == '```'))
-      }
+      end = which(blurb_safe_cut(lines) & 1:length(lines) >=end)[1]
     }
 
     tibble(
       filename = fn,
-      blurb = paste(lines[start:end],collapse='\n'),
+      blurb = paste(lines[1:end],collapse='\n'),
       abbreviated = end != length(lines),
-      author = gsub(' * ',', ', trimws(str_extract(lines[startsWith(lines,'author:')][1],'(?<=:).+')) , fixed=TRUE),
-      title = trimws(str_extract(lines[startsWith(lines,'title:')][1],'(?<=:).+')),
+      author = gsub(' * ',', ', trimws(str_extract(pre_amble[startsWith(pre_amble,'author:')][1],'(?<=:).+')) , fixed=TRUE),
+      title = trimws(str_extract(pre_amble[startsWith(pre_amble,'title:')][1],'(?<=:).+')),
       href = gsub('.Rmd','',fn,fixed=TRUE)
     )
   }) %>%

@@ -74,34 +74,47 @@ DIF = function(dataSrc, person_property, predicate=NULL)
   
   if(is_db(dataSrc))
     person_property = tolower(person_property)
-
+  
   pb = get_prog_bar(retrieve_data = is_db(dataSrc))
   on.exit({pb$close()})
   
+  ## 1. get data
   respData = get_resp_data(dataSrc, qtpredicate, extra_columns = person_property, env = env) 
-
+  
   respData$x[[person_property]] = ffactor(as.character(respData$x[[person_property]]))
   
   if(nlevels(respData$x[[person_property]]) != 2)
     stop('The person_property needs to have two unique values in your data to calculate DIF')
   
   
-  problems = unequal_categories(respData, person_property)
-
-  if(length(problems)>0)
-  {
-    message('items removed:')
-    print(as.character(problems))
-    warning('Some items do not have the same score categories over both person_properties and\n',
-            'have been removed from the analysis',call.=FALSE)
-    
-    respData = respData %>%
-      anti_join(tibble(item_id=problems), by='item_id', .recompute_sumscores = TRUE)
-  }
-  
   ## 2. Estimate models with fit_enorm using CML
   models = by(respData, person_property, fit_enorm)
-
+  
+  ## 3. get the intersection
+  common_items = models[[1]]$inputs$ssIS %>%
+    full_join(models[[2]]$inputs$ssIS, by=c('item_id','item_score') ,suffix=c('_1','_2')) %>%
+    group_by(.data$item_id) %>%
+    filter(!(anyNA(.data$sufI_1) | anyNA(.data$sufI_2))) %>%
+    ungroup() %>%
+    distinct(.data$item_id)
+  
+  if(nrow(common_items) != nrow(models[[1]]$inputs$ssI) || nrow(common_items) != nrow(models[[2]]$inputs$ssI))
+  {
+    cat('\n')
+    message('Some items were excluded because do not appear in both datasets and/or do not have the same score categories in both datasets.')
+    models = lapply(models, function(m){
+      ii = m$inputs$ssIS %>%
+        filter(.data$item_score > 0L) %>%
+        mutate(i = row_number()) %>%
+        semi_join(common_items, by='item_id') %>%
+        pull(.data$i)
+        
+      m$est$beta = drop(m$est$beta)[ii]
+      m$est$acov.beta = m$est$acov.beta[ii,ii]
+      return(m)
+    })
+  }
+  
   
   ## 4. Call overallDIF_ and PairDIF_
   DIF_stats = OverallDIF_ (models[[1]]$est$beta, models[[2]]$est$beta, 
@@ -111,18 +124,21 @@ DIF = function(dataSrc, person_property, predicate=NULL)
                       models[[1]]$est$acov.beta, models[[2]]$est$acov.beta)
   
   items = models[[1]]$inputs$ssIS %>%
+    semi_join(common_items,by='item_id') %>%
     filter(.data$item_score > 0) %>%
     select(.data$item_id, .data$item_score) %>%
     arrange(.data$item_id, .data$item_score) %>%
     mutate(item_id=as.character(.data$item_id))
   
-
+  
   ## 5. Report D and DIF_stats and inputs
   ou = list(DIF_overall = DIF_stats, DIF_pair = DIF_mats$D, Delta_R = DIF_mats$Delta_R, 
             group_labels = names(models), items = items)
   class(ou) = append('DIF_stats', class(ou))
   return(ou)
 }
+
+
 
 
 print.DIF_stats <- function(x, ...)

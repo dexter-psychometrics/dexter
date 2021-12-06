@@ -247,6 +247,23 @@ Educational tests are often equipped with a threshold to turn the test score int
 Consider a test for pregnancy. The state of nature is a binary variable (positive / negative). So is the outcome of the test, although the decision is possibly produced by dichotomizing the quantitative measurement of some hormone or other substance, just like we want to do with our educational test scores. There are four possible outcomes in all, which can be represented in a two-by-two table
 <table>
 <tbody>
+<tr>
+  <td rowspan="2" colspan="2"></td>
+  <td colspan="2">State of nature</td>
+</tr>
+<tr>
+  <td>Positive</td>
+  <td>Negative</td>
+</tr>
+<tr>
+<td rowspan="2">Prediction</td> 
+<td>Positive</td><td>True positive (TP)</td><td>False positive (FP)</td>
+</tr>
+<tr>
+<td>Negative</td><td>False negative (FN)</td><td>True negative (TN)</td>
+</tr>
+</tbody>
+</table>
 </p>[read more...](2018-05-25-equating-a-pass-fail-score-with-dexter)
 
 ## [Item-total regressions in dexter](2018-02-25-item-total-regressions-in-dexter)
