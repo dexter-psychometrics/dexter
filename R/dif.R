@@ -101,7 +101,7 @@ DIF = function(dataSrc, person_property, predicate=NULL)
   if(nrow(common_items) != nrow(models[[1]]$inputs$ssI) || nrow(common_items) != nrow(models[[2]]$inputs$ssI))
   {
     cat('\n')
-    message('Some items were excluded because do not appear in both datasets and/or do not have the same score categories in both datasets.')
+    message('Some items were excluded because they do not appear in both datasets and/or do not have the same score categories in both datasets.')
     models = lapply(models, function(m){
       ii = m$inputs$ssIS %>%
         filter(.data$item_score > 0L) %>%
