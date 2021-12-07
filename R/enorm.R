@@ -136,12 +136,7 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
     
     
   }
-  if(method=='CML' && tolower(Sys.info()['sysname'])=='sunos' && is.matrix(result$b))
-  {
-    method='Bayes'
-    message('Hessian matrix could not be inverted due to lack of computable precision. Bayesian method was used.')
-  }
-  
+
   mle = design %>% 
     group_by(.data$booklet_id) %>%
     do({
@@ -210,8 +205,8 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
   }
   if(length(setdiff(item_id,x$inputs$ssI$item_id))>0)
   {
-    message('The following items were not found in your parameters')
-    print(setdiff(setdiff(item_id,x$inputs$ssI$item_id)))
+    message('The following items were not found in yourfit object')
+    print(setdiff(item_id,x$inputs$ssI$item_id))
     stop('unknown item',call.=FALSE)
   }
 

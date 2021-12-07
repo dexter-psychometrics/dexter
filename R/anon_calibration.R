@@ -255,10 +255,6 @@ NR_bkl = function(..., use_mean = FALSE)
 
 calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fixed_b=NULL, NR=TRUE) 
 {
-  if(tolower(Sys.info()['sysname'])=='sunos'){
-    return(calibrate_CML_sol(scoretab, design, sufI, a, first, last, nIter, fixed_b))
-  }
-  
   pb = get_prog_bar()
   on.exit({pb$close()})
 
@@ -496,10 +492,6 @@ calibrate_Bayes = function(scoretab, design, sufI, a, first, last,  nIter, fixed
   if(!is.null(start_b))
   {
     b = start_b
-  } else if(Gibbs.settings$start_b=='random' || tolower(Sys.info()['sysname'])=='sunos')
-  {
-    b = exp(runif(length(a), -1, 1))
-    b[first] = 1
   } else
   {
     b = calibrate_CML(scoretab, design, sufI, a, first, last, fixed_b = fixed_b)$b 
