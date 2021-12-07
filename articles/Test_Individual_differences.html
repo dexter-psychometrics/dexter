@@ -20,6 +20,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-article">
       <header><div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
   <div class="container">
@@ -32,7 +34,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dexter</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.1.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.1.5</span>
       </span>
     </div>
 
@@ -83,7 +85,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/dexter-psychometrics/dexter">
+  <a href="https://github.com/dexter-psychometrics/dexter" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -102,11 +104,11 @@
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>One theta to rule them all: Test Individual Differences</h1>
-                        <h4 class="author">Timo Bechger and Ivailo Partchev</h4>
+                        <h4 data-toc-skip class="author">Timo Bechger and Ivailo Partchev</h4>
             
-            <h4 class="date">03 December, 2021</h4>
+            <h4 data-toc-skip class="date">07 December, 2021</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/Test_Individual_differences.Rmd"><code>vignettes/Test_Individual_differences.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/vignettes/Test_Individual_differences.Rmd" class="external-link"><code>vignettes/Test_Individual_differences.Rmd</code></a></small>
       <div class="hidden name"><code>Test_Individual_differences.Rmd</code></div>
 
     </div>
@@ -120,61 +122,61 @@ img{ border:none;}
 <p>What if there are no individual differences at all? Classical test theory defines reliability as the ratio of the variance of the true scores to the variance of the observed scores <span class="citation">(e.g., Bechger et al. 2003)</span>. The observed scores will have some chance variance, so reliability is 0 in that case. We have provided an IRT analogue with function <code>individual_differences</code>, to check whether the response data are consistent with the hypothesis of no individual differences in true ability.</p>
 <p>First, we simulate a matrix of response data from the Rasch model. We simulate responses to 20 items with uniformly distributed difficulties for 2000 persons having all the same true ability of 0.5:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">items</span> <span class="op">=</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html">tibble</a></span><span class="op">(</span>item_id<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">'i'</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span>, item_score<span class="op">=</span><span class="fl">1</span>, delta<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html">runif</a></span><span class="op">(</span><span class="fl">20</span>, <span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">items</span> <span class="op">=</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>item_id<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">'i'</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span>, item_score<span class="op">=</span><span class="fl">1</span>, delta<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">20</span>, <span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>
 <span class="va">sim_Rasch</span> <span class="op">=</span> <span class="fu"><a href="../reference/information.html">r_score</a></span><span class="op">(</span><span class="va">items</span><span class="op">)</span>
 
-<span class="va">theta</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">2000</span><span class="op">)</span>
+<span class="va">theta</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">2000</span><span class="op">)</span>
 <span class="va">simulated</span> <span class="op">=</span> <span class="fu">sim_Rasch</span><span class="op">(</span><span class="va">theta</span><span class="op">)</span></code></pre></div>
 <p>Computing the sum scores and examining their distribution, we find nothing conspicuous:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="va">simulated</span><span class="op">)</span>, main<span class="op">=</span><span class="st">''</span>, xlab<span class="op">=</span><span class="st">'sumScore'</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/ecdf.html">ecdf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html">rowSums</a></span><span class="op">(</span><span class="va">simulated</span><span class="op">)</span><span class="op">)</span>, bty<span class="op">=</span><span class="st">'l'</span>, main<span class="op">=</span><span class="st">'ecdf'</span>, xlab<span class="op">=</span><span class="st">'sumScore'</span> <span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">simulated</span><span class="op">)</span>, main<span class="op">=</span><span class="st">''</span>, xlab<span class="op">=</span><span class="st">'sumScore'</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/ecdf.html" class="external-link">ecdf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">simulated</span><span class="op">)</span><span class="op">)</span>, bty<span class="op">=</span><span class="st">'l'</span>, main<span class="op">=</span><span class="st">'ecdf'</span>, xlab<span class="op">=</span><span class="st">'sumScore'</span> <span class="op">)</span></code></pre></div>
 <p><img src="Test_Individual_differences_files/figure-html/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;"></p>
 <p>We can also examine the various item-total regressions produced by function <code>fit_inter</code>. For example, here are the plots for the first two items:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">mm</span> <span class="op">=</span> <span class="fu"><a href="../reference/fit_inter.html">fit_inter</a></span><span class="op">(</span><span class="va">simulated</span><span class="op">)</span>
 
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">mm</span>, show.observed <span class="op">=</span> <span class="cn">TRUE</span>, 
-     items <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'i1'</span>,<span class="st">'i2'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mm</span>, show.observed <span class="op">=</span> <span class="cn">TRUE</span>, 
+     items <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'i1'</span>,<span class="st">'i2'</span><span class="op">)</span><span class="op">)</span></code></pre></div>
 <p><img src="Test_Individual_differences_files/figure-html/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;"></p>
 <p>The curtains that eliminate the 5% smallest and 5% largest sum scores are drawn somewhat narrow but, apart from that, all regressions look nice. It appears that, by just looking at the response data, we are not in a very good position to judge whether there are any true individual differences in ability. To help with that, dexter offers a function, <code>individual_differences</code>:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dd</span> <span class="op">=</span> <span class="fu"><a href="../reference/individual_differences.html">individual_differences</a></span><span class="op">(</span><span class="va">simulated</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">dd</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dd</span><span class="op">)</span></code></pre></div>
 <p><img src="Test_Individual_differences_files/figure-html/unnamed-chunk-4-1.png" width="384" style="display: block; margin: auto;"></p>
 <p>The gray line shows the predicted frequency of each sum score under the hypothesis of no true individual differences. The green dots show the observed frequencies and it will be clear that our observed data is compatible with the null hypothesis.</p>
 <p>The print function for the test shows a chi-squared test for the null hypothesis. Note that this uses R’s option to simulate the p-value, which explains why the degrees of freedom are missing:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dd</span></code></pre></div>
-<pre><code>## Chi-Square Test for the hypothesis that all respondents have the same ability:
-## 
-##  Chi-squared test for given probabilities with simulated p-value (based
-##  on 2000 replicates)
-## 
-## data:  observed
-## X-squared = 23.403, df = NA, p-value = 0.1034</code></pre>
-<p>Thus, we find a p-value of 0.1 for the hypothesis that there are no individual differences.</p>
+<pre><code><span class="co">## Chi-Square Test for the hypothesis that all respondents have the same ability:</span>
+<span class="co">## </span>
+<span class="co">##  Chi-squared test for given probabilities with simulated p-value (based</span>
+<span class="co">##  on 2000 replicates)</span>
+<span class="co">## </span>
+<span class="co">## data:  observed</span>
+<span class="co">## X-squared = 7.343, df = NA, p-value = 0.9525</span></code></pre>
+<p>Thus, we find a p-value of 0.95 for the hypothesis that there are no individual differences.</p>
 <p>What about real data? <strong>Dexter</strong> comes with a well-known example preinstalled, the verbal aggression data <span class="citation">(Vansteelandt 2000)</span> analysed in great detail in <span class="citation">(Paul De Boeck 2004)</span> and many others. 243 females and 73 males have answered on a 3-point scale (‘yes’, ‘perhaps’, or ‘no’) how likely they are to become verbally aggressive in four different frustrating situations</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="../reference/start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="st">":memory:"</span><span class="op">)</span>
 <span class="fu"><a href="../reference/add_booklet.html">add_booklet</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrData</span>, <span class="st">"data"</span><span class="op">)</span>
 
 <span class="va">dd</span> <span class="op">=</span> <span class="fu"><a href="../reference/individual_differences.html">individual_differences</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">booklet_id</span><span class="op">==</span><span class="st">"data"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">dd</span><span class="op">)</span></code></pre></div>
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dd</span><span class="op">)</span></code></pre></div>
 <p><img src="Test_Individual_differences_files/figure-html/unnamed-chunk-6-1.png" width="384" style="display: block; margin: auto;"></p>
 <p>This is quite different now, and the chi-squared test is highly significant.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">dd</span></code></pre></div>
-<pre><code>## Chi-Square Test for the hypothesis that all respondents have the same ability:
-## 
-##  Chi-squared test for given probabilities with simulated p-value (based
-##  on 2000 replicates)
-## 
-## data:  observed
-## X-squared = 1.6144e+21, df = NA, p-value = 0.0004998</code></pre>
-<div id="references" class="section level2 unnumbered">
-<h2 class="hasAnchor">
-<a href="#references" class="anchor"></a>References</h2>
+<pre><code><span class="co">## Chi-Square Test for the hypothesis that all respondents have the same ability:</span>
+<span class="co">## </span>
+<span class="co">##  Chi-squared test for given probabilities with simulated p-value (based</span>
+<span class="co">##  on 2000 replicates)</span>
+<span class="co">## </span>
+<span class="co">## data:  observed</span>
+<span class="co">## X-squared = 1.6144e+21, df = NA, p-value = 0.0004998</span></code></pre>
+<div class="section level2 unnumbered">
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
 <div id="refs" class="references">
 <div id="ref-BechgerMarisVerstralen2003">
 <p>Bechger, Timo M., Gunter Maris, Huub H. F. M. Verstralen, and Anton A. Béguin. 2003. “Using Classical Test Theory in Combination with Item Response Theory.” <em>Applied Psychological Measurement</em> 27 (5): 319–34.</p>
@@ -200,11 +202,13 @@ img{ border:none;}
 
 
       <footer><div class="copyright">
-  <p>Developed by Gunter Maris, Timo Bechger, Jesse Koops, Ivailo Partchev.</p>
+  <p></p>
+<p>Developed by Gunter Maris, Timo Bechger, Jesse Koops, Ivailo Partchev.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.1.</p>
 </div>
 
       </footer>
@@ -212,6 +216,8 @@ img{ border:none;}
 
   
 
+
+  
 
   </body>
 </html>
