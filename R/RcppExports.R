@@ -21,10 +21,6 @@ ds_connected_groups <- function(a) {
     .Call(`_dexter_ds_connected_groups`, a)
 }
 
-unequal_categories_C <- function(group_id, item_id, item_score, nit, max_score) {
-    .Call(`_dexter_unequal_categories_C`, group_id, item_id, item_score, nit, max_score)
-}
-
 make_booklets <- function(person_id, item_id, item_score, booklet_id, booklet_score, merged) {
     .Call(`_dexter_make_booklets`, person_id, item_id, item_score, booklet_id, booklet_score, merged)
 }

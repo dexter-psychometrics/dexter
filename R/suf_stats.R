@@ -168,19 +168,3 @@ get_sufStats_tia = function(respData)
         frst_item, respData$design$booklet_id, respData$design$item_id ) 
 }
 
-
-unequal_categories = function(respData, person_property)
-{
-  if(!is.factor(respData$x[[person_property]]) || nlevels(respData$x[[person_property]]) !=2)
-    stop('person_property needs to have two categories')
-  
-  itms = unequal_categories_C(respData$x[[person_property]], 
-                              respData$x$item_id, respData$x$item_score,
-                              nlevels(respData$x$item_id),max(respData$x$item_score))  
-
-  class(itms) = 'factor'
-  levels(itms) = levels(respData$x$item_id)
-  
-  itms
-}
-

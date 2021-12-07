@@ -107,40 +107,6 @@ IntegerVector ds_connected_groups(const IntegerMatrix& a)
 	return group;
 }
 
-// needs two groups with values 1 and 2 in group_id
-// already tried parallel, practically no gain
-// [[Rcpp::export]]
-std::vector<int> unequal_categories_C(const IntegerVector& group_id, const IntegerVector& item_id, const IntegerVector& item_score, const int nit, const int max_score)
-{	
-	std::vector<int> scratch((nit+1)*(max_score+1),0);
-	
-	std::vector<int> out;
-	out.reserve(nit);
-	
-	const int nr = item_id.length();	
-	const int isz = max_score+1;
-	
-	for(int i=0;i<nr;i++)
-	{
-		if(scratch[item_id[i] * isz + item_score[i]] == group_id[i])
-			scratch[item_id[i] * isz + item_score[i]] = 3;
-		else if(scratch[item_id[i] * isz + item_score[i]] == 0)
-			scratch[item_id[i] * isz + item_score[i]] = 3 - group_id[i]; //2->1, 1->2
-	}	
-	
-	for(int i=1; i<=nit; i++)
-		for(int s=0; s<=max_score; s++)
-		{
-			if(scratch[i*isz+s] == 1 || scratch[i*isz+s] == 2)
-			{
-				out.push_back(i);
-				break;
-			}
-		}
-	out.shrink_to_fit();
-	return out;	
-}
-
 
 /* ******************************************************************************************* 
 * Booklets, sumscores and designs in a mutate and summarize variant for data.frame columns
@@ -158,7 +124,6 @@ std::vector<int> unequal_categories_C(const IntegerVector& group_id, const Integ
 / In case of merge: all original booklet id's are lost (not mapped at all)
 / In case of no merge: returned df map_booklet contains a map of new to old booklet id's
 / 	booklets with different id's that have equal items are maintained as different booklets
-/
 /
 ******************************************************************************************** */
 
