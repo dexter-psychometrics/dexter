@@ -26,7 +26,7 @@ plot method for pairwise DIF statistics
 \details{
 Plotting produces an image of the matrix of pairwise DIF statistics. 
 The statistics are standard normal deviates and colored to distinguish significant from non-significant values.
-If there is no DIF, a proportion alpha will be significant be change.
+If there is no DIF, a proportion alpha off the cells will be significant by chance.
 }
 \references{
 Feskens, R., Fox, J. P., & Zwitser, R. (2019). Differential item functioning in PISA due to mode effects. 

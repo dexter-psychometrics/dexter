@@ -170,7 +170,7 @@ print.DIF_stats <- function(x, ...)
 #' @details
 #' Plotting produces an image of the matrix of pairwise DIF statistics. 
 #' The statistics are standard normal deviates and colored to distinguish significant from non-significant values.
-#' If there is no DIF, a proportion alpha will be significant be change.
+#' If there is no DIF, a proportion alpha off the cells will be significant by chance.
 #'      
 plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, alpha =.05,...)
 {
