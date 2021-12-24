@@ -11,6 +11,14 @@ p.blog-authors{font-style:italic}
 </style>
 
 
+## [Happy 2022!](2021-12-24-happy-2022)
+<p class="blog-authors">Ivailo Partchev</p><p>
+![](img/Dx22.jpg)
+Merry Christmas and a happy, healthy and prosperous 2022 to all!
+There have not been many changes to __dexter__ in 2021, but overall it has been a happy year, professionally, and we have many ideas for the near future. __dexter__ is known in 145 countries now. It has taken 5 months to get from 140 to 145, so it may be a while until the next increase.
+Prize question: which density function approximates best the unique shape of Dexter's ear?
+</p>
+
 ## [140!](2021-02-15-140)
 <p class="blog-authors">Ivailo Partchev</p><p>
 Just a few lines to boast that (i) __dexter__ has been downloaded in 140 countries now, and (ii) that I have learned how to make nice maps with `tmap` and `leaflet`.

@@ -329,6 +329,8 @@ made it subroutine to easily return both esufi and hess
 everything except b and a is concatenated per booklet
 */
 
+// to do: use reductions in omp, code can be done much simpler
+
 // [[Rcpp::export]]
 void NR_booklets(const arma::vec& b, const arma::ivec& a, 
 				 arma::ivec& first, arma::ivec& last, arma::ivec& scoretab, 
