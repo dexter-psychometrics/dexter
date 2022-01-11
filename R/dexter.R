@@ -22,17 +22,17 @@ utils::globalVariables(c("."))
 
 #' Start a new project
 #'
-#' Imports a complete set of scoring rules and starts a new project (data base)
+#' Imports a complete set of scoring rules and starts a new project (database)
 #'
 #'
 #'
 #' @param rules A data frame with columns \code{item_id}, \code{response}, and \code{item_score}.
 #' The order is not important but spelling is. Any other columns will be ignored.
-#' @param db_name A connection to an existing sqlite database or a string specifying a filename
+#' @param db_name A string specifying a filename
 #' for a new sqlite database to be created. If this name does not
 #' contain a path, the file will be created in the work
 #' directory. Any existing file with the same name will be overwritten. For an in-memory database
-#' you can use the string \code{":memory:"}.
+#' you can use the string \code{":memory:"}. A connection object is also allowed.
 #' @param person_properties An optional list of person properties. Names should correspond to person_properties intended to be used in the project.
 #' Values are used as default (missing) values. The datatype will also be inferred from the values.
 #' Known person_properties will be automatically imported when adding response data with \code{\link{add_booklet}}. 
@@ -263,6 +263,7 @@ keys_to_rules = function(keys, include_NA_rule = FALSE)
 touch_rules = function(db, rules)
 {
   check_df(rules, c('item_id','response','item_score'))
+  check_db(db)
   
   if(any(is.na(rules$item_id)) || any(is.na(rules$item_score)))
     stop("The item_id and item_score columns may not contain NA values")
@@ -407,6 +408,7 @@ touch_rules = function(db, rules)
 add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
   
   check_df(x)
+  check_db(db)
   x = mutate_if(x, is.factor, as.character) 
   
   person_properties = intersect(dbListFields(db, 'dxpersons'), tolower(names(x)))
@@ -519,6 +521,7 @@ add_response_data = function(db, data, auto_add_unknown_rules = FALSE, missing_v
   }
   
   check_df(data, c('item_id', 'person_id', 'response','booklet_id'))
+  check_db(db)
 
   data = ungroup(data)
   
@@ -679,11 +682,12 @@ add_response_data = function(db, data, auto_add_unknown_rules = FALSE, missing_v
 #'
 add_item_properties = function(db, item_properties=NULL, default_values=NULL) {
   
-  # for convenience we include the item_id as a property
-  existing_item_properties = dbListFields(db, 'dxitems') 
-  
+  check_db(db)
   check_df(item_properties, 'item_id', nullable=TRUE)
   check_list(default_values, nullable=TRUE)
+  
+  # for convenience we include the item_id as a property
+  existing_item_properties = dbListFields(db, 'dxitems') 
   
   dbTransaction(db, 
   {
@@ -766,6 +770,7 @@ add_item_properties = function(db, item_properties=NULL, default_values=NULL) {
 #' @return nothing
 add_person_properties = function(db, person_properties = NULL, default_values = NULL)
 {
+  check_db(db)
   check_df(person_properties, 'person_id', nullable=TRUE)
   check_list(default_values, nullable=TRUE)
   dbTransaction(db, 
@@ -832,6 +837,7 @@ add_person_properties = function(db, person_properties = NULL, default_values = 
 #' 
 get_rules = function(db)
 {
+  check_db(db)
   dbGetQuery(db, 'SELECT item_id, response, item_score FROM dxscoring_rules ORDER BY item_id, response;')
 }
 
@@ -846,6 +852,7 @@ get_rules = function(db)
 #' booklet_max_score gives the maximum theoretically possible score according to the scoring rules
 #'
 get_booklets = function(db) {
+  check_db(db)
   bk = dbGetQuery(db, 'SELECT dxbooklets.*, n_items, n_persons FROM dxbooklets 
                         INNER JOIN dxbooklet_stats USING(booklet_id) ORDER BY booklet_id;')
   if(!'booklet_max_score' %in% colnames(bk))
@@ -883,6 +890,7 @@ get_booklets = function(db) {
 #' 
 get_variables = function(db)
 {
+  check_db(db)
   lapply(c('dxitems','dxbooklets','dxbooklet_design','dxscoring_rules',
            'dxpersons','dxadministrations','dxresponses'),
          function(tbl)
@@ -917,6 +925,7 @@ get_items = function(db)
   if(is.list(db) && !is.null(db$inputs))
     return(df_format(tibble(item_id=as.character(db$inputs$ssI$item_id))))
 
+  check_db(db)
   df_format(dbGetQuery(db,'SELECT * FROM dxitems ORDER BY item_id;'))
 }
 
@@ -932,6 +941,7 @@ get_items = function(db)
 #' @return A data frame with columns person_id and columns for each person_property
 #'
 get_persons = function(db){
+  check_db(db)
   dbGetQuery(db,'SELECT * FROM dxpersons ORDER BY person_id;')
 }
 

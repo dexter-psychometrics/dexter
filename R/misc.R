@@ -249,6 +249,8 @@ if.else = function(test, yes, no)
 
 
 #  basic argument type and attribute checks with error messages
+stop_ = function(...) stop(..., call. = FALSE)
+
 check_dataSrc = function(x)
 {
   force(x)
@@ -258,28 +260,45 @@ check_dataSrc = function(x)
   if(is.matrix(x))
   {
     if(!mode(x) %in% c('numeric','integer'))
-      stop('dataSrc must be a matrix of positive numbers, a data.frame or a database connection')
+      stop_('dataSrc must be a matrix of positive numbers, a data.frame or a database connection')
     return(NULL)
   } 
   
   if(inherits(x, 'data.frame'))
   {
     if(length(setdiff(c('person_id','item_id','item_score'), colnames(x)))>0)
-      stop("dataSrc must contain the columns: 'person_id','item_id','item_score'")
+      stop_("dataSrc must contain the columns: 'person_id','item_id','item_score'")
     return(NULL)
   }
   if(is_db(x))
   {
     if(dbIsValid(x)) return(NULL)
-    stop('your database connection is no longer valid, you need to reconnect. see: ?open_project for details')
+    stop_('your database connection is no longer valid, you need to reconnect. see: ?open_project for details')
   }
     
      
   if(length(x)== 1 && is.character(x) && file.exists(x))
-      stop('dataSrc is a string but must be a database connection, data.frame or matrix. ',
-           'Did you forget to do: `db = open_project("',x,'")`?', call.=FALSE)
+      stop_('dataSrc is a string but must be a database connection, data.frame or matrix. ',
+           'Did you forget to do: `db = open_project("',x,'")`?')
  
-  stop("dataSrc must be of type 'DBIconnection', 'data.frame' or 'matrix'")
+  stop_("dataSrc must be of type 'DBIconnection', 'data.frame' or 'matrix'")
+}
+
+check_db = function(x)
+{
+  if(length(x)== 1 && is.character(x) && file.exists(x))
+  {
+      stop_('db is a string but must be a database connection. ',
+            'Did you forget to do: `db = open_project("',x,'")`?')
+  } else if(!is_db(x))
+  {
+    stop_("Argument 'db' is not a database connection.")
+  } else if(!dbIsValid(x))
+  {
+    stop_('your database connection is no longer valid, you need to reconnect. see: ?open_project for details')
+  }
+  
+  NULL
 }
 
 
@@ -297,21 +316,21 @@ check_vector = function(x, type=c('character','numeric','integer'), name = depar
   if(type != 'character')
   {
     if(!is.numeric(x))
-      stop("Argument '",name, "' must be ", type, call.=FALSE)
+      stop_("Argument '",name, "' must be ", type)
   
     if(type=='integer' && !(is.integer(x) || all(x %% 1 == 0)))
-       stop("Argument '",name, "' must be an integer", call.=FALSE)
+       stop_("Argument '",name, "' must be an integer")
     
     if(!is.null(.min) && any(x<.min))
-      stop("Argument '",name, "' must be >= ", .min, call.=FALSE)
+      stop_("Argument '",name, "' must be >= ", .min)
     
     if(!is.null(.max) && any(x>.max))
-      stop("Argument '",name, "' must be <= ", .max, call.=FALSE)
+      stop_("Argument '",name, "' must be <= ", .max)
   }
   
 
   if(!is.null(.length) && length(x) != .length )  
-    stop("Argument '",name, "' must have length ", .length, call.=FALSE)
+    stop_("Argument '",name, "' must have length ", .length)
  
 }
   
@@ -337,7 +356,7 @@ check_string = function(x, name = deparse(substitute(x)), nullable = FALSE)
     return(NULL)
   
   if(!is.character(x) && length(x)!=1)
-    stop("Argument '",name, "' must be a string of length 1", call.=FALSE)
+    stop_("Argument '",name, "' must be a string of length 1")
 }
 
 
@@ -355,7 +374,7 @@ check_df = function(x, columns=NULL, n_rows=NULL, name = deparse(substitute(x)),
     stop('column(s): ', paste0('`', missing_col, '`',collapse=', '),' must be present in ', name)
   
   if(!is.null(n_rows) && NROW(x)!=n_rows)
-    stop('argument`', name, '` must have ', n_rows, ' rows')
+    stop_('argument`', name, '` must have ', n_rows, ' rows')
   
 }
 
@@ -364,7 +383,7 @@ check_parms = function(x, name = deparse(substitute(x)), nullable=FALSE)
   if(nullable && is.null(x))
     return(NULL)
   if(!inherits(x,'prms'))
-    stop(name,' must be an object of type `prms`')
+    stop_(name,' must be an object of type `prms`')
 }
 
 check_list = function(x, name = deparse(substitute(x)), nullable=FALSE)
@@ -372,7 +391,7 @@ check_list = function(x, name = deparse(substitute(x)), nullable=FALSE)
   if(nullable && is.null(x))
     return(NULL)
   if(!inherits(x,'list'))
-    stop(name,' must be a list')
+    stop_(name,' must be a list')
 }
 
 
@@ -385,16 +404,16 @@ rng_fl = function(x, name = deparse(substitute(x)))
   if(length(x)==2)
   {
     if(x[1]>x[2])
-      stop('first element of ',name,' must be smaller or equal than second element')
+      stop_('first element of ',name,' must be smaller or equal than second element')
     x
   } else if(length(x)<2)
   {
-    stop(name, ' must be a vector of length 2')
+    stop_(name, ' must be a vector of length 2')
   } else
   {
     test = x[1]:x[length(x)] 
     if(length(x) != length(test) || !all(test == x) || x[1]>x[length(x)])
-      stop(name, ' is not a valid range')
+      stop_(name, ' is not a valid range')
     c(x[1],x[length(x)])
   }
 }
