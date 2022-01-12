@@ -15,15 +15,10 @@
 #' correlations with the sum score (rit), and correlations with the rest score (rit) are 
 #' shown in separate tables and compared across booklets
 #' @param max_scores use the observed maximum item score or the theoretical maximum item score 
-#' according to the scoring rules in the database to compute pvalues and maximum scores
+#' according to the scoring rules in the database to determine pvalues and maximum scores
 #' @return A list containing:
 #' \item{booklets}{a data.frame of statistics at booklet level} 
 #' \item{items}{a data.frame (or list if type='compared') of statistics at item level}
-#'
-#' @details 
-#' The returned list also contains the elements 'testStats' and 'itemStats'. These contain the same information
-#' as 'booklets' and 'items' but using obsolete (mixed camelCase and snake_case) variable names. These will
-#' be removed in the future and users are advised to not use these in newer code.
 #'
 tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compared'),
                       max_scores = c('observed','theoretical')) 
@@ -33,102 +28,84 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
   check_dataSrc(dataSrc)
   
   qtpredicate = eval(substitute(quote(predicate)))
-  env=caller_env()
+  env = caller_env()
   respData = get_resp_data(dataSrc, qtpredicate, env=env, summarised=FALSE)
   
-  ti = get_sufStats_tia(respData) 
+  items = get_sufStats_tia(respData) 
   
   if(max_scores=='theoretical' && is_db(dataSrc))
   {
-    ti$item_id = as.character(ti$item_id)
-    ti = inner_join(
-      select(ti,-.data$maxScore),
+    items$item_id = as.character(items$item_id)
+    items = inner_join(
+      select(items, -.data$max_score),
       dbGetQuery(dataSrc, 'SELECT item_id, MAX(item_score) AS max_score 
                           FROM dxscoring_rules GROUP BY item_id;'),
-      by='item_id') %>%
-      rename(maxScore = .data$max_score)
+      by='item_id')
   } 
+
+  items$pvalue = coalesce(items$mean_score / items$max_score, 0)
   
-  ti = mutate(ti, pvalue=coalesce(.data$meanScore/.data$maxScore, 0))
+  if(anyNA(items$rit))
+    warning("Items without score variation have been removed from the test statistics")
   
+  booklets = items %>%
+    filter(complete.cases(.data$rit)) %>%
+    group_by(.data$booklet_id) %>% 
+    summarise(n_items=n(),
+              alpha=.data$n_items/(.data$n_items-1)*(1-sum(.data$sd_score^2) / sum(.data$rit * .data$sd_score)^2 ),
+              mean_pvalue = mean(.data$pvalue),
+              mean_rit = mean(.data$rit),
+              mean_rir = mean(.data$rir),
+              max_booklet_score = sum(.data$max_score),
+              n_persons = max(.data$n_persons)) %>%
+    ungroup() %>%
+    mutate_if(is.factor, as.character) %>%
+    df_format()
   
+  # different views of item statistics
   if(type=='raw')
   {
-    itemStats = select(ti, .data$booklet_id, .data$item_id, .data$meanScore, .data$sdScore, 
-                           .data$maxScore, .data$pvalue, .data$rit, .data$rir, .data$n) %>%
+    items = select(items, .data$booklet_id, .data$item_id, .data$mean_score, .data$sd_score, 
+                           .data$max_score, .data$pvalue, .data$rit, .data$rir, .data$n_persons) %>%
       mutate_if(is.factor, as.character) %>%
       df_format()
     
   } else if(type=='averaged')
   {
-    itemStats = ti %>% 
+    items = items %>% 
       group_by(.data$item_id) %>%
-      summarise( nBooklets=n(),
-                 w_meanScore=weighted.mean(.data$meanScore, w=.data$n),
-                 sdScore = sqrt(combined_var(.data$meanScore, .data$sdScore^2, .data$n)),
-                 maxScore = max(.data$maxScore),
-                 pvalue=weighted.mean(.data$pvalue, w=.data$n),
-                 rit=weighted.mean(.data$rit, w=.data$n, na.rm=TRUE),
-                 rir=weighted.mean(.data$rir, w=.data$n, na.rm=TRUE),
-                 n=sum(.data$n)) %>%
+      summarise( n_booklets = n(),
+                 w_mean_score=weighted.mean(.data$mean_score, w = .data$n_persons),
+                 sd_score = sqrt(combined_var(.data$mean_score, .data$sd_score^2, .data$n_persons)),
+                 max_score = max(.data$max_score),
+                 pvalue = weighted.mean(.data$pvalue, w=.data$n_persons),
+                 rit = weighted.mean(.data$rit, w=.data$n_persons, na.rm=TRUE),
+                 rir = weighted.mean(.data$rir, w=.data$n_persons, na.rm=TRUE),
+                 n_persons = sum(.data$n_persons)) %>%
       ungroup() %>%
       mutate_if(is.factor, as.character) %>%
-      rename(meanScore=.data$w_meanScore) %>%
+      rename(mean_score=.data$w_mean_score) %>%
       df_format()
   } else
   {
-    ti = mutate_if(ti, is.factor, as.character)
-    itemStats = list(
-      pvalue = ti %>% 
+    items = mutate_if(items, is.factor, as.character)
+    
+    items = list(
+      pvalue = items %>% 
         select(.data$booklet_id,.data$item_id,.data$pvalue) %>% 
         spread(key=.data$booklet_id, value=.data$pvalue),
       
-      rit = ti %>% 
+      rit = items %>% 
         select(.data$booklet_id,.data$item_id,.data$rit) %>% 
         spread(key=.data$booklet_id,value=.data$rit),
       
-      rir = ti %>% 
+      rir = items %>% 
         select(.data$booklet_id,.data$item_id,.data$rir) %>% 
         spread(key=.data$booklet_id,value=.data$rir)
     )
   }
-  if(anyNA(ti$rit))
-    warning("Items without score variation have been removed from the test statistics")
-
-  testStats = ti %>%
-    filter(complete.cases(.data$rit)) %>%
-    group_by(.data$booklet_id) %>% 
-    summarise(nItems=n(),
-              alpha=.data$nItems/(.data$nItems-1)*(1-sum(.data$sdScore^2) / sum(.data$rit * .data$sdScore)^2 ),
-              meanP=mean(.data$pvalue),
-              meanRit=mean(.data$rit),
-              meanRir=mean(.data$rir),
-              maxTestScore=sum(.data$maxScore),
-              N=max(.data$n)) %>%
-    ungroup() %>%
-    mutate_if(is.factor, as.character) %>%
-    df_format()
-  
-  # new names since version 1.0.3 may 2021, old are kept for backward compatibility
-  booklets = rename(testStats, n_items=.data$nItems, mean_pvalue=.data$meanP,
-                    mean_rit=.data$meanRit, mean_rir=.data$meanRir, 
-                    max_booklet_score=.data$maxTestScore, n_persons=.data$N)
-  
-  if(type == 'raw')
-  {
-    items = rename(itemStats, mean_score = .data$meanScore,
-                 sd_score=.data$sdScore, max_score=.data$maxScore, n_persons=.data$n)
-  } else if(type == 'averaged')
-  {
-    items = rename(itemStats, mean_score = .data$meanScore,
-                   sd_score=.data$sdScore, max_score=.data$maxScore, n_persons=.data$n,
-                   n_booklets = .data$nBooklets)
-  } else
-  {
-    items = itemStats
-  }
   
   
-  list(booklets=booklets,items=items,itemStats=itemStats, testStats=testStats)
+  list(booklets=booklets, items=items)
 }
 

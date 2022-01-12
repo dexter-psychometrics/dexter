@@ -27,6 +27,8 @@ tia_equal = function(tia1,tia2, tolerance = 1e-8)
 
 test_that('tia computations are correct',{
   set.seed(123)
+  
+  #--- prepare test data
   nit_dich = 70L
   nit_poly = 10L
   nit = nit_poly + nit_dich
@@ -46,7 +48,7 @@ test_that('tia computations are correct',{
   
   
   dat = r_score(items)(rnorm(N))
-  # remove disco's
+  # remove disco's dich items
   dat[,!grepl('poly',colnames(dat))][dat[,!grepl('poly',colnames(dat))] > 1L] = 1L
   
   # incomplete design, 2 booklets with overlap
@@ -61,6 +63,7 @@ test_that('tia computations are correct',{
   rsp = get_responses(dat, columns = c("person_id", "item_id", "item_score")) %>%
     mutate(booklet_id = as.character(1L+(as.integer(person_id) %% 2L == 0)))
 
+  #--- test
   # manual tia separate per booklet
   tia_dpl = rsp %>%
     group_by(person_id, booklet_id) %>%

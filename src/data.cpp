@@ -1224,9 +1224,9 @@ DataFrame tia_C(const IntegerVector& booklet_id, const IntegerVector& booklet_sc
 	}
 	
 	
-	return DataFrame::create(Named("booklet_id") = ds_booklet_id, Named("item_id") = ds_item_id, Named("meanScore") = tia_mean, 
-							 Named("maxScore") = tia_max, Named("sdScore") = tia_sd, Named("rit") = tia_rit, Named("rir") = tia_rir, 
-							 Named("n") = tia_n);
+	return DataFrame::create(Named("booklet_id") = ds_booklet_id, Named("item_id") = ds_item_id, Named("mean_score") = tia_mean, 
+							 Named("max_score") = tia_max, Named("sd_score") = tia_sd, Named("rit") = tia_rit, Named("rir") = tia_rir, 
+							 Named("n_persons") = tia_n);
 }
 
 

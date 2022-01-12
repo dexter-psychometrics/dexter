@@ -1,11 +1,12 @@
 # dexter 1.1.5
 
-* slight change in implementation of DIF. If both datasets do not contain some items, they are now removed after calibration instead of before, making calibration more precise in incomplete designs.
+* slight change in implementation of DIF. If some items are not administered in both groups, they are now removed after calibration instead of before, making calibration more robust in incomplete designs.
+* deprecated names in result of tia_tables have now been removed.
+
 
 # dexter 1.1.4
 
 * changed sd_score for items in tia_tables() for type='averaged' to the actual sd rather than a weighted average of sd over booklets (which was the case in previous versions) 
-
 * tia_tables now returns a list with data.frame elements booklets and items with snake case columns names rather than elements testStats and itemStats. testStas and itemStats are also still included for the time being to not break existing code.
 * corrected a minor bug which caused progress bars to hang or not complete to 100%
 * get_resp_matrix no longer includes empty rows for missing factor levels
