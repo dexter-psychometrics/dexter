@@ -19,6 +19,7 @@ importFrom(grDevices, "rainbow","colorRampPalette","col2rgb","rgb")
 importFrom(methods, "is", "new")
 importFrom(utils, "str", "head", "person", "tail", "modifyList")
 importFrom(MASS, "lmsreg")
+importFrom(pheatmap, "pheatmap")
 
 
 # dexter.R
