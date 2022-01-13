@@ -1,5 +1,5 @@
 pandoc: 2.7.3
-pkgdown: 2.0.1
+pkgdown: 2.0.2
 pkgdown_sha: ~
 articles:
   DIF_vignette: DIF_vignette.html
@@ -46,5 +46,5 @@ articles:
   index: blog/index.html
   dexter: dexter.html
   profile-plots: profile-plots.html
-last_built: 2022-01-12T09:06Z
+last_built: 2022-01-13T22:09Z
 
