@@ -161,7 +161,7 @@ print.DIF_stats <- function(x, ...)
 #' @param itemsX character vector of item id's for the X axis
 #' @param itemsY character vector of item id's for the Y axis
 #' @param alpha significance level used to color the plot (two sided)
-#' @param ... further arguments to pheatmap
+#' @param ... further arguments to plot
 #' 
 #' @references
 #' Feskens, R., Fox, J. P., & Zwitser, R. (2019). Differential item functioning in PISA due to mode effects. 
@@ -170,9 +170,106 @@ print.DIF_stats <- function(x, ...)
 #' @details
 #' Plotting produces an image of the matrix of pairwise DIF statistics. 
 #' The statistics are standard normal deviates and colored to distinguish significant from non-significant values.
-#' If there is no DIF, a proportion alpha off the cells will be significant by chance.
+#' If there is no DIF, a proportion alpha off the cells will be colored significant by chance alone.
 #'      
 plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, alpha =.05,...)
+{
+  if(is.null(itemsX)) itemsX = sort(unique(x$items$item_id))
+  if(is.null(itemsY)) itemsY = sort(unique(x$items$item_id))
+  
+  if(length(setdiff(c(itemsX, itemsY), x$items$item_id)) > 0)
+  {
+    cat('items not found in DIF object:\n')
+    print(setdiff(c(itemsX, itemsY), x$items))
+    stop('some of the item_ids you specified are not present in the DIF object')
+  }
+  
+  x$items = x$items %>%
+    mutate(rn = row_number())
+  
+  itemsX = x$items %>%
+    inner_join(tibble(item_id = itemsX, ord = 1:length(itemsX)), by='item_id') %>%
+    arrange(.data$ord)
+  
+  itemsY = x$items %>%
+    inner_join(tibble(item_id = itemsY, ord = 1:length(itemsY)), by='item_id') %>%
+    arrange(.data$ord)
+  
+  DIF_pair = abs(x$DIF_pair[itemsX$rn, itemsY$rn])
+  
+  
+  if(nrow(distinct(x$items,.data$item_id)) == nrow(x$items))
+  {
+    yLabels = pull(itemsY, 'item_id')
+    xLabels = pull(itemsX, 'item_id')
+  } else
+  {
+    yLabels = paste(itemsY$item_id, itemsY$item_score)
+    xLabels = paste(itemsX$item_id, itemsX$item_score)
+    
+  }
+  
+  max_ = max(x$DIF_pair)
+  default.args = list(main = paste(x$group_labels[1],'vs.',x$group_labels[2]),
+                      axes=FALSE, zlim=c(0,max_),xlab='',ylab='',useRaster=TRUE)
+  
+  oldpar = par(no.readonly = TRUE)
+  on.exit({par(oldpar)},add=TRUE)
+  
+  graphics::layout(matrix(c(1,1,2,0),2,2), widths=c(7,1))
+  
+  qn = qnorm(1-alpha/2)
+  
+  breaks = seq(0, qn, .05)
+  col = colorRampPalette(c('white','lightblue'))(length(breaks)-1)
+  if(max_ > qn)
+  {
+    breaks_b = seq(qn, min(20,max_), .05)
+    breaks_b[length(breaks_b)] = max_ + 21
+    col = c(col,colorRampPalette(c('gold1','red2'))(length(breaks_b)))
+    breaks = c(breaks, breaks_b)
+  }
+  
+  # Reverse Y axis
+  # yLabels <- rev(yLabels)
+  xLabels <- rev(xLabels)
+  DIF_pair <- DIF_pair[nrow(DIF_pair) : 1,]
+  
+  # Data Map
+  par(mar = c(6,8,2.5,2))
+  
+  
+  do.call(image,
+          merge_arglists(list(...),
+                         override = list(x = 1:length(yLabels), y = 1:length(xLabels), z=t( DIF_pair),
+                                         col=col,breaks=breaks),
+                         default = default.args))
+  
+  
+  axis(1, at=1:length(yLabels), labels=yLabels, las=3, cex.axis=0.6, hadj=1,padj=0.5)
+  axis(2, at=1:length(xLabels), labels=xLabels, las=1, cex.axis=0.6, hadj=1,padj=0.5)
+  
+  #Color Scale
+  try({
+    par(mar=c(2,2,2.5,2))
+    image(1, seq(0, max(qn,min(20,max_)), by=.05),
+          matrix(seq(0, max(qn,min(20,max_)), by=.05),nrow=1),
+          col=col,
+          breaks=breaks,
+          xlab="",ylab="",
+          xaxt="n", axes=FALSE)
+    axis(2, at=0:min(20,max_),lwd=0,lwd.ticks=1,las=2,cex.axis=0.8)
+    
+  }, silent=TRUE)
+  
+  graphics::layout(1)
+  invisible(NULL)
+}
+
+
+
+
+DIF_heatmap = function(x, items = NULL, itemsX = items, itemsY = items, alpha =.05,...)
 {
   if(is.null(itemsX)) itemsX = sort(unique(x$items$item_id))
   if(is.null(itemsY)) itemsY = sort(unique(x$items$item_id))
@@ -220,8 +317,8 @@ plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, alpha
     breaks = c(breaks, breaks_b)
   }
   
-pheatmap::pheatmap(DIF_pair, colors=col, breaks=breaks, ...)  
-
+  pheatmap::pheatmap(DIF_pair, colors=col, breaks=breaks, ...)  
+  
   
   invisible(NULL)
 }
