@@ -26,7 +26,6 @@ Imports:
     Rcpp (>= 1.0.1),
     graphics,
     grDevices,
-    pheatmap,
     methods,
     utils
 LinkingTo: Rcpp, RcppArmadillo (>= 0.10.0)

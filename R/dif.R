@@ -238,16 +238,16 @@ plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, alpha
   # Data Map
   par(mar = c(6,8,2.5,2))
   
-  
+  user.args = list(...)
   do.call(image,
-          merge_arglists(list(...),
+          merge_arglists(user.args,
                          override = list(x = 1:length(yLabels), y = 1:length(xLabels), z=t( DIF_pair),
                                          col=col,breaks=breaks),
                          default = default.args))
   
-  
-  axis(1, at=1:length(yLabels), labels=yLabels, las=3, cex.axis=0.6, hadj=1,padj=0.5)
-  axis(2, at=1:length(xLabels), labels=xLabels, las=1, cex.axis=0.6, hadj=1,padj=0.5)
+  cex.axis = c(user.args$cex.axis, 0.6)[1]
+  axis(1, at=1:length(yLabels), labels=yLabels, las=3, cex.axis=cex.axis, hadj=1,padj=0.5)
+  axis(2, at=1:length(xLabels), labels=xLabels, las=1, cex.axis=cex.axis, hadj=1,padj=0.5)
   
   #Color Scale
   try({
@@ -269,56 +269,56 @@ plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, alpha
 
 
 
-DIF_heatmap = function(x, items = NULL, itemsX = items, itemsY = items, alpha =.05,...)
-{
-  if(is.null(itemsX)) itemsX = sort(unique(x$items$item_id))
-  if(is.null(itemsY)) itemsY = sort(unique(x$items$item_id))
-  
-  if(length(setdiff(c(itemsX, itemsY), x$items$item_id)) > 0)
-  {
-    cat('items not found in DIF object:\n')
-    print(setdiff(c(itemsX, itemsY), x$items))
-    stop('some of the item_ids you specified are not present in the DIF object')
-  }
-  
-  x$items = x$items %>%
-    mutate(rn = row_number())
-  
-  itemsX = x$items %>%
-    inner_join(tibble(item_id = itemsX, ord = 1:length(itemsX)), by='item_id') %>%
-    arrange(.data$ord)
-  
-  itemsY = x$items %>%
-    inner_join(tibble(item_id = itemsY, ord = 1:length(itemsY)), by='item_id') %>%
-    arrange(.data$ord)
-  
-  DIF_pair = abs(x$DIF_pair[itemsX$rn, itemsY$rn])
-  
-  
-  if(nrow(distinct(x$items,.data$item_id)) == nrow(x$items))
-  {
-    yLabels = pull(itemsY, 'item_id')
-    xLabels = pull(itemsX, 'item_id')
-  } else
-  {
-    yLabels = paste(itemsY$item_id, itemsY$item_score)
-    xLabels = paste(itemsX$item_id, itemsX$item_score)
-  }
-  
-  dimnames(DIF_pair) = list(xLabels, yLabels)
-  max_ = max(x$DIF_pair)
-  qn = qnorm(1-alpha/2)
-  breaks = seq(0, qn, length=50)
-  col = colorRampPalette(c('white','lightblue'))(length(breaks)-1)
-  if(max_ > qn)
-  {
-    breaks_b = seq(qn+0.01, max_, length=50)
-    col = c(col,colorRampPalette(c('gold1','red2'))(length(breaks_b)))
-    breaks = c(breaks, breaks_b)
-  }
-  
-  pheatmap::pheatmap(DIF_pair, colors=col, breaks=breaks, ...)  
-  
-  
-  invisible(NULL)
-}
+# DIF_heatmap = function(x, items = NULL, itemsX = items, itemsY = items, alpha =.05,...)
+# {
+#   if(is.null(itemsX)) itemsX = sort(unique(x$items$item_id))
+#   if(is.null(itemsY)) itemsY = sort(unique(x$items$item_id))
+#   
+#   if(length(setdiff(c(itemsX, itemsY), x$items$item_id)) > 0)
+#   {
+#     cat('items not found in DIF object:\n')
+#     print(setdiff(c(itemsX, itemsY), x$items))
+#     stop('some of the item_ids you specified are not present in the DIF object')
+#   }
+#   
+#   x$items = x$items %>%
+#     mutate(rn = row_number())
+#   
+#   itemsX = x$items %>%
+#     inner_join(tibble(item_id = itemsX, ord = 1:length(itemsX)), by='item_id') %>%
+#     arrange(.data$ord)
+#   
+#   itemsY = x$items %>%
+#     inner_join(tibble(item_id = itemsY, ord = 1:length(itemsY)), by='item_id') %>%
+#     arrange(.data$ord)
+#   
+#   DIF_pair = abs(x$DIF_pair[itemsX$rn, itemsY$rn])
+#   
+#   
+#   if(nrow(distinct(x$items,.data$item_id)) == nrow(x$items))
+#   {
+#     yLabels = pull(itemsY, 'item_id')
+#     xLabels = pull(itemsX, 'item_id')
+#   } else
+#   {
+#     yLabels = paste(itemsY$item_id, itemsY$item_score)
+#     xLabels = paste(itemsX$item_id, itemsX$item_score)
+#   }
+#   
+#   dimnames(DIF_pair) = list(xLabels, yLabels)
+#   max_ = max(x$DIF_pair)
+#   qn = qnorm(1-alpha/2)
+#   breaks = seq(0, qn, length=50)
+#   col = colorRampPalette(c('white','lightblue'))(length(breaks)-1)
+#   if(max_ > qn)
+#   {
+#     breaks_b = seq(qn+0.01, max_, length=50)
+#     col = c(col,colorRampPalette(c('gold1','red2'))(length(breaks_b)))
+#     breaks = c(breaks, breaks_b)
+#   }
+#   
+#   pheatmap::pheatmap(DIF_pair, colors=col, breaks=breaks, ...)  
+#   
+#   
+#   invisible(NULL)
+# }

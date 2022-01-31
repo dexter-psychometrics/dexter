@@ -300,7 +300,12 @@ profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, mod
   check_string(item_property)
   check_string(covariate)
   model = match.arg(model)
+  
   user.args = list(...)
+  leg.args = user.args[endsWith(names(user.args),'.legend')]
+  names(leg.args) = gsub('\\.legend$','',names(leg.args))
+  user.args = user.args[!endsWith(names(user.args),'.legend')]
+  
   if(is_db(dataSrc))
   {
     item_property = dbValid_colnames(item_property)
@@ -398,9 +403,11 @@ profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, mod
     lines(lns,col=colors[i], lw=2)
   }
 
-  
-  legend("topleft", legend=names(tt),lty=1, col=colors, cex=.7, 
-         box.lty=0, bg='white')
+  do.call(legend,
+          merge_arglists(leg.args, 
+                         default=list(x="topleft", cex=.7, box.lty=0, bg='white'),
+                         override=list(legend=names(tt),lty=1, col=colors)))
+
   invisible(NULL)
 }
 

@@ -14,7 +14,8 @@ get_resp_data(
   protect_x = TRUE,
   retain_person_id = TRUE,
   merge_within_persons = FALSE,
-  parms_check = NULL
+  parms_check = NULL,
+  raw = FALSE
 )
 
 get_resp_matrix(dataSrc, qtpredicate = NULL, env = NULL)
@@ -37,6 +38,8 @@ get_resp_matrix(dataSrc, qtpredicate = NULL, env = NULL)
 \item{merge_within_persons}{merge different booklets for the same person together}
 
 \item{parms_check}{data.frame of item_id, item_score to check for coverage of data}
+
+\item{raw}{if raw is TRUE, no sum scores, booklets, or design is provided and arguments, 'parms_check' and 'summarised' are ignored}
 }
 \value{
 \describe{
@@ -57,8 +60,11 @@ easy connection of your own package to the data management capabilities of dexte
 }
 \description{
 These functions are meant for people who want to develop their own models based
-on the data management structure of dexter. Very little input checking is performed,
-the benefit is some extra speed over using `get_responses`.
+on the data management structure of dexter. The benefit is some extra speed and less memory usage 
+compared to using `get_responses` or `get_testscores`.
+The return value of get_resp_data can be used as the 'dataSrc' argument in analysis functions.
+}
+\details{
 Regular users are advised not to use these functions 
-as incorrect use can easily crash your R-session or lead to unexpected results.
+as incorrect use can crash your R-session or lead to unexpected results.
 }

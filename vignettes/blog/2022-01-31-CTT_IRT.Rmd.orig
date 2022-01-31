@@ -1,0 +1,175 @@
+---
+title: "Classical Test Theory with IRT"
+author: "Timo Bechger and Jesse Koops"
+date: "`r Sys.Date()`"
+bibliography: dexter.bib
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE)
+library(dexter)
+library(dplyr)
+#setwd("~/Documents/statlib/explore/dexter_blogs")
+```
+
+Item response theory (IRT) and classical test theory (CTT) can be combined. To this effect, we can use __theta functions__ in dexter:
+
+- __expected_score__: The expected score given theta.
+- __information__: The Fisher information about theta in the test score.
+- __p_score__: The distribution of test scores given theta.
+
+where theta, i.e., $\theta$, represents student ability. The aim of this blog is to illustrate the use of these functions but we commence with a (very) brief overview of CTT. 
+
+# Classical test theory
+The test score is assumed to be discrete random variable $X_+$ where the randomness is due to measurement error. The expected score of a test taker with ability $\theta$, $\mathcal{E}[X_+|\theta]$ is called the *true score*. It is the average score over (hypothetical) repeated testing of the same individual or the average score of people with the same ability. 
+
+The true score is a function of ability and, in IRT parlance, would be called the **test characteristic function (TCF)**. Obviously, the TCF can not be observed but if we assume a Rasch model, we can draw its curve using the function __expected_score__ -- the test score being the number of correct answers. 
+
+```{r, fig.align='center', fig.width=4, fig.height=4}
+parms = data.frame(item_id=1:30, item_score=1, beta=rep(0,30))
+Exp_sc = expected_score(parms)
+plot(Exp_sc, from=-5,to=5, xlab="ability", ylab="Exp. score")
+```
+
+
+The observed scores vary around their average due to __measurement error__, formally defined as deviations around the true score; $x_+ - \mathcal{E}[X_+|\theta]$. As we can always write $x_+ = \mathcal{E}[X_+|\theta] + \left(x_+ - \mathcal{E}[X_+|\theta]\right)$, we now find the famous equation:
+$$
+\text{observed score} = \text{true score} + \text{measurement error}
+$$
+which is merely a tautology, equivalent to a random-effects ANOVA model.
+
+The amount of measurement error at a given level of ability can be captured by the __conditional error variance (CEV)__: 
+\begin{equation}
+Var(X_+|\theta)=\mathcal{E}[\left(X_+ - \mathcal{E}[X_+|\theta] \right)^2|\theta]
+\end{equation}
+Like the true score, the CEV is a function of ability. Here is a plot.
+
+```{r,fig.align='center', fig.width=4, fig.height=4}
+Cond.error.variance = information(parms)
+curve(Cond.error.variance, from=-5,to=5, col="blue", xlab="ability")
+```
+
+Note that the CEV coincides with [**test information**](https://dexterities.netlify.com/2018/11/05/test-and-item-information-functions-in-dexter/) which is counter-intuitive as "error" sounds negative and "information" positive. Moreover, it is not true in general - only in exponential family IRT models. We will clarify this in a future blog where we explain the difference between estimating a true score or an ability.
+
+What happens in a population of test-takers? Using the [law of total expectation](https://en.wikipedia.org/wiki/Law_of_total_expectation), we find that, in a population of test-takers, the average of the true scores $\mathcal{E}[\mathcal{E}[X_+|\theta]] = \mathcal{E}[X_+]$ is just the average of the scores -- measurement errors average to zero. The variance of the test score is the sum of true score variance and error variance. Specifically, from the [law of total variance](https://en.wikipedia.org/wiki/Law_of_total_variance) it follows that:
+$$
+Var(X_+)=Var(\mathcal{E}[X_+|\theta])+\mathcal{E}[Var(X_+|\theta)]
+$$
+where $Var(\mathcal{E}[X_+|\theta])$ is the true-score variance and
+\begin{align*}
+ \mathcal{E}[Var(X_+|\theta)] & \equiv \mathcal{E}(\mathcal{E}[(X_+-\mathcal{E}[X_+|\theta])^{2}|\theta])  \\
+ &=\mathcal{E}[(X_+-\mathcal{E}[X_+|\theta])^{2}]
+\end{align*}
+is indeed the variance of the measurement errors -- sometimes called __the average error variance__. In the population of test takers, measurement errors and true scores are uncorrelated but not necessarily independent. For one thing, we expect measurement error to be smaller for test takers whose true scores lie on the upper or lower end of the score range - simply because it cannot be lower or higher.
+
+Last, but not least, the proportion true-score variance in the population is the __reliability__. That is,
+$$
+\operatorname{rel}(X_+)  
+  \equiv\frac{\operatorname{Var}(\mathcal{E}[X_+|\theta])}{\operatorname{Var}(X_+)}
+=1-\frac{\mathcal{E}[\operatorname{Var}(X_+|\theta)]}{\operatorname{Var}(\mathcal{E}[X_+|\theta])+\mathcal{E
+}[Var(X_+|\theta)]}
+$$
+defined if $\operatorname{Var}(X_+)>0$. Note that, since $Var(X_+) \geq Var(\mathcal{E}[X_+|\theta])$, $0\leq \operatorname{rel}(X_+)\leq 1$. Reliability is the correlation between two administrations of the same test to samples from the same population (see @BechgerMarisVerstralen2003) and is widely used as a measure of consistency and an index for test quality. In the parlance of ANOVA it would be called the intra-class correlation (see @snijders2011multilevel, 3.5).  
+
+
+# Numerical Integration
+CTT is a sometimes called a weak theory of measurement as it based on one assumption only, to wit, the test-score is random. Ability was introduced as a random variable to represent the test taker and could be continuous or discrete, uni- or multivariate. Assuming an IRT model like the Rasch model makes the theory stronger. The down-side is that the conclusions depend on the fit of the model. The advantage is that it allows us to do more. We mention one possibility.
+
+Using IRT, reliability can be calculated using numerical or Monte-Carlo integration. Here is a small script based on Gauss-Hermite Quadrature which is the default procedure when the ability distribution is normal; see e.g., @kolen1996conditional. 
+
+```{r}
+library(statmod)
+GH = gauss.quad.prob(60,'normal',mu=0,sigma=1)
+x = GH$nodes
+w = GH$weights
+
+es = expected_score(parms)
+info = information(parms)
+
+expected.score = sum(es(x) * w)
+
+true.variance = sum(es(x)^2 * w) - expected.score^2
+
+error.variance = sum(info(x) * w)
+
+```
+
+Assuming a standard normal ability distribution we find: __true.variance = __ `r round(true.variance,2)`. The (average) error variance is just the expected information; in this case equal to  __error.variance = __ `r round(error.variance,2)`. The reliability is found to be __true.variance/(error.variance+true.variance)) = __ `r round(true.variance/(error.variance+true.variance),2)`.
+
+
+```{r, include=FALSE}
+db = start_new_project(verbAggrRules,':memory:')
+add_booklet(db,verbAggrData, "agg")
+parms =fit_enorm(db)
+```
+
+
+# The Consistency of Classifications
+Now for something new. Consider an examination that students fail if their test score is below a pass-fail score $c$, and pass otherwise. Let us consider the probability that a person with the same ability obtains the same result over two exchangeable replications. Let $I=(X_+\geq c)$ be an indicator of passing. Then, the probability of a consistent outcome over two exchangeable replications of the exam is:
+\begin{align*}
+p(\text{Consistent}|\theta) &= p(I=1,I^*=1|\theta) + p(I=0,I^*=0|\theta) \\
+&=\left(\sum_{s\geq c} p(X_+ =s|\theta)\right)^2 + \left(\sum_{s< c} p(X_+ =s|\theta)\right)^2
+\end{align*}
+In our 2003 article, we have coined this the __test-characteristic decision function__. Here is an R-function that calculates this function using the function __p_score__ which calculates the test score distribution given ability.
+
+
+
+
+
+```{r}
+TCDF = function(parms, c)
+{
+  function(theta)
+  {
+    p.score = p_score(parms)(theta)
+    s = 1:ncol(p.score) - 1
+    
+    rowSums(p.score[,s<c])^2 + rowSums(p.score[,s>=c])^2
+  }
+}
+
+```
+
+If, for illustration, we consider the verbal aggression test as an examination with a pass-fail-score of 20, we obtain the following picture.
+
+
+```{r, fig.align='center', fig.width=5, fig.height=5}
+plot(TCDF(parms,20), from=-4, to=4, xlab='theta',ylab='P(consistent)')
+```
+
+```{r, include=FALSE}
+# add reliability to pv's
+# for use in next blog
+pv = plausible_values(db, nPV=10)
+
+pv = pv |>
+  mutate(across(starts_with('PV'), 
+                TCDF(parms,20), 
+                .names = '{gsub("PV","rel",.col)}'))
+
+```
+
+
+When the TCDC is integrated over the population that took the test (we estimated mu=-0.8, sigma=1), we obtain the probability of consistent classification when the test is applied to this population using c as a cutoff. For the verbal aggression test with a pass-fail score of 20 this percentage is `r round(mean(as.matrix(select(pv,starts_with('rel')))),2)` - not bad. The following function can be used for this.
+
+```{r, eval=FALSE}
+Cons_class = function(parms, c, mu=0, sigma=1)
+{
+  GH = gauss.quad.prob(60,'normal',mu=mu, sigma=sigma)
+  sum(TCDF(parms, c)(GH$nodes) * GH$weights)
+}
+
+```
+
+
+In closing: Integration requires that the values of the item parameters and the ability distribution are known to us. In a future blog we will discuss how plausible values may come to the rescue when that the IRT model is not fully known.
+
+```{r, echo=FALSE}
+close_project(db)
+```
+
+
+# References

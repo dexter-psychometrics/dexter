@@ -666,6 +666,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   }
   respData = get_resp_data(dataSrc, qtpredicate, env=env, extra_columns=item_property,
                            merge_within_persons=TRUE)
+  #to do: jk, why merge within persons here? it's not the default. can't remember my thinking here
   
   respData$x[[item_property]] = ffactor(as.character(respData$x[[item_property]]))
   lvl = levels(respData$x[[item_property]])

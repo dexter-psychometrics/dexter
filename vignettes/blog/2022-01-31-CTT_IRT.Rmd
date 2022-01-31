@@ -1,0 +1,163 @@
+---
+title: "Classical Test Theory with IRT"
+author: "Timo Bechger and Jesse Koops"
+date: "2022-01-31"
+bibliography: dexter.bib
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+Item response theory (IRT) and classical test theory (CTT) can be combined. To this effect, we can use __theta functions__ in dexter:
+
+- __expected_score__: The expected score given theta.
+- __information__: The Fisher information about theta in the test score.
+- __p_score__: The distribution of test scores given theta.
+
+where theta, i.e., $\theta$, represents student ability. The aim of this blog is to illustrate the use of these functions but we commence with a (very) brief overview of CTT. 
+
+# Classical test theory
+The test score is assumed to be discrete random variable $X_+$ where the randomness is due to measurement error. The expected score of a test taker with ability $\theta$, $\mathcal{E}[X_+|\theta]$ is called the *true score*. It is the average score over (hypothetical) repeated testing of the same individual or the average score of people with the same ability. 
+
+The true score is a function of ability and, in IRT parlance, would be called the **test characteristic function (TCF)**. Obviously, the TCF can not be observed but if we assume a Rasch model, we can draw its curve using the function __expected_score__ -- the test score being the number of correct answers. 
+
+
+```r
+parms = data.frame(item_id=1:30, item_score=1, beta=rep(0,30))
+Exp_sc = expected_score(parms)
+plot(Exp_sc, from=-5,to=5, xlab="ability", ylab="Exp. score")
+```
+
+<img src="data:image/png;base64,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" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" style="display: block; margin: auto;" />
+
+
+The observed scores vary around their average due to __measurement error__, formally defined as deviations around the true score; $x_+ - \mathcal{E}[X_+|\theta]$. As we can always write $x_+ = \mathcal{E}[X_+|\theta] + \left(x_+ - \mathcal{E}[X_+|\theta]\right)$, we now find the famous equation:
+$$
+\text{observed score} = \text{true score} + \text{measurement error}
+$$
+which is merely a tautology, equivalent to a random-effects ANOVA model.
+
+The amount of measurement error at a given level of ability can be captured by the __conditional error variance (CEV)__: 
+\begin{equation}
+Var(X_+|\theta)=\mathcal{E}[\left(X_+ - \mathcal{E}[X_+|\theta] \right)^2|\theta]
+\end{equation}
+Like the true score, the CEV is a function of ability. Here is a plot.
+
+
+```r
+Cond.error.variance = information(parms)
+curve(Cond.error.variance, from=-5,to=5, col="blue", xlab="ability")
+```
+
+<img src="data:image/png;base64,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" title="plot of chunk unnamed-chunk-2" alt="plot of chunk unnamed-chunk-2" style="display: block; margin: auto;" />
+
+Note that the CEV coincides with [**test information**](https://dexterities.netlify.com/2018/11/05/test-and-item-information-functions-in-dexter/) which is counter-intuitive as "error" sounds negative and "information" positive. Moreover, it is not true in general - only in exponential family IRT models. We will clarify this in a future blog where we explain the difference between estimating a true score or an ability.
+
+What happens in a population of test-takers? Using the [law of total expectation](https://en.wikipedia.org/wiki/Law_of_total_expectation), we find that, in a population of test-takers, the average of the true scores $\mathcal{E}[\mathcal{E}[X_+|\theta]] = \mathcal{E}[X_+]$ is just the average of the scores -- measurement errors average to zero. The variance of the test score is the sum of true score variance and error variance. Specifically, from the [law of total variance](https://en.wikipedia.org/wiki/Law_of_total_variance) it follows that:
+$$
+Var(X_+)=Var(\mathcal{E}[X_+|\theta])+\mathcal{E}[Var(X_+|\theta)]
+$$
+where $Var(\mathcal{E}[X_+|\theta])$ is the true-score variance and
+\begin{align*}
+ \mathcal{E}[Var(X_+|\theta)] & \equiv \mathcal{E}(\mathcal{E}[(X_+-\mathcal{E}[X_+|\theta])^{2}|\theta])  \\
+ &=\mathcal{E}[(X_+-\mathcal{E}[X_+|\theta])^{2}]
+\end{align*}
+is indeed the variance of the measurement errors -- sometimes called __the average error variance__. In the population of test takers, measurement errors and true scores are uncorrelated but not necessarily independent. For one thing, we expect measurement error to be smaller for test takers whose true scores lie on the upper or lower end of the score range - simply because it cannot be lower or higher.
+
+Last, but not least, the proportion true-score variance in the population is the __reliability__. That is,
+$$
+\operatorname{rel}(X_+)  
+  \equiv\frac{\operatorname{Var}(\mathcal{E}[X_+|\theta])}{\operatorname{Var}(X_+)}
+=1-\frac{\mathcal{E}[\operatorname{Var}(X_+|\theta)]}{\operatorname{Var}(\mathcal{E}[X_+|\theta])+\mathcal{E
+}[Var(X_+|\theta)]}
+$$
+defined if $\operatorname{Var}(X_+)>0$. Note that, since $Var(X_+) \geq Var(\mathcal{E}[X_+|\theta])$, $0\leq \operatorname{rel}(X_+)\leq 1$. Reliability is the correlation between two administrations of the same test to samples from the same population (see @BechgerMarisVerstralen2003) and is widely used as a measure of consistency and an index for test quality. In the parlance of ANOVA it would be called the intra-class correlation (see @snijders2011multilevel, 3.5).  
+
+
+# Numerical Integration
+CTT is a sometimes called a weak theory of measurement as it based on one assumption only, to wit, the test-score is random. Ability was introduced as a random variable to represent the test taker and could be continuous or discrete, uni- or multivariate. Assuming an IRT model like the Rasch model makes the theory stronger. The down-side is that the conclusions depend on the fit of the model. The advantage is that it allows us to do more. We mention one possibility.
+
+Using IRT, reliability can be calculated using numerical or Monte-Carlo integration. Here is a small script based on Gauss-Hermite Quadrature which is the default procedure when the ability distribution is normal; see e.g., @kolen1996conditional. 
+
+
+```r
+library(statmod)
+GH = gauss.quad.prob(60,'normal',mu=0,sigma=1)
+x = GH$nodes
+w = GH$weights
+
+es = expected_score(parms)
+info = information(parms)
+
+expected.score = sum(es(x) * w)
+
+true.variance = sum(es(x)^2 * w) - expected.score^2
+
+error.variance = sum(info(x) * w)
+```
+
+Assuming a standard normal ability distribution we find: __true.variance = __ 39.04. The (average) error variance is just the expected information; in this case equal to  __error.variance = __ 6.2. The reliability is found to be __true.variance/(error.variance+true.variance)) = __ 0.86.
+
+
+
+
+
+# The Consistency of Classifications
+Now for something new. Consider an examination that students fail if their test score is below a pass-fail score $c$, and pass otherwise. Let us consider the probability that a person with the same ability obtains the same result over two exchangeable replications. Let $I=(X_+\geq c)$ be an indicator of passing. Then, the probability of a consistent outcome over two exchangeable replications of the exam is:
+\begin{align*}
+p(\text{Consistent}|\theta) &= p(I=1,I^*=1|\theta) + p(I=0,I^*=0|\theta) \\
+&=\left(\sum_{s\geq c} p(X_+ =s|\theta)\right)^2 + \left(\sum_{s< c} p(X_+ =s|\theta)\right)^2
+\end{align*}
+In our 2003 article, we have coined this the __test-characteristic decision function__. Here is an R-function that calculates this function using the function __p_score__ which calculates the test score distribution given ability.
+
+
+
+
+
+
+```r
+TCDF = function(parms, c)
+{
+  function(theta)
+  {
+    p.score = p_score(parms)(theta)
+    s = 1:ncol(p.score) - 1
+    
+    rowSums(p.score[,s<c])^2 + rowSums(p.score[,s>=c])^2
+  }
+}
+```
+
+If, for illustration, we consider the verbal aggression test as an examination with a pass-fail-score of 20, we obtain the following picture.
+
+
+
+```r
+plot(TCDF(parms,20), from=-4, to=4, xlab='theta',ylab='P(consistent)')
+```
+
+<img src="data:image/png;base64,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" title="plot of chunk unnamed-chunk-6" alt="plot of chunk unnamed-chunk-6" style="display: block; margin: auto;" />
+
+
+
+
+When the TCDC is integrated over the population that took the test (we estimated mu=-0.8, sigma=1), we obtain the probability of consistent classification when the test is applied to this population using c as a cutoff. For the verbal aggression test with a pass-fail score of 20 this percentage is 0.87 - not bad. The following function can be used for this.
+
+
+```r
+Cons_class = function(parms, c, mu=0, sigma=1)
+{
+  GH = gauss.quad.prob(60,'normal',mu=mu, sigma=sigma)
+  sum(TCDF(parms, c)(GH$nodes) * GH$weights)
+}
+```
+
+
+In closing: Integration requires that the values of the item parameters and the ability distribution are known to us. In a future blog we will discuss how plausible values may come to the rescue when that the IRT model is not fully known.
+
+
+
+
+# References

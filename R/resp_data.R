@@ -33,10 +33,12 @@ stop_no_param = function(items)
 #' Functions for developers
 #'
 #' These functions are meant for people who want to develop their own models based
-#' on the data management structure of dexter. Very little input checking is performed,
-#' the benefit is some extra speed over using `get_responses`.
+#' on the data management structure of dexter. The benefit is some extra speed and less memory usage 
+#' compared to using `get_responses` or `get_testscores`.
+#' The return value of get_resp_data can be used as the 'dataSrc' argument in analysis functions.
+#' 
 #' Regular users are advised not to use these functions 
-#' as incorrect use can easily crash your R-session or lead to unexpected results.
+#' as incorrect use can crash your R-session or lead to unexpected results.
 #' 
 #'
 #' @param dataSrc data.frame, integer matrix, dexter database or `dx_resp_data` object
@@ -48,7 +50,8 @@ stop_no_param = function(items)
 #' @param retain_person_id whether to retain the original person_id levels or just use arbitrary integers
 #' @param merge_within_persons merge different booklets for the same person together
 #' @param parms_check data.frame of item_id, item_score to check for coverage of data
-#' 
+#' @param raw if raw is TRUE, no sum scores, booklets, or design is provided and arguments, 'parms_check' and 'summarised' are ignored
+
 #' @return
 #' \describe{
 #' \item{get_resp_data}{ returns a list with class `dx_resp_data` with elements
@@ -70,7 +73,8 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
                          summarised=FALSE, env=NULL,
                          protect_x=TRUE, retain_person_id=TRUE,
                          merge_within_persons = FALSE,
-                         parms_check=NULL)
+                         parms_check=NULL,
+                         raw=FALSE)
 {
 
   if(inherits(dataSrc,'dx_resp_data'))
@@ -80,6 +84,28 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
     
     return(resp_data.from_resp_data(dataSrc, extra_columns=extra_columns, summarised=summarised, 
                                     protect_x=protect_x,merge_within_persons = merge_within_persons))
+  }
+  if(raw)
+  {
+    x = get_responses_(dataSrc, qtpredicate = qtpredicate, env = env, 
+                       columns = c('person_id','item_id','item_score', extra_columns))
+    
+    if(is.factor(x$person_id))
+    {
+      x$person_id = droplevels(x$person_id)
+    } else
+    {
+      x$person_id = ffactor(x$person_id, as_int=!retain_person_id)
+    }
+    
+    if(is.factor(x$item_id))
+    {
+      x$item_id = droplevels(x$item_id)
+    } else
+    {
+      x$item_id = ffactor(x$item_id)
+    }
+    return(list(x=x))
   }
   
   if(is.matrix(dataSrc))
@@ -823,6 +849,7 @@ get_resp_matrix = function(dataSrc, qtpredicate=NULL, env=NULL)
     }
       
   }
+
   out = matrix(NA_integer_, nlevels(x$person_id),nlevels(x$item_id))
   fill_resp_matrix(x$person_id, x$item_id, x$item_score, out)
   rownames(out) = levels(x$person_id)
