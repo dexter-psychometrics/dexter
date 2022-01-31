@@ -189,7 +189,7 @@ update_pv_prior_mixnorm = function (pv, p, mu, sigma, prior.dist=c('normal','Jef
   if (prior.dist == 'normal')
   {
      ## hyper-prior
-    l = rep(1,2)
+    l = rep(2,2) #rep(1,2)
     v = rep(5,2)
 
       ## latent group membership
