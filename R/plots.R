@@ -301,10 +301,14 @@ profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, mod
   check_string(covariate)
   model = match.arg(model)
   
-  user.args = list(...)
-  leg.args = user.args[endsWith(names(user.args),'.legend')]
-  names(leg.args) = gsub('\\.legend$','',names(leg.args))
-  user.args = user.args[!endsWith(names(user.args),'.legend')]
+  user.args = list(...); leg.args = list()
+  if(length(names(user.args))>0)
+  {
+    leg.args = user.args[endsWith(names(user.args),'.legend')]
+    names(leg.args) = gsub('\\.legend$','',names(leg.args))
+    user.args = user.args[!endsWith(names(user.args),'.legend')]
+  }
+  
   
   if(is_db(dataSrc))
   {
