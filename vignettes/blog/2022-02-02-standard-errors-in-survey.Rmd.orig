@@ -1,0 +1,102 @@
+---
+title: "Approximate survey errors for the correlation and the standard deviation: with R package survey"
+author: "Ivailo Partchev"
+date: "`r Sys.Date()`"
+bibliography: delta.bib
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE)
+```
+
+For a survey statistician, there can hardly be anything more helpful than Thomas Lumley's `survey` [@survey, @lumley]. Not surprisingly, it has been downloaded over 3.1 million times at the time of writing, which makes it one of the more popular packages for R [@R].
+
+Unfortunately, `survey` does not have functions to estimate two popular statistics, the standard deviation and the Pearson correlation, and their standard errors. Packages like `srvyr` [@srvyr] or `jtools` [@jtools] have attempted to fill this lacune, but they only provide the estimates, not the standard errors.
+
+Consider an object, `est`, containing `survey` estimates for the variances of three variables. The variables happen to be plausible values [@MarsmanPV] from a large educational survey, and the estimates have been produced by a replication method (BRR, see @lumley, Ch.2.3). Note that I could have had any variables instead of plausible values (remember petal length? sepal width?), and that we are discussing the standard error under repeated sampling form a population. The question about the meaning of the correlation between two sets of plausible values, or the variability seen in a whole bunch of them, is psychometrically relevant, but it will be discussed in a different post.
+
+Applying the generic print method, I get:
+
+```{r, message=FALSE}
+library(survey)
+load('~/Rdatasets/est.Rdata')
+print(est)
+```
+
+I may be misled about the standard errors if I type
+
+```{r}
+sqrt(est)
+```
+
+On the other hand, if I type
+
+```{r}
+str(est)
+```
+
+I get to see the entire contents of this object. It is a $3\times 3$ matrix, let us call it $\hat S$, containing the estimated  covariance matrix of my plausible values. It has several attributes, one of which, `var`, is the $9\times 9$ covariance matrix of $\hat S$, which we may call $\hat V$.
+
+Because the standard deviation is a simple function of the statistic that `survey` does provide, we can derive its approximate standard error by applying the delta theorem \citep[Ch.5.5]{wasserman2010statistics}. If $\hat{s^2}$ is the estimate of the variance and $\hat{v^2}$ is the variance of that estimate, the variance for the standard deviation is estimated as $\hat{v^2}$ multiplied by the square of the first derivative of $\sqrt{x}$, i.e.~$1/(2\sqrt{x})$, at $\hat{s^2}$. In other words, the standard error for $\sqrt{\hat s^2}$ obtains as $\sqrt{\hat{v^2}/4\hat{s^2}}=0.5\sqrt{\hat{v^2}/\hat{s^2}}$.
+
+The correlation, $\hat r= \hat{s_{xy}}/\sqrt{\hat{s^2_{x}}\hat{s^2_{y}}}$, is a function of three variables, the covariance and the two variances. We have to apply the multivariate delta theorem: the original covariance matrix is pre- and post-multiplied with the vector
+of the partial derivatives of the function with respect to each of the three variables. For simplicity, let $M$ be the $3\times 3$ submatrix of $\hat{V}$ containing just the rows and columns that have to do with $\hat{s_{xy}}$, $\hat{s^2_{x}}$, and $\hat{s^2_{y}}$.  Then, the standard error of the correlation will be estimated as $J'MJ$, where
+
+$$ 
+J = \left( 
+\begin{array}{c}   
+\displaystyle{\frac{ \partial \hat{r} } { \partial \hat{s_{xy}} }}\\ 
+\displaystyle{\frac{ \partial \hat r}{\partial \hat{s^2_{x}}}} \\ 
+\displaystyle{\frac{ \partial \hat r}{\partial \hat{s^2_{y}}}} 
+\end{array}   
+\right) 
+=
+\left(
+\begin{array}{c}   
+\displaystyle{\frac{ 1 } { \sqrt{ \hat{s^2_{x}}\hat{s^2_{y}}} }}\\ 
+- \displaystyle{\frac{ \hat{s_{xy}}}{2\hat{s^2_{x}}^{3/2}\sqrt{\hat{s^2_{y}}}}} \\ 
+- \displaystyle{\frac{ \hat{s_{xy}}}{2\sqrt{\hat{s^2_{x}}}\hat{s^2_{y}}^{3/2}}}
+\end{array}   
+\right)
+$$
+
+
+The code is provided below. There is just a short function, `deltify`, that takes as a single argument the object returned by `survey` and returns a list of two matrices: `estimates` has the standard deviations along the diagonal and the correlations in the off-diagonal cells, and `stderr` shows the standard errors similarly arranged:
+
+
+```{r}
+deltify = function(est) {
+  v = attr(est,"var")
+  n = nrow(est)
+  est2 = var2 = matrix(0, n, n)
+  pos = function(i,j,n){(i-1)*n+j}
+  
+  for (i in 2:n) {
+    for (j in 1 : (i-1)) {
+      est2[i,j] = est[i,j] / (sqrt(est[i,i])*sqrt(est[j,j]))
+      jac = rep(0, n*n)
+      jac[pos(i,j,n)] = 1.0 / (sqrt(est[i,i])*sqrt(est[j,j]))
+      jac[pos(i,i,n)] = - est[i,j] / (2.0 * est[i,i]^1.5 * sqrt(est[j,j]))
+      jac[pos(j,j,n)] = - est[i,j] / (2.0 * est[j,j]^1.5 * sqrt(est[i,i]))
+      var2[i,j] = jac %*% v %*% jac
+    }
+  }
+
+  var2 = var2 + t(var2)
+  est2 = est2 + t(est2)
+
+  for (i in 1:n) {
+    est2[i,i] = sqrt(est[i,i])
+    var2[i,i] = v[pos(i,i,n)] / (4*est[i,i])
+  }
+  dimnames(est2) = dimnames(var2) = dimnames(est)
+  list(estimates=est2, stderr=sqrt(var2))
+}
+
+deltify(est)
+```
+
+## References
+
