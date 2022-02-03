@@ -9,7 +9,7 @@ editor_options:
 
 
 
-For a survey statistician, there can hardly be anything more helpful than Thomas Lumley's `survey` [@survey, @lumley]. Not surprisingly, it has been downloaded over 3.1 million times at the time of writing, which makes it one of the more popular packages for R [@R].
+For a survey statistician, there can hardly be anything more helpful than Thomas Lumley's `survey` [@lumley]. Not surprisingly, it has been downloaded over 3.1 million times at the time of writing, which makes it one of the more popular packages for R [@R].
 
 Unfortunately, `survey` does not have functions to estimate two popular statistics, the standard deviation and the Pearson correlation, and their standard errors. Packages like `srvyr` [@srvyr] or `jtools` [@jtools] have attempted to fill this lacune, but they only provide the estimates, not the standard errors.
 
@@ -68,7 +68,7 @@ str(est)
 
 I get to see the entire contents of this object. It is a $3\times 3$ matrix, let us call it $\hat S$, containing the estimated  covariance matrix of my plausible values. It has several attributes, one of which, `var`, is the $9\times 9$ covariance matrix of $\hat S$, which we may call $\hat V$.
 
-Because the standard deviation is a simple function of the statistic that `survey` does provide, we can derive its approximate standard error by applying the delta theorem \citep[Ch.5.5]{wasserman2010statistics}. If $\hat{s^2}$ is the estimate of the variance and $\hat{v^2}$ is the variance of that estimate, the variance for the standard deviation is estimated as $\hat{v^2}$ multiplied by the square of the first derivative of $\sqrt{x}$, i.e.~$1/(2\sqrt{x})$, at $\hat{s^2}$. In other words, the standard error for $\sqrt{\hat s^2}$ obtains as $\sqrt{\hat{v^2}/4\hat{s^2}}=0.5\sqrt{\hat{v^2}/\hat{s^2}}$.
+Because the standard deviation is a simple function of the statistic that `survey` does provide, we can derive its approximate standard error by applying the delta theorem [@wasserman2010statistics, Ch.5.5]. If $\hat{s^2}$ is the estimate of the variance and $\hat{v^2}$ is the variance of that estimate, the variance for the standard deviation is estimated as $\hat{v^2}$ multiplied by the square of the first derivative of $\sqrt{x}$, i.e.~$1/(2\sqrt{x})$, at $\hat{s^2}$. In other words, the standard error for $\sqrt{\hat s^2}$ obtains as $\sqrt{\hat{v^2}/4\hat{s^2}}=0.5\sqrt{\hat{v^2}/\hat{s^2}}$.
 
 The correlation, $\hat r= \hat{s_{xy}}/\sqrt{\hat{s^2_{x}}\hat{s^2_{y}}}$, is a function of three variables, the covariance and the two variances. We have to apply the multivariate delta theorem: the original covariance matrix is pre- and post-multiplied with the vector
 of the partial derivatives of the function with respect to each of the three variables. For simplicity, let $M$ be the $3\times 3$ submatrix of $\hat{V}$ containing just the rows and columns that have to do with $\hat{s_{xy}}$, $\hat{s^2_{x}}$, and $\hat{s^2_{y}}$.  Then, the standard error of the correlation will be estimated as $J'MJ$, where
