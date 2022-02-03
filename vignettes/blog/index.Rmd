@@ -11,6 +11,14 @@ p.blog-authors{font-style:italic}
 </style>
 
 
+## ["Classical Test Theory with IRT"](2022-01-31-CTT_IRT)
+<p class="blog-authors">"Timo Bechger and Jesse Koops"</p><p>
+There is a long-standing interest in combining item response theory (IRT) and classical test theory (CTT) rather than treat them as mere alternatives [@BechgerMarisVerstralen2003]. The __theta functions__ in dexter are particularly helpful in this approach:
+- __expected_score__: The expected score given theta.
+- __information__: The Fisher information about theta in the test score.
+- __p_score__: The distribution of test scores given theta.
+</p>[read more...](2022-01-31-CTT_IRT)
+
 ## [Happy 2022!](2021-12-24-happy-2022)
 <p class="blog-authors">Ivailo Partchev</p><p>
 ![](img/Dx22.jpg)
