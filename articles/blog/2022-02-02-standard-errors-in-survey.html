@@ -106,7 +106,7 @@
       <h1 data-toc-skip>Approximate survey errors for the correlation and the standard deviation: with R package survey</h1>
                         <h4 data-toc-skip class="author">Ivailo Partchev</h4>
             
-            <h4 data-toc-skip class="date">2022-02-03</h4>
+            <h4 data-toc-skip class="date">2022-02-04</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/vignettes/blog/2022-02-02-standard-errors-in-survey.Rmd" class="external-link"><code>vignettes/blog/2022-02-02-standard-errors-in-survey.Rmd</code></a></small>
       <div class="hidden name"><code>2022-02-02-standard-errors-in-survey.Rmd</code></div>
@@ -115,13 +115,13 @@
 
     
     
-<p>For a survey statistician, there can hardly be anything more helpful than Thomas Lumley’s <code>survey</code> <span class="citation">(Lumley 2010)</span>. Not surprisingly, it has been downloaded over 3.1 million times at the time of writing, which makes it one of the more popular packages for R <span class="citation">(R Development Core Team 2005)</span>.</p>
+<p>For a survey statistician, there can hardly be anything more helpful than Thomas Lumley’s <code>survey</code> <span class="citation">(Lumley 2004, <span class="citation">@lumley</span>)</span>. Not surprisingly, it has been downloaded over 3.1 million times at the time of writing, which makes it one of the more popular packages for R <span class="citation">(R Development Core Team 2005)</span>.</p>
 <p>Unfortunately, <code>survey</code> does not have functions to estimate two popular statistics, the standard deviation and the Pearson correlation, and their standard errors. Packages like <code>srvyr</code> <span class="citation">(Freedman Ellis and Schneider 2021)</span> or <code>jtools</code> <span class="citation">(Long 2020)</span> have attempted to fill this lacune, but they only provide the estimates, not the standard errors.</p>
 <p>Consider an object, <code>est</code>, containing <code>survey</code> estimates for the variances of three variables. The variables happen to be plausible values <span class="citation">(Marsman et al. 2016)</span> from a large educational survey, and the estimates have been produced by a replication method (BRR, see <span class="citation">Lumley (2010)</span>, Ch.2.3). Note that I could have had any variables instead of plausible values (remember petal length? sepal width?), and that we are discussing the standard error under repeated sampling form a population. The question about the meaning of the correlation between two sets of plausible values, or the variability seen in a whole bunch of them, is psychometrically relevant, but it will be discussed in a different post.</p>
 <p>Applying the generic print method, I get:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://r-survey.r-forge.r-project.org/survey/" class="external-link">survey</a></span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">'~/Rdatasets/est.Rdata'</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">'/Rdatasets/est.Rdata'</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">##     variance     SE</span>
 <span class="co">## PV1   1.2476 0.0268</span>
@@ -149,7 +149,7 @@
 <span class="co">##   .. ..- attr(*, "names")= chr [1:9] "PV1" "PV1" "PV1" "PV2" ...</span>
 <span class="co">##  - attr(*, "statistic")= chr "variance"</span></code></pre>
 <p>I get to see the entire contents of this object. It is a <span class="math inline">\(3\times 3\)</span> matrix, let us call it <span class="math inline">\(\hat S\)</span>, containing the estimated covariance matrix of my plausible values. It has several attributes, one of which, <code>var</code>, is the <span class="math inline">\(9\times 9\)</span> covariance matrix of <span class="math inline">\(\hat S\)</span>, which we may call <span class="math inline">\(\hat V\)</span>.</p>
-<p>Because the standard deviation is a simple function of the statistic that <code>survey</code> does provide, we can derive its approximate standard error by applying the delta theorem <span class="citation">(Wasserman 2010, Ch.5.5)</span>. If <span class="math inline">\(\hat{s^2}\)</span> is the estimate of the variance and <span class="math inline">\(\hat{v^2}\)</span> is the variance of that estimate, the variance for the standard deviation is estimated as <span class="math inline">\(\hat{v^2}\)</span> multiplied by the square of the first derivative of <span class="math inline">\(\sqrt{x}\)</span>, i.e.~<span class="math inline">\(1/(2\sqrt{x})\)</span>, at <span class="math inline">\(\hat{s^2}\)</span>. In other words, the standard error for <span class="math inline">\(\sqrt{\hat s^2}\)</span> obtains as <span class="math inline">\(\sqrt{\hat{v^2}/4\hat{s^2}}=0.5\sqrt{\hat{v^2}/\hat{s^2}}\)</span>.</p>
+<p>Because the standard deviation is a simple function of the statistic that <code>survey</code> does provide, we can derive its approximate standard error by applying the delta theorem . If <span class="math inline">\(\hat{s^2}\)</span> is the estimate of the variance and <span class="math inline">\(\hat{v^2}\)</span> is the variance of that estimate, the variance for the standard deviation is estimated as <span class="math inline">\(\hat{v^2}\)</span> multiplied by the square of the first derivative of <span class="math inline">\(\sqrt{x}\)</span>, i.e.~<span class="math inline">\(1/(2\sqrt{x})\)</span>, at <span class="math inline">\(\hat{s^2}\)</span>. In other words, the standard error for <span class="math inline">\(\sqrt{\hat s^2}\)</span> obtains as <span class="math inline">\(\sqrt{\hat{v^2}/4\hat{s^2}}=0.5\sqrt{\hat{v^2}/\hat{s^2}}\)</span>.</p>
 <p>The correlation, <span class="math inline">\(\hat r= \hat{s_{xy}}/\sqrt{\hat{s^2_{x}}\hat{s^2_{y}}}\)</span>, is a function of three variables, the covariance and the two variances. We have to apply the multivariate delta theorem: the original covariance matrix is pre- and post-multiplied with the vector of the partial derivatives of the function with respect to each of the three variables. For simplicity, let <span class="math inline">\(M\)</span> be the <span class="math inline">\(3\times 3\)</span> submatrix of <span class="math inline">\(\hat{V}\)</span> containing just the rows and columns that have to do with <span class="math inline">\(\hat{s_{xy}}\)</span>, <span class="math inline">\(\hat{s^2_{x}}\)</span>, and <span class="math inline">\(\hat{s^2_{y}}\)</span>. Then, the standard error of the correlation will be estimated as <span class="math inline">\(J'MJ\)</span>, where</p>
 <p><span class="math display">\[ 
 J = \left( 
@@ -220,17 +220,17 @@ J = \left(
 <div id="ref-jtools">
 <p>Long, Jacob A. 2020. <em>Jtools: Analysis and Presentation of Social Scientific Data</em>. <a href="https://cran.r-project.org/package=jtools" class="external-link">https://cran.r-project.org/package=jtools</a>.</p>
 </div>
+<div id="ref-survey">
+<p>Lumley, Thomas. 2004. “Analysis of Complex Survey Samples.” <em>Journal of Statistical Software</em> 9 (1): 1–19.</p>
+</div>
 <div id="ref-lumley">
-<p>Lumley, Thomas. 2010. <em>Complex Surveys: A Guide to Analysis Using R: A Guide to Analysis Using R</em>. John Wiley; Sons.</p>
+<p>———. 2010. <em>Complex Surveys: A Guide to Analysis Using R: A Guide to Analysis Using R</em>. John Wiley; Sons.</p>
 </div>
 <div id="ref-MarsmanPV">
 <p>Marsman, M., G. Maris, T. M. Bechger, and C. A. W. Glas. 2016. “What can we learn from plausible values?” <em>Psychometrika</em>, 1–16.</p>
 </div>
 <div id="ref-R">
-<p>R Development Core Team. 2005. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing.</p>
-</div>
-<div id="ref-wasserman2010statistics">
-<p>Wasserman, Larry. 2010. <em>All of Statistics : A Concise Course in Statistical Inference</em>. New York: Springer.</p>
+<p>R Development Core Team. 2005. <em>R: A Language and Environment for Statistical Computing</em>. Vienna, Austria: R Foundation for Statistical Computing. <a href="https://www.R-project.org" class="external-link">https://www.R-project.org</a>.</p>
 </div>
 </div>
 </div>

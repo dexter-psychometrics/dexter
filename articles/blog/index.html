@@ -121,25 +121,25 @@ p.blog-authors{font-style:italic}
 </style>
 <div class="section level2">
 <h2 id="approximate-survey-errors-for-the-correlation-and-the-standard-deviation-with-r-package-survey">
-<a href="2022-02-02-standard-errors-in-survey">“Approximate survey errors for the correlation and the standard deviation: with R package survey”</a><a class="anchor" aria-label="anchor" href="#approximate-survey-errors-for-the-correlation-and-the-standard-deviation-with-r-package-survey"></a>
+<a href="2022-02-02-standard-errors-in-survey">Approximate survey errors for the correlation and the standard deviation: with R package survey</a><a class="anchor" aria-label="anchor" href="#approximate-survey-errors-for-the-correlation-and-the-standard-deviation-with-r-package-survey"></a>
 </h2>
 <p class="blog-authors">
-“Ivailo Partchev”
+Ivailo Partchev
 </p>
 <p>
-For a survey statistician, there can hardly be anything more helpful than Thomas Lumley’s <code>survey</code> <span class="citation">(Lumley 2004, <span class="citation">@lumley</span>)</span>. Not surprisingly, it has been downloaded over 3.1 million times at the time of writing, which makes it one of the more popular packages for R <span class="citation">(R Development Core Team 2005)</span>. Unfortunately, <code>survey</code> does not have functions to estimate two popular statistics, the standard deviation and the Pearson correlation, and their standard errors. Packages like <code>srvyr</code> <span class="citation">(<span class="citeproc-not-found" data-reference-id="srvyr"><strong>???</strong></span>)</span> or <code>jtools</code> <span class="citation">(<span class="citeproc-not-found" data-reference-id="jtools"><strong>???</strong></span>)</span> have attempted to fill this lacune, but they only provide the estimates, not the standard errors. Consider an object, <code>est</code>, containing <code>survey</code> estimates for the variances of three variables. The variables happen to be plausible values <span class="citation">(Marsman et al. 2016)</span> from a large educational survey, and the estimates have been produced by a replication method (BRR, see <span class="citation">(<span class="citeproc-not-found" data-reference-id="lumley"><strong>???</strong></span>)</span>, Ch.2.3). Note that I could have had any variables instead of plausible values (remember petal length? sepal width?), and that we are discussing the standard error under repeated sampling form a population. The question about the meaning of the correlation between two sets of plausible values, or the variability seen in a whole bunch of them, is psychometrically relevant, but it will be discussed in a different post. Applying the generic print method, I get:
+For a survey statistician, there can hardly be anything more helpful than Thomas Lumley’s <code>survey</code> <span class="citation">(Lumley 2004, <span class="citation">@lumley</span>)</span>. Not surprisingly, it has been downloaded over 3.1 million times at the time of writing, which makes it one of the more popular packages for R <span class="citation">(R Development Core Team 2005)</span>. Unfortunately, <code>survey</code> does not have functions to estimate two popular statistics, the standard deviation and the Pearson correlation, and their standard errors. Packages like <code>srvyr</code> <span class="citation">(Freedman Ellis and Schneider 2021)</span> or <code>jtools</code> <span class="citation">(Long 2020)</span> have attempted to fill this lacune, but they only provide the estimates, not the standard errors. Consider an object, <code>est</code>, containing <code>survey</code> estimates for the variances of three variables. The variables happen to be plausible values <span class="citation">(Marsman et al. 2016)</span> from a large educational survey, and the estimates have been produced by a replication method (BRR, see <span class="citation">Lumley (2010)</span>, Ch.2.3). Note that I could have had any variables instead of plausible values (remember petal length? sepal width?), and that we are discussing the standard error under repeated sampling form a population. The question about the meaning of the correlation between two sets of plausible values, or the variability seen in a whole bunch of them, is psychometrically relevant, but it will be discussed in a different post. Applying the generic print method, I get:
 </p>
 <p><a href="2022-02-02-standard-errors-in-survey">read more…</a></p>
 </div>
 <div class="section level2">
 <h2 id="classical-test-theory-with-irt">
-<a href="2022-01-31-CTT_IRT">“Classical Test Theory with IRT”</a><a class="anchor" aria-label="anchor" href="#classical-test-theory-with-irt"></a>
+<a href="2022-01-31-CTT_IRT">Classical Test Theory with IRT</a><a class="anchor" aria-label="anchor" href="#classical-test-theory-with-irt"></a>
 </h2>
 <p class="blog-authors">
-“Timo Bechger and Jesse Koops”
+Timo Bechger and Jesse Koops
 </p>
 <p>
-There is a long-standing interest in combining item response theory (IRT) and classical test theory (CTT) rather than treat them as mere alternatives <span class="citation">(Bechger et al. 2003)</span>. The <strong>theta functions</strong> in dexter are particularly helpful in this approach: - <strong>expected_score</strong>: The expected score given theta. - <strong>information</strong>: The Fisher information about theta in the test score. - <strong>p_score</strong>: The distribution of test scores given theta.
+There is a long-standing interest in combining item response theory (IRT) and classical test theory (CTT) rather than treat them as mere alternatives <span class="citation">(Bechger et al. 2003)</span>. The <strong>theta functions</strong> in dexter are particularly helpful in this approach: - <code><a href="../../reference/information.html">expected_score()</a></code>: The expected score given theta. - <code><a href="../../reference/information.html">information()</a></code>: The Fisher information about theta in the test score. - <code><a href="../../reference/information.html">p_score()</a></code>: The distribution of test scores given theta.
 </p>
 <p><a href="2022-01-31-CTT_IRT">read more…</a></p>
 </div>
@@ -497,7 +497,7 @@ In a <a href="2018-02-25/item-total-regressions-in-dexter">previous post</a>, I 
 </div>
 <div class="section level2">
 <h2 id="dextermst-dexter-for-multi-stage-tests">
-<a href="2018-07-13-dextermst">“dexterMST: dexter for Multi-Stage Tests”</a><a class="anchor" aria-label="anchor" href="#dextermst-dexter-for-multi-stage-tests"></a>
+<a href="2018-07-13-dextermst">dexterMST: dexter for Multi-Stage Tests</a><a class="anchor" aria-label="anchor" href="#dextermst-dexter-for-multi-stage-tests"></a>
 </h2>
 <p class="blog-authors">
 Timo Bechger, Jesse Koops, Robert Zwitser, Ivailo Partchev, Gunter Maris
@@ -629,17 +629,26 @@ The dexter makers
 <div id="ref-finetti1965methods">
 <p>Finetti, Bruno de. 1965. “Methods for Discriminating Levels of Partial Knowledge Concerning a Test Item.” <em>British Journal of Mathematical and Statistical Psychology</em> 18 (1): 87–123.</p>
 </div>
+<div id="ref-srvyr">
+<p>Freedman Ellis, Greg, and Ben Schneider. 2021. <em>Srvyr: ’Dplyr’-Like Syntax for Summary Statistics of Survey Data</em>. <a href="https://CRAN.R-project.org/package=srvyr" class="external-link">https://CRAN.R-project.org/package=srvyr</a>.</p>
+</div>
 <div id="ref-hendrickson2007ncme">
 <p>Hendrickson, Amy. 2007. “An Ncme Instructional Module on Multistage Testing.” <em>Educational Measurement: Issues and Practice</em> 26 (2): 44–52.</p>
 </div>
 <div id="ref-Livingston2004">
 <p>Livingston, Samuel A., and Neil J. Dorans. 2004. “A Graphical Approach to Item Analysis.” <em>ETS Research Report Series</em>, no. 1: i–17. <a href="https://doi.org/10.1002/j.2333-8504.2004.tb01937.x" class="external-link">https://doi.org/10.1002/j.2333-8504.2004.tb01937.x</a>.</p>
 </div>
+<div id="ref-jtools">
+<p>Long, Jacob A. 2020. <em>Jtools: Analysis and Presentation of Social Scientific Data</em>. <a href="https://cran.r-project.org/package=jtools" class="external-link">https://cran.r-project.org/package=jtools</a>.</p>
+</div>
 <div id="ref-lord1984comparison">
 <p>Lord, Frederic M, and Marilyn S Wingersky. 1984. “Comparison of Irt True-Score and Equipercentile Observed-Score Equatings.” <em>Applied Psychological Measurement</em> 8 (4): 453–61.</p>
 </div>
 <div id="ref-survey">
 <p>Lumley, Thomas. 2004. “Analysis of Complex Survey Samples.” <em>Journal of Statistical Software</em> 9 (1): 1–19.</p>
+</div>
+<div id="ref-lumley">
+<p>———. 2010. <em>Complex Surveys: A Guide to Analysis Using R: A Guide to Analysis Using R</em>. John Wiley; Sons.</p>
 </div>
 <div id="ref-dexter">
 <p>Maris, Gunter, Timo Bechger, Jesse Koops, and Ivailo Partchev. 2018. <em>Dexter: Data Management and Analysis of Tests</em>. <a href="https://CRAN.R-project.org/package=dexter" class="external-link">https://CRAN.R-project.org/package=dexter</a>.</p>
