@@ -191,8 +191,8 @@ blurb_info = function(fns, n_lines=10)
       filename = fn,
       blurb = paste(lines[1:end],collapse='\n'),
       abbreviated = end != length(lines),
-      author = gsub(' * ',', ', trimws(str_extract(pre_amble[startsWith(pre_amble,'author:')][1],'(?<=:).+')) , fixed=TRUE),
-      title = trimws(str_extract(pre_amble[startsWith(pre_amble,'title:')][1],'(?<=:).+')),
+      author = gsub('"','', gsub(' * ',', ', trimws(str_extract(pre_amble[startsWith(pre_amble,'author:')][1],'(?<=:).+')) , fixed=TRUE)),
+      title = trimws(gsub('"','',str_extract(pre_amble[startsWith(pre_amble,'title:')][1],'(?<=:).+'))),
       href = gsub('.Rmd','',fn,fixed=TRUE)
     )
   }) %>%
