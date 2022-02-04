@@ -9,7 +9,8 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE)
+knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE,fig.align='center', fig.width=6, fig.height=5,
+                      dev='CairoPNG')
 library(dexter)
 library(dplyr)
 #setwd("~/Documents/statlib/explore/dexter_blogs")
@@ -17,9 +18,9 @@ library(dplyr)
 
 Item response theory (IRT) and classical test theory (CTT) can be combined. To this effect, we can use __theta functions__ in dexter:
 
-- __expected_score__: The expected score given theta.
-- __information__: The Fisher information about theta in the test score.
-- __p_score__: The distribution of test scores given theta.
+- `expected_score()`: The expected score given theta.
+- `information()`: The Fisher information about theta in the test score.
+- `p_score()`: The distribution of test scores given theta.
 
 where theta, i.e., $\theta$, represents student ability. The aim of this blog is to illustrate the use of these functions but we commence with a (very) brief overview of CTT. 
 
@@ -28,7 +29,7 @@ The test score is assumed to be discrete random variable $X_+$ where the randomn
 
 The true score is a function of ability and, in IRT parlance, would be called the **test characteristic function (TCF)**. Obviously, the TCF can not be observed but if we assume a Rasch model, we can draw its curve using the function __expected_score__ -- the test score being the number of correct answers. 
 
-```{r, fig.align='center', fig.width=4, fig.height=4}
+```{r}
 parms = data.frame(item_id=1:30, item_score=1, beta=rep(0,30))
 Exp_sc = expected_score(parms)
 plot(Exp_sc, from=-5,to=5, xlab="ability", ylab="Exp. score")
@@ -47,12 +48,13 @@ Var(X_+|\theta)=\mathcal{E}[\left(X_+ - \mathcal{E}[X_+|\theta] \right)^2|\theta
 \end{equation}
 Like the true score, the CEV is a function of ability. Here is a plot.
 
-```{r,fig.align='center', fig.width=4, fig.height=4}
+```{r}
 Cond.error.variance = information(parms)
 curve(Cond.error.variance, from=-5,to=5, col="blue", xlab="ability")
 ```
 
-Note that the CEV coincides with [**test information**](https://dexterities.netlify.com/2018/11/05/test-and-item-information-functions-in-dexter/) which is counter-intuitive as "error" sounds negative and "information" positive. Moreover, it is not true in general - only in exponential family IRT models. We will clarify this in a future blog where we explain the difference between estimating a true score or an ability.
+Note that the CEV coincides with
+[**test information**](2018-11-05-test-and-item-information-functions-in-dexter) which is counter-intuitive as "error" sounds negative and "information" positive. Moreover, it is not true in general - only in exponential family IRT models. We will clarify this in a future blog where we explain the difference between estimating a true score or an ability.
 
 What happens in a population of test-takers? Using the [law of total expectation](https://en.wikipedia.org/wiki/Law_of_total_expectation), we find that, in a population of test-takers, the average of the true scores $\mathcal{E}[\mathcal{E}[X_+|\theta]] = \mathcal{E}[X_+]$ is just the average of the scores -- measurement errors average to zero. The variance of the test score is the sum of true score variance and error variance. Specifically, from the [law of total variance](https://en.wikipedia.org/wiki/Law_of_total_variance) it follows that:
 $$
@@ -136,7 +138,7 @@ TCDF = function(parms, c)
 If, for illustration, we consider the verbal aggression test as an examination with a pass-fail-score of 20, we obtain the following picture.
 
 
-```{r, fig.align='center', fig.width=5, fig.height=5}
+```{r}
 plot(TCDF(parms,20), from=-4, to=4, xlab='theta',ylab='P(consistent)')
 ```
 
