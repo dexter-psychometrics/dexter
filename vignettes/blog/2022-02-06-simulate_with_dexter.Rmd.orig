@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE)
 ```
 
 __dexter__ is meant for real-life applications. The choice of models it estimates is limited to a few practical ones, and it is assumed that the users know how to construct univariate tests and make use of the ample quality control facilities provided. But when the need for simulated data arises, __dexter__ is quite helpful. We will show and discuss in detail a reasonably complicated example. After all, if a single booklet of Rasch data is all that is needed, we can do it with a single line in plain R:
@@ -119,7 +119,7 @@ db = start_new_project(dummy_rules,
 
 Now, let us have an incomplete design, 30 items per booklet. SBO students will get the easier booklet, and BAO students will get the more difficult one. In real life, this would be determined by a pretest with a small sample of students, but we will simply sort items on their true difficulty parameters. The easy booklet will contain all items except the 20 most difficult ones, and the difficult booklets all items except the 20 easiest ones; thus, the two booklets have an overlap of 10 items of average difficulty:
 
-```{r}
+```{r, results='hide'}
 items_SBO = arrange(items,beta) |> slice(1:20)  |> pull(item_id)
 items_BAO = arrange(items,beta) |> slice(31:50) |> pull(item_id)
 
@@ -134,7 +134,7 @@ add_booklet(db,
 
 Finally, we add the domains as an item property:
 
-```{r}
+```{r, results='hide'}
 add_item_properties(db, select(items, item_id, domain))
 ```
 
