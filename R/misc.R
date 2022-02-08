@@ -689,3 +689,23 @@ condMoments = function(mu, sigma, y.ind, x.ind=NULL, x.value )
   return(list(mu=cMu, sigma=cVar))
 }
 
+
+# log(sum(exp(x)))
+# where exp(x) is potentially infinite in floating point
+logsumexp = function(x)
+{
+  m = max(x)
+  m + log(sum(exp(x-m)))
+}
+
+
+
+# GH points
+# library(statmod)
+# GH = gauss.quad.prob(160,'normal',mu=0,sigma=1)
+# quadpoints = tibble(nodes=GH$nodes,weights=GH$weights) |>
+#   filter(weights>1e-60) |>
+#   arrange(weights) |>
+#   as.list()
+# usethis::use_data(quadpoints, internal = TRUE)
+

@@ -87,17 +87,32 @@ theta_score_distribution = function(b,a,first,last,scoretab)
   return(theta)
 }
 
+# exp(score*tht) is liable to get infinite
+# g is largish so only compounds the problem
+# p has cols theta and rows scores
+
 
 # Expected distribution given a vector theta
 # return matrix, ncol=length(theta), nrow=nscores
+# old
+# pscore = function(theta, b, a, first, last)
+# {
+#   g = elsym(b, a, first, last)
+#   score = 0:(length(g)-1)
+#   
+#   p = sapply(theta, function(tht) g * exp(score*tht))
+#   sweep(p,2,colSums(p),`/`)
+# }
+
 pscore = function(theta, b, a, first, last)
 {
   g = elsym(b, a, first, last)
   score = 0:(length(g)-1)
+  p = sapply(theta, function(tht) log(g) + score*tht)
   
-  p = sapply(theta, function(tht) g * exp(score*tht))
-  sweep(p,2,colSums(p),`/`)
+  exp(sweep(p,2,apply(p,2,logsumexp),`-`))
 }
+
 
 # vector of 0,1 indicating if a score is possible. element 1 is score 0
 possible_scores = function(a, first, last)
@@ -158,6 +173,16 @@ theta_jEAP = function(b, a, first,last, se=FALSE, grid_from=-6, grid_to=6, grid_
   return(list(theta=theta,se=sem))
 }
 
+
+
+# se is always returned (arg se is ignored)
+theta_EAP_GH = function(b, a, first,last, se=TRUE, mu=0, sigma=4)
+{
+  nodes = quadpoints$nodes * sigma + mu
+  weights = quadpoints$weights
+  ps = t(pscore(nodes,b,a,first,last))
+  theta_EAP_GH_c(ps,nodes,weights)
+}
 
 
 ##### EAP based on npv (default 500) plausible values ####

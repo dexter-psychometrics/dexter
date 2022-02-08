@@ -62,7 +62,7 @@
 #' Psychometrika, 54(3), 427-450. 
 #' 
 ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), prior=c("normal", "Jeffreys"), 
-                   use_draw=NULL, npv=500, mu=0, sigma=4, standard_errors=FALSE, merge_within_persons=FALSE)
+                   use_draw=NULL, mu=0, sigma=4, standard_errors=FALSE, merge_within_persons=FALSE)
 {
   check_dataSrc(dataSrc)
 
@@ -85,7 +85,7 @@ ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), 
   
 
   abl = ability_tables(parms=parms, design = respData$design, method = method, prior=prior, use_draw = use_draw, 
-                       npv=npv, mu=mu, sigma=sigma, standard_errors=standard_errors)
+                       mu=mu, sigma=sigma, standard_errors=standard_errors)
   abl$booklet_id = ffactor(abl$booklet_id, levels = levels(respData$design$booklet_id))
   respData$x %>% 
     inner_join(abl, by = c("booklet_id", "booklet_score")) %>% 
@@ -98,32 +98,19 @@ ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), 
 
 #' @rdname ability
 ability_tables = function(parms, design = NULL, method = c("MLE","EAP","WLE"), prior=c("normal", "Jeffreys"), 
-                          use_draw = NULL, npv=500, mu=0, sigma=4, standard_errors = TRUE)
+                          use_draw = NULL, mu=0, sigma=4, standard_errors = TRUE)
 {
   method = match.arg(method)
   prior = match.arg(prior) 
   
   if(method=='EAP' && prior=="normal")
   {
-    check_num(npv, 'integer', .length=1, .min=1)
     check_num(mu, .length=1)
-    check_num(sigma, .length=1)
+    check_num(sigma, .length=1, .min=0)
     check_num(use_draw, 'integer', .length=1, nullable=TRUE)
-  
-    if (sigma<0)
-    {
-      warning("Prior sd cannot be negative. Set to 4.")
-      sigma = 4
-    }
-    if (npv<1)
-    {
-      warning("Number of plausible values must be positive. Set to 500")
-      npv = 500
-    }
   }
   
-  if (method=="EAP" && prior=="Jeffreys") 
-    method="jEAP"
+  if (method=="EAP" && prior=="Jeffreys") method="jEAP"
   
   simple_parms = simplify_parms(parms, design, use_draw, collapse_b=TRUE) 
   b = simple_parms$b
@@ -131,10 +118,10 @@ ability_tables = function(parms, design = NULL, method = c("MLE","EAP","WLE"), p
   
   estimate = switch(method, 
                     'MLE'  = function(.){ theta_MLE(b, a, .$first, .$last, se=standard_errors) }, 
-                    'EAP'  = function(.){ theta_EAP(b, a, .$first, .$last, npv=npv, mu=mu, sigma=sigma, se=standard_errors) }, 
+                    #'EAP'  = function(.){ theta_EAP(b, a, .$first, .$last, npv=npv, mu=mu, sigma=sigma, se=standard_errors) }, 
+                    'EAP'  = function(.){ theta_EAP_GH(b, a, .$first, .$last, mu=mu, sigma=sigma) },
                     'jEAP' = function(.){ theta_jEAP(b, a, .$first, .$last, se=standard_errors) },
                     'WLE' = function(.){ theta_WLE(b, a, .$first, .$last, se=standard_errors) })
-  
   
   
   # under the assumption that we always get theta's for the vector 0:max_test_score 

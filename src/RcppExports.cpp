@@ -597,6 +597,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// theta_EAP_GH_c
+Rcpp::List theta_EAP_GH_c(const arma::mat& p_score, const arma::vec& theta, const arma::vec& weights);
+RcppExport SEXP _dexter_theta_EAP_GH_c(SEXP p_scoreSEXP, SEXP thetaSEXP, SEXP weightsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type p_score(p_scoreSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type weights(weightsSEXP);
+    rcpp_result_gen = Rcpp::wrap(theta_EAP_GH_c(p_score, theta, weights));
+    return rcpp_result_gen;
+END_RCPP
+}
 // IJ_c
 void IJ_c(const arma::vec& theta, const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, arma::mat& I, arma::mat& J, arma::vec& logFi);
 RcppExport SEXP _dexter_IJ_c(SEXP thetaSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP ISEXP, SEXP JSEXP, SEXP logFiSEXP) {
@@ -730,6 +743,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dexter_theta_mle_sec", (DL_FUNC) &_dexter_theta_mle_sec, 4},
     {"_dexter_escore_wle", (DL_FUNC) &_dexter_escore_wle, 7},
     {"_dexter_theta_wle_sec", (DL_FUNC) &_dexter_theta_wle_sec, 4},
+    {"_dexter_theta_EAP_GH_c", (DL_FUNC) &_dexter_theta_EAP_GH_c, 3},
     {"_dexter_IJ_c", (DL_FUNC) &_dexter_IJ_c, 8},
     {"_dexter_PVrecycle", (DL_FUNC) &_dexter_PVrecycle, 9},
     {"_dexter_PV_sve", (DL_FUNC) &_dexter_PV_sve, 12},

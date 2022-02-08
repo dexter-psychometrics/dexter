@@ -153,6 +153,10 @@ theta_wle_sec <- function(b, a, first, last) {
     .Call(`_dexter_theta_wle_sec`, b, a, first, last)
 }
 
+theta_EAP_GH_c <- function(p_score, theta, weights) {
+    .Call(`_dexter_theta_EAP_GH_c`, p_score, theta, weights)
+}
+
 IJ_c <- function(theta, b, a, first, last, I, J, logFi) {
     invisible(.Call(`_dexter_IJ_c`, theta, b, a, first, last, I, J, logFi))
 }

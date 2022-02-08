@@ -214,8 +214,6 @@ arma::vec theta_mle_sec(const arma::vec& b, const arma::ivec& a,
 // [[Rcpp::export]]
 double escore_wle(const double theta, const arma::vec& b, const arma::ivec& a, const arma::ivec& first,  const arma::ivec& last, const int nI, const int max_a)
 {
-	
-
 	const int max_ncat = max(last - first) + 1;
 	
 	std::vector<long double> Fij(max_ncat);
@@ -301,7 +299,29 @@ arma::vec theta_wle_sec(const arma::vec& b, const arma::ivec& a,
 	return theta;
 }
 
-
+//only reason for this to be in c is extended precision type
+// [[Rcpp::export]]
+Rcpp::List theta_EAP_GH_c(const arma::mat& p_score, const arma::vec& theta, const arma::vec& weights)
+{
+	const int ns = p_score.n_cols, nt=p_score.n_rows;
+	std::vector<long double> w(nt);
+	vec eap(ns), se(ns);
+	for(int s=0; s<ns; s++)
+	{
+		long double sumw=0;
+		for(int t=0; t<nt; t++)
+		{
+			w[t] = p_score.at(t,s) * weights[t];
+			sumw += w[t]; 
+		}
+		long double m=0, var=0;
+		for(int t=0; t<nt; t++)	m += theta[t] * w[t]/sumw;
+		for(int t=0; t<nt; t++)	var += (theta[t] - m) * (theta[t] - m) * w[t]/sumw;
+		eap[s] = m;
+		se[s] = std::sqrt(var);
+	}
+	return Rcpp::List::create(Rcpp::Named("theta") = eap, Rcpp::Named("se") = se);
+}
 
 
 /*
