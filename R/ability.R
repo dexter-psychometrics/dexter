@@ -22,7 +22,6 @@
 #'                 parameters that will be used for generating plausible values. 
 #'                 If use_draw=NULL, a posterior mean is used. 
 #'                 If outside range, the last iteration will be used. 
-#' @param npv Number of plausible values sampled to calculate EAP with normal prior
 #' @param mu Mean of the normal prior
 #' @param sigma Standard deviation of the normal prior
 #' @param standard_errors If true standard-errors are produced
@@ -118,7 +117,7 @@ ability_tables = function(parms, design = NULL, method = c("MLE","EAP","WLE"), p
   
   estimate = switch(method, 
                     'MLE'  = function(.){ theta_MLE(b, a, .$first, .$last, se=standard_errors) }, 
-                    #'EAP'  = function(.){ theta_EAP(b, a, .$first, .$last, npv=npv, mu=mu, sigma=sigma, se=standard_errors) }, 
+                    # 'EAP'  = function(.){ theta_EAP(b, a, .$first, .$last, npv=npv, mu=mu, sigma=sigma, se=standard_errors) }, 
                     'EAP'  = function(.){ theta_EAP_GH(b, a, .$first, .$last, mu=mu, sigma=sigma) },
                     'jEAP' = function(.){ theta_jEAP(b, a, .$first, .$last, se=standard_errors) },
                     'WLE' = function(.){ theta_WLE(b, a, .$first, .$last, se=standard_errors) })

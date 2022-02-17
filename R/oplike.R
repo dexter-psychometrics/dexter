@@ -102,6 +102,8 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
   
   finished = FALSE
   dbTransaction(db,{
+    con = file(dat_path, "r")
+    
     dbExecute(db,'ALTER TABLE dxbooklets ADD COLUMN booklet_on_off INTEGER NOT NULL DEFAULT 1;')
     dbExecute(db,'ALTER TABLE dxbooklet_design ADD COLUMN item_local_on_off INTEGER NOT NULL DEFAULT 1;')
     dbExecute(db,'ALTER TABLE dxitems ADD COLUMN item_global_on_off INTEGER NOT NULL DEFAULT 1;')
@@ -120,10 +122,17 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
                       tibble(b=as.character(1:scr$nBook),onoff=scr$bookOn))
     dbExecute_param(db,'INSERT INTO dxbooklet_design(booklet_id, item_id, item_position, item_local_on_off) 
                             VALUES(:booklet_id,:item_id,:item_position, :onoff);', 
-					select(design, .data$booklet_id,.data$item_id,.data$item_position, .data$onoff))                
+					select(design, .data$booklet_id,.data$item_id,.data$item_position, .data$onoff))     
+    
+    if(length(scr$margLabels)>1)
+    {
+      dbExecute(db,"ALTER TABLE dxbooklets ADD COLUMN oplm_marginal VARCHAR(50) NOT NULL DEFAULT '<unknown>';")
+      dbExecute_param(db,'UPDATE dxbooklets SET oplm_marginal=:marg WHERE booklet_id=:booklet_id;', 
+                      tibble(booklet_id=as.character(1:scr$nBook), marg=scr$margLabels[scr$margBook]))
+    }
     
     vp = 1
-    con = file(dat_path, "r")
+    
     short_line = NULL
     while ( TRUE ) {
       lines = readLines(con, n = 5000, encoding='ascii')
@@ -191,6 +200,7 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
                 select(data, .data$booklet_id,.data$person_id,.data$item_id,.data$response))
     
     }
+    
     close(con)
     finished=TRUE
     if(!is.null(short_line))
@@ -379,9 +389,9 @@ readSCR = function (scrfile)
   list(nit = nit, nMarg = nMarg, nStat = nStat, itemLabels = itemLabels, 
        booklet_position = c(fmt[1], fmt[1] + fmt[2] - 1L),
        responses_start = fmt[3], response_length = fmt[5],
-       margLabels = margLabels, statLabels = statLabels, 
+       margLabels = sapply(margLabels,rawToChar), 
        globCal = globCal, 
-       discrim = discrim, maxScore = maxScore, parFixed = parFixed, 
+       discrim = discrim, maxScore = maxScore, 
        nBook = nb, bookOn = inUse, nitBook = nitb, 
        margBook = margBook, statBook = statBook, 
        itemsBook = itemsBook, itemsOn = itemsOn, 

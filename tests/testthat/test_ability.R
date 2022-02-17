@@ -26,12 +26,12 @@ test_that('inconsistencies between data and parms are handled correctly',{
 })  
 
 
-test_that('verbAgg abilities are monotone increasing', {
+test_that('verbAgg abilities', {
 
   db = open_project('../verbAggression.db')
   f = fit_enorm(db)
   
-  # check ability mle is correct
+  # check ability mle is inverse of expected_score
   es = expected_score(f)
   expect_lt(
     ability_tables(f) %>%

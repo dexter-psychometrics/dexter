@@ -206,32 +206,29 @@ theta_EAP_GH = function(b, a, first,last, se=TRUE, mu=0, sigma=4)
 # The final argument allows EAPs based on A-weighted score, where A need not equal a.
 ####
 
-  
-
-theta_EAP = function(b, a, first, last, npv=500, mu=0, sigma=4, smooth=FALSE, se=FALSE, A=NULL)
-{
-  if(is.null(A)) A=a
-  
-  mx = sum(A[last])
-  score = (0:mx)[as.logical(possible_scores(A,first,last))]
-  tmp = pv_recycle(b,a,first,last,score,npv,mu,sigma,A=A)
-  
-  theta = rep(NA,(mx+1))
-  theta[score+1]=rowMeans(tmp)
-  
-  # @Timo: ik denk niet dat smooth goed werkt als er NA scores zijn
-  # misschien gewoon alleen een vector voor de bestaande scores gebruiken?
-  if (smooth) 
-  {
-      score = 0:mx
-      theta = predict(lm(theta ~ poly(score,7)))
-  }
-  sem=rep(NA,(mx+1))
-
-  if (se) sem=apply(tmp,1,sd)
-  return(list(theta=theta, se=sem))
-}
-
+# theta_EAP = function(b, a, first, last, npv=500, mu=0, sigma=4, smooth=FALSE, se=FALSE, A=NULL)
+# {
+#   if(is.null(A)) A=a
+#   
+#   mx = sum(A[last])
+#   score = (0:mx)[as.logical(possible_scores(A,first,last))]
+#   tmp = pv_recycle(b,a,first,last,score,npv,mu,sigma,A=A)
+#   
+#   theta = rep(NA,(mx+1))
+#   theta[score+1]=rowMeans(tmp)
+#   
+#   # @Timo: ik denk niet dat smooth goed werkt als er NA scores zijn
+#   # misschien gewoon alleen een vector voor de bestaande scores gebruiken?
+#   if (smooth) 
+#   {
+#       score = 0:mx
+#       theta = predict(lm(theta ~ poly(score,7)))
+#   }
+#   sem=rep(NA,(mx+1))
+# 
+#   if (se) sem=apply(tmp,1,sd)
+#   return(list(theta=theta, se=sem))
+# }
 
 
 

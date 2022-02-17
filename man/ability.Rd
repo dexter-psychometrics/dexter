@@ -12,7 +12,6 @@ ability(
   method = c("MLE", "EAP", "WLE"),
   prior = c("normal", "Jeffreys"),
   use_draw = NULL,
-  npv = 500,
   mu = 0,
   sigma = 4,
   standard_errors = FALSE,
@@ -25,7 +24,6 @@ ability_tables(
   method = c("MLE", "EAP", "WLE"),
   prior = c("normal", "Jeffreys"),
   use_draw = NULL,
-  npv = 500,
   mu = 0,
   sigma = 4,
   standard_errors = TRUE
@@ -49,8 +47,6 @@ the index of the posterior sample of the item
 parameters that will be used for generating plausible values. 
 If use_draw=NULL, a posterior mean is used. 
 If outside range, the last iteration will be used.}
-
-\item{npv}{Number of plausible values sampled to calculate EAP with normal prior}
 
 \item{mu}{Mean of the normal prior}
 

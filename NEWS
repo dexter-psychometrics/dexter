@@ -1,7 +1,8 @@
 # dexter 1.1.5
 
-* slight change in implementation of DIF. If some items are not administered in both groups, they are now removed after calibration instead of before, making calibration more robust in incomplete designs.
-* deprecated names in result of tia_tables have now been removed.
+* slight change in implementation of DIF. If some items are not administered in both groups, they are now removed after calibration instead of before, making the calibration more robust in incomplete designs.
+* ability in EAP with normal prior is faster and SE's are more precise
+* deprecated objects in result of tia_tables have now been removed.
 
 
 # dexter 1.1.4
