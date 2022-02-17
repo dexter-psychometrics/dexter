@@ -6,6 +6,12 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dexter: The Fundamentals • dexter</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/flatly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
@@ -106,7 +112,7 @@
       <h1 data-toc-skip>Dexter: The Fundamentals</h1>
                         <h4 data-toc-skip class="author">Ivailo Partchev, Jesse Koops, Timo Bechger, Gunter Maris</h4>
             
-            <h4 data-toc-skip class="date">2022-02-08</h4>
+            <h4 data-toc-skip class="date">2022-02-17</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/vignettes/dexter.Rmd" class="external-link"><code>vignettes/dexter.Rmd</code></a></small>
       <div class="hidden name"><code>dexter.Rmd</code></div>
@@ -190,7 +196,7 @@ img{ border:none;}
 <span class="co">## 6 S1WantShout    Shout Want Other       Bus</span></code></pre>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="../reference/get_persons.html">get_persons</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
-  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Rows: 316</span>
 <span class="co">## Columns: 2</span>
 <span class="co">## $ person_id <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "dx_0000001", "dx_0000002", "dx_0000003", "dx_0000004", "dx_…</span>
@@ -564,50 +570,50 @@ img{ border:none;}
 <tr class="odd">
 <td align="left">S1DoCurse</td>
 <td align="right">1</td>
-<td align="right">-1.344</td>
-<td align="right">0.152</td>
-<td align="right">-1.645</td>
-<td align="right">-1.049</td>
+<td align="right">-1.342</td>
+<td align="right">0.158</td>
+<td align="right">-1.662</td>
+<td align="right">-1.043</td>
 </tr>
 <tr class="even">
 <td align="left">S1DoCurse</td>
 <td align="right">2</td>
-<td align="right">-0.635</td>
-<td align="right">0.142</td>
-<td align="right">-0.893</td>
-<td align="right">-0.332</td>
-</tr>
-<tr class="odd">
-<td align="left">S1DoScold</td>
-<td align="right">1</td>
-<td align="right">-0.675</td>
+<td align="right">-0.632</td>
 <td align="right">0.140</td>
-<td align="right">-0.919</td>
-<td align="right">-0.374</td>
+<td align="right">-0.915</td>
+<td align="right">-0.358</td>
+</tr>
+<tr class="odd">
+<td align="left">S1DoScold</td>
+<td align="right">1</td>
+<td align="right">-0.683</td>
+<td align="right">0.144</td>
+<td align="right">-0.956</td>
+<td align="right">-0.407</td>
 </tr>
 <tr class="even">
 <td align="left">S1DoScold</td>
 <td align="right">2</td>
-<td align="right">-0.245</td>
-<td align="right">0.158</td>
-<td align="right">-0.531</td>
-<td align="right">0.095</td>
+<td align="right">-0.240</td>
+<td align="right">0.156</td>
+<td align="right">-0.545</td>
+<td align="right">0.069</td>
 </tr>
 <tr class="odd">
 <td align="left">S1DoShout</td>
 <td align="right">1</td>
-<td align="right">0.316</td>
+<td align="right">0.318</td>
 <td align="right">0.148</td>
-<td align="right">0.028</td>
-<td align="right">0.608</td>
+<td align="right">0.018</td>
+<td align="right">0.594</td>
 </tr>
 <tr class="even">
 <td align="left">S1DoShout</td>
 <td align="right">2</td>
-<td align="right">0.381</td>
-<td align="right">0.201</td>
-<td align="right">-0.041</td>
-<td align="right">0.743</td>
+<td align="right">0.386</td>
+<td align="right">0.207</td>
+<td align="right">-0.004</td>
+<td align="right">0.793</td>
 </tr>
 </tbody>
 </table>
