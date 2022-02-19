@@ -34,27 +34,29 @@
 #'   \item{ability_tables}{a data.frame with columns: booklet_id, booklet_score, theta and optionally se (standard error)}
 #' }
 #' 
-#' @details MLE estimates of ability will produce an NA for
-#' the minimum (=0) or the maximum score on a booklet. If this is undesirable, 
+#' @details MLE estimates of ability will produce -Inf and Inf estimates for
+#' the minimum (=0) and the maximum score on a booklet. If this is undesirable, 
 #' we advise to use WLE. The WLE was proposed by Warm (1989) to reduce bias in the MLE and is also known
 #' as the Warm estimator.
 #'
 #' @examples
-#' \dontrun{
-#' db = start_new_project(verbAggrRules, "verbAggression.db")
+
+#' db = start_new_project(verbAggrRules, ":memory:")
 #' add_booklet(db, verbAggrData, "agg")
+#' 
 #' f = fit_enorm(db)
-#' aa = ability_tables(f,method="MLE",standard_errors=FALSE)
-#' bb = ability_tables(f,method="EAP",standard_errors=FALSE)
-#' cc = ability_tables(f,method="EAP",prior="Jeffreys", standard_errors=FALSE)
-#' plot(bb$booklet_score, bb$theta, xlab="test-score", ylab="ability est.", pch=19, cex=0.7)
-#' points(aa$booklet_score, aa$theta, col="red", pch=19, cex=0.7)
-#' points(aa$booklet_score, cc$theta, col="green", pch=19, cex=0.7)
-#' legend("topleft", legend = c("EAP normal prior", "EAP Jeffreys prior", "MLE"), bty = "n",
-#'         lwd = 1, cex = 0.7, col = c("black", "green", "red"), lty=c(0,0,0), pch = c(19,19,19))
+#' 
+#' mle = ability_tables(f, method="MLE")
+#' eap = ability_tables(f, method="EAP", mu=0, sigma=1)
+#' wle = ability_tables(f, method="WLE")
+#' 
+#' plot(wle$booklet_score, wle$theta, xlab="test-score", ylab="ability est.", pch=19)
+#' points(mle$booklet_score, mle$theta, col="red", pch=19,)
+#' points(eap$booklet_score, eap$theta, col="blue", pch=19)
+#' legend("topleft", legend = c("WLE", "MLE", "EAP N(0,1)"), 
+#'         col = c("black", "red", "blue"), bty = "n",pch = 19)
 #' 
 #' close_project(db)
-#' }
 #' 
 #' @references
 #' Warm, T. A. (1989). Weighted likelihood estimation of ability in item response theory. 

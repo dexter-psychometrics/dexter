@@ -32,8 +32,7 @@ If dataSrc is a data.frame, it must contain the covariate.}
 
 \item{use_draw}{When the ENORM was fitted with a Gibbs sampler, this specifies the use of a particular sample of item parameters used to generate the plausible value(s). If NULL, the posterior means are used. If outside range, the last iteration will be used.}
 
-\item{prior.dist}{use a normal prior or a mixture of two normals
-recognised automatically),}
+\item{prior.dist}{use a normal prior or a mixture of two normals}
 
 \item{merge_within_persons}{If a person took multiple booklets, this indicates
 whether plausible values are generated per person (TRUE) or per booklet (FALSE)}

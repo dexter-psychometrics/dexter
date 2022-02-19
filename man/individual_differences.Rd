@@ -28,14 +28,13 @@ the intersection (i.e., the common items) of two or more booklets. If the inters
 (i.e., no common items for all persons), the function will exit with an error message.
 }
 \examples{
-\dontrun{
-db = start_new_project(verbAggrRules, "verbAggression.db")
+db = start_new_project(verbAggrRules, ":memory:")
 add_booklet(db, verbAggrData, "agg")
+
 dd = individual_differences(db)
 print(dd)
 plot(dd)
 
 close_project(db)
-}
 
 }

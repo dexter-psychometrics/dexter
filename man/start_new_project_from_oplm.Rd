@@ -50,8 +50,8 @@ Creates a dexter project database and fills it with response data based on a .da
 }
 \details{
 start_new_project_from_oplm builds a complete dexter database from a .dat and .scr file in
-the proprietary oplm format. Three custom variables are added to the database: 
-booklet_on_off, item_local_on_off, item_global_on_off. These are taken from the .scr file
+the proprietary oplm format. Four custom variables are added to the database: 
+booklet_on_off, oplm_marginal, item_local_on_off, item_global_on_off. These are taken from the .scr file
 and can be used in predicates in the various dexter functions.
 
 Booklet_position and responses_start are usually inferred from the scr file but since they

@@ -23,8 +23,8 @@
 #' 
 #' @details
 #' start_new_project_from_oplm builds a complete dexter database from a .dat and .scr file in
-#' the proprietary oplm format. Three custom variables are added to the database: 
-#' booklet_on_off, item_local_on_off, item_global_on_off. These are taken from the .scr file
+#' the proprietary oplm format. Four custom variables are added to the database: 
+#' booklet_on_off, oplm_marginal, item_local_on_off, item_global_on_off. These are taken from the .scr file
 #' and can be used in predicates in the various dexter functions.
 #' 
 #' Booklet_position and responses_start are usually inferred from the scr file but since they
@@ -365,7 +365,7 @@ readSCR = function (scrfile)
   margLabels = sapply(1:nMarg, function(x) {
     sl = readBin(z, 'int', size = 1, 1)
   readBin(z, 'raw', n = 8)[1:sl]
-  })
+  },simplify=FALSE)
   statLabels = sapply(1:nStat, function(x) {
     sl = readBin(z, 'int', size = 1, 1)
     readBin(z, 'raw', n = 8)[1:sl]
@@ -389,7 +389,7 @@ readSCR = function (scrfile)
   list(nit = nit, nMarg = nMarg, nStat = nStat, itemLabels = itemLabels, 
        booklet_position = c(fmt[1], fmt[1] + fmt[2] - 1L),
        responses_start = fmt[3], response_length = fmt[5],
-       margLabels = sapply(margLabels,rawToChar), 
+       margLabels = trimws(sapply(margLabels,rawToChar)), 
        globCal = globCal, 
        discrim = discrim, maxScore = maxScore, 
        nBook = nb, bookOn = inUse, nitBook = nitb, 

@@ -14,15 +14,14 @@
 #' The former under the hypothesis that there are no individual differences.
 #'
 #'@examples
-#' \dontrun{
-#' db = start_new_project(verbAggrRules, "verbAggression.db")
+#' db = start_new_project(verbAggrRules, ":memory:")
 #' add_booklet(db, verbAggrData, "agg")
+#' 
 #' dd = individual_differences(db)
 #' print(dd)
 #' plot(dd)
 #' 
 #' close_project(db)
-#' }
 #' 
 individual_differences <- function(dataSrc, predicate = NULL)
 {

@@ -16,7 +16,6 @@
 #' @param nPV Number of plausible values to draw per person.
 #' @param use_draw When the ENORM was fitted with a Gibbs sampler, this specifies the use of a particular sample of item parameters used to generate the plausible value(s). If NULL, the posterior means are used. If outside range, the last iteration will be used.
 #' @param prior.dist use a normal prior or a mixture of two normals
-#' recognised automatically), 
 #' @param merge_within_persons If a person took multiple booklets, this indicates
 #' whether plausible values are generated per person (TRUE) or per booklet (FALSE)
 #' @return A data.frame with columns booklet_id, person_id, booklet_score and nPV plausible values

@@ -1,14 +1,14 @@
 # dexter 1.1.5
 
 * slight change in implementation of DIF. If some items are not administered in both groups, they are now removed after calibration instead of before, making the calibration more robust in incomplete designs.
-* ability in EAP with normal prior is faster and SE's are more precise
+* ability for EAP with normal prior is faster and SE's are more precise, argument nPV is removed
 * deprecated objects in result of tia_tables have now been removed.
 
 
 # dexter 1.1.4
 
 * changed sd_score for items in tia_tables() for type='averaged' to the actual sd rather than a weighted average of sd over booklets (which was the case in previous versions) 
-* tia_tables now returns a list with data.frame elements booklets and items with snake case columns names rather than elements testStats and itemStats. testStas and itemStats are also still included for the time being to not break existing code.
+* tia_tables now returns a list with data.frame elements booklets and items with snake case column names rather than elements testStats and itemStats. testStas and itemStats are also still included for the time being to not break existing code.
 * corrected a minor bug which caused progress bars to hang or not complete to 100%
 * get_resp_matrix no longer includes empty rows for missing factor levels
 
