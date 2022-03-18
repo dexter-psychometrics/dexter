@@ -10,3 +10,4 @@
 ^\.github$
 ^vignettes/blog
 ^LICENSE$
+^CRAN-SUBMISSION$

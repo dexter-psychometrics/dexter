@@ -97,6 +97,14 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
   check_string(item_id)
   item = item_id
   
+  user.args = list(...); leg.args = list()
+  if(length(names(user.args))>0)
+  {
+    leg.args = user.args[endsWith(names(user.args),'.legend')]
+    names(leg.args) = gsub('\\.legend$','',names(leg.args))
+    user.args = user.args[!endsWith(names(user.args),'.legend')]
+  }
+  
   iprop = list()
   if(is_db(dataSrc))
     iprop = as.list(dbGetQuery_param(dataSrc,'SELECT * FROM dxItems WHERE item_id= :item;', 
@@ -149,9 +157,7 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
                              '$item_id, pos. $item_position in booklet $booklet_id',
                              '$item_id in booklet $booklet_id')
   
-  user.args = list(...)
-  
-  
+
   rsp_counts = respData$x %>%
     count(.data$booklet_id, .data$response, .data$item_score, .data$booklet_score)
 
@@ -230,8 +236,10 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
       
       if(legend && NROW(lgnd)>0)
       {
-        graphics::legend("topleft", legend = lgnd$label, inset=c(0.01, 0),
-                         lty = 1, col = lgnd$col, cex = 0.8,lwd=2, box.lty = 0)
+        do.call(graphics::legend,
+                merge_arglists(leg.args, 
+                               default=list(x="topleft", cex=.8, box.lty=0, bg='white',lwd=2,inset=c(0.01, 0)),
+                               override=list(legend=lgnd$label,lty=1, col=lgnd$col)))
       }
     }
   })

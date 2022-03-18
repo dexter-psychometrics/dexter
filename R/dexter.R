@@ -2,6 +2,8 @@
 utils::globalVariables(c("."))
 
 
+#to do: save pascal.c more size prudent so it does not have to be compiled 
+
 #' Dexter: data analyses for educational and psychological tests.
 #' 
 #' Dexter provides a comprehensive solution for managing and analyzing educational test data.

@@ -340,7 +340,7 @@ print.prms = function(x, ...){
 #' @param ... further arguments to coef are ignored
 #'  
 #' @return 
-#' Depends on the calibration method and the value of 'what'. For 'items'#' 
+#' Depends on the calibration method and the value of 'what'. For 'items' 
 #' 
 #' \describe{
 #' \item{CML}{a data.frame with columns: item_id, item_score, beta, SE_beta}
