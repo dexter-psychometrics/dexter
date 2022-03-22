@@ -12,6 +12,7 @@ profile_plot(
   model = c("IM", "RM"),
   x = NULL,
   col = NULL,
+  col.diagonal = "lightgray",
   ...
 )
 }
@@ -34,6 +35,8 @@ the data better or at least as good as the Rasch model.}
 \item{x}{Which value of the item_property to draw on the x axis, if NULL, one is chosen automatically}
 
 \item{col}{vector of colors to use for plotting}
+
+\item{col.diagonal}{color of the diagonal lines representing the testscores}
 
 \item{...}{further arguments to plot}
 }

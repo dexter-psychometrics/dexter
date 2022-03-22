@@ -247,19 +247,59 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
   invisible(df_format(rsp_colors))
 }
 
+# pp_segments = function(maxA, maxB, psbl, col='lightgray',cex=0.6)
+# {
+#   clip(0,maxA,0,maxB) 
+#   segments(0L, psbl, psbl, 0L, col=col, xpd=FALSE)
+#   h = strheight('1',cex=cex)
+# 
+#   y = par('usr')[3] + h/2
+#   psblx = psbl[psbl<=maxA]
+#   text(psblx - y, y, psblx, cex=.6,col=col, xpd=TRUE,adj=c(0.4,0.4))
+#   
+#   psbly = psbl[psbl>maxA]
+#   text(maxA - y,psbly-maxA+y, psbly,col=col,xpd=TRUE,cex=cex)
+# }
+adjust_pp_scores = function(maxA, psbl,cex)
+{
+  w = max(strwidth(maxA,cex=cex), strheight('1',cex=cex)) + 0.05
+  
+  if(w>=1)
+  {
+    lag = psbl[1]
+    for(i in 2:length(psbl))
+    {
+      if(psbl[i]-lag<w)
+      {
+        psbl[i] = NA_integer_
+      } else
+      {
+        lag = psbl[i]
+      }
+    }
+  }
+  psbl[!is.na(psbl)]
+}
+
 pp_segments = function(maxA, maxB, psbl, col='lightgray',cex=0.6)
 {
+  psbl = adjust_pp_scores(maxA,psbl,cex)
+  
   clip(0,maxA,0,maxB) 
   segments(0L, psbl, psbl, 0L, col=col, xpd=FALSE)
+  
   h = strheight('1',cex=cex)
-
-  y = par('usr')[3] + h/2
+  
+  y = par('usr')[3] + h
   psblx = psbl[psbl<=maxA]
-  text(psblx - y, y, psblx, cex=.6,col=col, xpd=TRUE,adj=c(0.4,0.4))
+  
+  text(psblx, y, psblx, cex=cex,col=col, xpd=TRUE,pos=4,offset=0)
   
   psbly = psbl[psbl>maxA]
-  text(maxA - y,psbly-maxA+y, psbly,col=col,xpd=TRUE,cex=cex)
+  text(maxA ,psbly-maxA+y, psbly,col=col,xpd=TRUE,cex=cex,pos=4,offset=0)
+  
 }
+
 
 #' Profile plot
 #'
@@ -276,6 +316,7 @@ pp_segments = function(maxA, maxB, psbl, col='lightgray',cex=0.6)
 #' the data better or at least as good as the Rasch model.
 #' @param x Which value of the item_property to draw on the x axis, if NULL, one is chosen automatically
 #' @param col vector of colors to use for plotting
+#' @param col.diagonal color of the diagonal lines representing the testscores
 #' @param ... further arguments to plot
 #' @details 
 #' Profile plots can be used to investigate whether two (or more) groups of respondents 
@@ -302,7 +343,8 @@ pp_segments = function(maxA, maxB, psbl, col='lightgray',cex=0.6)
 #' close_project(db)
 #' 
 #' 
-profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, model = c("IM","RM"), x = NULL, col = NULL, ...) 
+profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, model = c("IM","RM"), x = NULL, 
+                        col = NULL, col.diagonal='lightgray',...) 
 {
   check_dataSrc(dataSrc)
   check_string(item_property)
@@ -393,8 +435,8 @@ profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, mod
                          default=default.args,
                          override=list(x=c(0,maxA), y=c(0,maxB),type="n")))
   
-  pp_segments(maxA,maxB,psbl)
-  
+  seg.cex = 0.6 * ifelse('cex' %in% names(user.args), user.args$cex, 1)
+  pp_segments(maxA,maxB,psbl,cex=seg.cex, col=col.diagonal)
   
   colors = qcolors(length(tt), col)
   
@@ -417,7 +459,7 @@ profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, mod
 
   do.call(legend,
           merge_arglists(leg.args, 
-                         default=list(x="topleft", cex=.7, box.lty=0, bg='white'),
+                         default=list(x="topleft", cex=.7, box.lty=0, bg='white',inset=0.01),
                          override=list(legend=names(tt),lty=1, col=colors)))
 
   invisible(NULL)
