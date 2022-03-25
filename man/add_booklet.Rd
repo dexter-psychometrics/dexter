@@ -10,8 +10,9 @@ add_booklet(db, x, booklet_id, auto_add_unknown_rules = FALSE)
 add_response_data(
   db,
   data,
-  auto_add_unknown_rules = FALSE,
-  missing_value = "NA"
+  design = NULL,
+  missing_value = "NA",
+  auto_add_unknown_rules = FALSE
 )
 }
 \arguments{
@@ -26,11 +27,14 @@ correspond to the item_id's in the rules or the names of the person_properties. 
 
 \item{auto_add_unknown_rules}{If FALSE (the default), an error will be generated if 
 one or more responses do not appear in the scoring rules. If TRUE, unknown responses will be
-assumed to have a score of 0.}
+assumed to have a score of 0 and will be added to your scoring rules}
 
 \item{data}{response data in normalized (long) format. Must contain columns \code{person_id}, \code{booklet_id},
  \code{item_id} and \code{response} and optionally \code{item_position} 
 (useful if your data contains new booklets, see details)}
+
+\item{design}{data.frame with columns booklet_id, item_id and optionally item_position specifying the design of any 
+_new_ booklets in your data.}
 
 \item{missing_value}{value to use for responses in missing rows in your data, see details}
 }
@@ -38,7 +42,7 @@ assumed to have a score of 0.}
 A list with information about the recent import.
 }
 \description{
-Add item response data in long or wide format
+Add item response data in long or wide format.
 }
 \details{
 It is a common practice to keep response data in tables where each row 
@@ -58,21 +62,13 @@ a person_property and an item_id, the item takes precedence. Columns other than 
 and person_id will be ignored.
 
 
-\code{add_response_data} can be used to add data that is already 'normalized'. This function takes a 
+\code{add_response_data} can be used to add data that is already normalized. This function takes a 
 data.frame in long format with columns \code{person_id}, \code{booklet_id}, 
 \code{item_id} and \code{response} such as can usually be found in databases for example. 
-The first time a new booklet is encountered, 
-the design (i.e. which items are contained in each booklet at each position) is derived
-from \code{data}. In this case it is useful if you specify an extra column named \code{item_position},
-otherwise dexter will generate the item_positions automatically in some way that may not reflect your actual design 
-(of course, if the item positions in your tests are randomized, that is not a problem).
- 
-If there are missing rows (e.g. there are only 9 rows for a person-booklet where the booklet should contain 10 items)  
- \code{missing_value} will be used for the omitted responses. This can lead to an error in case \code{missing_value}
-is not defined in your rules and \code{auto_add_unknown_rules} is set to FALSE (the default). Please also note
-that the booklet_design for any specific booklet is derived from the distinct combination of booklet_id and item_id
-in \code{data} the first time that booklet is encountered. If subsequent calls to \code{add_response_data} 
-contain data with more or different items for this same booklet, this will cause an error. 
+For booklets that are not already known in your project, you need to specify the design via the \code{design} argument.
+Failure to do so will result in an error. Responses to items that should be there according to the design but which do not have a correpsoning
+row in \code{data} will be added with \code{missing_value} used for the response. If this missing value is not defined in your scoring rules and 
+and \code{auto_add_unknown_rules} is set to FALSE, this will lead to an error message.
 
 
 Note that responses are always treated as strings (in both functions), and \code{NA}

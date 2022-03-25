@@ -123,7 +123,7 @@ test_that('merging works',
     mutate(response=item_score)
   
   db = start_new_project(rules, ':memory:')
-  add_response_data(db, rename(rsp, response=item_score))
+  add_response_data(db, data = rename(rsp, response=item_score), design=distinct(rsp,booklet_id,item_id))
   
   
   get_resp_data(db) %>% 
@@ -173,7 +173,7 @@ test_that('merging works',
     mutate(response=item_score)
   
   db = start_new_project(rules, ':memory:')
-  add_response_data(db, rename(rsp, response=item_score))
+  add_response_data(db, data=rename(rsp, response=item_score), design = distinct(rsp,booklet_id, item_id))
   
   
   expect_no_error(get_resp_data(rsp, merge_within_person=FALSE))

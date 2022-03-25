@@ -1,3 +1,8 @@
+# dexter 1.1.6
+
+* argument 'design' added to add_response_data. This obligates the user to explicitly specify the design rather than having it inferred from the data.  
+
+
 # dexter 1.1.5
 
 * slight change in implementation of DIF. If some items are not administered in both groups, they are now removed after calibration instead of before, making the calibration more robust in incomplete designs.
