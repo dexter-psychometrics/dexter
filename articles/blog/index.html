@@ -126,6 +126,21 @@ small.dont-index{display:none;}
 p.blog-authors{font-style:italic}
 </style>
 <div class="section level2">
+<h2 id="simulating-data-with-dexter-a-commented-example">
+<a href="2022-03-26-simulate_with_dexter">Simulating data with dexter: a commented example</a><a class="anchor" aria-label="anchor" href="#simulating-data-with-dexter-a-commented-example"></a>
+</h2>
+<p class="blog-authors">
+Jesse Koops and Ivailo Partchev
+</p>
+<p>
+</p>
+<p>We are busy people. We spend most of our time analyzing the large-scale national and international assessments for which <strong>dexter</strong> was developed. So far, we have not had the time to discuss at length the facilities for simulating item response data with <strong>dexter</strong>. Of course they are there, since simulation plays a vital role in our approach to generating plausible values and modelling in general – see <span class="citation">Marsman et al. (2017)</span>. But they are somewhat hidden among several ‘functions of theta’ – anyway, here is the overdue introduction to data simulation with <strong>dexter</strong>. Simulating IRT data for a single booklet of Rasch items is quite easy – it can be done with a single line in plain R:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">Rasch_data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">rlogis</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">20</span>,<span class="op">-</span><span class="fl">2</span>,<span class="fl">2</span><span class="op">)</span> ,<span class="st">'-'</span><span class="op">)</span><span class="op">)</span><span class="op">&gt;</span><span class="fl">0</span><span class="op">)</span>, <span class="fl">500</span>, <span class="fl">20</span><span class="op">)</span></code></pre></div>
+
+<p><a href="2022-03-26-simulate_with_dexter">read more…</a></p>
+</div>
+<div class="section level2">
 <h2 id="approximate-survey-errors-for-the-correlation-and-the-standard-deviation-with-r-package-survey">
 <a href="2022-02-02-standard-errors-in-survey">Approximate survey errors for the correlation and the standard deviation: with R package survey</a><a class="anchor" aria-label="anchor" href="#approximate-survey-errors-for-the-correlation-and-the-standard-deviation-with-r-package-survey"></a>
 </h2>
@@ -344,7 +359,7 @@ Ivailo Partchev
 <p>
 </p>
 <p>In my post on DIPF from yesterday, I had plots with an arbitrary aspect ratio chosen automatically by R. Rather than change them behind the scenes, I revisit them because I feel the issue deserves attention. To start with the MDS plot: it is supposed to reconstruct a map from a distance matrix, so there is no discussion that the aspect ratio should be set to 1 by adding <code>asp=1</code> to the arguments of the <code>plot</code> function. Like this:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mmds</span><span class="op">$</span><span class="va">points</span>, type<span class="op">=</span><span class="st">'n'</span>, xlab<span class="op">=</span><span class="st">'Dimension 1'</span>, ylab<span class="op">=</span><span class="st">'Dimension 2'</span>, asp<span class="op">=</span><span class="fl">1</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/text.html" class="external-link">text</a></span><span class="op">(</span><span class="va">mmds</span><span class="op">$</span><span class="va">points</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">mmds</span><span class="op">$</span><span class="va">points</span><span class="op">)</span>, cex<span class="op">=</span><span class="fl">.6</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h<span class="op">=</span><span class="fl">0</span>, col<span class="op">=</span><span class="st">'gray'</span><span class="op">)</span>
@@ -658,6 +673,9 @@ The dexter makers
 </div>
 <div id="ref-dexter">
 <p>Maris, Gunter, Timo Bechger, Jesse Koops, and Ivailo Partchev. 2018. <em>Dexter: Data Management and Analysis of Tests</em>. <a href="https://CRAN.R-project.org/package=dexter" class="external-link">https://CRAN.R-project.org/package=dexter</a>.</p>
+</div>
+<div id="ref-marsman2017turning">
+<p>Marsman, Maarten, Gunter Maris, Timo Bechger, and Cees Glas. 2017. “Turning Simulation into Estimation: Generalized Exchange Algorithms for Exponential Family Models.” <em>PloS One</em> 12 (1): e0169787.</p>
 </div>
 <div id="ref-MarsmanPV">
 <p>Marsman, M., G. Maris, T. M. Bechger, and C. A. W. Glas. 2016. “What can we learn from plausible values?” <em>Psychometrika</em>, 1–16.</p>
