@@ -11,6 +11,15 @@ p.blog-authors{font-style:italic}
 </style>
 
 
+## [Simulating data with dexter: a commented example](2022-03-26-simulate_with_dexter)
+<p class="blog-authors">Jesse Koops and Ivailo Partchev</p><p>
+We are busy people. We spend most of our time analyzing the large-scale national and international assessments for which __dexter__ was developed. So far, we have not had the time to discuss at length the facilities for simulating item response data with __dexter__. Of course they are there, since simulation plays a vital role in our approach to generating plausible values and modelling in general -- see @marsman2017turning. But they are somewhat hidden among several 'functions of theta' -- anyway, here is the overdue introduction to data simulation with __dexter__.
+Simulating IRT data for a single booklet of Rasch items is quite easy -- it can be done with a single line in plain R:
+```r
+Rasch_data = matrix(as.integer(rlogis(outer(rnorm(500), runif(20,-2,2) ,'-'))>0), 500, 20)
+```
+</p>[read more...](2022-03-26-simulate_with_dexter)
+
 ## [Approximate survey errors for the correlation and the standard deviation: with R package survey](2022-02-02-standard-errors-in-survey)
 <p class="blog-authors">Ivailo Partchev</p><p>
 For a survey statistician, there can hardly be anything more helpful than Thomas Lumley's `survey` [@survey, @lumley]. Not surprisingly, it has been downloaded over 3.1 million times at the time of writing, which makes it one of the more popular packages for R [@R].

@@ -1,23 +1,26 @@
 ---
 title: "Simulating data with dexter: a commented example"
 author: "Jesse Koops and Ivailo Partchev"
-date: "2/5/2022"
+date: "3/26/2022"
+bibliography: dexter.bib
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE)
-```
 
-__dexter__ is meant for real-life applications. The choice of models it estimates is limited to a few practical ones, and it is assumed that the users know how to construct univariate tests and make use of the ample quality control facilities provided. But when the need for simulated data arises, __dexter__ is quite helpful. We will show and discuss in detail a reasonably complicated example. After all, if a single booklet of Rasch data is all that is needed, we can do it with a single line in plain R:
 
-```{r}
+We are busy people. We spend most of our time analyzing the large-scale national and international assessments for which __dexter__ was developed. So far, we have not had the time to discuss at length the facilities for simulating item response data with __dexter__. Of course they are there, since simulation plays a vital role in our approach to generating plausible values and modelling in general -- see @marsman2017turning. But they are somewhat hidden among several 'functions of theta' -- anyway, here is the overdue introduction to data simulation with __dexter__.
+
+Simulating IRT data for a single booklet of Rasch items is quite easy -- it can be done with a single line in plain R:
+
+
+```r
 Rasch_data = matrix(as.integer(rlogis(outer(rnorm(500), runif(20,-2,2) ,'-'))>0), 500, 20)
 ```
 
 The __dexter__ way would be:
 
-```{r}
+
+```r
 library(dexter)
 library(dplyr)
 items = tibble(item_id = paste0('item', 1:20),
@@ -26,13 +29,11 @@ items = tibble(item_id = paste0('item', 1:20),
 Rasch_data = r_score(items)(rnorm(500))
 ```
 
-Not much longer, really. `r_score` is __dexter__'s function to simulate item responses, which plays a vital role in the generation of plausible values. The syntax to call it is clear even to me (I LIED!!).
+We just construct a tibble with the item parameters in the expected format, after which it is a single line again. We now discuss a more interesting and complicated case. The example is by Jesse and the comments by me, so the perception of a certain age difference is inevitable even if not deliberate.
 
-What makes simulation with __dexter__ interesting is that everything is programmable and embedded in an environment where solid data management and tidy handling of data are the rule. The cost of writing a few more lines of code is more than offset by the advantages.
 
-So here is the example, step by step:
 
-```{r}
+```r
 library(mvtnorm)
 set.seed(42)
 
@@ -48,29 +49,25 @@ pop_theta = tribble(
 )
 ```
 
-`tribble` is a handy way to define a tiny data frame, or is it tibble, in a visually convenient way (in the traditional R approach, we would need to go columnwise, declaring first the gender variable, then the school type variable, and so on). What we have here is the combinations of gender and two Dutch school types, and three domains that will be treated as three highly correlated but distinct abilities. The hypothesized abilities will have a multivariate normal distribution with means varying across domains, sexes, and school types, and standard deviations differing just across school types. The last column has the number of fictional students in each cell. 
+The `tribble`, ot transposed tibble, defines the combinations of gender, two Dutch school types, and three domains that will be treated as three highly correlated but distinct abilities. The hypothesized abilities will have a multivariate normal distribution with means varying across domains, sexes, and school types, and standard deviations differing just across school types. The last column has the number of fictional students in each cell. 
 
-```{r}
+
+```r
 items = tibble(domain = sample(domains, nit, TRUE),
                item_id = sprintf('item%03i-%s', 1:nit, substring(domain,1,3)),
                item_score = 1,
                beta = runif(nit, -2, 2))
 ```
 
-Here we constructed the tibble that defines the items, just as in the initial example. `sprintf` is a much better choice than `paste0` because it produces sortable names: we don't get items 10 through 19 sorted before item 2, for example.
+Here we constructed the tibble that defines the items, just as in the initial example. `sprintf` is a much better choice than `paste0` because it produces sortable names: we don't get items 10 through 19 sorted before item 2, for example. Next, define the correlation matrix for the three domains and use the __mvtnorm__ package to generate the abilities:
 
-Next, define the correlation matrix for the three domains:
 
-```{r}
+```r
 rho = matrix(c(1, .8, .8,
               .8, 1,  .8,
               .8, .8, 1), 
              ncol=3, byrow=TRUE)
-```
 
-$\ldots$ and use the __mvtnorm__ package to generate the abilities:
-
-```{r}
 theta = pop_theta |>
   group_by(gender, school_type) |>
   do({
@@ -82,12 +79,10 @@ theta = pop_theta |>
   })
 ```
 
-This happens in a __dplyr__ pipe that groups by gender and school type, effectively calling `rmvnorm` four times and combining the results in a tibble. Note that the piping operator, `\>`, became a regular feature of __R__ since version 4.1; if your version is older, you may have to replace it with `%>%`.
+This happens in a __dplyr__ pipe that groups by gender and school type, effectively calling `rmvnorm` four times and combining the results in a tibble. Now that we have the items and the thetas, call `r_score` three times to generate the simulated item responses, and stack the output:
 
 
-Now that we have the items and the thetas, call `r_score` three times to generate the simulated item responses, and stack the output:
-
-```{r}
+```r
 dat = cbind(
   r_score(filter(items, domain=='geometry'))(theta$geometry),
   r_score(filter(items, domain=='algebra'))(theta$algebra),
@@ -97,7 +92,8 @@ dat = cbind(
 
 Add the two person properties:
 
-```{r}
+
+```r
 dat = as_tibble(dat)
 dat$gender = rep(pop_theta$gender, pop_theta$n)
 dat$school_type = rep(pop_theta$school_type, pop_theta$n)
@@ -105,13 +101,15 @@ dat$school_type = rep(pop_theta$school_type, pop_theta$n)
 
 The simulated data is ready now, but we are going to put it in a __dexter__ database and have some more fun with generating an incomplete design. The creation of a __dexter__ database (a.k.a. project) always starts with a set of scoring rules. We shall make some trivial rules, where responses can be only 0 or 1, and will be scored as 0 or 1:
 
-```{r}
+
+```r
 dummy_rules = tibble(item_id=rep(items$item_id,2), item_score=rep(0:1,each=nit), response=item_score)
 ```
 
 From the rules, we generate an empty database, announcing the two person properties included with the data:
 
-```{r}
+
+```r
 db = start_new_project(dummy_rules, 
                        ':memory:', 
                        person_properties=list(gender='<unknown>', school_type='<unknown>'))
@@ -119,7 +117,8 @@ db = start_new_project(dummy_rules,
 
 Now, let us have an incomplete design, 30 items per booklet. SBO students will get the easier booklet, and BAO students will get the more difficult one. In real life, this would be determined by a pretest with a small sample of students, but we will simply sort items on their true difficulty parameters. The easy booklet will contain all items except the 20 most difficult ones, and the difficult booklets all items except the 20 easiest ones; thus, the two booklets have an overlap of 10 items of average difficulty:
 
-```{r, results='hide'}
+
+```r
 items_SBO = arrange(items,beta) |> slice(1:20)  |> pull(item_id)
 items_BAO = arrange(items,beta) |> slice(31:50) |> pull(item_id)
 
@@ -134,8 +133,11 @@ add_booklet(db,
 
 Finally, we add the domains as an item property:
 
-```{r, results='hide'}
+
+```r
 add_item_properties(db, select(items, item_id, domain))
 ```
 
 We are now ready to check how the models available in __dexter__ will cope with this simulated data set, or how the diagnostic facilities might help us investigate its particular properties.
+
+## References
