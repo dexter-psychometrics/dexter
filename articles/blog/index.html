@@ -126,6 +126,20 @@ small.dont-index{display:none;}
 p.blog-authors{font-style:italic}
 </style>
 <div class="section level2">
+<h2 id="when-cml-is-not-possible">
+<a href="2022-03-31-dexterMML">When CML is not possible</a><a class="anchor" aria-label="anchor" href="#when-cml-is-not-possible"></a>
+</h2>
+<p class="blog-authors">
+Jesse Koops
+</p>
+<p>
+Recently, we published a new package dexterMML to the <a href="https://github.com/dexter-psychometrics" class="external-link">dexter github site</a>, it will probably also be available from CRAN at some time in the future. What follows is the package vignette as it is at the time of writing. In dexter we use an extended (polytomous) Rasch model to equate test forms and <a href="https://dexter-psychometrics.github.io/dexter/reference/tia_tables.html" class="external-link">classical test analysis</a>, <a href="https://dexter-psychometrics.github.io/dexter/reference/distractor_plot.html" class="external-link">distractor plots</a> and the <a href="https://dexter-psychometrics.github.io/dexter/reference/fit_inter.html" class="external-link">interaction model</a> for quality control of items. For calibration of the NRM and interacton model we can use conditional maximum likelihood (CML). CML calibration is not possible for fully adaptive tests or for Multi Stage tests with probabilistic routing rules. CML is currently also impractical for random tests (i.e. tests with items randomly selected from a bank). Classical analysis is also not feasible in these situations. So in these cases we must turn to Marginal Maximum Likelihood (MML) where we can use a marginal Rasch model (1PL) for equating and a 2PL for quality control of the items. As the name implies, in MML estimation the likelihood that is maximized is marginal, over an assumed distribution of ability. The likelihood for a response vector <span class="math inline">\(x\)</span> for a single person is defined as: <span class="math display">\[
+P(x) = \int P(x|\theta, \omega)f(\theta|\phi,Y)d\theta
+\]</span>
+</p>
+<p><a href="2022-03-31-dexterMML">read more…</a></p>
+</div>
+<div class="section level2">
 <h2 id="simulating-data-with-dexter-a-commented-example">
 <a href="2022-03-26-simulate_with_dexter">Simulating data with dexter: a commented example</a><a class="anchor" aria-label="anchor" href="#simulating-data-with-dexter-a-commented-example"></a>
 </h2>
