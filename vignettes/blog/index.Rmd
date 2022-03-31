@@ -11,6 +11,16 @@ p.blog-authors{font-style:italic}
 </style>
 
 
+## [When CML is not possible](2022-03-31-dexterMML)
+<p class="blog-authors">Jesse Koops</p><p>
+Recently, we published a new package dexterMML to the [dexter github site](https://github.com/dexter-psychometrics), it will probably also be available from CRAN at some time in the future. What follows is the package vignette as it is at the time of writing.
+In dexter we use an extended (polytomous) Rasch model to equate test forms and [classical test analysis](https://dexter-psychometrics.github.io/dexter/reference/tia_tables.html), [distractor plots](https://dexter-psychometrics.github.io/dexter/reference/distractor_plot.html) and the [interaction model](https://dexter-psychometrics.github.io/dexter/reference/fit_inter.html) for quality control of items. For calibration of the NRM and interacton model we can use conditional maximum likelihood (CML).
+CML calibration is not possible for fully adaptive tests or for Multi Stage tests with probabilistic routing rules. CML is currently also impractical for random tests (i.e. tests with items randomly selected from a bank). Classical analysis is also not feasible in these situations. So in these cases we must turn to Marginal Maximum Likelihood (MML) where we can use a marginal Rasch model (1PL) for equating and a 2PL for quality control of the items. As the name implies, in MML estimation the likelihood that is maximized is marginal, over an assumed distribution of ability. The likelihood for a response vector $x$ for a single person is defined as:
+$$
+P(x) = \int P(x|\theta, \omega)f(\theta|\phi,Y)d\theta
+$$
+</p>[read more...](2022-03-31-dexterMML)
+
 ## [Simulating data with dexter: a commented example](2022-03-26-simulate_with_dexter)
 <p class="blog-authors">Jesse Koops and Ivailo Partchev</p><p>
 We are busy people. We spend most of our time analyzing the large-scale national and international assessments for which __dexter__ was developed. So far, we have not had the time to discuss at length the facilities for simulating item response data with __dexter__. Of course they are there, since simulation plays a vital role in our approach to generating plausible values and modelling in general -- see @marsman2017turning. But they are somewhat hidden among several 'functions of theta' -- anyway, here is the overdue introduction to data simulation with __dexter__.
