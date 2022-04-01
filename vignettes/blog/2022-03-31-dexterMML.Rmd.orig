@@ -2,21 +2,22 @@
 title: "When CML is not possible"
 author: "Jesse Koops"
 date: "3/31/2022"
-
-output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
-```{css,echo=FALSE}
+<style>
 p.caption{
 margin-left:5em;
 margin-right:5em;
 margin-bottom:1.5em;
 font-style:italic;
+text-align:center;
 }
 blockquote{
   font-size:100%;
 }
-```
+</style>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE,dev='CairoPNG',fig.align='center')

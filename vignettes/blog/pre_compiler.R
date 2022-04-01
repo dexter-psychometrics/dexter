@@ -1,5 +1,6 @@
 
 # to do: dexterities links
+# to do: fig.cap disappears as well as custom css
 
 library(stringr)
 library(RCurl)
@@ -40,12 +41,19 @@ pre_compile = function(blog_file_name)
     # for some reason it is arbitrary if images are exported in markdown or html format
     # prbl to do with fig margins being set in knitr
     img = str_extract_all(txt,'<img src="[^>]+>')
-    for(i in unlist(img))
+    pcap = ""
+    for(i in rev(unlist(img)))
     {
       fn = str_extract(i,'(?<=src=")[^"]+')
       if(!is.na(fn) && !startsWith(fn,'img'))
       {
+        cap = str_extract(i, '(?<=title=")[^"]+')
         j = gsub('src="[^"]+"',sprintf('src="data:image/png;base64,%s"', fig[[basename(fn)]]),i)
+        if(!is.na(cap) && cap!= pcap)
+        {
+          j = sprintf('%s<p class="caption">%s</p>',j,cap)
+          pcap=cap
+        }
         txt = gsub(i,j,txt,fixed=TRUE)
       }
     }
