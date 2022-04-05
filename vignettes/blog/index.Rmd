@@ -11,6 +11,14 @@ p.blog-authors{font-style:italic}
 </style>
 
 
+## [Simulating data from the interaction model](2022-04-05-simulating-data-from-the-interaction-model)
+<p class="blog-authors">Timo Bechger, Norman Verhelst, Ivailo Partchev</p><p>
+In a recent post, Jesse has given a somewhat involved example of simulating Rasch / PCM data with __dexter__.  In spite of the rather complex design involving planned missingness and adaptivity, the models at the heart of it are well-known. In this post, we show how to simulate from Haberman's interaction model (@IM), which is very interesting, quite useful in practice, and to our knowledge only available in __dexter__. And, as an Easter promotion, we give you two methods for the price of one: one based on rejection sampling (__dexter__'s 'official' version), and one based on sampling without rejection. But we start with a short discussion of this fascinating IRT model.
+## The interaction model
+While not even mentioned at the career award session dedicated to Shelby Haberman at NCME 2019, his interaction model (IM) must be one of the brightest, practically most salient ideas in psychometrics since 2000. It plays a strategic role in __dexter__, and we have posted several times about it and will continue to do so in the future. The IM can be represented in several ways, each of them highlighting different aspects of interest and applicability:
+* as a generalization of the Rasch model that relaxes conditional independence while retaining sufficient statistics and the immediate connection to the observable
+</p>[read more...](2022-04-05-simulating-data-from-the-interaction-model)
+
 ## [When CML is not possible](2022-03-31-dexterMML)
 <p class="blog-authors">Jesse Koops</p><p>
 Recently, we published a new package dexterMML to the [dexter github site](https://github.com/dexter-psychometrics), it will probably also be available from CRAN at some time in the future. What follows is the package vignette as it is at the time of writing.
@@ -190,14 +198,6 @@ The title says it all, and here are some details from the NEWS file:
 * new function `design_info()` returns extensive information about incomplete test designs. Functions `design_as_network()` and `design_is_connected()` are deprecated.
 * correction for a bug which caused NA's in plausible values for booklets with 1 respondent and nPV>1
 </p>
-
-## [Simulating data from the interaction model](2019-04-19-simulating-data-from-the-interaction-model)
-<p class="blog-authors">Timo Bechger, Norman Verhelst, Ivailo Partchev</p><p>
-I thought I had seen it all, dear readers. But now our first and second authors, who are in a student:professor relationship, want to have a programming contest among the two, and the problem is how to simulate data from Haberman's interaction model (@IM). Now, as a third author I cannot allow such extravagant behavior, can I. On the other hand, the problem is so interesting, and the two algorithms so fascinating, that I feel everyone should see them. So I publish them as Algorithm A and Algorithm B, along with some comments.
-## The interaction model
-While not even mentioned at the career award session dedicated to Shelby Haberman at NCME 2019, his interaction model (IM) must be one of the brightest, practically most salient ideas in psychometrics since 2000. It plays a strategic role in __dexter__, and we have posted several times about it and will continue to do so in the future. The IM can be represented in several ways, each of them highlighting different aspects of interest and applicability:
-* as a generalization of the Rasch model that relaxes conditional independence while retaining sufficient statistics and the immediate connection to the observable
-</p>[read more...](2019-04-19-simulating-data-from-the-interaction-model)
 
 ## [dexter 0.8.4 is out](2019-01-03-dexter-0-8-4-is-out)
 <p class="blog-authors">Ivailo Partchev</p><p>
