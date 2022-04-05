@@ -70,9 +70,6 @@
     <loc>/articles/blog/2019-01-03-dexter-0-8-4-is-out.html</loc>
   </url>
   <url>
-    <loc>/articles/blog/2019-04-19-simulating-data-from-the-interaction-model.html</loc>
-  </url>
-  <url>
     <loc>/articles/blog/2019-04-26-dexter-0-8-5-on-cran.html</loc>
   </url>
   <url>
@@ -140,6 +137,9 @@
   </url>
   <url>
     <loc>/articles/blog/2022-03-31-dexterMML.html</loc>
+  </url>
+  <url>
+    <loc>/articles/blog/2022-04-05-simulating-data-from-the-interaction-model.html</loc>
   </url>
   <url>
     <loc>/articles/blog/about.html</loc>
