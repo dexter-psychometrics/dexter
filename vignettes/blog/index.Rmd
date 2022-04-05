@@ -191,6 +191,14 @@ The title says it all, and here are some details from the NEWS file:
 * correction for a bug which caused NA's in plausible values for booklets with 1 respondent and nPV>1
 </p>
 
+## [Simulating data from the interaction model](2019-04-19-simulating-data-from-the-interaction-model)
+<p class="blog-authors">Timo Bechger, Norman Verhelst, Ivailo Partchev</p><p>
+I thought I had seen it all, dear readers. But now our first and second authors, who are in a student:professor relationship, want to have a programming contest among the two, and the problem is how to simulate data from Haberman's interaction model (@IM). Now, as a third author I cannot allow such extravagant behavior, can I. On the other hand, the problem is so interesting, and the two algorithms so fascinating, that I feel everyone should see them. So I publish them as Algorithm A and Algorithm B, along with some comments.
+## The interaction model
+While not even mentioned at the career award session dedicated to Shelby Haberman at NCME 2019, his interaction model (IM) must be one of the brightest, practically most salient ideas in psychometrics since 2000. It plays a strategic role in __dexter__, and we have posted several times about it and will continue to do so in the future. The IM can be represented in several ways, each of them highlighting different aspects of interest and applicability:
+* as a generalization of the Rasch model that relaxes conditional independence while retaining sufficient statistics and the immediate connection to the observable
+</p>[read more...](2019-04-19-simulating-data-from-the-interaction-model)
+
 ## [dexter 0.8.4 is out](2019-01-03-dexter-0-8-4-is-out)
 <p class="blog-authors">Ivailo Partchev</p><p>
 I have just uploaded version 0.8.4 of **dexter**. It has the same functionality as version 0.8.3 except for some minor changes to accommodate the upcoming version of **tibble**.

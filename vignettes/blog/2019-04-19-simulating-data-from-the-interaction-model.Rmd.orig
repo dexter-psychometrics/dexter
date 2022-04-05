@@ -1,13 +1,15 @@
 ---
 title: Simulating data from the interaction model
 author: Timo Bechger * Norman Verhelst * Ivailo Partchev
-bibliography: dexterMST.bib
+bibliography: dexter.bib
 date: '2019-04-19'
 slug: simulating-data-from-the-interaction-model
 categories:
   - Psychometrics
   - R
 tags: []
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -44,36 +46,38 @@ sim_Rasch = function(theta, delta) {
 
 
 ```{r makeMLE, echo=FALSE}
-makeMLE<-function(delta, sigma)
+# MLE ability estimate for dichotomous interaction model
+IM_mle = function(delta, sigma)
 {
-  nI = length(delta)
-  first = seq(1,2*nI,2)
-  last = first+1
-  a = rep(c(0,1), nI)
-  b = rep(1,2*nI)
-  ab = rep(0,nI-2)
-  for (s in 1:(nI-1))
+  scores = 1:(length(delta)-1)
+  
+  Es_x = function(s)
   {
-    eta = delta - s*sigma
-    b[last] = exp(-eta)
-    ab[s] = dexter:::theta_MLE(b,a,first,last)$theta[s+1]
+    delta = delta - s*sigma
+    function(theta) 
+    {
+      Pi = 1/(exp(delta - theta)+1)
+      sum(Pi) - s
+    }
   }
-  ab = c(-Inf,ab,Inf)
-  return(ab)
+
+  c(-Inf,
+    sapply(scores, function(s) uniroot(Es_x(s), interval = c(-10,20),extendInt='yes')$root),
+    Inf)
 }
 
 ```
 
 ```{r simulate_Rasch, echo=FALSE}
-simRasch<-function(theta, delta)
+simRasch = function(theta, delta)
 {
-  1*(rlogis(length(delta), 0, 1) <= (theta-delta))
+  as.integer(rlogis(length(delta), 0, 1) <= (theta-delta))
 }
 ```
 
 
 ```{r simulate_fun, echo=FALSE}
-sim_IM <-function(delta, sigma, scoretab)
+sim_IM = function(delta, sigma, scoretab)
 {
   nI = length(delta)
   nP = sum(scoretab)
@@ -82,26 +86,23 @@ sim_IM <-function(delta, sigma, scoretab)
   # nP samples from the score distribution:
   s = sample(0:nI, nP, replace=TRUE, prob=scoretab)
   # attach the MLE estimates of theta:
-  ab = makeMLE(delta,sigma)
+  abl = IM_mle(delta,sigma)
+
   for (p in 1:nP)
   {
-    if ((s[p]>0)&(s[p]<nI))
-    {
-      # compute item difficulties at score s[p]:
-      delta_s = delta - s[p]*sigma
-      repeat{
-          y = simRasch(theta=ab[s[p]+1], delta=delta_s)
-          if (sum(y)==s[p]) break
-      }
-      x[p,] = y
+    # compute item difficulties at score s[p]:
+    delta_s = delta - s[p]*sigma
+    repeat{
+        y = simRasch(theta=abl[s[p]+1], delta=delta_s)
+        if (sum(y)==s[p]) break
     }
-    if (s[p]==0)  x[p,] = rep(0,nI)
-    if (s[p]==nI) x[p,] = rep(1,nI)
+    x[p,] = y
   }
   return(x)
 }
 
 ```
+
 The interaction model can be expressed as a generalization of the Rasch model where item difficulty is a linear function of the test-score:
 \begin{align*}
 P(\mathbf{X}=\mathbf{x}|\theta) 
@@ -119,21 +120,20 @@ delta = runif(nI, -0.1,1.5)
 sigma = runif(nI, -0.2,0.2)
 hh=sim_Rasch(theta, delta)
 ts=get_testscores(hh)
-scoretab = dexter:::my_freq(ts$test_score,min_max=c(0,nI), operator="==")*nP
+scoretab = sapply(0:nI,function(j)sum(ts$booklet_score==j))
 x = sim_IM(delta, sigma, scoretab)
 colnames(x) = paste0("i", 1:nI)
-x=data.frame(person_id = paste0("p",1:nP) , as.data.frame(x))
-ldat <- gather(x, item_id, value="item_score", paste0("i",1:nI))
+ldat = get_responses(x)
 
 yy = matrix(NA,nI-1,nI)
 ts = get_testscores(ldat)
-hh = inner_join(ldat,ts, "person_id") %>% arrange(test_score)
+hh = inner_join(ldat,ts, "person_id") %>% arrange(booklet_score)
 for (sc in 1:(nI-1))
 {
-  nn = nrow(get_testscores(hh,test_score==sc))
+  nn = nrow(get_testscores(hh,booklet_score==sc))
   if (nn>600)
   {
-    ff=fit_enorm(hh, test_score==sc)
+    ff=fit_enorm(hh, booklet_score==sc)
     yy[sc,] = ff %>% coef() %>% arrange(as.numeric(gsub("i","", item_id))) %>% pull(beta)
   }
 }
@@ -145,7 +145,7 @@ par(mfrow=c(2,2))
 its = sample(nI,4)
 for (it in its)
 {
-  plot(1:(nI-1), yy[,it], ylim=c(-3,3), xlab="test score", pch=16,   
+  plot(1:(nI-1), yy[,it], ylim=c(-3,3), xlab="test score", pch=16,   ylab='item difficulty',
        main=paste(paste0("i",it),"sigma =",as.character(round(sigma[it]-mean(sigma),3))))
 curve(delta[it]-mean(delta)-(sigma[it]-mean(sigma))*x,1,19, add=T, col="green")
 curve((beta_im[it]-mean(beta_im))-sigma_im[it]*x,1,19, add=T, col="grey")
@@ -200,7 +200,7 @@ $$
 
 where the first two indices $r$ and $s$ run from zero to $n$, and the third index $i$ runs from $1$ to $n$. The elementary symmetric functions are calculated using the sum-algorithm. Here is the necessary code in R:
 
-```{r}
+```{r, echo=TRUE}
 elsymRM <-function(b)
 {
   n=length(b)
@@ -244,7 +244,7 @@ sim_IMB <-function(delta, sigma, scoretab)
   r = sample(0:nI, nP, replace=TRUE, prob=scoretab)
   b_r = matrix(0, nI+1, nI)
   for (s in 0:nI) b_r[s+1,] = exp(-(delta - s*sigma))
-  # so far, as in Algorith A, but now compute the 
+  # so far, as in Algorithm A, but now compute the 
   # matrix of elementary symmetric functions rather
   # than the MLE of ability at each sum score
   G = makeG(b_r)
@@ -294,19 +294,19 @@ for (m in rrng)
 {
   hh=sim_Rasch(theta,delta[1:m])
   ts=get_testscores(hh)
-  scoretab = dexter:::my_freq(ts$test_score,min_max=c(0,m),operator="==")*nP
+  scoretab = sapply(0:m,function(j)sum(ts$booklet_score==j))
   hh = system.time(sim_IMB(delta[1:m], sigma[1:m], scoretab))
   yyB=c(yyB,as.numeric(hh[1]))
   hh = system.time(sim_IM(delta[1:m], sigma[1:m], scoretab))
   yy=c(yy,as.numeric(hh[1]))
 }
 plot(rrng, yy, col="red", ylim=c(0,max(yyB)), xlab="nr. of items", ylab="time in sec.", pch=16,
-     title='15000 persons, varying number of items')
+     main='15000 persons, varying number of items')
 points(rrng, yyB, col="green", pch=16)
 legend(x='topleft', legend=c("A", "B"), bty="n", col = c("red", "green"), pch = 16, cex=0.7)
 
 nP = 15000
-nI = 20
+nI = 30
 theta = rnorm(nP,0,1)
 delta = runif(nI,-0.5,1.5)
 sigma = runif(nI,-0.5,0.5)
@@ -318,14 +318,14 @@ for (m in rrng)
 {
   hh=sim_Rasch(theta[1:m],delta)
   ts=get_testscores(hh)
-  scoretab = dexter:::my_freq(ts$test_score,min_max=c(0,nI),operator="==")*m
+  scoretab = sapply(0:nI,function(j)sum(ts$booklet_score==j))
   hh = system.time(sim_IMB(delta, sigma, scoretab))
   yyB=c(yyB,as.numeric(hh[1]))
   hh = system.time(sim_IM(delta, sigma, scoretab))
   yy=c(yy,as.numeric(hh[1]))
 }
 plot(rrng, yy, col="red", ylim=c(0,max(yyB)), xlab="nr. of persons", ylab="time in sec.", pch=16,
-     title='20 items, varying number of persons')
+     main='30 items, varying number of persons')
 points(rrng, yyB, col="green", pch=16)
 legend(x='topleft', legend=c("A", "B"), bty="n", col = c("red", "green"), pch = 16, cex=0.7)
 ```
@@ -344,6 +344,10 @@ max(esf)
 ```
 
 The ESF are indispensable when dealing with test data and psychometric models, they are ubiquitous in __dexter__, but programming them for production purposes requires extra care. Our second author has developed a special FORTRAN library for dealing with very large numbers, somewhat similar to R package Brobdingnag (@RKSHankin07p15) but better and, as it happens much too often with this author, unpublished. We will revisit the problem in the future.
+
+### Official implementation
+
+Dexter has, since the writing of this blog, acquired a function `r_score_IM` to simulate item scores from the interaction model. This is a slightly faster implementation of algorithm A, which also works for polytomous items.
 
 ## Appendix 
 
@@ -387,7 +391,10 @@ sample_scores <-function(theta, G)
 }
 ```
 
-### MakeMLE
+
+
+### MLE
+How to find the MLE of ability under a Rasch model is explained in our blog entry about the Warm estimator. Here we use the `uniroot()`  function to find the root.
 
 ```{r ref.label='makeMLE', eval=FALSE, echo=TRUE}
 ```

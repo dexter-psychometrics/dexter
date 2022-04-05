@@ -183,6 +183,9 @@ blurb_info = function(fns, n_lines=10)
     lines = lines[nchar(trimws(lines))>0]
     start = which(grepl('^---',lines))[2] + 1
     
+    if(lines[start] == '<style>')
+      start = which(endsWith(lines,'</style>'))[1]+1
+    
     pre_amble = lines[1:(start-1)]
     
     if(startsWith(lines[start],'#')) start = start + 1

@@ -1,0 +1,304 @@
+---
+title: Simulating data from the interaction model
+author: Timo Bechger * Norman Verhelst * Ivailo Partchev
+bibliography: dexter.bib
+date: '2019-04-19'
+slug: simulating-data-from-the-interaction-model
+categories:
+  - Psychometrics
+  - R
+tags: []
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+I thought I had seen it all, dear readers. But now our first and second authors, who are in a student:professor relationship, want to have a programming contest among the two, and the problem is how to simulate data from Haberman's interaction model (@IM). Now, as a third author I cannot allow such extravagant behavior, can I. On the other hand, the problem is so interesting, and the two algorithms so fascinating, that I feel everyone should see them. So I publish them as Algorithm A and Algorithm B, along with some comments.
+
+## The interaction model
+
+While not even mentioned at the career award session dedicated to Shelby Haberman at NCME 2019, his interaction model (IM) must be one of the brightest, practically most salient ideas in psychometrics since 2000. It plays a strategic role in __dexter__, and we have posted several times about it and will continue to do so in the future. The IM can be represented in several ways, each of them highlighting different aspects of interest and applicability:
+
+* as a generalization of the Rasch model that relaxes conditional independence while retaining sufficient statistics and the immediate connection to the observable
+* as an exponential family model that reproduces all aspects of the data relevant to classical test theory: i.e., the score distribution, the item difficulties, and the item-total correlations
+* as a Rasch model where item difficulty depends both on the item and on the total score.
+
+In other posts, we have already commented on the usefulness of these properties in various practical situations. When devising a strategy to simulate from the model, the third aspect seems the most promising.
+
+
+
+
+
+
+
+
+
+
+
+
+The interaction model can be expressed as a generalization of the Rasch model where item difficulty is a linear function of the test-score:
+\begin{align*}
+P(\mathbf{X}=\mathbf{x}|\theta) 
+&\propto \exp(\theta r - \sum_i \delta_{ri} x_i)
+\end{align*}
+where $\delta_{ri}=\delta_i-r\sigma_i$ for any possible sum score $r$. 
+
+As an illustration, let us simulate data from an interaction model and use these to estimate a Rasch model separately for persons with the same test score (provided there are enough of them): 
+
+<img src="data:image/png;base64,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" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" style="display: block; margin: auto;" /><p class="caption">plot of chunk unnamed-chunk-1</p>
+
+The dots are the estimated Rasch item parameters for each score-group, the green line represents the model from which we simulated, and the gray curve is obtained when we fit an interaction model to the simulated data. Two things are worth noting. First, we need very large samples to make such plots. Second, when we do have large samples, we often observe a linear relationship between item difficulty and test score. For some reason, the interaction model seems to describe educational data quite well.   
+
+Anyway. We have simulated data from the interaction model but the original question was how to do exactly that. Simulating from the Rasch model is fairly trivial. Given a vector of item difficulties, delta, and a sample from the ability distribution, theta, the R function is a one-liner:
+
+
+```r
+simRasch = function(theta, delta)
+{
+  as.integer(rlogis(length(delta), 0, 1) <= (theta-delta))
+}
+```
+
+To simulate responses from the interaction model, we can apply this at each distinct test score $r$ with score-specific item difficulties $\delta_{ri}=\delta_i-r\sigma_i$ rather than simply $\delta_i$. But this is not all, as the responses conditional on a given test-score are not independent. The two algorithms presented here differ in how they tackle this dependency: one samples item parameters directly while the other one relies on a simple rejection algorithm. 
+
+## Algorithm A: rejection sampling
+
+As mentioned above, the interaction model preserves the item difficulties, the item-total correlations, and the score distribution, so we enter the simulation with three inputs: `delta`, `sigma`, and `scoretab`. We sample from the discrete score distribution, `scoretab`, and, since the interaction model maps sum scores to ability estimates, we attach those from a look-up table easily produced with __dexter__. (For those who prefer to sample from the ability distribution, we will show in the Appendix how to derive the score distribution from that.) 
+
+We then go over all simulated 'examinees' and we simulate responses from the Rasch model, with `theta` and item difficulties both matching the person's score, until the simulated sum score equals the true one. For zero and perfect scores, we simply take vectors of 0 or 1. In R:  
+
+
+```r
+sim_IM = function(delta, sigma, scoretab)
+{
+  nI = length(delta)
+  nP = sum(scoretab)
+  y = rep(0, nI)
+  x = matrix(0, nP, nI)
+  # nP samples from the score distribution:
+  s = sample(0:nI, nP, replace=TRUE, prob=scoretab)
+  # attach the MLE estimates of theta:
+  abl = IM_mle(delta,sigma)
+
+  for (p in 1:nP)
+  {
+    # compute item difficulties at score s[p]:
+    delta_s = delta - s[p]*sigma
+    repeat{
+        y = simRasch(theta=abl[s[p]+1], delta=delta_s)
+        if (sum(y)==s[p]) break
+    }
+    x[p,] = y
+  }
+  return(x)
+}
+```
+
+The ability that matches a person's score is the maximum likelihood estimate (MLE); i.e., the ability for which the expected score is equal to the observed one. In fact, any theta would do, eventually, but then we would have to wait much longer until the sum of the simulated response pattern matches the target sum score. For the aficionados, our __makeMLE__ function is provided in the Appendix.
+
+## Algorithm B: sampling without replacement
+
+The dependence between responses conditional on the sum score can be approached by simulating them sequentially and adjusting the probability after each draw, much as we would take samples from an urn without replacement. An algorithm can be constructed based on the observation that at any sum score $r$, the probability that item $i$ is answered correctly can be computed as $$P(X_i=1|r) = \frac{b_{ri}\gamma_{r-1}(\mathbf{b}_{r}[-i])}{\gamma_{r}(\mathbf{b}_{r})}$$ where $b_{ri} = \exp(-\delta_{ri}) = \exp[-(\delta_i-\sigma_ir )]$, $\mathbf{b}_{r}[-i]$ is the vector of item parameters without the $i$th entry, and $\gamma_{s}(\mathbf{b})$ the *elementary symmetric function* of $\mathbf{b}$ of order $s$. Note the use of an R-like notation to express dropping the $i$-th element.
+
+This may be a bit subtle, so we illustrate what happens with a small example. Suppose that we have a test of three items. If the test score is 0 or 3, there is nothing to do because there is only one possible response pattern in each case. Suppose $x_+=2$, and let us start by simulating the response to the third item. This is a Bernoulli experiment with the probability of success given by 
+$$
+P(X_3=1|X_+ = 2, \boldsymbol{\delta}_2) = \frac{b_{23}(b_{21}+b_{22})}{b_{21}b_{22}+b_{21}b_{23}+b_{22}b_{23}}
+$$
+with the ESF written out. If the experiment fails, then we are done because, with $x_+=2$, the responses to the first two items must be correct. If it succeeds, we are left with a test of two items and a sum score of 1. To simulate the response to item 2, we perform another Bernoulli experiment with a probability of success 
+$$
+P(X_2=1|X_+ = 1, \boldsymbol{\delta}_2) = \frac{b_{22}b_{21}}{b_{21}+b_{22}}.
+$$
+Regardless of the outcome, the answer to the first item is now also determined because the sum score must be 2. The case of $x_+=1$ is handled in a similar fashion, and don't forget to replace $\boldsymbol{\delta}_2$ with $\boldsymbol{\delta}_1$ because we are simulating from the interaction model, remember?
+
+The computational burden with Algorithm B is in the calculation of the elementary symmetric functions. What is minimally required is a $n+1$ by $n$ matrix $\mathbf{G}_{x_+}$ whose columns contain the elementary functions for $\mathbf{b}_{x_+}[1], \mathbf{b}_{x_+}[1:2], \dots, \mathbf{b}_{x_+}[1:n]$. Since we need $\mathbf{G}_{x_+}$ for all possible test-scores $x_+$, we make a three way array $\mathbf{G}$: test-scores by number of test-scores by number of items. The entries of $\mathbf{G}$ are:
+$$
+g_{rsi} =
+\left\{
+\begin{array}{cl}
+\gamma_{s}(\mathbf{b}_{r}[1:i]) & \text{if $s\leq i$}\\
+0 & \text{if $s>i$}
+\end{array}
+\right.
+$$
+
+where the first two indices $r$ and $s$ run from zero to $n$, and the third index $i$ runs from $1$ to $n$. The elementary symmetric functions are calculated using the sum-algorithm. Here is the necessary code in R:
+
+
+```r
+elsymRM <-function(b)
+{
+  n=length(b)
+  g=matrix(0,n+1)
+  g[1]=1; g[2]=b[1]
+  
+  if (n>1)
+  {
+    for (j in 2:n)
+    {
+      for (s in (j+1):2) g[s]=g[s]+g[s-1]*b[j]
+    }
+  }
+  return(g)
+}
+ 
+makeG <-function(b_s)
+{
+  nI=ncol(b_s)   
+  G = array(0,c(nI+1,nI+1,nI)) 
+  for (s in 0:nI)
+  {
+    for (i in nI:1)
+    {
+      G[s+1,1:(i+1),i] = elsymRM(b_s[s+1,1:i])
+    }
+  }
+  return(G)
+}
+```
+
+It is now straightforward to implement the simulation algorithm itself:
+
+
+```r
+sim_IMB <-function(delta, sigma, scoretab)
+{
+  nI = length(delta)
+  nP = sum(scoretab)
+  x = matrix(0, nP, nI)
+  r = sample(0:nI, nP, replace=TRUE, prob=scoretab)
+  b_r = matrix(0, nI+1, nI)
+  for (s in 0:nI) b_r[s+1,] = exp(-(delta - s*sigma))
+  # so far, as in Algorithm A, but now compute the 
+  # matrix of elementary symmetric functions rather
+  # than the MLE of ability at each sum score
+  G = makeG(b_r)
+  for (p in 1:nP)
+  {
+    s = r[p]
+    for (i in nI:1)
+    {
+      if (s == 0) break
+      if (s == i)
+      {
+        x[p, 1:i] = 1
+        break
+      }
+      pi_s = (b_r[r[p]+1, i] * G[r[p]+1, s, i-1])/G[r[p]+1, s+1, i]
+      if (runif(1) <= pi_s)
+      {
+        x[p, i] = 1
+        s = s - 1
+      }
+    }
+  }
+  return(x)
+}
+```
+
+Note that both $\mathbf{b}$ and $\mathbf{G}$ are pre-calculated outside of the loop over persons. Note further that we break as soon as we know all remaining responses. 
+
+## Comparing the two algorithms
+
+### Speed
+
+Both algorithms are fast enough for practical purposes even though they are in plain R, not your fastest language. Additional speed can be gained by rewriting the critical parts in FORTRAN or C. Algorithm A turns out to be faster, which is worth mentioning because the idea of rejection sampling is inherently associated with some waste. 
+
+<img src="data:image/png;base64,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" title="plot of chunk unnamed-chunk-5" alt="plot of chunk unnamed-chunk-5" style="display: block; margin: auto;" /><p class="caption">plot of chunk unnamed-chunk-5</p>
+
+### Stability
+
+Note that the plots do not show times for more than a hundred items. Algorithm B depends on computing the [elementary symmetric functions](https://en.wikipedia.org/wiki/Elementary_symmetric_polynomial), the gentlest monster you have ever encountered, but still a monster in your backyard. We have used the sum-algorithm, which is perfectly reliable for tests of reasonable length, say up to 100 items. In the interaction model the item difficulties can become large quite rapidly such that, for longer tests, it may be compromised by numeric overflow. For example, with $150$ items and $x_+$ equal to $145$:
+
+
+```r
+delta = runif(150,-0.5,1.5)
+sigma = runif(150,-0.5,0.5)
+s = 145
+b_r = exp(-(delta-s*sigma))
+esf = elsymRM(b_r)
+max(esf)
+```
+
+```
+## [1] Inf
+```
+
+The ESF are indispensable when dealing with test data and psychometric models, they are ubiquitous in __dexter__, but programming them for production purposes requires extra care. Our second author has developed a special FORTRAN library for dealing with very large numbers, somewhat similar to R package Brobdingnag (@RKSHankin07p15) but better and, as it happens much too often with this author, unpublished. We will revisit the problem in the future.
+
+### Official implementation
+
+Dexter has, since the writing of this blog, acquired a function `r_score_IM` to simulate item scores from the interaction model. This is a slightly faster implementation of algorithm A, which also works for polytomous items.
+
+## Appendix 
+
+### Simulate score distribution from a continuous distribution of ability
+
+In both algorithms, we sampled "persons" from a discrete distribution of sum scores. This may seem unusual and, more importantly: where do we get that? Readers may be more accustomed to sampling ability values from a continuous distribution, with the normal distribution as a particularly popular choice. Although there is no compelling reason to believe that abilities must be normally distributed, it is not implausible, and everyone knows the `rnorm` function in R (@R). 
+
+To get samples from a discrete distribution of sum scores starting with samples from a continuous distribution and a set of item parameters, we may consider that, since 
+$$
+P(x_+) = \int P(x_+|\theta) f(\theta) d\theta
+$$
+we can sample $\theta$ from $f(\theta)$ and subsequently sample $x_+$ from $P(x_+|\theta)$. 
+
+What is $P(x_+|\theta)$? We find it if we write
+$$
+P(\mathbf{x}|\theta) = \frac{e^{x_+\theta}\prod_i b^{x_i}_{x_+i}}{\sum_s e^{s\theta} \gamma_s(\mathbf{b}_s)}
+=\frac{\prod_i b^{x_i}_{x_+i}}{\gamma_{x_+}(\mathbf{b}_{x_+})} \frac{e^{x_+\theta}\gamma_{x_+}(\mathbf{b}_{x_+})}{\sum_s e^{s\theta} \gamma_s(\mathbf{b}_s)} = P(\mathbf{x}|x_+)P(x_+|\theta)
+$$
+Thus, 
+$$
+P(x_+|\theta) \propto e^{x_+\theta}\gamma_{x_+}(\mathbf{b}_{x_+})
+$$
+Conveniently, we have already computed the elementary symmetric functions and saved them in the matrix, $\mathbf{G}$, so:
+
+
+```r
+sample_scores <-function(theta, G)
+{
+  nI = dim(G)[3]
+  nP = length(theta)
+  scores = rep(0, nP)
+  for (p in 1:nP)
+  {
+    prop = rep(0, nI+1)
+    for (s in 0:nI)
+    {
+      prop[s+1] = exp(theta[p]*s) * G[s+1, s+1, nI]
+    }
+    scores[p] = sample(0:nI, 1, prob=prop)
+  }
+  return(scores)
+}
+```
+
+
+
+### MLE
+How to find the MLE of ability under a Rasch model is explained in our blog entry about the Warm estimator. Here we use the `uniroot()`  function to find the root.
+
+
+```r
+# MLE ability estimate for dichotomous interaction model
+IM_mle = function(delta, sigma)
+{
+  scores = 1:(length(delta)-1)
+  
+  Es_x = function(s)
+  {
+    delta = delta - s*sigma
+    function(theta) 
+    {
+      Pi = 1/(exp(delta - theta)+1)
+      sum(Pi) - s
+    }
+  }
+
+  c(-Inf,
+    sapply(scores, function(s) uniroot(Es_x(s), interval = c(-10,20),extendInt='yes')$root),
+    Inf)
+}
+```
+
+## References
