@@ -19,7 +19,7 @@ library(tidyr)
 library(dplyr)
 ```
 
-I thought I had seen it all, dear readers. But now our first and second authors, who are in a student:professor relationship, want to have a programming contest among the two, and the problem is how to simulate data from Haberman's interaction model (@IM). Now, as a third author I cannot allow such extravagant behavior, can I. On the other hand, the problem is so interesting, and the two algorithms so fascinating, that I feel everyone should see them. So I publish them as Algorithm A and Algorithm B, along with some comments.
+In a recent post, Jesse has given a somewhat involved example of simulating Rasch / PCM data with __dexter__.  In spite of the rather complex design involving planned missingness and adaptivity, the models at the heart of it are well-known. In this post, we show how to simulate from Haberman's interaction model (@IM), which is very interesting, quite useful in practice, and to our knowledge only available in __dexter__. And, as an Easter promotion, we give you two methods for the price of one: one based on rejection sampling (__dexter__'s 'official' version), and one based on sampling without rejection. But we start with a short discussion of this fascinating IRT model.
 
 ## The interaction model
 
