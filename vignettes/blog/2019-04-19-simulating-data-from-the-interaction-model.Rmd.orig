@@ -347,7 +347,7 @@ The ESF are indispensable when dealing with test data and psychometric models, t
 
 ### Official implementation
 
-Dexter has, since the writing of this blog, acquired a function `r_score_IM` to simulate item scores from the interaction model. This is a slightly faster implementation of algorithm A, which also works for polytomous items.
+Dexter has, since the writing of this blog, acquired a function `r_score_IM()` to simulate item scores from the interaction model. This is a slightly faster implementation of algorithm A, which also works for polytomous items.
 
 ## Appendix 
 

@@ -49,7 +49,8 @@ pre_compile = function(blog_file_name)
       {
         cap = str_extract(i, '(?<=title=")[^"]+')
         j = gsub('src="[^"]+"',sprintf('src="data:image/png;base64,%s"', fig[[basename(fn)]]),i)
-        if(!is.na(cap) && cap!= pcap)
+        # figure captions are lost in the conversion
+        if(!is.na(cap) && cap!= pcap && !startsWith(cap,'plot of chunk'))
         {
           j = sprintf('%s<p class="caption">%s</p>',j,cap)
           pcap=cap
