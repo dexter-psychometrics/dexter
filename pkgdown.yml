@@ -23,6 +23,7 @@ articles:
   2018-11-05-test-and-item-information-functions-in-dexter: blog/2018-11-05-test-and-item-information-functions-in-dexter.html
   2019-01-01-happy-2019: blog/2019-01-01-happy-2019.html
   2019-01-03-dexter-0-8-4-is-out: blog/2019-01-03-dexter-0-8-4-is-out.html
+  2019-04-19-simulating-data-from-the-interaction-model: blog/2019-04-19-simulating-data-from-the-interaction-model.html
   2019-04-26-dexter-0-8-5-on-cran: blog/2019-04-26-dexter-0-8-5-on-cran.html
   2019-05-11-visualising-differential-item-pair-functioning-the-lazy-cook-way: blog/2019-05-11-visualising-differential-item-pair-functioning-the-lazy-cook-way.html
   2019-05-12-aspects-of-the-aspects-ratio: blog/2019-05-12-aspects-of-the-aspects-ratio.html
@@ -50,5 +51,5 @@ articles:
   index: blog/index.html
   dexter: dexter.html
   profile-plots: profile-plots.html
-last_built: 2022-04-01T12:42Z
+last_built: 2022-04-05T06:32Z
 
