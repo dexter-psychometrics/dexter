@@ -553,9 +553,9 @@ add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_a
     design = design[,c('booklet_id','item_id','item_position')]
     
     if(nrow(design) > n_distinct(design$booklet_id, design$item_id))
-      stop_('booklet_id, item_id combination in design is not unique')
+      stop_('booklet_id, item_id combination in `design` is not unique')
     if(nrow(design) > n_distinct(design$booklet_id, design$item_position))
-      stop_('booklet_id, item_position combination in design is not unique')
+      stop_('booklet_id, item_position combination in `design` is not unique')
     
     
     if(any(design$booklet_id %in% db_booklets))
@@ -582,6 +582,11 @@ add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_a
       }
     }
   }
+  if(n_distinct(data$person_id,data$booklet_id,data$item_id) < nrow(data))
+    stop_("The combination of the columns person_id, booklet_id, item_id in `data` is not unique")
+  
+  
+  msg = NULL
   
   dbTransaction(db,{ 
     # update design
@@ -614,7 +619,7 @@ add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_a
     if(NA_cnt > 0)
     {
       data$response[is.na(data$response)] = missing_value
-      message(sprintf('%i missing responses replaced by "%s"', NA_cnt, missing_value))
+      msg = c(msg,sprintf('%i missing responses replaced by "%s"', NA_cnt, missing_value))
     }
     
     # check rules
@@ -636,7 +641,7 @@ add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_a
       if(auto_add_unknown_rules)
       {
         dbExecute_param(db,"INSERT INTO dxscoring_rules(item_id, response, item_score) VALUES(:item_id, :response, 0);",new_rules)
-        message(sprintf('%i scoring rules with 0 score added to the rules', nrow(new_rules)))
+        msg = c(msg,sprintf('%i scoring rules with 0 score added to the rules', nrow(new_rules)))
       } else
       {
         message('Unknown responses (first 10):')
@@ -672,7 +677,8 @@ add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_a
                         'INSERT INTO dxresponses (person_id, booklet_id, item_id, response) VALUES(:person_id, :booklet_id, :item_id, :response);', 
                         data)
   })
-  cat(paste(n,'responses imported.\n'))
+  msg = c(msg,paste(n,'responses imported.\n'))
+  cat(paste(msg,collapse='\n'))
 }
 
 # add_response_data_old = function(db, data, auto_add_unknown_rules = FALSE, missing_value = 'NA')
