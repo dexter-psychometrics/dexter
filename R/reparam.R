@@ -162,7 +162,8 @@ transform.df.parms = function(parms.df, out.format = c('b','beta','eta'), includ
     mutate(rn = row_number()) %>%
     group_by(.data$item_id) %>% 
     summarize(first = as.integer(min(.data$rn)), last = as.integer(max(.data$rn))) %>%
-    ungroup()
+    ungroup() %>%
+    arrange(.data$item_id)
   
   args = list(first = fl$first, last = fl$last, parms.df = parms.df, 
               out.zero = include.zero, in.zero = in.zero)
