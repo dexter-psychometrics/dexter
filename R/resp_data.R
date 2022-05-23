@@ -143,20 +143,16 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
       stop("no data to analyse")
     x$person_id = ffactor(x$person_id, as_int = !retain_person_id)
     
-    if(is.null(qtpredicate))
-    {
-      design = dbReadTable(dataSrc, 'dxbooklet_design')
-      design$booklet_id = ffactor(design$booklet_id)
-      x$booklet_id = ffactor(x$booklet_id, levels = levels(design$booklet_id))
-    } else
-    {
-      x$booklet_id = ffactor(x$booklet_id)
-      design = dbGetQuery(dataSrc, paste("SELECT booklet_id, item_id, item_position FROM dxBooklet_design",
-                                         "WHERE booklet_id IN(",
-                                         paste(sql_quote(levels(x$booklet_id),"'"),collapse=','),");"))
-      
-      design$booklet_id = ffactor(design$booklet_id, levels=levels(x$booklet_id))
-    }
+    x$booklet_id = droplevels(ffactor(x$booklet_id,
+                                      levels = dbGetQuery(dataSrc, 
+                                                          "SELECT booklet_id FROM dxbooklets;")[,1]))
+    
+    design = dbGetQuery(dataSrc, paste("SELECT booklet_id, item_id, item_position FROM dxBooklet_design",
+                                       "WHERE booklet_id IN(",
+                                       paste(sql_quote(levels(x$booklet_id),"'"),collapse=','),");"))
+    
+    design$booklet_id = ffactor(design$booklet_id, levels=levels(x$booklet_id))
+
     
     design$item_id = ffactor(design$item_id)
     
@@ -251,19 +247,13 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
                           as_int=!retain_person_id)
     
     design = dbGetQuery(dataSrc, "SELECT booklet_id, item_id, item_position FROM dxbooklet_design;")
-    
-    if(is.null(qtpredicate))
-    {
-      # assume there are no empty booklets, if there are, sufstats, etc. might be a little less efficient
-      design$booklet_id = ffactor(design$booklet_id)
-      x$booklet_id = ffactor(x$booklet_id, levels(design$booklet_id))
-    } else
-    {
-      x$booklet_id = ffactor(x$booklet_id)
-      design$booklet_id = ffactor(design$booklet_id, levels(x$booklet_id))
-      design = filter(design, !is.na(.data$booklet_id))
-    }
-    
+
+    x$booklet_id = droplevels(ffactor(x$booklet_id,
+                                      levels = dbGetQuery(dataSrc, 
+                                                          "SELECT booklet_id FROM dxbooklets;")[,1]))
+    design$booklet_id = ffactor(design$booklet_id, levels(x$booklet_id))
+    design = filter(design, !is.na(.data$booklet_id))
+
     design$item_id = ffactor(design$item_id)
     x$item_id = ffactor(x$item_id, levels(design$item_id))
     

@@ -1,4 +1,3 @@
-
 utils::globalVariables(".")
 
 
@@ -508,6 +507,9 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
 }
 
 # to do: this update, if accepted, needs an update in dextergui, possibly cowtools
+# what about design for which there is no data?
+# 1. import or not?
+# 2. doe empty booklets mean problems in get_resp_data?
 
 #' @rdname add_booklet 
 add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_add_unknown_rules = FALSE)
@@ -556,6 +558,14 @@ add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_a
       stop_('booklet_id, item_id combination in `design` is not unique')
     if(nrow(design) > n_distinct(design$booklet_id, design$item_position))
       stop_('booklet_id, item_position combination in `design` is not unique')
+    
+    unknown_items = setdiff(design$item_id,dbGetQuery(db,'SELECT item_id FROM dxitems;')[,1])
+    if(length(unknown_items)>0)
+    {
+      message('Unknown items:')
+      print(unknown_items)
+      stop_('`design` contains unknown items. You have to specify any new items and scoring rules using the function touch_rules.')
+    }
     
     
     if(any(design$booklet_id %in% db_booklets))
