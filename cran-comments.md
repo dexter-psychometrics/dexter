@@ -1,5 +1,5 @@
 
-just a regular update; small improvements and bugfixes, extra unit tests, etc.
+update includes a fix to comply to next dplyr version
 
 kind regards,
 Jesse

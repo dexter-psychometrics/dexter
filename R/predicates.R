@@ -11,12 +11,19 @@ qtpredicate_to_sql = function(qtpredicate, db, env)
                     dbListFields(db,'dxresponses'), dbListFields(db,'dxscoring_rules'), 
                     dbListFields(db,'dxadministrations')))
   
-  variant = switch(class(db), SQLiteConnection = 'sqlite', PostgreSQLConnection = 'postgresql', 
-                   PqConnection = 'postgresql','ansi')
+  variant = 'ansi'
+  if(inherits(db,'SQLiteConnection'))
+  {
+    variant = 'sqlite'
+  } else if(inherits(db,'PostgreSQLConnection') || inherits(db,'PqConnection')) 
+  {
+    variant = 'postgresql'
+  }
+    
   
   out = list(success=TRUE)
   
-  if(is.sql(qtpredicate))
+  if(inherits(qtpredicate,'sql'))
   {
     out$all_vars = sql_vars(qtpredicate)
     
@@ -91,13 +98,11 @@ is_bkl_safe = function(dataSrc, qtpredicate, env)
 sql = function(txt, vars = character())
 {
   stopifnot(is.character(txt) && length(txt) == 1)
-  if(!is.sql(txt))
+  if(!inherits(txt,'sql'))
     class(txt) = append(class(txt),'sql')
   attr(txt,'vars') = vars
   txt
 }
-
-is.sql = function(obj) ('sql' %in% class(obj)) 
 
 # if dbvars is null then only works if vars are sql-quoted
 sql_vars = function(sql,dbvars=NULL)
@@ -537,12 +542,12 @@ translate_sql = function(e, variant) # variant = c('ansi','sqlite','postgresql')
   if(type == 'list')
     stop('lists cannot be translated')
   
-  if(class(e) == 'matrix')
+  if(inherits(e,'matrix'))
   {
     e = drop(e)
     stopifnot(is.null(dim(e)))
   }
-  if(class(e) == 'array')
+  else if(inherits(e, 'array'))
   {
     stopifnot(length(dim(e))==1)
     e = as.vector(e)
