@@ -293,12 +293,11 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
     
     qnt = abs(qnorm((1-ci)/2))
     
-    cmin = function(p, n) pmax(0, p - qnt * sqrt(p*(1-p)/n))
-    cmax = function(p, n) pmin(1, p + qnt * sqrt(p*(1-p)/n))
-    
+    I=information(x, items = item_id)
     plt = plt %>%
-      mutate(conf_min = max_score * cmin(.data$expected_score/max_score, .data$n),
-             conf_max = max_score * cmax(.data$expected_score/max_score, .data$n)) %>%
+      mutate(se = sqrt(I(.data$gr_theta)/.data$n),
+             conf_min = pmax(.data$expected_score - qnt*.data$se,0),
+             conf_max = pmin(.data$expected_score + qnt*.data$se,max_score)) %>%
       mutate(outlier = .data$avg_score < .data$conf_min | .data$avg_score > .data$conf_max)
     
     suppressWarnings({

@@ -1,4 +1,8 @@
-# dexter 1.2.0
+# dexter 1.2.2
+
+* bugfix: the confidence intervals in the fit plots for the enorm were drawn to wide for polytomous items in dexter <= 1.2.1. They are now correct.
+
+# dexter 1.2.1
 
 ## breaking change
 
