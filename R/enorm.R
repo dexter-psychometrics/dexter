@@ -663,10 +663,13 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
     # analyses functions with item_properties, ip's can be made more flexible for df as well
     stop("a matrix datasrc is not yet implemented for this function")
   }
+  # to do: this is a bit tricky, we will often need to merge over persons, e.g. if booklets are administered
+  # per subject. But if the same person makes multiple tests for the same subject, this is not good.
+  # Still have to decide on a solution
+  
   respData = get_resp_data(dataSrc, qtpredicate, env=env, extra_columns=item_property,
                            merge_within_persons=TRUE)
-  #to do: jk, why merge within persons here? it's not the default. can't remember my thinking here
-  
+
   respData$x[[item_property]] = ffactor(as.character(respData$x[[item_property]]))
   lvl = levels(respData$x[[item_property]])
   nd = length(lvl)
@@ -683,7 +686,17 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   
   np = max(respData$x$person_id)
   respData = lapply(split(respData$x, respData$x[[item_property]]), get_resp_data)
-  models = lapply(respData, fit_enorm)
+  models = lapply(respData, function(x){try(fit_enorm(x), silent=TRUE)})
+  names(models)=names(respData)
+  if(any(sapply(models,inherits,what='try-error')))
+  {
+    message('\nThe model could not be estimated for one or more item properties, reasons:')
+    models[!sapply(models,inherits,what='try-error')] = 'OK'
+    print(data.frame(item_property=names(models), 
+                      result=gsub('^.+try\\(\\{ *:','',trimws(as.character(models)))))
+    stop('Some models could not be estimated')
+  }
+  
   abl = mapply(ability, respData, models, SIMPLIFY=FALSE,
                MoreArgs = list(method="EAP", prior="Jeffreys",standard_errors=FALSE))
   
