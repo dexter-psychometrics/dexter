@@ -87,16 +87,16 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">distractor_plot</span><span class="op">(</span>
-  <span class="va">dataSrc</span>,
-  <span class="va">item_id</span>,
-  predicate <span class="op">=</span> <span class="cn">NULL</span>,
-  legend <span class="op">=</span> <span class="cn">TRUE</span>,
-  curtains <span class="op">=</span> <span class="fl">10</span>,
-  adjust <span class="op">=</span> <span class="fl">1</span>,
-  col <span class="op">=</span> <span class="cn">NULL</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">distractor_plot</span><span class="op">(</span></span>
+<span>  <span class="va">dataSrc</span>,</span>
+<span>  <span class="va">item_id</span>,</span>
+<span>  predicate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  legend <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  curtains <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  adjust <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  col <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -104,28 +104,45 @@
     <dl><dt>dataSrc</dt>
 <dd><p>a connection to a dexter database or a data.frame with columns: person_id, item_id, response, item_score
 and optionally booklet_id</p></dd>
+
+
 <dt>item_id</dt>
 <dd><p>The ID of the item to plot. A separate plot will be produced
 for each booklet that contains the item, or an error message if the item_id
 is not known. Each plot contains a non-parametric regression of each possible
 response on the total score.</p></dd>
+
+
 <dt>predicate</dt>
 <dd><p>An optional expression to subset data, if NULL all data is used</p></dd>
+
+
 <dt>legend</dt>
 <dd><p>logical, whether to include the legend. default is TRUE</p></dd>
+
+
 <dt>curtains</dt>
 <dd><p>100*the tail probability of the sum scores to be shaded. Default is 10.
 Set to 0 to have no curtains shown at all.</p></dd>
+
+
 <dt>adjust</dt>
 <dd><p>factor to adjust the smoothing bandwidth respective to the default value</p></dd>
+
+
 <dt>col</dt>
 <dd><p>vector of colors to use for plotting</p></dd>
+
+
 <dt>...</dt>
 <dd><p>further arguments to plot.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Silently, a data.frame of response categories and colors used. Potentially useful if you want to customize the legend or 
+    
+
+<p>Silently, a data.frame of response categories and colors used. Potentially useful if you want to customize the legend or 
 print it separately</p>
     </div>
     <div id="details">
@@ -149,7 +166,7 @@ with a sprintf style format string, e.g.
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

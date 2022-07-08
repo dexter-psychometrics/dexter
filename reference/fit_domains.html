@@ -87,22 +87,29 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">fit_domains</span><span class="op">(</span><span class="va">dataSrc</span>, <span class="va">item_property</span>, predicate <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">fit_domains</span><span class="op">(</span><span class="va">dataSrc</span>, <span class="va">item_property</span>, predicate <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>dataSrc</dt>
 <dd><p>a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score</p></dd>
+
+
 <dt>item_property</dt>
 <dd><p>The item property defining the
 domains (subtests)</p></dd>
+
+
 <dt>predicate</dt>
 <dd><p>An optional expression to subset data, if NULL all data is used</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class <code>imp</code> holding results
+    
+
+<p>An object of class <code>imp</code> holding results
 for the Rasch model and the interaction model.</p>
     </div>
     <div id="details">
@@ -118,9 +125,9 @@ super-items and analyses these as normal items.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="st">":memory:"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="add_booklet.html">add_booklet</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrData</span>, <span class="st">"agg"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="st">":memory:"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="add_booklet.html">add_booklet</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrData</span>, <span class="st">"agg"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> no column `person_id` provided, automatically generating unique person id's</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $items</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "S1DoCurse"   "S1DoScold"   "S1DoShout"   "S1WantCurse" "S1WantScold"</span>
@@ -135,18 +142,18 @@ super-items and analyses these as normal items.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $columns_ignored</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "gender" "anger" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span class="fu"><a href="add_item_properties.html">add_item_properties</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrProperties</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="add_item_properties.html">add_item_properties</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrProperties</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4 item properties for 24 items added or updated</span>
-<span class="r-in"><span class="va">mSit</span> <span class="op">=</span> <span class="fu">fit_domains</span><span class="op">(</span><span class="va">db</span>, item_property<span class="op">=</span> <span class="st">"situation"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mSit</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">mSit</span> <span class="op">=</span> <span class="fu">fit_domains</span><span class="op">(</span><span class="va">db</span>, item_property<span class="op">=</span> <span class="st">"situation"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mSit</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="fit_domains-1.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="fit_domains-2.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="fit_domains-3.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="fit_domains-4.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="close_project.html">close_project</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="close_project.html">close_project</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -161,7 +168,7 @@ super-items and analyses these as normal items.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

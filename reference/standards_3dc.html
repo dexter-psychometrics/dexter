@@ -87,35 +87,48 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">standards_3dc</span><span class="op">(</span><span class="va">parms</span>, <span class="va">design</span><span class="op">)</span>
-
-<span class="co"># S3 method for sts_par</span>
-<span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="co"># S3 method for sts_par</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, booklet_id <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">standards_3dc</span><span class="op">(</span><span class="va">parms</span>, <span class="va">design</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for sts_par</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for sts_par</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, booklet_id <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>parms</dt>
 <dd><p>parameters object returned from fit_enorm</p></dd>
+
+
 <dt>design</dt>
 <dd><p>a data.frame with columns `cluster_id`, `item_id` and optionally `booklet_id`</p></dd>
+
+
 <dt>object</dt>
 <dd><p>an object containing parameters for the 3DC standard setting procedure</p></dd>
+
+
 <dt>...</dt>
 <dd><p>ignored
 Optionally you can include a column `booklet_id` to specify multiple test forms for standard setting and/or
 columns `cluster_nbr` and `item_nbr` to specify ordering of clusters and items in the forms and application.</p></dd>
+
+
 <dt>x</dt>
 <dd><p>an object containing parameters for the 3DC standard setting procedure</p></dd>
+
+
 <dt>booklet_id</dt>
 <dd><p>which test form to plot</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>an object of type `sts_par`</p>
+    
+
+<p>an object of type `sts_par`</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -144,8 +157,8 @@ Methodology of Educational Measurement and Assessment. Springer, Cham</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Attaching package: ‘dplyr’</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> The following objects are masked from ‘package:stats’:</span>
@@ -154,9 +167,9 @@ Methodology of Educational Measurement and Assessment. Springer, Cham</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> The following objects are masked from ‘package:base’:</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>     intersect, setdiff, setequal, union</span>
-<span class="r-in"><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="st">":memory:"</span><span class="op">)</span></span>
-<span class="r-in">            </span>
-<span class="r-in"><span class="fu"><a href="add_booklet.html">add_booklet</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrData</span>, <span class="st">"agg"</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="st">":memory:"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>            </span></span>
+<span class="r-in"><span><span class="fu"><a href="add_booklet.html">add_booklet</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrData</span>, <span class="st">"agg"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> no column `person_id` provided, automatically generating unique person id's</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $items</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "S1DoCurse"   "S1DoScold"   "S1DoShout"   "S1WantCurse" "S1WantScold"</span>
@@ -171,21 +184,21 @@ Methodology of Educational Measurement and Assessment. Springer, Cham</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $columns_ignored</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "gender" "anger" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span class="fu"><a href="add_item_properties.html">add_item_properties</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrProperties</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="add_item_properties.html">add_item_properties</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrProperties</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4 item properties for 24 items added or updated</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">design</span> <span class="op">=</span> <span class="fu"><a href="get_items.html">get_items</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span class="r-in">  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>cluster_id<span class="op">=</span><span class="st">'behavior'</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">f</span> <span class="op">=</span> <span class="fu"><a href="fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">sts_par</span> <span class="op">=</span> <span class="fu">standards_3dc</span><span class="op">(</span><span class="va">f</span>, <span class="va">design</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sts_par</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">design</span> <span class="op">=</span> <span class="fu"><a href="get_items.html">get_items</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>cluster_id<span class="op">=</span><span class="st">'behavior'</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">f</span> <span class="op">=</span> <span class="fu"><a href="fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">sts_par</span> <span class="op">=</span> <span class="fu">standards_3dc</span><span class="op">(</span><span class="va">f</span>, <span class="va">design</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">sts_par</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="standards_3dc-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># db_sts = standards_db(sts_par,'test.db',c('mildly aggressive','dangerously aggressive'))</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># db_sts = standards_db(sts_par,'test.db',c('mildly aggressive','dangerously aggressive'))</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -200,7 +213,7 @@ Methodology of Educational Measurement and Assessment. Springer, Cham</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

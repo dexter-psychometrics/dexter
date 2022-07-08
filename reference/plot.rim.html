@@ -87,40 +87,53 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for rim</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>
-  <span class="va">x</span>,
-  items <span class="op">=</span> <span class="cn">NULL</span>,
-  summate <span class="op">=</span> <span class="cn">TRUE</span>,
-  overlay <span class="op">=</span> <span class="cn">FALSE</span>,
-  curtains <span class="op">=</span> <span class="fl">10</span>,
-  show.observed <span class="op">=</span> <span class="cn">TRUE</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for rim</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  items <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  summate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  overlay <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  curtains <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  show.observed <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>An object produced by function <code>fit_inter</code></p></dd>
+
+
 <dt>items</dt>
 <dd><p>The items to plot (item_id's). If NULL, all items will be plotted</p></dd>
+
+
 <dt>summate</dt>
 <dd><p>If FALSE, regressions for polytomous items will be shown for each
 response option separately; default is TRUE.</p></dd>
+
+
 <dt>overlay</dt>
 <dd><p>If TRUE and more than one item is specified, there will be two plots,
 one for the Rasch model and the other for the interaction model, with all items
 overlayed; otherwise, one plot for each item with the two models overlayed. Ignored
 if summate is FALSE. Default is FALSE</p></dd>
+
+
 <dt>curtains</dt>
 <dd><p>100*the tail probability of the sum scores to be shaded. Default is 10.
 Set to 0 to have no curtains shown at all.</p></dd>
+
+
 <dt>show.observed</dt>
 <dd><p>If TRUE, the observed proportion correct at each sum score
 will be shown as dots. Default is FALSE.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Any additional plotting parameters.</p></dd>
+
 </dl></div>
     <div id="details">
     <h2>Details</h2>
@@ -141,7 +154,7 @@ by prefixing them with a dollar sign, e.g. plot(m, main='item: $item_id')</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

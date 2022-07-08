@@ -87,7 +87,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">add_item_properties</span><span class="op">(</span><span class="va">db</span>, item_properties <span class="op">=</span> <span class="cn">NULL</span>, default_values <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_item_properties</span><span class="op">(</span><span class="va">db</span>, item_properties <span class="op">=</span> <span class="cn">NULL</span>, default_values <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -95,16 +95,23 @@
     <dl><dt>db</dt>
 <dd><p>a connection to a dexter database, e.g. the output of <code>start_new_project</code>
 or <code>open_project</code></p></dd>
+
+
 <dt>item_properties</dt>
 <dd><p>A data frame containing a column item_id (matching item_id's already defined in the project)
 and 1 or more other columns with item properties (e.g. item_type, subject)</p></dd>
+
+
 <dt>default_values</dt>
 <dd><p>a list where the names are item_properties and the values are defaults.
 The defaults will be used wherever the item property is unknown.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>nothing</p>
+    
+
+<p>nothing</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -136,7 +143,7 @@ use <code><a href="touch_rules.html">touch_rules</a></code> if you want to add n
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

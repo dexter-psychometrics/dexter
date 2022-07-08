@@ -93,14 +93,14 @@ become faster in future versions of dexter.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">latent_cor</span><span class="op">(</span>
-  <span class="va">dataSrc</span>,
-  <span class="va">item_property</span>,
-  predicate <span class="op">=</span> <span class="cn">NULL</span>,
-  nDraws <span class="op">=</span> <span class="fl">500</span>,
-  hpd <span class="op">=</span> <span class="fl">0.95</span>,
-  use <span class="op">=</span> <span class="st">"complete.obs"</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">latent_cor</span><span class="op">(</span></span>
+<span>  <span class="va">dataSrc</span>,</span>
+<span>  <span class="va">item_property</span>,</span>
+<span>  predicate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  nDraws <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  hpd <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  use <span class="op">=</span> <span class="st">"complete.obs"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -108,23 +108,36 @@ become faster in future versions of dexter.</p>
     <dl><dt>dataSrc</dt>
 <dd><p>A connection to a dexter database or a data.frame with columns: person_id, item_id, item_score and 
 the item_property</p></dd>
+
+
 <dt>item_property</dt>
 <dd><p>The name of the item property used to define the domains. If <code>dataSrc</code> is a dexter db then the
 item_property must match a known item property. If datasrc is a data.frame, item_property must be equal to
  one of its column names.</p></dd>
+
+
 <dt>predicate</dt>
 <dd><p>An optional expression to subset data, if NULL all data is used</p></dd>
+
+
 <dt>nDraws</dt>
 <dd><p>Number of draws for plausible values</p></dd>
+
+
 <dt>hpd</dt>
 <dd><p>width of Bayesian highest posterior density interval around the correlations, 
 value must be between 0 and 1.</p></dd>
+
+
 <dt>use</dt>
 <dd><p>Only complete.obs at this time. Respondents who don't have a score for one or more scales are removed.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>List containing a estimated correlation matrix, the corresponding standard deviations, 
+    
+
+<p>List containing a estimated correlation matrix, the corresponding standard deviations, 
 and the lower and upper limits of the highest posterior density interval</p>
     </div>
 
@@ -140,7 +153,7 @@ and the lower and upper limits of the highest posterior density interval</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

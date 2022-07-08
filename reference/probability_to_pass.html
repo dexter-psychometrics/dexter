@@ -89,40 +89,55 @@ compute the probability to pass on the reference set conditional on each score o
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">probability_to_pass</span><span class="op">(</span>
-  <span class="va">dataSrc</span>,
-  <span class="va">parms</span>,
-  <span class="va">ref_items</span>,
-  <span class="va">pass_fail</span>,
-  predicate <span class="op">=</span> <span class="cn">NULL</span>,
-  target_booklets <span class="op">=</span> <span class="cn">NULL</span>,
-  nDraws <span class="op">=</span> <span class="fl">1000</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">probability_to_pass</span><span class="op">(</span></span>
+<span>  <span class="va">dataSrc</span>,</span>
+<span>  <span class="va">parms</span>,</span>
+<span>  <span class="va">ref_items</span>,</span>
+<span>  <span class="va">pass_fail</span>,</span>
+<span>  predicate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  target_booklets <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  nDraws <span class="op">=</span> <span class="fl">1000</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>dataSrc</dt>
 <dd><p>a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score</p></dd>
+
+
 <dt>parms</dt>
 <dd><p>parameters returned from fit_enorm. If uncertainty about parameter estimation should be included
 in the computations, use `method='Bayes'` and nDraws equal or larger than nDraws in probability_to_pass</p></dd>
+
+
 <dt>ref_items</dt>
 <dd><p>vector with id's of items in the reference set, they must all occur in dataSrc</p></dd>
+
+
 <dt>pass_fail</dt>
 <dd><p>pass-fail score on the reference set, the lowest score with which one passes</p></dd>
+
+
 <dt>predicate</dt>
 <dd><p>An optional expression to subset data in dataSrc, if NULL all data is used</p></dd>
+
+
 <dt>target_booklets</dt>
 <dd><p>The target test booklet(s). A data.frame with columns booklet_id (if multiple booklets) and item_id, 
 if NULL (default) this will be derived from the dataSrc and the probability to pass will be computed 
 for each test score for each booklet in your data.</p></dd>
+
+
 <dt>nDraws</dt>
 <dd><p>The function uses an Markov-Chain Monte-Carlo method to calculate the probability to pass and this is the number of Monte-Carlo samples used.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of type <code>p2pass</code>. Use <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> to extract the 
+    
+
+<p>An object of type <code>p2pass</code>. Use <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> to extract the 
 probablity to pass for each booklet and score. Use <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> to plot 
 the probabilities, sensitivity and specificity or a ROC-curve.</p>
     </div>
@@ -148,7 +163,7 @@ probability to pass for multiple target booklets. Further technical details can 
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

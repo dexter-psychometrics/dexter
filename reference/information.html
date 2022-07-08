@@ -89,13 +89,13 @@ for a single item, an arbitrary group of items or all items</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">information</span><span class="op">(</span><span class="va">parms</span>, items <span class="op">=</span> <span class="cn">NULL</span>, booklet_id <span class="op">=</span> <span class="cn">NULL</span>, which.draw <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
-
-<span class="fu">expected_score</span><span class="op">(</span><span class="va">parms</span>, items <span class="op">=</span> <span class="cn">NULL</span>, booklet_id <span class="op">=</span> <span class="cn">NULL</span>, which.draw <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
-
-<span class="fu">r_score</span><span class="op">(</span><span class="va">parms</span>, items <span class="op">=</span> <span class="cn">NULL</span>, booklet_id <span class="op">=</span> <span class="cn">NULL</span>, which.draw <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
-
-<span class="fu">p_score</span><span class="op">(</span><span class="va">parms</span>, items <span class="op">=</span> <span class="cn">NULL</span>, booklet_id <span class="op">=</span> <span class="cn">NULL</span>, which.draw <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">information</span><span class="op">(</span><span class="va">parms</span>, items <span class="op">=</span> <span class="cn">NULL</span>, booklet_id <span class="op">=</span> <span class="cn">NULL</span>, which.draw <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">expected_score</span><span class="op">(</span><span class="va">parms</span>, items <span class="op">=</span> <span class="cn">NULL</span>, booklet_id <span class="op">=</span> <span class="cn">NULL</span>, which.draw <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">r_score</span><span class="op">(</span><span class="va">parms</span>, items <span class="op">=</span> <span class="cn">NULL</span>, booklet_id <span class="op">=</span> <span class="cn">NULL</span>, which.draw <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">p_score</span><span class="op">(</span><span class="va">parms</span>, items <span class="op">=</span> <span class="cn">NULL</span>, booklet_id <span class="op">=</span> <span class="cn">NULL</span>, which.draw <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -103,17 +103,26 @@ for a single item, an arbitrary group of items or all items</p>
     <dl><dt>parms</dt>
 <dd><p>object produced by <code><a href="fit_enorm.html">fit_enorm</a></code> or a data.frame with columns item_id, item_score and, 
 depending on parametrization, a column named either beta/delta, eta or b</p></dd>
+
+
 <dt>items</dt>
 <dd><p>vector of one or more item_id's. If NULL and booklet_id is also NULL, all items in parms are used</p></dd>
+
+
 <dt>booklet_id</dt>
 <dd><p>id of a single booklet (e.g. the test information function), if items is not NULL this is ignored</p></dd>
+
+
 <dt>which.draw</dt>
 <dd><p>the number of the random draw (only applicable if calibration method was Bayes). If NULL, the mean 
 beta parameter will be used</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Each function returns a new function which accepts a vector of theta's. These return the following values:</p><dl><dt>information</dt>
+    
+
+<p>Each function returns a new function which accepts a vector of theta's. These return the following values:</p><dl><dt>information</dt>
 <dd><p>an equal length vector with the information estimate at each value of theta.</p></dd>
 
 <dt>expected_score</dt>
@@ -132,9 +141,9 @@ the score given theta</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>,<span class="st">':memory:'</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="add_booklet.html">add_booklet</a></span><span class="op">(</span><span class="va">db</span>,<span class="va">verbAggrData</span>, <span class="st">"agg"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>,<span class="st">':memory:'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="add_booklet.html">add_booklet</a></span><span class="op">(</span><span class="va">db</span>,<span class="va">verbAggrData</span>, <span class="st">"agg"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> no column `person_id` provided, automatically generating unique person id's</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $items</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "S1DoCurse"   "S1DoScold"   "S1DoShout"   "S1WantCurse" "S1WantScold"</span>
@@ -149,36 +158,36 @@ the score given theta</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $columns_ignored</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "gender" "anger" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span class="va">p</span> <span class="op">=</span> <span class="fu"><a href="fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># plot information function for single item</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">ifun</span> <span class="op">=</span> <span class="fu">information</span><span class="op">(</span><span class="va">p</span>, <span class="st">"S1DoScold"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ifun</span>,from<span class="op">=</span><span class="op">-</span><span class="fl">4</span>,to<span class="op">=</span><span class="fl">4</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="va">p</span> <span class="op">=</span> <span class="fu"><a href="fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># plot information function for single item</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">ifun</span> <span class="op">=</span> <span class="fu">information</span><span class="op">(</span><span class="va">p</span>, <span class="st">"S1DoScold"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ifun</span>,from<span class="op">=</span><span class="op">-</span><span class="fl">4</span>,to<span class="op">=</span><span class="fl">4</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="information-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># compare test information function to the population ability distribution</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">ifun</span> <span class="op">=</span> <span class="fu">information</span><span class="op">(</span><span class="va">p</span>, booklet<span class="op">=</span><span class="st">"agg"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">pv</span> <span class="op">=</span> <span class="fu"><a href="plausible_values.html">plausible_values</a></span><span class="op">(</span><span class="va">db</span>,<span class="va">p</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">op</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>no.readonly<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>,<span class="fl">4</span>,<span class="fl">2</span>,<span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ifun</span>,from<span class="op">=</span><span class="op">-</span><span class="fl">4</span>,to<span class="op">=</span><span class="fl">4</span>, xlab<span class="op">=</span><span class="st">'theta'</span>, ylab<span class="op">=</span><span class="st">'test information'</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>new<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/density.html" class="external-link">density</a></span><span class="op">(</span><span class="va">pv</span><span class="op">$</span><span class="va">PV1</span><span class="op">)</span>, col<span class="op">=</span><span class="st">'green'</span>, axes<span class="op">=</span><span class="cn">FALSE</span>, xlab<span class="op">=</span><span class="cn">NA</span>, ylab<span class="op">=</span><span class="cn">NA</span>, main<span class="op">=</span><span class="cn">NA</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/axis.html" class="external-link">axis</a></span><span class="op">(</span>side<span class="op">=</span><span class="fl">4</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/mtext.html" class="external-link">mtext</a></span><span class="op">(</span>side <span class="op">=</span> <span class="fl">4</span>, line <span class="op">=</span> <span class="fl">2.5</span>, <span class="st">'population density (green)'</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># compare test information function to the population ability distribution</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">ifun</span> <span class="op">=</span> <span class="fu">information</span><span class="op">(</span><span class="va">p</span>, booklet<span class="op">=</span><span class="st">"agg"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">pv</span> <span class="op">=</span> <span class="fu"><a href="plausible_values.html">plausible_values</a></span><span class="op">(</span><span class="va">db</span>,<span class="va">p</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">op</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>no.readonly<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>,<span class="fl">4</span>,<span class="fl">2</span>,<span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ifun</span>,from<span class="op">=</span><span class="op">-</span><span class="fl">4</span>,to<span class="op">=</span><span class="fl">4</span>, xlab<span class="op">=</span><span class="st">'theta'</span>, ylab<span class="op">=</span><span class="st">'test information'</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>new<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/density.html" class="external-link">density</a></span><span class="op">(</span><span class="va">pv</span><span class="op">$</span><span class="va">PV1</span><span class="op">)</span>, col<span class="op">=</span><span class="st">'green'</span>, axes<span class="op">=</span><span class="cn">FALSE</span>, xlab<span class="op">=</span><span class="cn">NA</span>, ylab<span class="op">=</span><span class="cn">NA</span>, main<span class="op">=</span><span class="cn">NA</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/axis.html" class="external-link">axis</a></span><span class="op">(</span>side<span class="op">=</span><span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/mtext.html" class="external-link">mtext</a></span><span class="op">(</span>side <span class="op">=</span> <span class="fl">4</span>, line <span class="op">=</span> <span class="fl">2.5</span>, <span class="st">'population density (green)'</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="information-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span><span class="va">op</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="close_project.html">close_project</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span><span class="va">op</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="close_project.html">close_project</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -193,7 +202,7 @@ the score given theta</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

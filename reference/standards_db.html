@@ -91,13 +91,13 @@ The 3DC application can be downloaded from <a href="https://www.cito.com/our-exp
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">standards_db</span><span class="op">(</span>
-  <span class="va">par.sts</span>,
-  <span class="va">file_name</span>,
-  <span class="va">standards</span>,
-  population <span class="op">=</span> <span class="cn">NULL</span>,
-  group_leader <span class="op">=</span> <span class="st">"admin"</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">standards_db</span><span class="op">(</span></span>
+<span>  <span class="va">par.sts</span>,</span>
+<span>  <span class="va">file_name</span>,</span>
+<span>  <span class="va">standards</span>,</span>
+<span>  population <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  group_leader <span class="op">=</span> <span class="st">"admin"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -105,17 +105,26 @@ The 3DC application can be downloaded from <a href="https://www.cito.com/our-exp
     <dl><dt>par.sts</dt>
 <dd><p>an object containing parameters for the 3DC standard setting procedure produced by
 <code><a href="standards_3dc.html">standards_3dc</a></code></p></dd>
+
+
 <dt>file_name</dt>
 <dd><p>name of the exported database file</p></dd>
+
+
 <dt>standards</dt>
 <dd><p>vector of 1 or more standards. In case there are multiple test forms and
 they should use different performance standards, a list of such vectors. 
 The names of this list should correspond to the names of the testforms</p></dd>
+
+
 <dt>population</dt>
 <dd><p>optional, a data.frame with three columns: `booklet_id`,`booklet_score`,`n` (where n is a count)</p></dd>
+
+
 <dt>group_leader</dt>
 <dd><p>login name of the group leader. The login password will always be `admin` 
 but can be changed in the 3DC application</p></dd>
+
 </dl></div>
 
   </div>
@@ -130,7 +139,7 @@ but can be changed in the 3DC application</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

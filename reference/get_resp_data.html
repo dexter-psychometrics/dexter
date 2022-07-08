@@ -93,48 +93,69 @@ The return value of get_resp_data can be used as the 'dataSrc' argument in analy
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">get_resp_data</span><span class="op">(</span>
-  <span class="va">dataSrc</span>,
-  qtpredicate <span class="op">=</span> <span class="cn">NULL</span>,
-  extra_columns <span class="op">=</span> <span class="cn">NULL</span>,
-  summarised <span class="op">=</span> <span class="cn">FALSE</span>,
-  env <span class="op">=</span> <span class="cn">NULL</span>,
-  protect_x <span class="op">=</span> <span class="cn">TRUE</span>,
-  retain_person_id <span class="op">=</span> <span class="cn">TRUE</span>,
-  merge_within_persons <span class="op">=</span> <span class="cn">FALSE</span>,
-  parms_check <span class="op">=</span> <span class="cn">NULL</span>,
-  raw <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
-
-<span class="fu">get_resp_matrix</span><span class="op">(</span><span class="va">dataSrc</span>, qtpredicate <span class="op">=</span> <span class="cn">NULL</span>, env <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_resp_data</span><span class="op">(</span></span>
+<span>  <span class="va">dataSrc</span>,</span>
+<span>  qtpredicate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  extra_columns <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  summarised <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  env <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  protect_x <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  retain_person_id <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  merge_within_persons <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  parms_check <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  raw <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">get_resp_matrix</span><span class="op">(</span><span class="va">dataSrc</span>, qtpredicate <span class="op">=</span> <span class="cn">NULL</span>, env <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>dataSrc</dt>
 <dd><p>data.frame, integer matrix, dexter database or `dx_resp_data` object</p></dd>
+
+
 <dt>qtpredicate</dt>
 <dd><p>quoted predicate</p></dd>
+
+
 <dt>extra_columns</dt>
 <dd><p>to be returned in addition to person_id, booklet_id, item_score, item_id</p></dd>
+
+
 <dt>summarised</dt>
 <dd><p>if TRUE, no item scores are returned, just booklet scores</p></dd>
+
+
 <dt>env</dt>
 <dd><p>environment for evaluation of qtpredicate, defaults to caller environment</p></dd>
+
+
 <dt>protect_x</dt>
 <dd><p>best set TRUE (default)</p></dd>
+
+
 <dt>retain_person_id</dt>
 <dd><p>whether to retain the original person_id levels or just use arbitrary integers</p></dd>
+
+
 <dt>merge_within_persons</dt>
 <dd><p>merge different booklets for the same person together</p></dd>
+
+
 <dt>parms_check</dt>
 <dd><p>data.frame of item_id, item_score to check for coverage of data</p></dd>
+
+
 <dt>raw</dt>
 <dd><p>if raw is TRUE, no sum scores, booklets, or design is provided and arguments, 'parms_check' and 'summarised' are ignored</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <dl><dt>get_resp_data</dt>
+    
+
+<dl><dt>get_resp_data</dt>
 <dd><p>returns a list with class `dx_resp_data` with elements</p><dl><dt>x</dt>
 <dd><p>when summarised is FALSE, a tibble(person_id, booklet_id, item_id, item_score, booklet_score [, extra_columns&gt;]), sorted in such a way that
   all rows pertaining to the same person-booklet are together</p>  
@@ -170,7 +191,7 @@ as incorrect use can crash your R-session or lead to unexpected results.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

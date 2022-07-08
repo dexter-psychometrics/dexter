@@ -87,7 +87,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">start_new_project</span><span class="op">(</span><span class="va">rules</span>, db_name <span class="op">=</span> <span class="st">"dexter.db"</span>, person_properties <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">start_new_project</span><span class="op">(</span><span class="va">rules</span>, db_name <span class="op">=</span> <span class="st">"dexter.db"</span>, person_properties <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -95,20 +95,27 @@
     <dl><dt>rules</dt>
 <dd><p>A data frame with columns <code>item_id</code>, <code>response</code>, and <code>item_score</code>.
 The order is not important but spelling is. Any other columns will be ignored.</p></dd>
+
+
 <dt>db_name</dt>
 <dd><p>A string specifying a filename
 for a new sqlite database to be created. If this name does not
 contain a path, the file will be created in the work
 directory. Any existing file with the same name will be overwritten. For an in-memory database
 you can use the string <code>":memory:"</code>. A connection object is also allowed.</p></dd>
+
+
 <dt>person_properties</dt>
 <dd><p>An optional list of person properties. Names should correspond to person_properties intended to be used in the project.
 Values are used as default (missing) values. The datatype will also be inferred from the values.
 Known person_properties will be automatically imported when adding response data with <code><a href="add_booklet.html">add_booklet</a></code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>a database connection object.</p>
+    
+
+<p>a database connection object.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -125,8 +132,8 @@ responses in the list. NA values will be treated as the string "NA"'.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">verbAggrRules</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">verbAggrRules</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       item_id response item_score</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 S1WantCurse        0          0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 S1WantCurse        1          1</span>
@@ -134,11 +141,11 @@ responses in the list. NA values will be treated as the string "NA"'.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4   S1DoCurse        0          0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5   S1DoCurse        1          1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6   S1DoCurse        2          2</span>
-<span class="r-in"><span class="va">db_name</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext<span class="op">=</span><span class="st">'.db'</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">db</span> <span class="op">=</span> <span class="fu">start_new_project</span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="va">db_name</span>, </span>
-<span class="r-in">                       person_properties <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>gender <span class="op">=</span> <span class="st">"unknown"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="co"># }</span></span>
-<span class="r-in"></span>
+<span class="r-in"><span><span class="va">db_name</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext<span class="op">=</span><span class="st">'.db'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">db</span> <span class="op">=</span> <span class="fu">start_new_project</span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="va">db_name</span>, </span></span>
+<span class="r-in"><span>                       person_properties <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>gender <span class="op">=</span> <span class="st">"unknown"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -153,7 +160,7 @@ responses in the list. NA values will be treated as the string "NA"'.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

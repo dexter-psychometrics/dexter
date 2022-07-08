@@ -91,39 +91,54 @@ with similar estimated ability.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="co"># S3 method for prms</span>
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>
-  <span class="va">x</span>,
-  item_id <span class="op">=</span> <span class="cn">NULL</span>,
-  dataSrc <span class="op">=</span> <span class="cn">NULL</span>,
-  predicate <span class="op">=</span> <span class="cn">NULL</span>,
-  nbins <span class="op">=</span> <span class="fl">5</span>,
-  ci <span class="op">=</span> <span class="fl">0.95</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for prms</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  item_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dataSrc <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  predicate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  nbins <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  ci <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>object produced by fit_enorm</p></dd>
+
+
 <dt>item_id</dt>
 <dd><p>which item to plot, if NULL, one plot for each item is made</p></dd>
+
+
 <dt>dataSrc</dt>
 <dd><p>data source, see details</p></dd>
+
+
 <dt>predicate</dt>
 <dd><p>an expression to subset data in dataSrc</p></dd>
+
+
 <dt>nbins</dt>
 <dd><p>number of ability groups</p></dd>
+
+
 <dt>ci</dt>
 <dd><p>confidence interval for the error bars, between 0 and 1. Use 0 to suppress the error bars.
 Default = 0.95 for a 95% confidence interval</p></dd>
+
+
 <dt>...</dt>
 <dd><p>further arguments to plot</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Silently, a data.frame with observed and expected values possibly useful to create a numerical fit measure.</p>
+    
+
+<p>Silently, a data.frame with observed and expected values possibly useful to create a numerical fit measure.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -146,7 +161,7 @@ sample size in dataSrc (if not NULL) or the original data on which the model was
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

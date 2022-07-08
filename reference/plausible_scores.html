@@ -91,48 +91,65 @@ a complete item bank when data is collected using an incomplete design</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plausible_scores</span><span class="op">(</span>
-  <span class="va">dataSrc</span>,
-  parms <span class="op">=</span> <span class="cn">NULL</span>,
-  predicate <span class="op">=</span> <span class="cn">NULL</span>,
-  items <span class="op">=</span> <span class="cn">NULL</span>,
-  covariates <span class="op">=</span> <span class="cn">NULL</span>,
-  keep.observed <span class="op">=</span> <span class="cn">TRUE</span>,
-  nPS <span class="op">=</span> <span class="fl">1</span>,
-  merge_within_persons <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plausible_scores</span><span class="op">(</span></span>
+<span>  <span class="va">dataSrc</span>,</span>
+<span>  parms <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  predicate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  items <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  keep.observed <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  nPS <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  merge_within_persons <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>dataSrc</dt>
 <dd><p>a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score</p></dd>
+
+
 <dt>parms</dt>
 <dd><p>An object returned by function <code>fit_enorm</code> and containing
 parameter estimates. If parms is given the function provides plausible scores conditional on the 
 item parameters. These are considered known. If <code>parms</code> is <code>NULL</code>, Bayesian parameters are calculated from the datasrc</p></dd>
+
+
 <dt>predicate</dt>
 <dd><p>an expression to filter data. If missing, the function will use 
 all data in dataSrc</p></dd>
+
+
 <dt>items</dt>
 <dd><p>vector of item_id's, this specifies the itemset to generate the testscores for. If <code>items</code> is <code>NULL</code> 
 all items occurring in <code>dataSrc</code> are used.</p></dd>
+
+
 <dt>covariates</dt>
 <dd><p>name or a vector of names of the variables to group the population, used to update the prior.
 A covariate must be a discrete person covariate (e.g. not a float) that indicates nominal categories, e.g. gender or school
 If dataSrc is a data.frame, it must contain the covariate.</p></dd>
+
+
 <dt>keep.observed</dt>
 <dd><p>If responses to one or more of the items have been observed,
 the user can choose to keep these observations or generate new ones.</p></dd>
+
+
 <dt>nPS</dt>
 <dd><p>Number of plausible testscores to generate per person.</p></dd>
+
+
 <dt>merge_within_persons</dt>
 <dd><p>If a person took multiple booklets, this indicates
 whether plausible scores are generated per person (TRUE) or per booklet (FALSE)</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A data.frame with columns booklet_id, person_id, booklet_score and nPS plausible scores
+    
+
+<p>A data.frame with columns booklet_id, person_id, booklet_score and nPS plausible scores
 named PS1...PSn.</p>
     </div>
 
@@ -148,7 +165,7 @@ named PS1...PSn.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

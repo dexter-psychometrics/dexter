@@ -89,7 +89,7 @@ scoring rules from the keys to the correct responses</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">keys_to_rules</span><span class="op">(</span><span class="va">keys</span>, include_NA_rule <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">keys_to_rules</span><span class="op">(</span><span class="va">keys</span>, include_NA_rule <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -97,12 +97,19 @@ scoring rules from the keys to the correct responses</p>
     <dl><dt>keys</dt>
 <dd><p>A data frame containing columns <code>item_id</code>, <code>noptions</code>, and
 <code>key</code> See details.</p></dd>
+
+
 <dt>include_NA_rule</dt>
 <dd><p>whether to add an option 'NA' (which is scored 0) to each item</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A data frame that can be used as input to <code>start_new_project</code></p>
+    
+
+<p>A data frame that can be used as input to <code>start_new_project</code></p>
+
+
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -127,7 +134,7 @@ in an error.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

@@ -87,50 +87,71 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">start_new_project_from_oplm</span><span class="op">(</span>
-  <span class="va">dbname</span>,
-  <span class="va">scr_path</span>,
-  <span class="va">dat_path</span>,
-  booklet_position <span class="op">=</span> <span class="cn">NULL</span>,
-  responses_start <span class="op">=</span> <span class="cn">NULL</span>,
-  response_length <span class="op">=</span> <span class="fl">1</span>,
-  person_id <span class="op">=</span> <span class="cn">NULL</span>,
-  missing_character <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">" "</span>, <span class="st">"9"</span><span class="op">)</span>,
-  use_discrim <span class="op">=</span> <span class="cn">FALSE</span>,
-  format <span class="op">=</span> <span class="st">"compressed"</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">start_new_project_from_oplm</span><span class="op">(</span></span>
+<span>  <span class="va">dbname</span>,</span>
+<span>  <span class="va">scr_path</span>,</span>
+<span>  <span class="va">dat_path</span>,</span>
+<span>  booklet_position <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  responses_start <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  response_length <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  person_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  missing_character <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">" "</span>, <span class="st">"9"</span><span class="op">)</span>,</span>
+<span>  use_discrim <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  format <span class="op">=</span> <span class="st">"compressed"</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>dbname</dt>
 <dd><p>filename/path of new dexter project database (will be overwritten if already exists)</p></dd>
+
+
 <dt>scr_path</dt>
 <dd><p>path to the .scr file</p></dd>
+
+
 <dt>dat_path</dt>
 <dd><p>path to the .dat file</p></dd>
+
+
 <dt>booklet_position</dt>
 <dd><p>vector of start and end of booklet position in the dat file, e.g. c(1,4), 
 all positions are counted from 1, start and end are both inclusive. If NULL, this is read from the scr file.</p></dd>
+
+
 <dt>responses_start</dt>
 <dd><p>start position of responses in the .dat file. If NULL, this is read from the scr file.</p></dd>
+
+
 <dt>response_length</dt>
 <dd><p>length of individual responses, default=1</p></dd>
+
+
 <dt>person_id</dt>
 <dd><p>optionally, a vector of start and end position of person_id in the .dat file.
 If NULL, person id's will be auto-generated.</p></dd>
+
+
 <dt>missing_character</dt>
 <dd><p>vector of character(s) used to indicate missing in .dat file, 
 default is to use both a space and a 9 as missing characters.</p></dd>
+
+
 <dt>use_discrim</dt>
 <dd><p>if TRUE, the scores for the responses will be multiplied by the
 discrimination parameters of the items</p></dd>
+
+
 <dt>format</dt>
 <dd><p>not used, at the moment only the compressed format is supported.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>a database connection object.</p>
+    
+
+<p>a database connection object.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -159,7 +180,7 @@ inferred from the scr file since anything other than 1 is most often a mistake.<
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

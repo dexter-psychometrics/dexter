@@ -89,40 +89,55 @@ Domains are specified as categories of items using item_properties.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">profile_tables</span><span class="op">(</span><span class="va">parms</span>, <span class="va">domains</span>, <span class="va">item_property</span>, design <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
-
-<span class="fu">profiles</span><span class="op">(</span>
-  <span class="va">dataSrc</span>,
-  <span class="va">parms</span>,
-  <span class="va">item_property</span>,
-  predicate <span class="op">=</span> <span class="cn">NULL</span>,
-  merge_within_persons <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">profile_tables</span><span class="op">(</span><span class="va">parms</span>, <span class="va">domains</span>, <span class="va">item_property</span>, design <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">profiles</span><span class="op">(</span></span>
+<span>  <span class="va">dataSrc</span>,</span>
+<span>  <span class="va">parms</span>,</span>
+<span>  <span class="va">item_property</span>,</span>
+<span>  predicate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  merge_within_persons <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>parms</dt>
 <dd><p>An object returned by <code><a href="fit_enorm.html">fit_enorm</a></code> or a data.frame of item parameters</p></dd>
+
+
 <dt>domains</dt>
 <dd><p>data.frame with column item_id and a column with name equal to <code>item_property</code></p></dd>
+
+
 <dt>item_property</dt>
 <dd><p>the name of the item property used to define the domains. If <code>dataSrc</code> is a dexter db then the
 item_property must match a known item property. If datasrc is a data.frame, item_property must be equal to
  one of its column names. For profile_tables item_property must match a column name in <code>domains</code>.</p></dd>
+
+
 <dt>design</dt>
 <dd><p>data.frame with columns item_id and optionally booklet_id</p></dd>
+
+
 <dt>dataSrc</dt>
 <dd><p>a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score, 
 an arbitrarily named column containing an item property and optionally booklet_id</p></dd>
+
+
 <dt>predicate</dt>
 <dd><p>An optional expression to subset data in dataSrc, if NULL all data is used</p></dd>
+
+
 <dt>merge_within_persons</dt>
 <dd><p>whether to merge different booklets administered to the same person.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <dl><dt>profiles</dt>
+    
+
+<dl><dt>profiles</dt>
 <dd><p>a data.frame with columns person_id, booklet_id, booklet_score, 
 &lt;item_property&gt;, domain_score, expected_domain_score</p></dd>
 
@@ -160,7 +175,7 @@ Scandinavian Journal of Educational Research, 56 (3), 315-332.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

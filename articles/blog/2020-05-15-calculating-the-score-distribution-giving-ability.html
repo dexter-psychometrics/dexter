@@ -178,12 +178,12 @@ p(X_+=s|t) = p(Y_{++}=s|t, \mathbf{b}) = \frac{t^{y_{++}} \gamma_s(\boldsymbol{b
 P(Y_{++}=s|t, \mathbf{b}) = \sum_{\mathbf{y}:y_+ = s} \prod_i \prod_j \pi_{ij}^{y_{ij}} = \gamma_s(\boldsymbol{\pi})
 \]</span> where <span class="math inline">\(\pi_{ij}\)</span> is short-hand for <span class="math inline">\(p(Y_{ij}=1|t) = p(X_i=j|t)\)</span>. Written in this way, the test score distribution is an esf, albeit with argument <span class="math inline">\(\boldsymbol{\pi}\)</span>. The following R function uses this observation to calculate the score distribution:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">LW</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">Pi</span>, <span class="va">a</span><span class="op">)</span>
-<span class="op">{</span>
-  <span class="va">first</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">a</span><span class="op">==</span><span class="fl">0</span><span class="op">)</span>
-  <span class="va">last</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">first</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">-</span><span class="fl">1</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span><span class="op">)</span>
-  <span class="fu">dexter</span><span class="fu">:::</span><span class="fu">elsym</span><span class="op">(</span><span class="va">Pi</span>,<span class="va">a</span>,<span class="va">first</span>,<span class="va">last</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">LW</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">Pi</span>, <span class="va">a</span><span class="op">)</span></span>
+<span><span class="op">{</span></span>
+<span>  <span class="va">first</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">a</span><span class="op">==</span><span class="fl">0</span><span class="op">)</span></span>
+<span>  <span class="va">last</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">first</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">-</span><span class="fl">1</span>,<span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu">dexter</span><span class="fu">:::</span><span class="fu">elsym</span><span class="op">(</span><span class="va">Pi</span>,<span class="va">a</span>,<span class="va">first</span>,<span class="va">last</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <p>The <strong>elsym</strong> function is internal to <strong>dexter</strong>, hence the three colons. This function actually implements the Lord-Wingersky algorithm, extended to polytomous items. Compared to the first solution, it has the advantage that it works for any valid <span class="math inline">\(\boldsymbol{\pi}=(\pi_{10},\pi_{11},\dots, \pi_{m1})\)</span> and <span class="math inline">\(\mathbf{a}\)</span> and could be used with any IRT model, not just the NRM implemented in <strong>dexter</strong>.</p>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -216,7 +216,7 @@ P(Y_{++}=s|t, \mathbf{b}) = \sum_{\mathbf{y}:y_+ = s} \prod_i \prod_j \pi_{ij}^{
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer>

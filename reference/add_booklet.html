@@ -87,15 +87,15 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">add_booklet</span><span class="op">(</span><span class="va">db</span>, <span class="va">x</span>, <span class="va">booklet_id</span>, auto_add_unknown_rules <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="fu">add_response_data</span><span class="op">(</span>
-  <span class="va">db</span>,
-  <span class="va">data</span>,
-  design <span class="op">=</span> <span class="cn">NULL</span>,
-  missing_value <span class="op">=</span> <span class="st">"NA"</span>,
-  auto_add_unknown_rules <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">add_booklet</span><span class="op">(</span><span class="va">db</span>, <span class="va">x</span>, <span class="va">booklet_id</span>, auto_add_unknown_rules <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">add_response_data</span><span class="op">(</span></span>
+<span>  <span class="va">db</span>,</span>
+<span>  <span class="va">data</span>,</span>
+<span>  design <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  missing_value <span class="op">=</span> <span class="st">"NA"</span>,</span>
+<span>  auto_add_unknown_rules <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -103,29 +103,44 @@
     <dl><dt>db</dt>
 <dd><p>a connection to a dexter database, i.e. the output of <code>start_new_project</code>
 or <code>open_project</code></p></dd>
+
+
 <dt>x</dt>
 <dd><p>A data frame containing the responses and, optionally,
 person_properties. The data.frame should have one row per respondent and the column names should 
 correspond to the item_id's in the rules or the names of the person_properties. See details.</p></dd>
+
+
 <dt>booklet_id</dt>
 <dd><p>A (short) string identifying the test form (booklet)</p></dd>
+
+
 <dt>auto_add_unknown_rules</dt>
 <dd><p>If FALSE (the default), an error will be generated if 
 one or more responses do not appear in the scoring rules. If TRUE, unknown responses will be
 assumed to have a score of 0 and will be added to your scoring rules</p></dd>
+
+
 <dt>data</dt>
 <dd><p>response data in normalized (long) format. Must contain columns <code>person_id</code>, <code>booklet_id</code>,
  <code>item_id</code> and <code>response</code> and optionally <code>item_position</code> 
 (useful if your data contains new booklets, see details)</p></dd>
+
+
 <dt>design</dt>
 <dd><p>data.frame with columns booklet_id, item_id and optionally item_position specifying the design of any 
 _new_ booklets in your data.</p></dd>
+
+
 <dt>missing_value</dt>
 <dd><p>value to use for responses in missing rows in your data, see details</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list with information about the recent import.</p>
+    
+
+<p>A list with information about the recent import.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -156,9 +171,9 @@ values are transformed to the string <code>"NA"</code>.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="st">":memory:"</span>, </span>
-<span class="r-in">                       person_properties<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>gender<span class="op">=</span><span class="st">"unknown"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">verbAggrData</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="st">":memory:"</span>, </span></span>
+<span class="r-in"><span>                       person_properties<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>gender<span class="op">=</span><span class="st">"unknown"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">verbAggrData</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   gender anger S1DoCurse S1DoScold S1DoShout S1WantCurse S1WantScold</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   Male    20         1         0         1           0           0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2 Female    16         1         2         1           2           2</span>
@@ -187,7 +202,7 @@ values are transformed to the string <code>"NA"</code>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4         1         0           2           2           0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5         0         0           2           0           0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6         2         0           2           2           0</span>
-<span class="r-in"><span class="fu">add_booklet</span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrData</span>, <span class="st">"agg"</span><span class="op">)</span>      </span>
+<span class="r-in"><span><span class="fu">add_booklet</span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrData</span>, <span class="st">"agg"</span><span class="op">)</span>      </span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> no column `person_id` provided, automatically generating unique person id's</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $items</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "S1DoCurse"   "S1DoScold"   "S1DoShout"   "S1WantCurse" "S1WantScold"</span>
@@ -202,9 +217,9 @@ values are transformed to the string <code>"NA"</code>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $columns_ignored</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "anger"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="close_project.html">close_project</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="close_project.html">close_project</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -219,7 +234,7 @@ values are transformed to the string <code>"NA"</code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

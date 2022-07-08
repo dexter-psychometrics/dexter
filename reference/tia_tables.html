@@ -89,37 +89,48 @@ at item and test level</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">tia_tables</span><span class="op">(</span>
-  <span class="va">dataSrc</span>,
-  predicate <span class="op">=</span> <span class="cn">NULL</span>,
-  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"raw"</span>, <span class="st">"averaged"</span>, <span class="st">"compared"</span><span class="op">)</span>,
-  max_scores <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"observed"</span>, <span class="st">"theoretical"</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">tia_tables</span><span class="op">(</span></span>
+<span>  <span class="va">dataSrc</span>,</span>
+<span>  predicate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"raw"</span>, <span class="st">"averaged"</span>, <span class="st">"compared"</span><span class="op">)</span>,</span>
+<span>  max_scores <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"observed"</span>, <span class="st">"theoretical"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>dataSrc</dt>
 <dd><p>a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score</p></dd>
+
+
 <dt>predicate</dt>
 <dd><p>An optional expression to subset data, if NULL all data is used</p></dd>
+
+
 <dt>type</dt>
 <dd><p>How to present the item level statistics: <code>raw</code> for each test booklet 
 separately, <code>averaged</code> booklets are ignored, with the exception of rit and rir which are averaged over the test booklets,
 with the number of persons as weights, or <code>compared</code>, in which case the pvalues, 
 correlations with the sum score (rit), and correlations with the rest score (rit) are 
 shown in separate tables and compared across booklets</p></dd>
+
+
 <dt>max_scores</dt>
 <dd><p>use the observed maximum item score or the theoretical maximum item score 
 according to the scoring rules in the database to determine pvalues and maximum scores</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list containing:</p>
+    
+
+<p>A list containing:</p>
 <dl><dt>booklets</dt>
 <dd><p>a data.frame of statistics at booklet level</p></dd>
+ 
 <dt>items</dt>
 <dd><p>a data.frame (or list if type='compared') of statistics at item level</p></dd>
+
 </dl></div>
 
   </div>
@@ -134,7 +145,7 @@ according to the scoring rules in the database to determine pvalues and maximum 
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

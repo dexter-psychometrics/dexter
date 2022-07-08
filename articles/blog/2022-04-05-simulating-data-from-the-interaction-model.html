@@ -141,10 +141,10 @@ P(\mathbf{X}=\mathbf{x}|\theta)
 <p>The dots are the estimated Rasch item parameters for each score-group, the green line represents the model from which we simulated, and the gray curve is obtained when we fit an interaction model to the simulated data. Two things are worth noting. First, we need very large samples to make such plots. Second, when we do have large samples, we often observe a linear relationship between item difficulty and test score. For some reason, the interaction model seems to describe educational data quite well.</p>
 <p>Anyway. We have simulated data from the interaction model but the original question was how to do exactly that. Simulating from the Rasch model is fairly trivial. Given a vector of item difficulties, delta, and a sample from the ability distribution, theta, the R function is a one-liner:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">simRasch</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">theta</span>, <span class="va">delta</span><span class="op">)</span>
-<span class="op">{</span>
-  <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">rlogis</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">delta</span><span class="op">)</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="op">(</span><span class="va">theta</span><span class="op">-</span><span class="va">delta</span><span class="op">)</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">simRasch</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">theta</span>, <span class="va">delta</span><span class="op">)</span></span>
+<span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">rlogis</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">delta</span><span class="op">)</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="op">(</span><span class="va">theta</span><span class="op">-</span><span class="va">delta</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <p>To simulate responses from the interaction model, we can apply this at each distinct test score <span class="math inline">\(r\)</span> with score-specific item difficulties <span class="math inline">\(\delta_{ri}=\delta_i-r\sigma_i\)</span> rather than simply <span class="math inline">\(\delta_i\)</span>. But this is not all, as the responses conditional on a given test-score are not independent. The two algorithms presented here differ in how they tackle this dependency: one samples item parameters directly while the other one relies on a simple rejection algorithm.</p>
 </div>
 <div class="section level2">
@@ -153,29 +153,29 @@ P(\mathbf{X}=\mathbf{x}|\theta)
 <p>As mentioned above, the interaction model preserves the item difficulties, the item-total correlations, and the score distribution, so we enter the simulation with three inputs: <code>delta</code>, <code>sigma</code>, and <code>scoretab</code>. We sample from the discrete score distribution, <code>scoretab</code>, and, since the interaction model maps sum scores to ability estimates, we attach those from a look-up table easily produced with <strong>dexter</strong>. (For those who prefer to sample from the ability distribution, we will show in the Appendix how to derive the score distribution from that.)</p>
 <p>We then go over all simulated ‘examinees’ and we simulate responses from the Rasch model, with <code>theta</code> and item difficulties both matching the person’s score, until the simulated sum score equals the true one. For zero and perfect scores, we simply take vectors of 0 or 1. In R:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">sim_IM</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">delta</span>, <span class="va">sigma</span>, <span class="va">scoretab</span><span class="op">)</span>
-<span class="op">{</span>
-  <span class="va">nI</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">delta</span><span class="op">)</span>
-  <span class="va">nP</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">scoretab</span><span class="op">)</span>
-  <span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nI</span><span class="op">)</span>
-  <span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nP</span>, <span class="va">nI</span><span class="op">)</span>
-  <span class="co"># nP samples from the score distribution:</span>
-  <span class="va">s</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="va">nI</span>, <span class="va">nP</span>, replace<span class="op">=</span><span class="cn">TRUE</span>, prob<span class="op">=</span><span class="va">scoretab</span><span class="op">)</span>
-  <span class="co"># attach the MLE estimates of theta:</span>
-  <span class="va">abl</span> <span class="op">=</span> <span class="fu">IM_mle</span><span class="op">(</span><span class="va">delta</span>,<span class="va">sigma</span><span class="op">)</span>
-
-  <span class="kw">for</span> <span class="op">(</span><span class="va">p</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">nP</span><span class="op">)</span>
-  <span class="op">{</span>
-    <span class="co"># compute item difficulties at score s[p]:</span>
-    <span class="va">delta_s</span> <span class="op">=</span> <span class="va">delta</span> <span class="op">-</span> <span class="va">s</span><span class="op">[</span><span class="va">p</span><span class="op">]</span><span class="op">*</span><span class="va">sigma</span>
-    <span class="kw">repeat</span><span class="op">{</span>
-        <span class="va">y</span> <span class="op">=</span> <span class="fu">simRasch</span><span class="op">(</span>theta<span class="op">=</span><span class="va">abl</span><span class="op">[</span><span class="va">s</span><span class="op">[</span><span class="va">p</span><span class="op">]</span><span class="op">+</span><span class="fl">1</span><span class="op">]</span>, delta<span class="op">=</span><span class="va">delta_s</span><span class="op">)</span>
-        <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span><span class="op">==</span><span class="va">s</span><span class="op">[</span><span class="va">p</span><span class="op">]</span><span class="op">)</span> <span class="kw">break</span>
-    <span class="op">}</span>
-    <span class="va">x</span><span class="op">[</span><span class="va">p</span>,<span class="op">]</span> <span class="op">=</span> <span class="va">y</span>
-  <span class="op">}</span>
-  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">sim_IM</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">delta</span>, <span class="va">sigma</span>, <span class="va">scoretab</span><span class="op">)</span></span>
+<span><span class="op">{</span></span>
+<span>  <span class="va">nI</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">delta</span><span class="op">)</span></span>
+<span>  <span class="va">nP</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">scoretab</span><span class="op">)</span></span>
+<span>  <span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nI</span><span class="op">)</span></span>
+<span>  <span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nP</span>, <span class="va">nI</span><span class="op">)</span></span>
+<span>  <span class="co"># nP samples from the score distribution:</span></span>
+<span>  <span class="va">s</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="va">nI</span>, <span class="va">nP</span>, replace<span class="op">=</span><span class="cn">TRUE</span>, prob<span class="op">=</span><span class="va">scoretab</span><span class="op">)</span></span>
+<span>  <span class="co"># attach the MLE estimates of theta:</span></span>
+<span>  <span class="va">abl</span> <span class="op">=</span> <span class="fu">IM_mle</span><span class="op">(</span><span class="va">delta</span>,<span class="va">sigma</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">p</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">nP</span><span class="op">)</span></span>
+<span>  <span class="op">{</span></span>
+<span>    <span class="co"># compute item difficulties at score s[p]:</span></span>
+<span>    <span class="va">delta_s</span> <span class="op">=</span> <span class="va">delta</span> <span class="op">-</span> <span class="va">s</span><span class="op">[</span><span class="va">p</span><span class="op">]</span><span class="op">*</span><span class="va">sigma</span></span>
+<span>    <span class="kw">repeat</span><span class="op">{</span></span>
+<span>        <span class="va">y</span> <span class="op">=</span> <span class="fu">simRasch</span><span class="op">(</span>theta<span class="op">=</span><span class="va">abl</span><span class="op">[</span><span class="va">s</span><span class="op">[</span><span class="va">p</span><span class="op">]</span><span class="op">+</span><span class="fl">1</span><span class="op">]</span>, delta<span class="op">=</span><span class="va">delta_s</span><span class="op">)</span></span>
+<span>        <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span><span class="op">==</span><span class="va">s</span><span class="op">[</span><span class="va">p</span><span class="op">]</span><span class="op">)</span> <span class="kw">break</span></span>
+<span>    <span class="op">}</span></span>
+<span>    <span class="va">x</span><span class="op">[</span><span class="va">p</span>,<span class="op">]</span> <span class="op">=</span> <span class="va">y</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <p>The ability that matches a person’s score is the maximum likelihood estimate (MLE); i.e., the ability for which the expected score is equal to the observed one. In fact, any theta would do, eventually, but then we would have to wait much longer until the sum of the simulated response pattern matches the target sum score. For the aficionados, our <strong>makeMLE</strong> function is provided in the Appendix.</p>
 </div>
 <div class="section level2">
@@ -198,70 +198,70 @@ g_{rsi} =
 \]</span></p>
 <p>where the first two indices <span class="math inline">\(r\)</span> and <span class="math inline">\(s\)</span> run from zero to <span class="math inline">\(n\)</span>, and the third index <span class="math inline">\(i\)</span> runs from <span class="math inline">\(1\)</span> to <span class="math inline">\(n\)</span>. The elementary symmetric functions are calculated using the sum-algorithm. Here is the necessary code in R:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">elsymRM</span> <span class="op">&lt;-</span><span class="kw">function</span><span class="op">(</span><span class="va">b</span><span class="op">)</span>
-<span class="op">{</span>
-  <span class="va">n</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">b</span><span class="op">)</span>
-  <span class="va">g</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>,<span class="va">n</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span>
-  <span class="va">g</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">=</span><span class="fl">1</span>; <span class="va">g</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">=</span><span class="va">b</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>
-  
-  <span class="kw">if</span> <span class="op">(</span><span class="va">n</span><span class="op">&gt;</span><span class="fl">1</span><span class="op">)</span>
-  <span class="op">{</span>
-    <span class="kw">for</span> <span class="op">(</span><span class="va">j</span> <span class="kw">in</span> <span class="fl">2</span><span class="op">:</span><span class="va">n</span><span class="op">)</span>
-    <span class="op">{</span>
-      <span class="kw">for</span> <span class="op">(</span><span class="va">s</span> <span class="kw">in</span> <span class="op">(</span><span class="va">j</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span> <span class="va">g</span><span class="op">[</span><span class="va">s</span><span class="op">]</span><span class="op">=</span><span class="va">g</span><span class="op">[</span><span class="va">s</span><span class="op">]</span><span class="op">+</span><span class="va">g</span><span class="op">[</span><span class="va">s</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">*</span><span class="va">b</span><span class="op">[</span><span class="va">j</span><span class="op">]</span>
-    <span class="op">}</span>
-  <span class="op">}</span>
-  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span>
-<span class="op">}</span>
- 
-<span class="va">makeG</span> <span class="op">&lt;-</span><span class="kw">function</span><span class="op">(</span><span class="va">b_s</span><span class="op">)</span>
-<span class="op">{</span>
-  <span class="va">nI</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">b_s</span><span class="op">)</span>   
-  <span class="va">G</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">nI</span><span class="op">+</span><span class="fl">1</span>,<span class="va">nI</span><span class="op">+</span><span class="fl">1</span>,<span class="va">nI</span><span class="op">)</span><span class="op">)</span> 
-  <span class="kw">for</span> <span class="op">(</span><span class="va">s</span> <span class="kw">in</span> <span class="fl">0</span><span class="op">:</span><span class="va">nI</span><span class="op">)</span>
-  <span class="op">{</span>
-    <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="va">nI</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>
-    <span class="op">{</span>
-      <span class="va">G</span><span class="op">[</span><span class="va">s</span><span class="op">+</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">:</span><span class="op">(</span><span class="va">i</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span>,<span class="va">i</span><span class="op">]</span> <span class="op">=</span> <span class="fu">elsymRM</span><span class="op">(</span><span class="va">b_s</span><span class="op">[</span><span class="va">s</span><span class="op">+</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">:</span><span class="va">i</span><span class="op">]</span><span class="op">)</span>
-    <span class="op">}</span>
-  <span class="op">}</span>
-  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">G</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">elsymRM</span> <span class="op">&lt;-</span><span class="kw">function</span><span class="op">(</span><span class="va">b</span><span class="op">)</span></span>
+<span><span class="op">{</span></span>
+<span>  <span class="va">n</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">b</span><span class="op">)</span></span>
+<span>  <span class="va">g</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>,<span class="va">n</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="va">g</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">=</span><span class="fl">1</span>; <span class="va">g</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">=</span><span class="va">b</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
+<span>  </span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="va">n</span><span class="op">&gt;</span><span class="fl">1</span><span class="op">)</span></span>
+<span>  <span class="op">{</span></span>
+<span>    <span class="kw">for</span> <span class="op">(</span><span class="va">j</span> <span class="kw">in</span> <span class="fl">2</span><span class="op">:</span><span class="va">n</span><span class="op">)</span></span>
+<span>    <span class="op">{</span></span>
+<span>      <span class="kw">for</span> <span class="op">(</span><span class="va">s</span> <span class="kw">in</span> <span class="op">(</span><span class="va">j</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span> <span class="va">g</span><span class="op">[</span><span class="va">s</span><span class="op">]</span><span class="op">=</span><span class="va">g</span><span class="op">[</span><span class="va">s</span><span class="op">]</span><span class="op">+</span><span class="va">g</span><span class="op">[</span><span class="va">s</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">*</span><span class="va">b</span><span class="op">[</span><span class="va">j</span><span class="op">]</span></span>
+<span>    <span class="op">}</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">g</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span> </span>
+<span><span class="va">makeG</span> <span class="op">&lt;-</span><span class="kw">function</span><span class="op">(</span><span class="va">b_s</span><span class="op">)</span></span>
+<span><span class="op">{</span></span>
+<span>  <span class="va">nI</span><span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">b_s</span><span class="op">)</span>   </span>
+<span>  <span class="va">G</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">nI</span><span class="op">+</span><span class="fl">1</span>,<span class="va">nI</span><span class="op">+</span><span class="fl">1</span>,<span class="va">nI</span><span class="op">)</span><span class="op">)</span> </span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">s</span> <span class="kw">in</span> <span class="fl">0</span><span class="op">:</span><span class="va">nI</span><span class="op">)</span></span>
+<span>  <span class="op">{</span></span>
+<span>    <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="va">nI</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span></span>
+<span>    <span class="op">{</span></span>
+<span>      <span class="va">G</span><span class="op">[</span><span class="va">s</span><span class="op">+</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">:</span><span class="op">(</span><span class="va">i</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span>,<span class="va">i</span><span class="op">]</span> <span class="op">=</span> <span class="fu">elsymRM</span><span class="op">(</span><span class="va">b_s</span><span class="op">[</span><span class="va">s</span><span class="op">+</span><span class="fl">1</span>,<span class="fl">1</span><span class="op">:</span><span class="va">i</span><span class="op">]</span><span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">G</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <p>It is now straightforward to implement the simulation algorithm itself:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">sim_IMB</span> <span class="op">&lt;-</span><span class="kw">function</span><span class="op">(</span><span class="va">delta</span>, <span class="va">sigma</span>, <span class="va">scoretab</span><span class="op">)</span>
-<span class="op">{</span>
-  <span class="va">nI</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">delta</span><span class="op">)</span>
-  <span class="va">nP</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">scoretab</span><span class="op">)</span>
-  <span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nP</span>, <span class="va">nI</span><span class="op">)</span>
-  <span class="va">r</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="va">nI</span>, <span class="va">nP</span>, replace<span class="op">=</span><span class="cn">TRUE</span>, prob<span class="op">=</span><span class="va">scoretab</span><span class="op">)</span>
-  <span class="va">b_r</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nI</span><span class="op">+</span><span class="fl">1</span>, <span class="va">nI</span><span class="op">)</span>
-  <span class="kw">for</span> <span class="op">(</span><span class="va">s</span> <span class="kw">in</span> <span class="fl">0</span><span class="op">:</span><span class="va">nI</span><span class="op">)</span> <span class="va">b_r</span><span class="op">[</span><span class="va">s</span><span class="op">+</span><span class="fl">1</span>,<span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="op">(</span><span class="va">delta</span> <span class="op">-</span> <span class="va">s</span><span class="op">*</span><span class="va">sigma</span><span class="op">)</span><span class="op">)</span>
-  <span class="co"># so far, as in Algorithm A, but now compute the </span>
-  <span class="co"># matrix of elementary symmetric functions rather</span>
-  <span class="co"># than the MLE of ability at each sum score</span>
-  <span class="va">G</span> <span class="op">=</span> <span class="fu">makeG</span><span class="op">(</span><span class="va">b_r</span><span class="op">)</span>
-  <span class="kw">for</span> <span class="op">(</span><span class="va">p</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">nP</span><span class="op">)</span>
-  <span class="op">{</span>
-    <span class="va">s</span> <span class="op">=</span> <span class="va">r</span><span class="op">[</span><span class="va">p</span><span class="op">]</span>
-    <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="va">nI</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span>
-    <span class="op">{</span>
-      <span class="kw">if</span> <span class="op">(</span><span class="va">s</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="kw">break</span>
-      <span class="kw">if</span> <span class="op">(</span><span class="va">s</span> <span class="op">==</span> <span class="va">i</span><span class="op">)</span>
-      <span class="op">{</span>
-        <span class="va">x</span><span class="op">[</span><span class="va">p</span>, <span class="fl">1</span><span class="op">:</span><span class="va">i</span><span class="op">]</span> <span class="op">=</span> <span class="fl">1</span>
-        <span class="kw">break</span>
-      <span class="op">}</span>
-      <span class="va">pi_s</span> <span class="op">=</span> <span class="op">(</span><span class="va">b_r</span><span class="op">[</span><span class="va">r</span><span class="op">[</span><span class="va">p</span><span class="op">]</span><span class="op">+</span><span class="fl">1</span>, <span class="va">i</span><span class="op">]</span> <span class="op">*</span> <span class="va">G</span><span class="op">[</span><span class="va">r</span><span class="op">[</span><span class="va">p</span><span class="op">]</span><span class="op">+</span><span class="fl">1</span>, <span class="va">s</span>, <span class="va">i</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">/</span><span class="va">G</span><span class="op">[</span><span class="va">r</span><span class="op">[</span><span class="va">p</span><span class="op">]</span><span class="op">+</span><span class="fl">1</span>, <span class="va">s</span><span class="op">+</span><span class="fl">1</span>, <span class="va">i</span><span class="op">]</span>
-      <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="va">pi_s</span><span class="op">)</span>
-      <span class="op">{</span>
-        <span class="va">x</span><span class="op">[</span><span class="va">p</span>, <span class="va">i</span><span class="op">]</span> <span class="op">=</span> <span class="fl">1</span>
-        <span class="va">s</span> <span class="op">=</span> <span class="va">s</span> <span class="op">-</span> <span class="fl">1</span>
-      <span class="op">}</span>
-    <span class="op">}</span>
-  <span class="op">}</span>
-  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">sim_IMB</span> <span class="op">&lt;-</span><span class="kw">function</span><span class="op">(</span><span class="va">delta</span>, <span class="va">sigma</span>, <span class="va">scoretab</span><span class="op">)</span></span>
+<span><span class="op">{</span></span>
+<span>  <span class="va">nI</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">delta</span><span class="op">)</span></span>
+<span>  <span class="va">nP</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">scoretab</span><span class="op">)</span></span>
+<span>  <span class="va">x</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nP</span>, <span class="va">nI</span><span class="op">)</span></span>
+<span>  <span class="va">r</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="va">nI</span>, <span class="va">nP</span>, replace<span class="op">=</span><span class="cn">TRUE</span>, prob<span class="op">=</span><span class="va">scoretab</span><span class="op">)</span></span>
+<span>  <span class="va">b_r</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nI</span><span class="op">+</span><span class="fl">1</span>, <span class="va">nI</span><span class="op">)</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">s</span> <span class="kw">in</span> <span class="fl">0</span><span class="op">:</span><span class="va">nI</span><span class="op">)</span> <span class="va">b_r</span><span class="op">[</span><span class="va">s</span><span class="op">+</span><span class="fl">1</span>,<span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="op">(</span><span class="va">delta</span> <span class="op">-</span> <span class="va">s</span><span class="op">*</span><span class="va">sigma</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="co"># so far, as in Algorithm A, but now compute the </span></span>
+<span>  <span class="co"># matrix of elementary symmetric functions rather</span></span>
+<span>  <span class="co"># than the MLE of ability at each sum score</span></span>
+<span>  <span class="va">G</span> <span class="op">=</span> <span class="fu">makeG</span><span class="op">(</span><span class="va">b_r</span><span class="op">)</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">p</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">nP</span><span class="op">)</span></span>
+<span>  <span class="op">{</span></span>
+<span>    <span class="va">s</span> <span class="op">=</span> <span class="va">r</span><span class="op">[</span><span class="va">p</span><span class="op">]</span></span>
+<span>    <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="va">nI</span><span class="op">:</span><span class="fl">1</span><span class="op">)</span></span>
+<span>    <span class="op">{</span></span>
+<span>      <span class="kw">if</span> <span class="op">(</span><span class="va">s</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span> <span class="kw">break</span></span>
+<span>      <span class="kw">if</span> <span class="op">(</span><span class="va">s</span> <span class="op">==</span> <span class="va">i</span><span class="op">)</span></span>
+<span>      <span class="op">{</span></span>
+<span>        <span class="va">x</span><span class="op">[</span><span class="va">p</span>, <span class="fl">1</span><span class="op">:</span><span class="va">i</span><span class="op">]</span> <span class="op">=</span> <span class="fl">1</span></span>
+<span>        <span class="kw">break</span></span>
+<span>      <span class="op">}</span></span>
+<span>      <span class="va">pi_s</span> <span class="op">=</span> <span class="op">(</span><span class="va">b_r</span><span class="op">[</span><span class="va">r</span><span class="op">[</span><span class="va">p</span><span class="op">]</span><span class="op">+</span><span class="fl">1</span>, <span class="va">i</span><span class="op">]</span> <span class="op">*</span> <span class="va">G</span><span class="op">[</span><span class="va">r</span><span class="op">[</span><span class="va">p</span><span class="op">]</span><span class="op">+</span><span class="fl">1</span>, <span class="va">s</span>, <span class="va">i</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">/</span><span class="va">G</span><span class="op">[</span><span class="va">r</span><span class="op">[</span><span class="va">p</span><span class="op">]</span><span class="op">+</span><span class="fl">1</span>, <span class="va">s</span><span class="op">+</span><span class="fl">1</span>, <span class="va">i</span><span class="op">]</span></span>
+<span>      <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="va">pi_s</span><span class="op">)</span></span>
+<span>      <span class="op">{</span></span>
+<span>        <span class="va">x</span><span class="op">[</span><span class="va">p</span>, <span class="va">i</span><span class="op">]</span> <span class="op">=</span> <span class="fl">1</span></span>
+<span>        <span class="va">s</span> <span class="op">=</span> <span class="va">s</span> <span class="op">-</span> <span class="fl">1</span></span>
+<span>      <span class="op">}</span></span>
+<span>    <span class="op">}</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <p>Note that both <span class="math inline">\(\mathbf{b}\)</span> and <span class="math inline">\(\mathbf{G}\)</span> are pre-calculated outside of the loop over persons. Note further that we break as soon as we know all remaining responses.</p>
 </div>
 <div class="section level2">
@@ -278,13 +278,13 @@ g_{rsi} =
 </h3>
 <p>Note that the plots do not show times for more than a hundred items. Algorithm B depends on computing the <a href="https://en.wikipedia.org/wiki/Elementary_symmetric_polynomial" class="external-link">elementary symmetric functions</a>, the gentlest monster you have ever encountered, but still a monster in your backyard. We have used the sum-algorithm, which is perfectly reliable for tests of reasonable length, say up to 100 items. In the interaction model the item difficulties can become large quite rapidly such that, for longer tests, it may be compromised by numeric overflow. For example, with <span class="math inline">\(150\)</span> items and <span class="math inline">\(x_+\)</span> equal to <span class="math inline">\(145\)</span>:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">delta</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">150</span>,<span class="op">-</span><span class="fl">0.5</span>,<span class="fl">1.5</span><span class="op">)</span>
-<span class="va">sigma</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">150</span>,<span class="op">-</span><span class="fl">0.5</span>,<span class="fl">0.5</span><span class="op">)</span>
-<span class="va">s</span> <span class="op">=</span> <span class="fl">145</span>
-<span class="va">b_r</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="op">(</span><span class="va">delta</span><span class="op">-</span><span class="va">s</span><span class="op">*</span><span class="va">sigma</span><span class="op">)</span><span class="op">)</span>
-<span class="va">esf</span> <span class="op">=</span> <span class="fu">elsymRM</span><span class="op">(</span><span class="va">b_r</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">esf</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## [1] Inf</span></code></pre>
+<code class="sourceCode R"><span><span class="va">delta</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">150</span>,<span class="op">-</span><span class="fl">0.5</span>,<span class="fl">1.5</span><span class="op">)</span></span>
+<span><span class="va">sigma</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">150</span>,<span class="op">-</span><span class="fl">0.5</span>,<span class="fl">0.5</span><span class="op">)</span></span>
+<span><span class="va">s</span> <span class="op">=</span> <span class="fl">145</span></span>
+<span><span class="va">b_r</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="op">(</span><span class="va">delta</span><span class="op">-</span><span class="va">s</span><span class="op">*</span><span class="va">sigma</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">esf</span> <span class="op">=</span> <span class="fu">elsymRM</span><span class="op">(</span><span class="va">b_r</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">esf</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] Inf</span></span></code></pre>
 <p>The ESF are indispensable when dealing with test data and psychometric models, they are ubiquitous in <strong>dexter</strong>, but programming them for production purposes requires extra care. Our second author has developed a special FORTRAN library for dealing with very large numbers, somewhat similar to R package Brobdingnag (<span class="citation">Hankin (2007)</span>) but better and, as it happens much too often with this author, unpublished. We will revisit the problem in the future.</p>
 </div>
 <div class="section level3">
@@ -310,47 +310,47 @@ P(\mathbf{x}|\theta) = \frac{e^{x_+\theta}\prod_i b^{x_i}_{x_+i}}{\sum_s e^{s\th
 P(x_+|\theta) \propto e^{x_+\theta}\gamma_{x_+}(\mathbf{b}_{x_+})
 \]</span> Conveniently, we have already computed the elementary symmetric functions and saved them in the matrix, <span class="math inline">\(\mathbf{G}\)</span>, so:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">sample_scores</span> <span class="op">&lt;-</span><span class="kw">function</span><span class="op">(</span><span class="va">theta</span>, <span class="va">G</span><span class="op">)</span>
-<span class="op">{</span>
-  <span class="va">nI</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">G</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span>
-  <span class="va">nP</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">theta</span><span class="op">)</span>
-  <span class="va">scores</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nP</span><span class="op">)</span>
-  <span class="kw">for</span> <span class="op">(</span><span class="va">p</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">nP</span><span class="op">)</span>
-  <span class="op">{</span>
-    <span class="va">prop</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nI</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span>
-    <span class="kw">for</span> <span class="op">(</span><span class="va">s</span> <span class="kw">in</span> <span class="fl">0</span><span class="op">:</span><span class="va">nI</span><span class="op">)</span>
-    <span class="op">{</span>
-      <span class="va">prop</span><span class="op">[</span><span class="va">s</span><span class="op">+</span><span class="fl">1</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">p</span><span class="op">]</span><span class="op">*</span><span class="va">s</span><span class="op">)</span> <span class="op">*</span> <span class="va">G</span><span class="op">[</span><span class="va">s</span><span class="op">+</span><span class="fl">1</span>, <span class="va">s</span><span class="op">+</span><span class="fl">1</span>, <span class="va">nI</span><span class="op">]</span>
-    <span class="op">}</span>
-    <span class="va">scores</span><span class="op">[</span><span class="va">p</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="va">nI</span>, <span class="fl">1</span>, prob<span class="op">=</span><span class="va">prop</span><span class="op">)</span>
-  <span class="op">}</span>
-  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">scores</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">sample_scores</span> <span class="op">&lt;-</span><span class="kw">function</span><span class="op">(</span><span class="va">theta</span>, <span class="va">G</span><span class="op">)</span></span>
+<span><span class="op">{</span></span>
+<span>  <span class="va">nI</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">G</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span><span class="op">]</span></span>
+<span>  <span class="va">nP</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">theta</span><span class="op">)</span></span>
+<span>  <span class="va">scores</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nP</span><span class="op">)</span></span>
+<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">p</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">nP</span><span class="op">)</span></span>
+<span>  <span class="op">{</span></span>
+<span>    <span class="va">prop</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="va">nI</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span></span>
+<span>    <span class="kw">for</span> <span class="op">(</span><span class="va">s</span> <span class="kw">in</span> <span class="fl">0</span><span class="op">:</span><span class="va">nI</span><span class="op">)</span></span>
+<span>    <span class="op">{</span></span>
+<span>      <span class="va">prop</span><span class="op">[</span><span class="va">s</span><span class="op">+</span><span class="fl">1</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="va">p</span><span class="op">]</span><span class="op">*</span><span class="va">s</span><span class="op">)</span> <span class="op">*</span> <span class="va">G</span><span class="op">[</span><span class="va">s</span><span class="op">+</span><span class="fl">1</span>, <span class="va">s</span><span class="op">+</span><span class="fl">1</span>, <span class="va">nI</span><span class="op">]</span></span>
+<span>    <span class="op">}</span></span>
+<span>    <span class="va">scores</span><span class="op">[</span><span class="va">p</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="va">nI</span>, <span class="fl">1</span>, prob<span class="op">=</span><span class="va">prop</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">scores</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="mle">MLE<a class="anchor" aria-label="anchor" href="#mle"></a>
 </h3>
 <p>How to find the MLE of ability under a Rasch model is explained in our blog entry about the Warm estimator. Here we use the <code><a href="https://rdrr.io/r/stats/uniroot.html" class="external-link">uniroot()</a></code> function to find the root.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># MLE ability estimate for dichotomous interaction model</span>
-<span class="va">IM_mle</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">delta</span>, <span class="va">sigma</span><span class="op">)</span>
-<span class="op">{</span>
-  <span class="va">scores</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">delta</span><span class="op">)</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span>
-  
-  <span class="va">Es_x</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">s</span><span class="op">)</span>
-  <span class="op">{</span>
-    <span class="va">delta</span> <span class="op">=</span> <span class="va">delta</span> <span class="op">-</span> <span class="va">s</span><span class="op">*</span><span class="va">sigma</span>
-    <span class="kw">function</span><span class="op">(</span><span class="va">theta</span><span class="op">)</span> 
-    <span class="op">{</span>
-      <span class="va">Pi</span> <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">delta</span> <span class="op">-</span> <span class="va">theta</span><span class="op">)</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span>
-      <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Pi</span><span class="op">)</span> <span class="op">-</span> <span class="va">s</span>
-    <span class="op">}</span>
-  <span class="op">}</span>
-
-  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="cn">Inf</span>,
-    <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">scores</span>, <span class="kw">function</span><span class="op">(</span><span class="va">s</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/uniroot.html" class="external-link">uniroot</a></span><span class="op">(</span><span class="fu">Es_x</span><span class="op">(</span><span class="va">s</span><span class="op">)</span>, interval <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>,<span class="fl">20</span><span class="op">)</span>,extendInt<span class="op">=</span><span class="st">'yes'</span><span class="op">)</span><span class="op">$</span><span class="va">root</span><span class="op">)</span>,
-    <span class="cn">Inf</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># MLE ability estimate for dichotomous interaction model</span></span>
+<span><span class="va">IM_mle</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">delta</span>, <span class="va">sigma</span><span class="op">)</span></span>
+<span><span class="op">{</span></span>
+<span>  <span class="va">scores</span> <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">delta</span><span class="op">)</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span></span>
+<span>  </span>
+<span>  <span class="va">Es_x</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">s</span><span class="op">)</span></span>
+<span>  <span class="op">{</span></span>
+<span>    <span class="va">delta</span> <span class="op">=</span> <span class="va">delta</span> <span class="op">-</span> <span class="va">s</span><span class="op">*</span><span class="va">sigma</span></span>
+<span>    <span class="kw">function</span><span class="op">(</span><span class="va">theta</span><span class="op">)</span> </span>
+<span>    <span class="op">{</span></span>
+<span>      <span class="va">Pi</span> <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="va">delta</span> <span class="op">-</span> <span class="va">theta</span><span class="op">)</span><span class="op">+</span><span class="fl">1</span><span class="op">)</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">Pi</span><span class="op">)</span> <span class="op">-</span> <span class="va">s</span></span>
+<span>    <span class="op">}</span></span>
+<span>  <span class="op">}</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="cn">Inf</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">scores</span>, <span class="kw">function</span><span class="op">(</span><span class="va">s</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/uniroot.html" class="external-link">uniroot</a></span><span class="op">(</span><span class="fu">Es_x</span><span class="op">(</span><span class="va">s</span><span class="op">)</span>, interval <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>,<span class="fl">20</span><span class="op">)</span>,extendInt<span class="op">=</span><span class="st">'yes'</span><span class="op">)</span><span class="op">$</span><span class="va">root</span><span class="op">)</span>,</span>
+<span>    <span class="cn">Inf</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2 unnumbered">
@@ -387,7 +387,7 @@ P(x_+|\theta) \propto e^{x_+\theta}\gamma_{x_+}(\mathbf{b}_{x_+})
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer>

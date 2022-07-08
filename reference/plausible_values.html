@@ -87,45 +87,62 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">plausible_values</span><span class="op">(</span>
-  <span class="va">dataSrc</span>,
-  parms <span class="op">=</span> <span class="cn">NULL</span>,
-  predicate <span class="op">=</span> <span class="cn">NULL</span>,
-  covariates <span class="op">=</span> <span class="cn">NULL</span>,
-  nPV <span class="op">=</span> <span class="fl">1</span>,
-  use_draw <span class="op">=</span> <span class="cn">NULL</span>,
-  prior.dist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>, <span class="st">"mixture"</span><span class="op">)</span>,
-  merge_within_persons <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plausible_values</span><span class="op">(</span></span>
+<span>  <span class="va">dataSrc</span>,</span>
+<span>  parms <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  predicate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  nPV <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  use_draw <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  prior.dist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>, <span class="st">"mixture"</span><span class="op">)</span>,</span>
+<span>  merge_within_persons <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>dataSrc</dt>
 <dd><p>a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score</p></dd>
+
+
 <dt>parms</dt>
 <dd><p>An object returned by function <code>fit_enorm</code> containing parameter estimates. If parms are provided, item parameters are considered known. 
 If parms = NULL, plausible values are marginalized over the posterior distribution of the item parameters and uncertainty of the item parameters is taken into account.</p></dd>
+
+
 <dt>predicate</dt>
 <dd><p>an expression to filter data. If missing, the function will use 
 all data in dataSrc</p></dd>
+
+
 <dt>covariates</dt>
 <dd><p>name or a vector of names of the variables to group the populations used to improve the prior.
 A covariate must be a discrete person property (e.g. not a float) that indicates nominal categories, e.g. gender or school.
 If dataSrc is a data.frame, it must contain the covariate.</p></dd>
+
+
 <dt>nPV</dt>
 <dd><p>Number of plausible values to draw per person.</p></dd>
+
+
 <dt>use_draw</dt>
 <dd><p>When the ENORM was fitted with a Gibbs sampler, this specifies the use of a particular sample of item parameters used to generate the plausible value(s). If NULL, the posterior means are used. If outside range, the last iteration will be used.</p></dd>
+
+
 <dt>prior.dist</dt>
 <dd><p>use a normal prior or a mixture of two normals</p></dd>
+
+
 <dt>merge_within_persons</dt>
 <dd><p>If a person took multiple booklets, this indicates
 whether plausible values are generated per person (TRUE) or per booklet (FALSE)</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A data.frame with columns booklet_id, person_id, booklet_score and nPV plausible values
+    
+
+<p>A data.frame with columns booklet_id, person_id, booklet_score and nPV plausible values
 named PV1...PVn.</p>
     </div>
     <div id="references">
@@ -136,9 +153,9 @@ Psychometrika. 2016; 81: 274-289. See also the vignette.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="st">":memory:"</span>, </span>
-<span class="r-in">   person_properties<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>gender<span class="op">=</span><span class="st">"&lt;unknown&gt;"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="add_booklet.html">add_booklet</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrData</span>, <span class="st">"agg"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="st">":memory:"</span>, </span></span>
+<span class="r-in"><span>   person_properties<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>gender<span class="op">=</span><span class="st">"&lt;unknown&gt;"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="add_booklet.html">add_booklet</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrData</span>, <span class="st">"agg"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> no column `person_id` provided, automatically generating unique person id's</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $items</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "S1DoCurse"   "S1DoScold"   "S1DoShout"   "S1WantCurse" "S1WantScold"</span>
@@ -153,33 +170,33 @@ Psychometrika. 2016; 81: 274-289. See also the vignette.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $columns_ignored</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "anger"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span class="fu"><a href="add_item_properties.html">add_item_properties</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrProperties</span><span class="op">)</span></span>
+<span class="r-in"><span><span class="fu"><a href="add_item_properties.html">add_item_properties</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrProperties</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4 item properties for 24 items added or updated</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">f</span><span class="op">=</span><span class="fu"><a href="fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">pv_M</span><span class="op">=</span><span class="fu">plausible_values</span><span class="op">(</span><span class="va">db</span>,<span class="va">f</span>,<span class="op">(</span><span class="va">mode</span><span class="op">==</span><span class="st">"Do"</span><span class="op">)</span><span class="op">&amp;</span><span class="op">(</span><span class="va">gender</span><span class="op">==</span><span class="st">"Male"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">pv_F</span><span class="op">=</span><span class="fu">plausible_values</span><span class="op">(</span><span class="va">db</span>,<span class="va">f</span>,<span class="op">(</span><span class="va">mode</span><span class="op">==</span><span class="st">"Do"</span><span class="op">)</span><span class="op">&amp;</span><span class="op">(</span><span class="va">gender</span><span class="op">==</span><span class="st">"Female"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/ecdf.html" class="external-link">ecdf</a></span><span class="op">(</span><span class="va">pv_M</span><span class="op">$</span><span class="va">PV1</span><span class="op">)</span>, </span>
-<span class="r-in">   main<span class="op">=</span><span class="st">"Do: males versus females"</span>, xlab<span class="op">=</span><span class="st">"Ability"</span>, col<span class="op">=</span><span class="st">"red"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/ecdf.html" class="external-link">ecdf</a></span><span class="op">(</span><span class="va">pv_F</span><span class="op">$</span><span class="va">PV1</span><span class="op">)</span>, col<span class="op">=</span><span class="st">"green"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.2</span>,<span class="fl">0.9</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"female"</span>, <span class="st">"male"</span><span class="op">)</span> , </span>
-<span class="r-in">   lty<span class="op">=</span><span class="fl">1</span>, col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'green'</span>, <span class="st">'red'</span><span class="op">)</span>, bty<span class="op">=</span><span class="st">'n'</span>, cex<span class="op">=</span><span class="fl">.75</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">pv_M</span><span class="op">=</span><span class="fu">plausible_values</span><span class="op">(</span><span class="va">db</span>,<span class="va">f</span>,<span class="op">(</span><span class="va">mode</span><span class="op">==</span><span class="st">"Want"</span><span class="op">)</span><span class="op">&amp;</span><span class="op">(</span><span class="va">gender</span><span class="op">==</span><span class="st">"Male"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">pv_F</span><span class="op">=</span><span class="fu">plausible_values</span><span class="op">(</span><span class="va">db</span>,<span class="va">f</span>,<span class="op">(</span><span class="va">mode</span><span class="op">==</span><span class="st">"Want"</span><span class="op">)</span><span class="op">&amp;</span><span class="op">(</span><span class="va">gender</span><span class="op">==</span><span class="st">"Female"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/ecdf.html" class="external-link">ecdf</a></span><span class="op">(</span><span class="va">pv_M</span><span class="op">$</span><span class="va">PV1</span><span class="op">)</span>, </span>
-<span class="r-in">   main<span class="op">=</span><span class="st">"Want: males versus females"</span>, xlab<span class="op">=</span><span class="st">" Ability"</span>, col<span class="op">=</span><span class="st">"red"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/ecdf.html" class="external-link">ecdf</a></span><span class="op">(</span><span class="va">pv_F</span><span class="op">$</span><span class="va">PV1</span><span class="op">)</span>,col<span class="op">=</span><span class="st">"green"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.2</span>,<span class="fl">0.9</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"female"</span>, <span class="st">"male"</span><span class="op">)</span> , </span>
-<span class="r-in">   lty<span class="op">=</span><span class="fl">1</span>, col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'green'</span>, <span class="st">'red'</span><span class="op">)</span>, bty<span class="op">=</span><span class="st">'n'</span>, cex<span class="op">=</span><span class="fl">.75</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">f</span><span class="op">=</span><span class="fu"><a href="fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">pv_M</span><span class="op">=</span><span class="fu">plausible_values</span><span class="op">(</span><span class="va">db</span>,<span class="va">f</span>,<span class="op">(</span><span class="va">mode</span><span class="op">==</span><span class="st">"Do"</span><span class="op">)</span><span class="op">&amp;</span><span class="op">(</span><span class="va">gender</span><span class="op">==</span><span class="st">"Male"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">pv_F</span><span class="op">=</span><span class="fu">plausible_values</span><span class="op">(</span><span class="va">db</span>,<span class="va">f</span>,<span class="op">(</span><span class="va">mode</span><span class="op">==</span><span class="st">"Do"</span><span class="op">)</span><span class="op">&amp;</span><span class="op">(</span><span class="va">gender</span><span class="op">==</span><span class="st">"Female"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/ecdf.html" class="external-link">ecdf</a></span><span class="op">(</span><span class="va">pv_M</span><span class="op">$</span><span class="va">PV1</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>   main<span class="op">=</span><span class="st">"Do: males versus females"</span>, xlab<span class="op">=</span><span class="st">"Ability"</span>, col<span class="op">=</span><span class="st">"red"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/ecdf.html" class="external-link">ecdf</a></span><span class="op">(</span><span class="va">pv_F</span><span class="op">$</span><span class="va">PV1</span><span class="op">)</span>, col<span class="op">=</span><span class="st">"green"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.2</span>,<span class="fl">0.9</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"female"</span>, <span class="st">"male"</span><span class="op">)</span> , </span></span>
+<span class="r-in"><span>   lty<span class="op">=</span><span class="fl">1</span>, col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'green'</span>, <span class="st">'red'</span><span class="op">)</span>, bty<span class="op">=</span><span class="st">'n'</span>, cex<span class="op">=</span><span class="fl">.75</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">pv_M</span><span class="op">=</span><span class="fu">plausible_values</span><span class="op">(</span><span class="va">db</span>,<span class="va">f</span>,<span class="op">(</span><span class="va">mode</span><span class="op">==</span><span class="st">"Want"</span><span class="op">)</span><span class="op">&amp;</span><span class="op">(</span><span class="va">gender</span><span class="op">==</span><span class="st">"Male"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">pv_F</span><span class="op">=</span><span class="fu">plausible_values</span><span class="op">(</span><span class="va">db</span>,<span class="va">f</span>,<span class="op">(</span><span class="va">mode</span><span class="op">==</span><span class="st">"Want"</span><span class="op">)</span><span class="op">&amp;</span><span class="op">(</span><span class="va">gender</span><span class="op">==</span><span class="st">"Female"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/ecdf.html" class="external-link">ecdf</a></span><span class="op">(</span><span class="va">pv_M</span><span class="op">$</span><span class="va">PV1</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>   main<span class="op">=</span><span class="st">"Want: males versus females"</span>, xlab<span class="op">=</span><span class="st">" Ability"</span>, col<span class="op">=</span><span class="st">"red"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/ecdf.html" class="external-link">ecdf</a></span><span class="op">(</span><span class="va">pv_F</span><span class="op">$</span><span class="va">PV1</span><span class="op">)</span>,col<span class="op">=</span><span class="st">"green"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="op">-</span><span class="fl">2.2</span>,<span class="fl">0.9</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"female"</span>, <span class="st">"male"</span><span class="op">)</span> , </span></span>
+<span class="r-in"><span>   lty<span class="op">=</span><span class="fl">1</span>, col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'green'</span>, <span class="st">'red'</span><span class="op">)</span>, bty<span class="op">=</span><span class="st">'n'</span>, cex<span class="op">=</span><span class="fl">.75</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plausible_values-1.png" alt="" width="700" height="433"></span>
-<span class="r-in">   </span>
-<span class="r-in"><span class="fu"><a href="close_project.html">close_project</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span>    </span>
-<span class="r-in"></span>
+<span class="r-in"><span>   </span></span>
+<span class="r-in"><span><span class="fu"><a href="close_project.html">close_project</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span>    </span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -194,7 +211,7 @@ Psychometrika. 2016; 81: 274-289. See also the vignette.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

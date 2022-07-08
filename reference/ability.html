@@ -87,69 +87,92 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">ability</span><span class="op">(</span>
-  <span class="va">dataSrc</span>,
-  <span class="va">parms</span>,
-  predicate <span class="op">=</span> <span class="cn">NULL</span>,
-  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MLE"</span>, <span class="st">"EAP"</span>, <span class="st">"WLE"</span><span class="op">)</span>,
-  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>, <span class="st">"Jeffreys"</span><span class="op">)</span>,
-  use_draw <span class="op">=</span> <span class="cn">NULL</span>,
-  mu <span class="op">=</span> <span class="fl">0</span>,
-  sigma <span class="op">=</span> <span class="fl">4</span>,
-  standard_errors <span class="op">=</span> <span class="cn">FALSE</span>,
-  merge_within_persons <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span>
-
-<span class="fu">ability_tables</span><span class="op">(</span>
-  <span class="va">parms</span>,
-  design <span class="op">=</span> <span class="cn">NULL</span>,
-  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MLE"</span>, <span class="st">"EAP"</span>, <span class="st">"WLE"</span><span class="op">)</span>,
-  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>, <span class="st">"Jeffreys"</span><span class="op">)</span>,
-  use_draw <span class="op">=</span> <span class="cn">NULL</span>,
-  mu <span class="op">=</span> <span class="fl">0</span>,
-  sigma <span class="op">=</span> <span class="fl">4</span>,
-  standard_errors <span class="op">=</span> <span class="cn">TRUE</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">ability</span><span class="op">(</span></span>
+<span>  <span class="va">dataSrc</span>,</span>
+<span>  <span class="va">parms</span>,</span>
+<span>  predicate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MLE"</span>, <span class="st">"EAP"</span>, <span class="st">"WLE"</span><span class="op">)</span>,</span>
+<span>  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>, <span class="st">"Jeffreys"</span><span class="op">)</span>,</span>
+<span>  use_draw <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  mu <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  sigma <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  standard_errors <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  merge_within_persons <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ability_tables</span><span class="op">(</span></span>
+<span>  <span class="va">parms</span>,</span>
+<span>  design <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MLE"</span>, <span class="st">"EAP"</span>, <span class="st">"WLE"</span><span class="op">)</span>,</span>
+<span>  prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>, <span class="st">"Jeffreys"</span><span class="op">)</span>,</span>
+<span>  use_draw <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  mu <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  sigma <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  standard_errors <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>dataSrc</dt>
 <dd><p>a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score</p></dd>
+
+
 <dt>parms</dt>
 <dd><p>object produced by <code><a href="fit_enorm.html">fit_enorm</a></code> or a data.frame with columns item_id, item_score and, 
 depending on parametrization, a column named either beta/delta, eta or b</p></dd>
+
+
 <dt>predicate</dt>
 <dd><p>An optional expression to subset data, if NULL all data is used</p></dd>
+
+
 <dt>method</dt>
 <dd><p>Maximum Likelihood (MLE), Expected A posteriori (EAP) or Weighted Likelihood (WLE)</p></dd>
+
+
 <dt>prior</dt>
 <dd><p>If an EAP estimate is produced one can choose a normal prior or
 Jeffreys prior; i.e., a prior proportional to the square root of test information.</p></dd>
+
+
 <dt>use_draw</dt>
 <dd><p>When parms is Bayesian, use_draw is 
 the index of the posterior sample of the item 
 parameters that will be used for generating plausible values. 
 If use_draw=NULL, a posterior mean is used. 
 If outside range, the last iteration will be used.</p></dd>
+
+
 <dt>mu</dt>
 <dd><p>Mean of the normal prior</p></dd>
+
+
 <dt>sigma</dt>
 <dd><p>Standard deviation of the normal prior</p></dd>
+
+
 <dt>standard_errors</dt>
 <dd><p>If true standard-errors are produced</p></dd>
+
+
 <dt>merge_within_persons</dt>
 <dd><p>for persons who were administered multiple booklets, 
 whether to provide just one ability value (TRUE) or one per booklet(FALSE)</p></dd>
+
+
 <dt>design</dt>
 <dd><p>A data.frame with columns item_id and optionally booklet_id. If the column booklet_id is not included, the score 
 transformation table will be based on all items found in the design. If design is NULL
 and parms is an enorm fit object the score transformation table will be computed based on the test design 
 that was used to fit the items.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <dl><dt>ability</dt>
+    
+
+<dl><dt>ability</dt>
 <dd><p>a data.frame with columns: booklet_id, person_id, booklet_score, theta and optionally se (standard error)</p></dd>
 
   <dt>ability_tables</dt>
@@ -172,8 +195,8 @@ Psychometrika, 54(3), 427-450.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="st">":memory:"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="add_booklet.html">add_booklet</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrData</span>, <span class="st">"agg"</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="st">":memory:"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="add_booklet.html">add_booklet</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrData</span>, <span class="st">"agg"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> no column `person_id` provided, automatically generating unique person id's</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $items</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "S1DoCurse"   "S1DoScold"   "S1DoShout"   "S1WantCurse" "S1WantScold"</span>
@@ -188,22 +211,22 @@ Psychometrika, 54(3), 427-450.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $columns_ignored</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "gender" "anger" </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">f</span> <span class="op">=</span> <span class="fu"><a href="fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">mle</span> <span class="op">=</span> <span class="fu">ability_tables</span><span class="op">(</span><span class="va">f</span>, method<span class="op">=</span><span class="st">"MLE"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">eap</span> <span class="op">=</span> <span class="fu">ability_tables</span><span class="op">(</span><span class="va">f</span>, method<span class="op">=</span><span class="st">"EAP"</span>, mu<span class="op">=</span><span class="fl">0</span>, sigma<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">wle</span> <span class="op">=</span> <span class="fu">ability_tables</span><span class="op">(</span><span class="va">f</span>, method<span class="op">=</span><span class="st">"WLE"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">wle</span><span class="op">$</span><span class="va">booklet_score</span>, <span class="va">wle</span><span class="op">$</span><span class="va">theta</span>, xlab<span class="op">=</span><span class="st">"test-score"</span>, ylab<span class="op">=</span><span class="st">"ability est."</span>, pch<span class="op">=</span><span class="fl">19</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">mle</span><span class="op">$</span><span class="va">booklet_score</span>, <span class="va">mle</span><span class="op">$</span><span class="va">theta</span>, col<span class="op">=</span><span class="st">"red"</span>, pch<span class="op">=</span><span class="fl">19</span>,<span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">eap</span><span class="op">$</span><span class="va">booklet_score</span>, <span class="va">eap</span><span class="op">$</span><span class="va">theta</span>, col<span class="op">=</span><span class="st">"blue"</span>, pch<span class="op">=</span><span class="fl">19</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topleft"</span>, legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"WLE"</span>, <span class="st">"MLE"</span>, <span class="st">"EAP N(0,1)"</span><span class="op">)</span>, </span>
-<span class="r-in">        col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"black"</span>, <span class="st">"red"</span>, <span class="st">"blue"</span><span class="op">)</span>, bty <span class="op">=</span> <span class="st">"n"</span>,pch <span class="op">=</span> <span class="fl">19</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">f</span> <span class="op">=</span> <span class="fu"><a href="fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">mle</span> <span class="op">=</span> <span class="fu">ability_tables</span><span class="op">(</span><span class="va">f</span>, method<span class="op">=</span><span class="st">"MLE"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">eap</span> <span class="op">=</span> <span class="fu">ability_tables</span><span class="op">(</span><span class="va">f</span>, method<span class="op">=</span><span class="st">"EAP"</span>, mu<span class="op">=</span><span class="fl">0</span>, sigma<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">wle</span> <span class="op">=</span> <span class="fu">ability_tables</span><span class="op">(</span><span class="va">f</span>, method<span class="op">=</span><span class="st">"WLE"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">wle</span><span class="op">$</span><span class="va">booklet_score</span>, <span class="va">wle</span><span class="op">$</span><span class="va">theta</span>, xlab<span class="op">=</span><span class="st">"test-score"</span>, ylab<span class="op">=</span><span class="st">"ability est."</span>, pch<span class="op">=</span><span class="fl">19</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">mle</span><span class="op">$</span><span class="va">booklet_score</span>, <span class="va">mle</span><span class="op">$</span><span class="va">theta</span>, col<span class="op">=</span><span class="st">"red"</span>, pch<span class="op">=</span><span class="fl">19</span>,<span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/points.html" class="external-link">points</a></span><span class="op">(</span><span class="va">eap</span><span class="op">$</span><span class="va">booklet_score</span>, <span class="va">eap</span><span class="op">$</span><span class="va">theta</span>, col<span class="op">=</span><span class="st">"blue"</span>, pch<span class="op">=</span><span class="fl">19</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topleft"</span>, legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"WLE"</span>, <span class="st">"MLE"</span>, <span class="st">"EAP N(0,1)"</span><span class="op">)</span>, </span></span>
+<span class="r-in"><span>        col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"black"</span>, <span class="st">"red"</span>, <span class="st">"blue"</span><span class="op">)</span>, bty <span class="op">=</span> <span class="st">"n"</span>,pch <span class="op">=</span> <span class="fl">19</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="ability-1.png" alt="" width="700" height="433"></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="close_project.html">close_project</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="close_project.html">close_project</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -218,7 +241,7 @@ Psychometrika, 54(3), 427-450.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

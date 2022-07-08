@@ -87,25 +87,32 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">get_responses</span><span class="op">(</span>
-  <span class="va">dataSrc</span>,
-  predicate <span class="op">=</span> <span class="cn">NULL</span>,
-  columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"person_id"</span>, <span class="st">"item_id"</span>, <span class="st">"item_score"</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_responses</span><span class="op">(</span></span>
+<span>  <span class="va">dataSrc</span>,</span>
+<span>  predicate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"person_id"</span>, <span class="st">"item_id"</span>, <span class="st">"item_score"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>dataSrc</dt>
 <dd><p>a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score</p></dd>
+
+
 <dt>predicate</dt>
 <dd><p>an expression to select data on</p></dd>
+
+
 <dt>columns</dt>
 <dd><p>the columns you wish to select, can include any column in the project, see: <code><a href="get_variables.html">get_variables</a></code></p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>a data.frame of responses</p>
+    
+
+<p>a data.frame of responses</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -119,27 +126,27 @@ or possibly doing something else with it. The following example will hopefully c
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="co"># \donttest{</span></span>
-<span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># goal: fit the extended nominal response model using only persons </span></span>
-<span class="r-in"><span class="co"># without any missing responses</span></span>
-<span class="r-in"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># the following would not work since it will omit only the missing </span></span>
-<span class="r-in"><span class="co"># responses, not the persons; which is not what we want in this case</span></span>
-<span class="r-in"><span class="va">wrong</span> <span class="op">=</span> <span class="fu"><a href="fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">response</span> <span class="op">!=</span> <span class="st">'NA'</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># to select on an aggregate level, we need to gather the data and </span></span>
-<span class="r-in"><span class="co"># manipulate it ourselves</span></span>
-<span class="r-in"><span class="va">data</span> <span class="op">=</span> <span class="fu">get_responses</span><span class="op">(</span><span class="va">db</span>, </span>
-<span class="r-in">   columns<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'person_id'</span>,<span class="st">'item_id'</span>,<span class="st">'item_score'</span>,<span class="st">'response'</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span class="r-in">   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">person_id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span class="r-in">   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>any_missing <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">response</span><span class="op">==</span><span class="st">'NA'</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span class="r-in">   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="va">any_missing</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">correct</span> <span class="op">=</span> <span class="fu"><a href="fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="op">}</span><span class="co"># }</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># goal: fit the extended nominal response model using only persons </span></span></span>
+<span class="r-in"><span><span class="co"># without any missing responses</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># the following would not work since it will omit only the missing </span></span></span>
+<span class="r-in"><span><span class="co"># responses, not the persons; which is not what we want in this case</span></span></span>
+<span class="r-in"><span><span class="va">wrong</span> <span class="op">=</span> <span class="fu"><a href="fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">response</span> <span class="op">!=</span> <span class="st">'NA'</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># to select on an aggregate level, we need to gather the data and </span></span></span>
+<span class="r-in"><span><span class="co"># manipulate it ourselves</span></span></span>
+<span class="r-in"><span><span class="va">data</span> <span class="op">=</span> <span class="fu">get_responses</span><span class="op">(</span><span class="va">db</span>, </span></span>
+<span class="r-in"><span>   columns<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'person_id'</span>,<span class="st">'item_id'</span>,<span class="st">'item_score'</span>,<span class="st">'response'</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">person_id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>any_missing <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/any.html" class="external-link">any</a></span><span class="op">(</span><span class="va">response</span><span class="op">==</span><span class="st">'NA'</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span></span>
+<span class="r-in"><span>   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="va">any_missing</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">correct</span> <span class="op">=</span> <span class="fu"><a href="fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="op">}</span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -154,7 +161,7 @@ or possibly doing something else with it. The following example will hopefully c
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>
