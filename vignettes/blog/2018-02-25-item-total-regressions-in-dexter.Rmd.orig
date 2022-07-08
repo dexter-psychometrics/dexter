@@ -58,7 +58,7 @@ There are three item-test regressions on the plot: the observed one, shown as pi
 Here are some more examples, presented in pairs:
 
 ```{r, echo=FALSE, fig.show='hold', fig.width=3.5, fig.height=3.5}
-ps = open_project('pisa12_math.db')
+ps = open_project('c:/Rdatasets/pisa12_math.db')
 m = fit_inter(ps, booklet_id=='B01')
 plot(x, items=c('RT045_AN'), curtains=0, show.observed=TRUE, 
      main='Small sample (472)',cex=.8)
