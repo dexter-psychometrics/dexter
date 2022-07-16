@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Temporary issues with predicates, and how to resolve • dexter</title>
+<title>Just a Linux rant • dexter</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../../favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="../../favicon-32x32.png">
 <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../../apple-touch-icon.png">
@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../../pkgdown.css" rel="stylesheet">
 <script src="../../pkgdown.js"></script><link href="../../extra.css" rel="stylesheet">
-<meta property="og:title" content="Temporary issues with predicates, and how to resolve">
+<meta property="og:title" content="Just a Linux rant">
 <meta property="og:description" content="dexter">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -106,27 +106,31 @@
 
       
 
-      </header><script src="2019-05-14-issues-with-dbplyr-and-how-to-resolve_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><script src="2022-06-16-a_linux_rant_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Temporary issues with predicates, and how to resolve</h1>
-                        <h4 data-toc-skip class="author">Jesse Koops</h4>
+      <h1 data-toc-skip>Just a Linux rant</h1>
+                        <h4 data-toc-skip class="author">Ivailo Partchev</h4>
             
-            <h4 data-toc-skip class="date">2019-05-14</h4>
+            <h4 data-toc-skip class="date">2022-07-16</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/vignettes/blog/2019-05-14-issues-with-dbplyr-and-how-to-resolve.Rmd" class="external-link"><code>vignettes/blog/2019-05-14-issues-with-dbplyr-and-how-to-resolve.Rmd</code></a></small>
-      <div class="hidden name"><code>2019-05-14-issues-with-dbplyr-and-how-to-resolve.Rmd</code></div>
+      <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/vignettes/blog/2022-06-16-a_linux_rant.Rmd" class="external-link"><code>vignettes/blog/2022-06-16-a_linux_rant.Rmd</code></a></small>
+      <div class="hidden name"><code>2022-06-16-a_linux_rant.Rmd</code></div>
 
     </div>
 
     
     
-<p><em>Predicates</em> are a useful and powerful feature in <strong>dexter</strong> allowing users to filter the data passed to almost any function on arbitrarily complex combinations of the variables in the data base.</p>
-<p>Depending on the package infrastructure, some users may have experienced problems with predicates recently. This is caused by changes in the most recent version of a dependency, <strong>dbplyr 1.4</strong>. We are talking to the developers of dbplyr. In the meanwhile, problems can be avoided by downgrading dbplyr to version 1.3.</p>
-<p>Start a new R session and execute:</p>
-<pre><code><span><span class="fu"><a href="https://rdrr.io/r/utils/remove.packages.html" class="external-link">remove.packages</a></span><span class="op">(</span><span class="va">dbplyr</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span></span>
-<span><span class="fu">install_version</span><span class="op">(</span><span class="st">"dbplyr"</span>, version<span class="op">=</span><span class="st">"1.3.0"</span><span class="op">)</span></span></code></pre>
+<p>I am having a bad day, dear readers. People seem to all run into me, or try to knock me down with their bicycles, or stand in the way, or whatever. A million times. So I will rant on some Linux-related topics for a while, and at the end I will say something about installing <strong>dexter</strong> and <strong>dextergui</strong> on Ubuntu Linux for the first time. Those in a hurry please scroll down.</p>
+<p>Good or bad, it is a great day for me because I finally got rid of a Linux distribution called Elementary OS. Hallelujah! I installed it because it promised to look and feel like MacOS – not that I am so partial to Apple but my taste in design seems to have much in common with that of Steve Jobs and, of course, of <a href="https://en.wikipedia.org/wiki/Dieter_Rams" class="external-link">Dieter Rams</a>. But Elementary OS! As it is based on Ubuntu but not an official clone, it lags behind the latest versions. Various things did not work properly – most recently, the sound broke. But the most horrid thing about it is the “installation process”.</p>
+<p>Everyone who has updated Ubuntu recently knows that it is a breeze. Your home folder is preserved, and so is the software that you have installed. With that sort of expectation, I was disappointed to discover that Elementary OS insists on wiping any previous version entirely and starting from scratch. So far so good, but then it failed to recognize the main disc of a brand new computer and happily installed itself on a huge external USB hard drive without the hint of a warning, killing all data on it in the process!</p>
+<p>I am now running <a href="https://ubuntubudgie.org/" class="external-link">Ubuntu Budgie</a>, which is 22.04 LTS, runs beautifully, and it is a pleasure to look at. Don’t tell me that it is not important – otherwise we would not decorate our homes and would still live in cages.</p>
+<p>Second thing to rant about: R and Linux. R started its life as a Linux app – I think as a part of Debian Linux. Ironically, nowadays packages are easier to install on Windows than on Linux or its cousin, MacOS, because they come precompiled and are just unzipped. On Linux and MacOS, packages are typically fetched in source and compiled on the user’s machine. Compilation takes some time – not too long as of today. However, some R packages depend on Linux libraries that may not be installed on the machine. When installing the easy way from within RStudio, the process will terminate with an error message. Sometimes the message is civilized enough to tell us exactly what magic words are needed in Ubuntu or Fedora Linux to solve the problem. This is the case, for example, with packages <strong>xml2</strong> and <strong>httr</strong>, whose unsatisfied dependencies will interrupt the installation of <strong>tidyverse</strong> on a new Linux machine.</p>
+<p><strong>dexter</strong> and <strong>dextergui</strong> are not so lucky because their installation may break – the former over RccpArmadillo, and the latter over Cairo. Unfortunately, the error messages are not immediately helpful, so I will show the necessary steps here. Open up the terminal and type:</p>
+<pre><code>sudo apt update
+sudo apt install libblas-dev liblapack-dev gfortran
+sudo apt install libcairo2-dev libxt-dev</code></pre>
+<p>Now dexter and dextergui can be installed from within RStudio.</p>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
