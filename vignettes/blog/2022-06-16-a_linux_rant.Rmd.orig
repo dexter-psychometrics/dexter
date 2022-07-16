@@ -1,0 +1,31 @@
+---
+title: "Just a Linux rant"
+author: "Ivailo Partchev"
+date: "2022-07-16"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+I am having a bad day, dear readers. People seem to all run into me, or try to knock me down with their bicycles, or stand in the way, or whatever. A million times. So I will rant on some Linux-related topics for a while, and at the end I will say something about installing __dexter__ and __dextergui__ on Ubuntu Linux for the first time. Those in a hurry please scroll down.
+
+Good or bad, it is a great day for me because I finally got rid of a Linux distribution called Elementary OS. Hallelujah! I installed it because it promised to look and feel like MacOS -- not that I am so partial to Apple but my taste in design seems to have much in common with that of Steve Jobs and, of course, of [Dieter Rams](https://en.wikipedia.org/wiki/Dieter_Rams). But Elementary OS! As it is based on Ubuntu but not an official clone, it lags behind the latest versions. Various things did not work properly -- most recently, the sound broke. But the most horrid thing about it is the "installation process". 
+
+Everyone who has updated Ubuntu recently knows that it is a breeze. Your home folder is preserved, and so is the software that you have installed. With that sort of expectation, I was disappointed to discover that Elementary OS insists on wiping any previous version entirely and starting from scratch. So far so good, but then it failed to recognize the main disc of a brand new computer and happily installed itself on a huge external USB hard drive without the hint of a warning, killing all data on it in the process! 
+
+I am now running [Ubuntu Budgie](https://ubuntubudgie.org/), which is 22.04 LTS, runs beautifully, and it is a pleasure to look at. Don't tell me that it is not important -- otherwise we would not decorate our homes and would still live in cages.
+
+Second thing to rant about: R and Linux. R started its life as a Linux app -- I think as a part of Debian Linux. Ironically, nowadays packages are easier to install on Windows than on Linux or its cousin, MacOS, because they come precompiled and are just unzipped. On Linux and MacOS, packages are typically fetched in source and compiled on the user's machine. Compilation takes some time -- not too long as of today. However, some R packages depend on Linux libraries that may not be installed on the machine. When installing the easy way from within RStudio, the process will terminate with an error message. Sometimes the message is civilised enough to tell us exactly what magic words are needed in Ubuntu or Fedora Linux to solve the problem. This is the case, for example, with packages __xml2__ and __httr__, whose unsatisfied dependencies will interrupt the installation of __tidyverse__ on a new Linux machine.
+
+__dexter__ and __dextergui__ are not so lucky because their installation may break -- the former over RccpArmadillo, and the latter over Cairo. Unfortunately, the error messages are not immediately helpful, so I will show the necessary steps here. Open up the terminal and type:
+
+```
+sudo apt update
+sudo apt install libblas-dev liblapack-dev gfortran
+sudo apt install libcairo2-dev libxt-dev
+```
+
+Now dexter and dextergui can be installed from within RStudio. 

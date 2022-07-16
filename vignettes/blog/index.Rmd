@@ -11,6 +11,14 @@ p.blog-authors{font-style:italic}
 </style>
 
 
+## [Just a Linux rant](2022-06-16-a_linux_rant)
+<p class="blog-authors">Ivailo Partchev</p><p>
+I am having a bad day, dear readers. People seem to all run into me, or try to knock me down with their bicycles, or stand in the way, or whatever. A million times. So I will rant on some Linux-related topics for a while, and at the end I will say something about installing __dexter__ and __dextergui__ on Ubuntu Linux for the first time. Those in a hurry please scroll down.
+Good or bad, it is a great day for me because I finally got rid of a Linux distribution called Elementary OS. Hallelujah! I installed it because it promised to look and feel like MacOS -- not that I am so partial to Apple but my taste in design seems to have much in common with that of Steve Jobs and, of course, of [Dieter Rams](https://en.wikipedia.org/wiki/Dieter_Rams). But Elementary OS! As it is based on Ubuntu but not an official clone, it lags behind the latest versions. Various things did not work properly -- most recently, the sound broke. But the most horrid thing about it is the "installation process". 
+Everyone who has updated Ubuntu recently knows that it is a breeze. Your home folder is preserved, and so is the software that you have installed. With that sort of expectation, I was disappointed to discover that Elementary OS insists on wiping any previous version entirely and starting from scratch. So far so good, but then it failed to recognize the main disc of a brand new computer and happily installed itself on a huge external USB hard drive without the hint of a warning, killing all data on it in the process! 
+I am now running [Ubuntu Budgie](https://ubuntubudgie.org/), which is 22.04 LTS, runs beautifully, and it is a pleasure to look at. Don't tell me that it is not important -- otherwise we would not decorate our homes and would still live in cages.
+</p>[read more...](2022-06-16-a_linux_rant)
+
 ## [Simulating data from the interaction model](2022-04-05-simulating-data-from-the-interaction-model)
 <p class="blog-authors">Timo Bechger, Norman Verhelst, Ivailo Partchev</p><p>
 In a recent post, Jesse has given a somewhat involved example of simulating Rasch / PCM data with __dexter__.  In spite of the rather complex design involving planned missingness and adaptivity, the models at the heart of it are well-known. In this post, we show how to simulate from Haberman's interaction model (@IM), which is very interesting, quite useful in practice, and to our knowledge only available in __dexter__. And, as an Easter promotion, we give you two methods for the price of one: one based on rejection sampling (__dexter__'s 'official' version), and one based on sampling without rejection. But we start with a short discussion of this fascinating IRT model.
