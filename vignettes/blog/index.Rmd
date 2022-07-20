@@ -11,6 +11,14 @@ p.blog-authors{font-style:italic}
 </style>
 
 
+## [Psychometric woes (with the 2PL in particular)](2022-06-20-Woes_with_2PL)
+<p class="blog-authors">Ivailo Partchev</p><p>
+"What does it have to do with love?", Tina Turner used to sing. The psychometric equivalent would be "What does it have to do with life?". You will struggle to find an academic discipline so gloriously detached from the field which it is supposed to serve: individual assessment and testing.
+Of course, Science need not be reduced to a servant role. We want to learn and to understand the world better. We are driven by sacred scientific curiosity. Some of what I myself have written may have inspired research of the kind not likely to find practical application any time soon. The problem is not that many of the sophisticated papers and three-volume handbooks are not directly related to practical testing. But even in an introductory textbook we find that only the first few chapters can be safely and meaningfully recommended for practical application, and even they are not universally applied.
+A friend of mine got a paper rejected, and one of the arguments was that it did not cover the 3PL model -- and yet we know, the reviewer explained, that this is the most popular model in assessment. The good academic soul did not even suspect that the bulk of educational testing around the globe does not use IRT at all, much less the 3PL, and prefers to rely on classical test theory (CTT). Whole countries, from India to the UK, tend to avoid IRT; in other countries, which did adopt the 3PL (like in South America), test specialists have an interesting life. 
+For me, there are two ways to broaden the base of IRT in practical testing:
+</p>[read more...](2022-06-20-Woes_with_2PL)
+
 ## [Just a Linux rant](2022-06-16-a_linux_rant)
 <p class="blog-authors">Ivailo Partchev</p><p>
 I am having a bad day, dear readers. People seem to all run into me, or try to knock me down with their bicycles, or stand in the way, or whatever. A million times. So I will rant on some Linux-related topics for a while, and at the end I will say something about installing __dexter__ and __dextergui__ on Ubuntu Linux for the first time. Those in a hurry please scroll down.
