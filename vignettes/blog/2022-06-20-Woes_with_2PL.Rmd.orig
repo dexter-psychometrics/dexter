@@ -1,0 +1,82 @@
+---
+title: "Psychometric woes (with the 2PL in particular)"
+author: "Ivailo Partchev"
+date: "2022-07-16"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+"What does it have to do with love?", Tina Turner used to sing. The psychometric equivalent would be "What does it have to do with life?". You will struggle to find an academic discipline so gloriously detached from the field which it is supposed to serve: individual assessment and testing.
+
+Of course, Science need not be reduced to a servant role. We want to learn and to understand the world better. We are driven by sacred scientific curiosity. Some of what I myself have written may have inspired research of the kind not likely to find practical application any time soon. The problem is not that many of the sophisticated papers and three-volume handbooks are not directly related to practical testing. But even in an introductory textbook we find that only the first few chapters can be safely and meaningfully recommended for practical application, and even they are not universally applied.
+
+A friend of mine got a paper rejected, and one of the arguments was that it did not cover the 3PL model -- and yet we know, the reviewer explained, that this is the most popular model in assessment. The good academic soul did not even suspect that the bulk of educational testing around the globe does not use IRT at all, much less the 3PL, and prefers to rely on classical test theory (CTT). Whole countries, from India to the UK, tend to avoid IRT; in other countries, which did adopt the 3PL (like in South America), test specialists have an interesting life. 
+
+For me, there are two ways to broaden the base of IRT in practical testing:
+
+* in summative assessment, where the learning process is interrupted to take a snapshot of the subjects' current level of proficiency (often with considerable impact on their future lives), it is best to remain limited to the Rasch model, as it is entirely compatible with CTT and just offers a superior test equating method;
+
+* alternatively, wait until computer based education achieves a satisfactory mix of learning, formative assessment, and (perhaps?) summative assessment -- one that will be understood and endorsed not only by specialists but also by all stakeholders (in this case, 'wait' means think, develop, try out until perfectly cooked).
+
+They say that educational testing originated in Zwolle in the 14th century. By the late Middle Ages, it was common practice to rank students, while marking only came about in the 19th century. But ranking was already based on the sum scores of all students over the exams they had had. So the task we are solving to this very day in summative assessment: rank the students by proficiency, has been around for a very long time, and so has been the preferred scoring rule: the sum score, or, in the case of a test of dichotomous items, the number correct. There are many reasons for this long-standing popularity. The rule is simple, easy to understand, and generally accepted as fair. It is important to note that the rule is known to everybody in advance. Last not least, century-long attempts to find any serious faults with it or come up with anything substantially better have not been particularly convincing.
+
+Originating at the beginning of the 20th century and reached maturity in the 1960s, CTT basically tried to add scientific support to the sum score, introducing concepts such as test reliability and test validity. 
+
+Sum scores are not directly comparable between different forms of the same test and must be equated to a common scale. The Rasch model replaced a plethora of equating methods, some of them heuristic if not arbitrary, others heavily relying on assumptions, with an elegant, theoretically grounded solution. In all other respects it is compatible with CTT because it preserves the scoring rule: everybody who has the same score on the same test form will obtain the same ability estimate. Along with this practically salient feature, the Rasch model opens up important and profound insights, such as the possibility to study the true posterior distribution of a person’s latent trait by sampling plausible values; however, these are beyond the scope of this writing.
+
+Whether we equate with traditional methods or with IRT, design issues are of paramount importance. But, instead of showing you how to assemble your test forms (alias booklets) into a well-connected design, your IRT textbook most probably continues with other models that can be applied to the same old booklet: the 2PL, the 3PL, the 4PL$\dots$ Widely regarded as improvements over the Rasch model, these are less suited to practical testing. In what follows, I will concentrate mostly on the 2PL. The 3PL will be mentioned occasionally and the 4PL not at all, because by then the nature of my concerns will have been explained.
+
+The 2PL model is similar to the Rasch model except that each of the logistic curves that regress the probability of a correct response to an item on the latent trait is allowed to have a different slope. With so many degrees of freedom given up, the model is expected to fit at least marginally better than the Rasch model. However, model fit is not so important in the situation, as the model does not express any particular statement about the state of nature that must be either disproved or, if that does not happen, tentatively accepted. All we want to do is equate our tests!
+
+The different slopes in the 2PL model seem to correspond to the different discrimination measures in CTT, such as the item-total and the item-rest correlations. The reality is that the 2PL breaks with CTT because it replaces its scoring rule, the sum score, with a weighted sum score, where the weights are related to the different slopes. The ability estimate now depends not only on how many items were answered correctly, but which items. And this opens up some serious issues:
+
+* the contribution of each correct response to the ability estimate is not known in advance: it is determined post hoc based on the test responses. Imagine this done in sports, say, as a replacement to the scoring tables in decathlon!
+
+* stakeholders might accept that a more difficult item should give more credit when answered correctly, but trace lines are often flatter for more difficult items and steeper for the easier one (I will try to explain why below) -- thus, the score weights tend to go to the opposite of perceived justice!
+
+* we cannot really explain to the stakeholders _why_ an item should bring twice as much credit than another item. We can offer theories (far too many to feel really comfortable), but we cannot tell a highly discriminating item from a less discriminating one by just looking at its content, the way we can tell easy from difficult items; nor can we produce more or less discriminating items at leisure.
+
+One of the theories is that differences between the slopes are related to a lack of perfect unidimensionality in the test. This may be attractive because of the parallel with the loadings in factor analysis -- however, it leads to the conclusion that slopes must be context-dependent: surround the item with different items than before, and its slope might change.
+
+I can see two main reasons for a trace line to be flat, and both have to do with guessing. First, a multiple choice item may be written badly -- for example, two of the three wrong responses (distractors) are so improbable that the examinee is left with only two plausible responses. For the less able student the item reduces to coin flipping with a success probability of 0.5. When using the 2PL, the slope will immediately flatten.
+
+But even if the items are well written, the more difficult items will elicit more guessing, and that will flatten the trace line in the 2PL. Let us perform a small simulation. I will take 500 samples from the normal distribution to represent abilities, $\theta$, and 21 numbers spaced equally between -2 and +2 as item difficulties, $\beta$. Compute the logistic probabilities at $\theta-\beta$ and simulate two sets of item responses: one based on random guessing with a success probability of 0.25 (assume all our simulated items have four response categories), and one on an honest response according to the Rasch model. Now, if the logistic probability is below 0.25, use the guessed response, otherwise the honest one. This corresponds to a rational behaviour when a person guesses on an item if that is a potentially winning strategy. Then, use the popular R package, mirt, to estimate the 1PL, 2PL, and 3PL models.
+
+```{r, echo= FALSE, warning=FALSE, message=FALSE}
+np = 500
+ni = 21
+ta = plogis(outer(rnorm(np), seq(-2,2,length=ni), '-')) |> data.frame()
+names(ta) = sprintf('X%02d', 1:ni)
+l = np*ni
+guess = matrix( runif(l) < .25, np, ni) + 0
+solve = (ta > matrix(runif(l), np, ni)) + 0
+ta = ifelse(ta < .25, guess, solve)
+
+library(mirt)
+i1 = mirt(ta, model = 1, itemtype = "Rasch", verbose=FALSE)
+i2 = mirt(ta, model = 1, itemtype = "2PL", verbose=FALSE)
+i3 = mirt(ta, model = 1, itemtype = "3PL", verbose=FALSE)
+plot(i1, type='trace')
+plot(i2, type='trace')
+plot(i3, type='trace')
+```
+
+We know that 1PL was the true model, and that the rule to avoid guessing was not obeyed. Note how the slopes of the 2PL trace lines get flatter and flatter as the item becomes more difficulties. This is even better seen in a plot of estimated slopes against true difficulties:
+
+```{r, echo=F, warning=F, message=F}
+Slope = sapply(coef(i2), function(x)x[1])[1:21]
+Difficulty = seq(-2,2,length=ni)
+plot(Difficulty, Slope)
+```
+
+Now, try to sell the idea that easier items should give more credit than difficult items -- if you can. Looking at the results for the 3PL model, we see that, by trying to take guessing into account, it gets back to the correct idea that the slopes are all equal. However, we notice that, even in such an easy example, the 3PL takes much longer to converge: depending on the random numbers used in the simulation, the 1PL and 2PL models will converge in less than 20 iterations, while the 3PL might not converge fully in 500 iterations. This should be expected, as there are solid mathematical proofs that the model is unidentified in principle. Besides, we notice that the 3PL has a very hard time estimating the asymptotes for the easy items. This is because nobody guesses on an easy item, so there is no data for a precise estimate. But the final argument against the 3PL model is that it is not clear why cheating should be built into the model and into the scoring system. Try doing that in sports! I would much rather model the regulated part, get the upper part of the trace lines in place -- after all, tests are often used to select the best candidates, and if the worst candidates come away with a bonus by cheating, how will the 3PL stop them, and do we care? The _need_ to guess can be physically reduced with a well-considered multi-stage test of the kind implemented in dexterMST -- not a CAT based on the 2PL model, hopefully, because the combination raises problems to yet another level.
+
+So is there nothing good to be said about the 2PL model? Of course there is. A better fitting model may be very useful in research situations. It is also good for exploratory and diagnostic purposes, although in dexter we have assigned this role to Haberman's interaction model, which is actually more general than the 2PL while avoiding its problematic aspects (from the viewpoint of testing). Modern programs typically allow the slopes to be negative, overcoming an old and naive practice to constrain them to be positive "on theoretical grounds". This is particularly important when analysing opinion data. People do not simply like Biden better than Trump -- if they like one, they typically dislike the other. A 2PL where the slopes can be negative acts like a poor man's unfolding model, while a 2PL with slopes constrained to be positive would at best tell us only half of the story. In testing, a negative slope would identify an item where the correct answer key is wrong -- in spite of maximum care, this happens in about 2% of all items and can be corrected -- in programs like dexter, easily and without headaches or loss of data.
+
+### References
+
+This is a position paper, so no references. In the process of writing it, I have reinvented or reinterpreted work by Eric Maris, Paul De Boeck, Ernesto San Martin, Gunter Maris, Timo Bechger, and others, but solely with the concern whether we need the 2PL in practical testing, and why.
