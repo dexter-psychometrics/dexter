@@ -51,6 +51,9 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
   if(format != 'compressed') stop(paste('Only compressed format is supported at this time', 
                                         'use the inexpand tool from oplm to compress your data'))
   
+  check_file(scr_path)
+  check_file(dat_path)
+  
   scr = readSCR(scr_path)
   scr$itemLabels = trimws(scr$itemLabels)
   
@@ -228,6 +231,9 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
           cat('\nThe following responses were found in the data but they are not defined in the .scr file or coded as missing responses.')
           cat('Possible causes are that not all missing characters are correctly specified, your screen and dat files do not match ')
           cat('or responses_start is incorrect.\n')
+          unknown_responses = dbGetQuery(db, 'SELECT item_id, response, COUNT(*) AS tally FROM dxresponses GROUP BY item_id, response;') |>
+            semi_join(unknown_responses, by=c('item_id','response'))
+                  
           print(unknown_responses)
           e$message = 'Invalid responses, see output'
         } 
@@ -324,7 +330,15 @@ readCML = function(cml_path)
 }
 
 
-### functions borrowed from oplike package ###
+
+oplm_r2c =  function(x)
+{
+  y = try({sapply(x,rawToChar)}, silent=TRUE)
+  if(inherits(y, "try-error"))
+    y = sapply(x,intToUtf8)
+  
+  trimws(y)
+}
 
 readSCR = function (scrfile) 
 {
@@ -389,7 +403,7 @@ readSCR = function (scrfile)
   list(nit = nit, nMarg = nMarg, nStat = nStat, itemLabels = itemLabels, 
        booklet_position = c(fmt[1], fmt[1] + fmt[2] - 1L),
        responses_start = fmt[3], response_length = fmt[5],
-       margLabels = trimws(sapply(margLabels,rawToChar)), 
+       margLabels = oplm_r2c(margLabels), 
        globCal = globCal, 
        discrim = discrim, maxScore = maxScore, 
        nBook = nb, bookOn = inUse, nitBook = nitb, 

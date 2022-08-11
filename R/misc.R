@@ -284,6 +284,15 @@ check_dataSrc = function(x)
   stop_("dataSrc must be of type 'DBIconnection', 'data.frame' or 'matrix'")
 }
 
+check_file = function(x, name = deparse(substitute(x)))
+{
+  if(!length(x)== 1 && is.character(x))
+    stop_(paste(name, 'must be a string'))
+  
+  if(!file.exists(x))
+    stop_(sprintf('file "%s" does not exist', x))
+}
+
 check_db = function(x)
 {
   if(length(x)== 1 && is.character(x) && file.exists(x))
