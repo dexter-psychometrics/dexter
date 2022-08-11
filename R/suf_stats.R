@@ -58,7 +58,7 @@ get_sufStats_nrm = function(respData, check_sanity=TRUE)
       err = TRUE
     }
     if(err)
-      stop_('Some items have only one response category or lack a zero score category',call.=FALSE)
+      stop_('Some items have only one response category or lack a zero score category')
   }
   sufs$ssI = ssI
   
