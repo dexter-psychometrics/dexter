@@ -181,12 +181,9 @@ plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL,
       mutate_at(vars(starts_with('PV')), rscore, b=b, a=a, first=items$first,last=items$last,cntr=cnt, use_b_matrix = use_b_matrix)
   }
   
-  pv = pv %>%
-    select(.data$booklet_id,.data$person_id, starts_with('PV')) 
-  
-  pv = pv[, c(1,2,keep.which+2)]
-  colnames(pv) = c('booklet_id','person_id', paste0('PS',1:nPS))
-  pv
+  pv = select(pv, all_of(covariates), .data$booklet_id,.data$person_id, matches('^PV\\d+$')) %>%
+    rename_with(gsub,pattern='^PV(?=\\d+$)',replacement='PS', perl=TRUE) 
+
 }
 
 
