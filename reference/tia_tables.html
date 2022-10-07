@@ -93,7 +93,8 @@ at item and test level</p>
 <span>  <span class="va">dataSrc</span>,</span>
 <span>  predicate <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"raw"</span>, <span class="st">"averaged"</span>, <span class="st">"compared"</span><span class="op">)</span>,</span>
-<span>  max_scores <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"observed"</span>, <span class="st">"theoretical"</span><span class="op">)</span></span>
+<span>  max_scores <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"observed"</span>, <span class="st">"theoretical"</span><span class="op">)</span>,</span>
+<span>  distractor <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -119,6 +120,10 @@ shown in separate tables and compared across booklets</p></dd>
 <dd><p>use the observed maximum item score or the theoretical maximum item score 
 according to the scoring rules in the database to determine pvalues and maximum scores</p></dd>
 
+
+<dt>distractor</dt>
+<dd><p>add a tia for distractors, only useful for selected response (MC) items</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
@@ -130,6 +135,10 @@ according to the scoring rules in the database to determine pvalues and maximum 
  
 <dt>items</dt>
 <dd><p>a data.frame (or list if type='compared') of statistics at item level</p></dd>
+
+<dt>items</dt>
+<dd><p>a data.frame of statistics at the response level (if distractor==TRUE), i.e. 
+rvalue (pvalue for response) and rar (rest-alternative correlation)</p></dd>
 
 </dl></div>
 
