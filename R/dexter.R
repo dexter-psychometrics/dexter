@@ -79,19 +79,19 @@ start_new_project = function(rules, db_name="dexter.db", person_properties = NUL
   
   if(NROW(rules)>0)
   {
-	sanity = rules %>%
-		group_by(.data$item_id) %>%
-		summarise(less_than_two_scores = length(unique(.data$item_score))<2,
-				duplicated_responses = any(duplicated(.data$response)),
-				min_score_not_zero = min(.data$item_score)>0) %>%
-		filter(.data$less_than_two_scores | .data$duplicated_responses | .data$min_score_not_zero)
+  	sanity = rules %>%
+  		group_by(.data$item_id) %>%
+  		summarise(less_than_two_scores = n_distinct(.data$item_score)<2,
+  				duplicated_responses = any(duplicated(.data$response)),
+  				min_score_not_zero = min(.data$item_score)>0) %>%
+  		filter(.data$less_than_two_scores | .data$duplicated_responses | .data$min_score_not_zero)
 
     if (nrow(sanity)>0)
-	{
-      message("There were problems with your scoring rules.\nCheck the output below for possible reasons.\n")
-      print(as.data.frame(sanity))
-      stop('Scoring rules are not valid')
-	}
+  	{
+        message("There were problems with your scoring rules.\nCheck the output below for possible reasons.\n")
+        print(as.data.frame(sanity))
+        stop('Scoring rules are not valid')
+  	}
   } 
 
   if (inherits(db_name,'character'))

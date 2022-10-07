@@ -8,7 +8,8 @@ tia_tables(
   dataSrc,
   predicate = NULL,
   type = c("raw", "averaged", "compared"),
-  max_scores = c("observed", "theoretical")
+  max_scores = c("observed", "theoretical"),
+  distractor = FALSE
 )
 }
 \arguments{
@@ -24,11 +25,15 @@ shown in separate tables and compared across booklets}
 
 \item{max_scores}{use the observed maximum item score or the theoretical maximum item score 
 according to the scoring rules in the database to determine pvalues and maximum scores}
+
+\item{distractor}{add a tia for distractors, only useful for selected response (MC) items}
 }
 \value{
 A list containing:
 \item{booklets}{a data.frame of statistics at booklet level} 
 \item{items}{a data.frame (or list if type='compared') of statistics at item level}
+\item{items}{a data.frame of statistics at the response level (if distractor==TRUE), i.e. 
+rvalue (pvalue for response) and rar (rest-alternative correlation)}
 }
 \description{
 Show simple Classical Test Analysis statistics

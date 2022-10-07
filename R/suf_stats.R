@@ -154,6 +154,8 @@ get_sufStats_tia = function(respData)
   nb = length(levels(respData$design$booklet_id))
   nit = length(levels(respData$design$item_id))
   
+  # to do: could there be a problem with empty levels in booklet id when using a predicate?
+  # I think not but to check
   frst_item = respData$design %>%
     distinct(.data$booklet_id, .keep_all=TRUE) %>%
     arrange(.data$booklet_id) %>%
@@ -166,5 +168,6 @@ get_sufStats_tia = function(respData)
   tia_C(respData$x$booklet_id, respData$x$booklet_score, respData$x$item_id, respData$x$item_score, 
         nb, nit,
         frst_item, respData$design$booklet_id, respData$design$item_id ) 
+
 }
 

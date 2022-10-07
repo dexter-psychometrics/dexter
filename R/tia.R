@@ -16,12 +16,15 @@
 #' shown in separate tables and compared across booklets
 #' @param max_scores use the observed maximum item score or the theoretical maximum item score 
 #' according to the scoring rules in the database to determine pvalues and maximum scores
+#' @param distractor add a tia for distractors, only useful for selected response (MC) items
 #' @return A list containing:
 #' \item{booklets}{a data.frame of statistics at booklet level} 
 #' \item{items}{a data.frame (or list if type='compared') of statistics at item level}
+#' \item{items}{a data.frame of statistics at the response level (if distractor==TRUE), i.e. 
+#' rvalue (pvalue for response) and rar (rest-alternative correlation)}
 #'
 tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compared'),
-                      max_scores = c('observed','theoretical')) 
+                      max_scores = c('observed','theoretical'), distractor=FALSE) 
 {
   type = match.arg(type)
   max_scores = match.arg(max_scores)
@@ -29,7 +32,10 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
   
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
-  respData = get_resp_data(dataSrc, qtpredicate, env=env, summarised=FALSE)
+  out = list()
+  
+  respData = get_resp_data(dataSrc, qtpredicate, env=env, summarised=FALSE,
+                           extra_columns = if(distractor){'response'}else{NULL})
   
   items = get_sufStats_tia(respData) 
   
@@ -48,7 +54,7 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
   if(anyNA(items$rit))
     warning("Items without score variation have been removed from the test statistics")
   
-  booklets = items %>%
+  out$booklets = items %>%
     filter(complete.cases(.data$rit)) %>%
     group_by(.data$booklet_id) %>% 
     summarise(n_items=n(),
@@ -65,14 +71,14 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
   # different views of item statistics
   if(type=='raw')
   {
-    items = select(items, .data$booklet_id, .data$item_id, .data$mean_score, .data$sd_score, 
+    out$items = select(items, .data$booklet_id, .data$item_id, .data$mean_score, .data$sd_score, 
                            .data$max_score, .data$pvalue, .data$rit, .data$rir, .data$n_persons) %>%
       mutate_if(is.factor, as.character) %>%
       df_format()
     
   } else if(type=='averaged')
   {
-    items = items %>% 
+    out$items = items %>% 
       group_by(.data$item_id) %>%
       summarise( n_booklets = n(),
                  w_mean_score=weighted.mean(.data$mean_score, w = .data$n_persons),
@@ -90,7 +96,7 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
   {
     items = mutate_if(items, is.factor, as.character)
     
-    items = list(
+    out$items = list(
       pvalue = items %>% 
         select(.data$booklet_id,.data$item_id,.data$pvalue) %>% 
         spread(key=.data$booklet_id, value=.data$pvalue),
@@ -105,7 +111,38 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
     )
   }
   
-  
-  list(booklets=booklets, items=items)
+  if(distractor)
+  {
+    d = respData$x |>
+      mutate(bs=.data$booklet_score-.data$item_score) |>
+      group_by(.data$booklet_id, .data$item_id, .data$response) |>
+      summarise(n=n(), rbsum=sum(.data$bs), rb2sum=sum(.data$bs^2), .groups='drop_last') |>
+      mutate(N = sum(.data$n), 
+             bmean = sum(.data$rbsum)/.data$N, 
+             b2mean = sum(.data$rb2sum)/.data$N,
+             rvalue = .data$n/.data$N,
+             rar = (.data$rbsum/.data$N - .data$rvalue*.data$bmean)/
+                   sqrt(.data$rvalue*(1-.data$rvalue)*(.data$b2mean - .data$bmean^2)) ) |>
+      ungroup() 
+    
+    # type==compared makes little sense to me for distractors, so treated same as raw
+    if(type=='averaged')
+    {
+      d = d %>%
+        group_by(.data$item_id, .data$response) %>%
+        summarise(n=sum(.data$n),
+                  rvalue=weighted.mean(.data$rvalue,.data$N),
+                  rar=weighted.mean(.data$rar,.data$N, na.rm=TRUE)) %>%
+        ungroup()
+    } else
+    {
+      d = select(d, .data$booklet_id, .data$item_id, .data$response, .data$n, .data$rvalue, .data$rar)
+    }
+    
+    out$distractors = d %>%
+      mutate_if(is.factor, as.character) %>%
+      df_format()
+  }
+  out
 }
 

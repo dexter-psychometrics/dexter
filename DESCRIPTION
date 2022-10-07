@@ -29,7 +29,7 @@ Imports:
     methods,
     utils
 LinkingTo: Rcpp, RcppArmadillo (>= 0.10.0)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 Suggests:
     knitr,
     rmarkdown,

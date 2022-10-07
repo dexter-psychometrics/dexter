@@ -85,6 +85,15 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
     return(resp_data.from_resp_data(dataSrc, extra_columns=extra_columns, summarised=summarised, 
                                     protect_x=protect_x,merge_within_persons = merge_within_persons))
   }
+  if(!is.null(extra_columns))
+  {
+      if(is.matrix(dataSrc)) stop("column(s): ", paste(extra_columns,collapse=','), ' not found.')
+      if(inherits(dataSrc,'data.frame') && ! all(extra_columns %in% colnames(dataSrc)))
+      {
+        stop("column(s): ", paste(setdiff(extra_columns,colnames(dataSrc)),collapse=','), ' not found.')
+      }
+  }
+  
   if(raw)
   {
     x = get_responses_(dataSrc, qtpredicate = qtpredicate, env = env, 

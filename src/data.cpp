@@ -1150,7 +1150,8 @@ IntegerVector score_tab_single(const IntegerVector& scores, const int max_score)
 }
 
 
-// about 10-30 times faster than R (small bonus for rasch) (to~do: check for severly incomplete designs)
+// about 10-30 times faster than R (to~do: check for severly incomplete designs)
+
 // [[Rcpp::export]]
 DataFrame tia_C(const IntegerVector& booklet_id, const IntegerVector& booklet_score, const IntegerVector& item_id, const IntegerVector& item_score, const int nb, const int nit, 
 				const IntegerVector& frst_item, const IntegerVector& ds_booklet_id, const IntegerVector& ds_item_id ) 
@@ -1174,18 +1175,11 @@ DataFrame tia_C(const IntegerVector& booklet_id, const IntegerVector& booklet_sc
 		{
 			int indx = (booklet_id[i]-1) * nit + item_id[i] - 1;
 			int s = item_score[i];
-			if(s == 1)
-			{
-				bisum[indx]++;
-				bisum2[indx]++;
-				bic[indx] += booklet_score[i];
-			}
-			else
-			{						
-				bisum[indx] += s;
-				bisum2[indx] += s*s;
-				bic[indx] += s * booklet_score[i];					
-			}
+					
+			bisum[indx] += s;
+			bisum2[indx] += s*s;
+			bic[indx] += s * booklet_score[i];					
+
 			if(s > imax[item_id[i]])
 				imax[item_id[i]] = s;
 		}
@@ -1228,5 +1222,6 @@ DataFrame tia_C(const IntegerVector& booklet_id, const IntegerVector& booklet_sc
 							 Named("max_score") = tia_max, Named("sd_score") = tia_sd, Named("rit") = tia_rit, Named("rir") = tia_rir, 
 							 Named("n_persons") = tia_n);
 }
+
 
 
