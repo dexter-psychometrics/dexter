@@ -76,7 +76,8 @@ draw_curtains = function(qnt)
 #' @param curtains 100*the tail probability of the sum scores to be shaded. Default is 10.
 #' Set to 0 to have no curtains shown at all.
 #' @param adjust factor to adjust the smoothing bandwidth respective to the default value
-#' @param col vector of colors to use for plotting
+#' @param col vector of colors to use for plotting. The names of the vector can be responses. If the vector is not named, 
+#' colors are assigned to the most frequent responses first.
 #' @param ... further arguments to plot.
 #' @return 
 #' Silently, a data.frame of response categories and colors used. Potentially useful if you want to customize the legend or 
@@ -169,8 +170,19 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
     ungroup() %>%
     arrange(desc(.data$n), .data$response) 
   
+  # could use a placeholder for an empty string or a function that can handle it
+  # to do: user argument col could be a named vector
+  # the help should be extended for col argument
   # cannot make this a list since a response can be an empty string
-  rsp_colors = rsp_colors %>% add_column(color = qcolors(nrow(rsp_colors),col))
+  if(is.null(names(col)))
+  {
+    rsp_colors$color = qcolors(nrow(rsp_colors),col)
+  } else
+  {
+    rsp_colors$color = col[rsp_colors$response]
+    rsp_colors$color[rsp_colors$response==''] = col[names(col)=='']
+    rsp_colors[is.na(rsp_colors)] == '#A9A9A9'
+  }
   
   
   lapply(split(rsp_counts, rsp_counts$booklet_id), function(y)
@@ -247,19 +259,7 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
   invisible(df_format(rsp_colors))
 }
 
-# pp_segments = function(maxA, maxB, psbl, col='lightgray',cex=0.6)
-# {
-#   clip(0,maxA,0,maxB) 
-#   segments(0L, psbl, psbl, 0L, col=col, xpd=FALSE)
-#   h = strheight('1',cex=cex)
-# 
-#   y = par('usr')[3] + h/2
-#   psblx = psbl[psbl<=maxA]
-#   text(psblx - y, y, psblx, cex=.6,col=col, xpd=TRUE,adj=c(0.4,0.4))
-#   
-#   psbly = psbl[psbl>maxA]
-#   text(maxA - y,psbly-maxA+y, psbly,col=col,xpd=TRUE,cex=cex)
-# }
+
 adjust_pp_scores = function(maxA, psbl,cex)
 {
   w = max(strwidth(maxA,cex=cex), strheight('1',cex=cex)) + 0.05

@@ -32,7 +32,7 @@ according to the scoring rules in the database to determine pvalues and maximum 
 A list containing:
 \item{booklets}{a data.frame of statistics at booklet level} 
 \item{items}{a data.frame (or list if type='compared') of statistics at item level}
-\item{items}{a data.frame of statistics at the response level (if distractor==TRUE), i.e. 
+\item{distractors}{a data.frame of statistics at the response level (if distractor==TRUE), i.e. 
 rvalue (pvalue for response) and rar (rest-alternative correlation)}
 }
 \description{

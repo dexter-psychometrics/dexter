@@ -20,7 +20,7 @@
 #' @return A list containing:
 #' \item{booklets}{a data.frame of statistics at booklet level} 
 #' \item{items}{a data.frame (or list if type='compared') of statistics at item level}
-#' \item{items}{a data.frame of statistics at the response level (if distractor==TRUE), i.e. 
+#' \item{distractors}{a data.frame of statistics at the response level (if distractor==TRUE), i.e. 
 #' rvalue (pvalue for response) and rar (rest-alternative correlation)}
 #'
 tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compared'),
@@ -44,8 +44,7 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
     items$item_id = as.character(items$item_id)
     items = inner_join(
       select(items, -.data$max_score),
-      dbGetQuery(dataSrc, 'SELECT item_id, MAX(item_score) AS max_score 
-                          FROM dxscoring_rules GROUP BY item_id;'),
+      dbGetQuery(dataSrc, 'SELECT item_id, MAX(item_score) AS max_score FROM dxscoring_rules GROUP BY item_id;'),
       by='item_id')
   } 
 

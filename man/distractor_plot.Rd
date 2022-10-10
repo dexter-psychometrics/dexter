@@ -33,7 +33,8 @@ Set to 0 to have no curtains shown at all.}
 
 \item{adjust}{factor to adjust the smoothing bandwidth respective to the default value}
 
-\item{col}{vector of colors to use for plotting}
+\item{col}{vector of colors to use for plotting. The names of the vector can be responses. If the vector is not named, 
+colors are assigned to the most frequent responses first.}
 
 \item{...}{further arguments to plot.}
 }
