@@ -180,8 +180,8 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
   } else
   {
     rsp_colors$color = col[rsp_colors$response]
-    rsp_colors$color[rsp_colors$response==''] = col[names(col)=='']
-    rsp_colors[is.na(rsp_colors)] == '#A9A9A9'
+    rsp_colors$color[rsp_colors$response==''] = col[names(col)==''][1] # nog ff checken
+    rsp_colors$color[is.na(rsp_colors$color)] = '#A9A9A9'
   }
   
   

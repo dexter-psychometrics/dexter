@@ -23,7 +23,7 @@
 #' 
 #' close_project(db)
 #' 
-individual_differences <- function(dataSrc, predicate = NULL)
+individual_differences = function(dataSrc, predicate = NULL)
 {
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
@@ -61,7 +61,7 @@ individual_differences <- function(dataSrc, predicate = NULL)
 
 print.tind=function(x,...)
 {
-  cat("Chi-Square Test for the hypothesis that all respondents have the same ability:\n")
+  cat("Chi-Square Test for the hypothesis that respondents differ in ability:\n")
   print(x$est$test,...)
 }
 
@@ -73,21 +73,42 @@ coef.tind=function(object,...)
 
 plot.tind=function(x,...)
 {
-  user.args = list(...)
+  user.args = list(...); leg.args = list()
+  col = c("#4DAF4A","gray")
+  if('col' %in% names(user.args))
+  {
+    col = coalesce(as.character(user.args$col[1:2]),col)
+    user.args$col = NULL
+  }
+  
+  if(length(names(user.args))>0)
+  {
+    leg.args = user.args[endsWith(names(user.args),'legend')]
+    names(leg.args) = gsub('\\.legend$','',names(leg.args))
+    user.args = user.args[!endsWith(names(user.args),'legend')]
+  }
+  
   mx.frq=max(max(x$est$test$expected),max(x$est$test$observed))
-  default.args = list(col="#4DAF4A",
-                      ylim=c(0,mx.frq),
+  default.args = list(ylim=c(0,mx.frq),
                       xlab="Test-score", 
                       ylab="Frequency",
                       cex=0.7, 
                       bty='l',
                       pch=19)
-  override.args = list(x=0:x$inputs$max.score, y=x$est$test$observed)
+  override.args = list(x=0:x$inputs$max.score, y=x$est$test$observed,col=col[1])
  
   do.call(plot,merge_arglists(user.args,override=override.args, default=default.args))
+  
+  lines(0:x$inputs$max.score,x$inputs$observed_smooth,col=col[1])
+  lines(0:x$inputs$max.score,x$est$test$expected,col=col[2],pch=19,cex=0.7)
+  
+  do.call(graphics::legend,
+            merge_arglists(leg.args, 
+                           default=list(x="topleft", bty = "n",
+                                        lwd = 1, cex = 0.7, col = col, pch = c(19,NA),inset=0.01,
+                                        legend=c("observed", "expected")),
+                           override=list(lty = c(NA,1), col=col)))
 
-  lines(0:x$inputs$max.score,x$est$test$expected,col="gray",pch=19,cex=0.7)
-  lines(0:x$inputs$max.score,x$inputs$observed_smooth,col="lightgreen")
-  legend("topleft", legend = c("observed", "expected"), bty = "n",
-         lwd = 1, cex = 0.7, col = c("#4DAF4A", "gray"), lty = c(NA,1), pch = c(19,NA),inset=0.01)
+  
+  invisible(NULL)
 }
