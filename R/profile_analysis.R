@@ -7,7 +7,7 @@ profile_tables = function(parms, domains, item_property, design = NULL)
   
   if(length(unique(domains$item_id)) < nrow(domains))
     stop('column domains$item_id must be unique')
-  # to do: adjust mst vignette or this will cause problems
+
   parms = simplify_parms(parms,design=design,collapse_b = TRUE)
   
   domains$item_id = ffactor(as.character(domains$item_id), levels = levels(parms$items$item_id))

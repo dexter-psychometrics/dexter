@@ -42,8 +42,6 @@ test_that('profile analysis verb agg',{
   pt = profile_tables(f, get_items(db),'situation')
   
 
-  # to do: test especially profiles bayes against old dexter
-
   f = fit_enorm(db, method='Bayes')
   p = profiles(db, f, 'behavior')
   

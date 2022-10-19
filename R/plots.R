@@ -170,9 +170,6 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
     ungroup() %>%
     arrange(desc(.data$n), .data$response) 
   
-  # could use a placeholder for an empty string or a function that can handle it
-  # to do: user argument col could be a named vector
-  # the help should be extended for col argument
   # cannot make this a list since a response can be an empty string
   if(is.null(names(col)))
   {

@@ -46,28 +46,27 @@ expect_equal_respData = function(a,b, info='equal respData', ignore_booklet_leve
   invisible(a_)
 }
 
-# to do: check no grouping etc
 expect_valid_respData = function(respData, msg='respData')
 {
   expect_true(is.integer(respData$x$person_id) || is.factor(respData$x$person_id),
               info = sprintf("%s - x$person_id is not a factor but '%s'",
-                             info, typeof(respData$x$person_id)))
+                             msg, typeof(respData$x$person_id)))
   
   expect_true(is.factor(respData$x$booklet_id),
               info = sprintf("%s - x$booklet_id is not a factor but '%s'",
-                             info, typeof(respData$x$booklet_id)))
+                             msg, typeof(respData$x$booklet_id)))
   
   expect_true(is.factor(respData$design$booklet_id),
               info = sprintf("%s - design$booklet_id is not a factor but '%s'",
-                             info, typeof(respData$design$booklet_id)))
+                             msg, typeof(respData$design$booklet_id)))
   
   expect_true(is.factor(respData$design$item_id),
               info = sprintf("%s - design$item_id is not a factor but '%s'",
-                             info, typeof(respData$design$item_id)))
+                             msg, typeof(respData$design$item_id)))
   
   expect_true(is.integer(respData$x$booklet_score),
               info = sprintf("%s - x$isumSscore is not an integer but '%s'",
-                             info, typeof(respData$x$item_id)))
+                             msg, typeof(respData$x$item_id)))
   
   # check factor levels
   expect_true(n_distinct(respData$design$booklet_id) == nlevels(respData$design$booklet_id),
@@ -81,19 +80,19 @@ expect_valid_respData = function(respData, msg='respData')
   {
     expect_true(is.factor(respData$x$item_id),
                 info = sprintf("%s - x$item_id is not a factor but '%s'",
-                               info, typeof(respData$x$item_id)))
+                               msg, typeof(respData$x$item_id)))
     
     expect_true(is.integer(respData$x$item_score),
                 info = sprintf("%s - x$item_score is not an integer but '%s'",
-                               info, typeof(respData$x$item_id)))
+                               msg, typeof(respData$x$item_id)))
     
-    expect_false(is.unsorted(as.integer(respData$person_id)), info=sprintf("%s - person_id is unsorted", info))
+    expect_false(is.unsorted(as.integer(respData$person_id)), info=sprintf("%s - person_id is unsorted", msg))
     
     split(as.integer(respData$x$booklet_id), respData$x$person_id) %>%
       lapply(is.unsorted) %>%
       unlist() %>%
       any() %>%
-      expect_false(info=sprintf("%s - (person_id, booklet_id) is unsorted", info))
+      expect_false(info=sprintf("%s - (person_id, booklet_id) is unsorted", msg))
     
     respData$x %>%
       group_by(person_id, booklet_id) %>%
@@ -101,9 +100,12 @@ expect_valid_respData = function(respData, msg='respData')
       ungroup() %>%
       summarise(res = all(booklet_score == booklet_score2)) %>%
       pull(res) %>%
-      expect_true(info=sprintf("%s - booklet_score incorrect", info))
+      expect_true(info=sprintf("%s - booklet_score incorrect", msg))
     
   }
+  
+  expect_false(is_grouped_df(respData$x), info = sprintf("%s - x is grouped", msg))
+  expect_false(is_grouped_df(respData$design), info = sprintf("%s - design is grouped", msg))
   
   
   invisible(respData)

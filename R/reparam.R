@@ -16,7 +16,6 @@ simplify_parms = function(parms, design=NULL, use_draw=NULL, collapse_b=FALSE,
   
   if(inherits(parms, 'mst_enorm') && !'design' %in% names(parms$inputs))
   {
-    # to do: warnign oid? wanneer kan mst designveilig worden gebruikt?
     if(is.null(design))
       design = lapply(parms$inputs$bkList,function(bk) tibble(item_id=bk$items)) %>%
         bind_rows(.id='booklet_id')

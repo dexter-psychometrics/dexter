@@ -1,6 +1,4 @@
 
-# to do: dexterities links
-# to do: fig.cap disappears as well as custom css
 
 library(stringr)
 library(RCurl)
