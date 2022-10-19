@@ -385,8 +385,8 @@ touch_rules = function(db, rules)
 #' data.frame in long format with columns \code{person_id}, \code{booklet_id}, 
 #' \code{item_id} and \code{response} such as can usually be found in databases for example. 
 #' For booklets that are not already known in your project, you need to specify the design via the \code{design} argument.
-#' Failure to do so will result in an error. Responses to items that should be there according to the design but which do not have a correpsoning
-#' row in \code{data} will be added with \code{missing_value} used for the response. If this missing value is not defined in your scoring rules and 
+#' Failure to do so will result in an error. Responses to items that should be there according to the design but which do not have a corresponding
+#' row in \code{data} will be added with \code{missing_value} used for the response. If this missing value is not defined in your scoring rules 
 #' and \code{auto_add_unknown_rules} is set to FALSE, this will lead to an error message.
 #' 
 #' 
@@ -477,6 +477,7 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
       out$zero_rules_added = new_rules
     } else if(nrow(new_rules)>0) 
     {
+      # to do: if this is solely because missing rows, provide a different message
       message('The following responses are not in your rules (showing first 30):\n')
       as.data.frame(new_rules) %>% print(row.names=FALSE)
       stop('unknown responses')

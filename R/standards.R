@@ -19,8 +19,8 @@
 #' To easily apply this procedure, we advise to use the free digital 3DC application. This application 
 #' can be downloaded from the Cito website, see the 
 #' \href{https://www.cito.com/our-expertise/implementation/3dc}{3DC application download page}. 
-#' If you want to apply the 3DC method using paper forms instead, you can use the function plot3DC to generate the forms
-#' from the 3DC database.
+#' If you want to apply the 3DC method using paper forms instead, you can use the plot method to generate the forms
+#' from thests_par object.
 #' 
 #' Although the 3DC method is used as explained in Keuning et. al., the method we use for computing the forms is a simple
 #' maximum likelihood scaling from an IRT model, described in Moe and Verhelst (2017)
@@ -182,13 +182,21 @@ standards_db = function(par.sts, file_name, standards, population=NULL, group_le
                        cluster_nbr=x$cluster_nbr, cluster_score=x$cluster_score, booklet_score=x$booklet_score))
     })
     
-
     if(!is.null(population))
     {
-      check_df(population, c('booklet_id', 'booklet_score', 'n'))
-      #to~do: possible pop from prms?
-      if(length(intersect(booklets,population$booklet_id)) < length(booklets))
-        stop("one or more booklet_id's in your population do not exist in your sts parameters")
+      check_df(population, c('booklet_score', 'n'))
+      if('booklet_id' %in% colnames(population))
+      {
+        unknown_bk = setdiff(population$booklet_id, names(sts_par$est))
+        if(length(unknown_bk)>0)
+        {
+          stop(paste('Booklets:',paste(unknown_bk,collapse=', '),'listed in `population` were not found in the sts_par object.'))
+        }
+      } else
+      {
+        population = bind_rows(lapply(names(sts_par$est), function(booklet) mutate(population, booklet_id=booklet))) 
+      }
+
       dbExecute(db3dc, 
               "INSERT INTO Population(test_id,test_score,test_score_frequency) 
                 VALUES(:booklet_id, :booklet_score, :n);",
