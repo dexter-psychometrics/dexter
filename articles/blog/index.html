@@ -126,6 +126,18 @@ small.dont-index{display:none;}
 p.blog-authors{font-style:italic}
 </style>
 <div class="section level2">
+<h2 id="minorization-and-the-2pl">
+<a href="2022-11-03-Minorization">Minorization and the 2PL</a><a class="anchor" aria-label="anchor" href="#minorization-and-the-2pl"></a>
+</h2>
+<p class="blog-authors">
+Jesse Koops
+</p>
+<p>
+There is an interesting <a href="http://www.toetsspecials.nl/html/referentiesets/default.shtm" class="external-link">publicly available dataset</a> that has become a bit of a hobby project for me. The data takes some cleaning and restructuring which we may describe in the future. The interesting thing is that a largish set of math and reading items has been administered to a very diverse sample of students, ranging from the final grade of primary education (11-12 year olds), secondary (15-18 yo) and tertiary education (18-19 yo), 14369 persons and 280 items in total. There was some differentiation in that the easiest items were not administered in the highest grades and vice versa. But, as you can imagine, rather than showing a univariate smooth and steady increase of ability through the educational system, this resulted in the motherload of all DIF, not unlike PISA. We will use the mathematics part of this dataset. I wanted to try a factor analysis to see if there were any interesting differences in the underlying make-up of ability between the sectors. Unfortunately, there are no item properties available so we don’t know which items are about geometry or algebra, if there was or was not a context, a graph, etcetera. Therefore we are left with only the possibility for an exploratory factor analysis. Because the data is very incomplete, we need to use an IRT model. The best known option is <a href="https://CRAN.R-project.org/package=mirt" class="external-link">mirt</a> <span class="citation">(Chalmers 2012)</span>. Before trying a multi factor model I decided to try a one factor solution to see how well that went. Factor analysis with just one factor is equivalent to the standard 2PL model, which I could compare against our own package <a href="https://github.com/dexter-psychometrics/dexterMML" class="external-link">dexterMML</a>. I noted some differences in the estimates. These point to one of the difficulties one can encounter when calibrating a 2PL that merit a further look, which is what this story will be about. # Minorization and the 2PL Fitting a 2PL on this dataset takes 2.2 seconds in dexterMML and 22:17 minutes in mirt, but we know dexterMML is relatively fast for incomplete data and in this case every student only did about 10% of the items. Still, the difference is several orders of magnitude and a little concerning since the main cause seems to be that mirt failed to converge.
+</p>
+<p><a href="2022-11-03-Minorization">read more…</a></p>
+</div>
+<div class="section level2">
 <h2 id="psychometric-woes-with-the-2pl-in-particular">
 <a href="2022-06-20-Woes_with_2PL">Psychometric woes (with the 2PL in particular)</a><a class="anchor" aria-label="anchor" href="#psychometric-woes-with-the-2pl-in-particular"></a>
 </h2>
@@ -690,6 +702,9 @@ The dexter makers
 </div>
 <div id="ref-DeBoeck19">
 <p>Boeck, P. De, and Minjeong Jeon. 2019. “An Overview of Models for Response Times and Processes in Cognitive Tests.” <em>Frontiers in Psychology</em> 10. <a href="https://doi.org/10.3389/fpsyg.2019.00102" class="external-link">https://doi.org/10.3389/fpsyg.2019.00102</a>.</p>
+</div>
+<div id="ref-mirt">
+<p>Chalmers, R. Philip. 2012. “mirt: A Multidimensional Item Response Theory Package for the R Environment.” <em>Journal of Statistical Software</em> 48 (6): 1–29. <a href="http://www.jstatsoft.org/v48/i06/" class="external-link">http://www.jstatsoft.org/v48/i06/</a>.</p>
 </div>
 <div id="ref-dirkzwager2003multiple">
 <p>Dirkzwager, Arie. 2003. “Multiple Evaluation: A New Testing Paradigm That Exorcizes Guessing.” <em>International Journal of Testing</em> 3 (4): 333–52.</p>
