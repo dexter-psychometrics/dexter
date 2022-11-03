@@ -57,7 +57,7 @@ stop_no_param = function(items)
 #' \item{get_resp_data}{ returns a list with class `dx_resp_data` with elements
 #' \describe{
 #' \item{x}{
-#' when summarised is FALSE, a tibble(person_id, booklet_id, item_id, item_score, booklet_score [, extra_columns>]), sorted in such a way that
+#' when summarised is FALSE, a tibble(person_id, booklet_id, item_id, item_score, booklet_score [, extra_columns]), sorted in such a way that
 #'   all rows pertaining to the same person-booklet are together
 #'   
 #' when summarised is TRUE, a tibble(person_id, booklet_id, booklet_score [, extra_columns])}

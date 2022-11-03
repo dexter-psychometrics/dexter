@@ -24,7 +24,7 @@ I will propose my own guess about what can make the estimated discrimination par
 
 * the item discriminations are all the same because we aim to have them this way and, even if we didn't, we would not know how to make them different;
 
-* because it it a high stakes test, at least some examinees will try to guess the correct answer if the item is too difficult for them -- but, of course, they would not do this if they find the item to be easy.
+* because it is a high stakes test, at least some examinees will try to guess the correct answer if the item is too difficult for them -- but, of course, they would not do this if they find the item to be easy.
 
 Starting with these simple assumptions, I spaced 20 difficulties uniformly over the [-2,+2] continuum, and I sampled 500 abilities from the standard normal distribution. For each person-item combination, I simulated two responses, one based on random guessing with a success probability of .25 and the other based on the Rasch probability, and I retained the response that had the higher probability of success, as a rational person can be expected to do. The 1PL, 2PL, and 3PL models will be fit for this data with the popular package __mirt__, but first let us examine the item-total regressions for four items equally spaced from the easiest (Item 1) to the most difficult but two:
 
@@ -52,7 +52,7 @@ plot(m,item='X18')
 layout(1)
 ```
 
-We see that the data is where and as expected, and that the Rasch model fits quite well, particularly in the white area where the central 90% of all observations are concentrated, and always in the upper part. Only in the very difficult item 18 does it struggle a bit in the lower part. This is not surprising because I did not put different slopes in the simulated data. The surprises are yet to come as we fit the 1PL, 2PL and 3PL models.
+We see where the data is and looks as expected, and that the Rasch model fits quite well, particularly in the white area where the central 90% of all observations are concentrated, and always in the upper part. Only in the very difficult item 18 does it struggle a bit in the lower part. This is not surprising because I did not put different slopes in the simulated data. The surprises are yet to come as we fit the 1PL, 2PL and 3PL models.
 
 ```{r, echo= FALSE, warning=FALSE, message=FALSE}
 library(mirt)

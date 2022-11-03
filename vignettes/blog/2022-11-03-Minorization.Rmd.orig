@@ -1,0 +1,265 @@
+---
+title: "Minorization and the 2PL"
+author: "Jesse Koops"
+date: '2022-11-01'
+bibliography: dexter.bib
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+<style>
+table.kb{
+  margin:auto;
+  margin-bottom: 1em;
+  border-top: 1px solid #626161;
+  border-bottom: 1px solid #626161;
+}
+
+table.kb td, table.kb th{
+  padding-left:1em;
+  padding-right:1em;
+}
+table.kb th{ padding-top:1px;}
+
+caption{text-align: center !important;}
+
+</style>
+
+```{r setup, include=FALSE}
+library(knitr)
+library(printr)
+library(kableExtra)
+opts_chunk$set(echo = FALSE,message=FALSE,warning=FALSE,fig.align='center')
+library(dplyr)
+library(dexter)
+library(tidyr)
+library(dexterMML)
+library(mirt)
+options(dexter.use_tibble = TRUE,digits=2)
+
+db = open_project('c:/Rdatasets/refsets-rekenen.db')
+
+ptime = function(s){
+  ms = s
+  s = round(s)
+  h = s %/% 3600
+  m = s %/% 60
+  s = s - m * 60
+  m = m - h * 60
+  if(h>0) sprintf('%i:%02i:%02i hours',h,m,s)
+  else if(m>0) sprintf('%i:%02i minutes',m,s)
+  else(sprintf('%.1f seconds',ms))
+}
+
+```
+
+```{r mirt}
+# mirt fit took long, saved the output
+
+
+# dat = get_resp_matrix(db)
+# persons = get_persons(db) |>
+#   arrange(person_id)
+# 
+# dat = dat[order(rownames(dat)),]
+
+# time.mirt = system.time({
+#   fit.mirt = multipleGroup(dat, model=1,group=persons$populatie,
+#                            invariance=c('free_mean','free_var','slopes','intercepts'),
+#                            itemtype='gpcmIRT')
+# })
+# save(time.mirt,fit.mirt,file='mirt_rek.RData')
+
+load('c:/Rdatasets/mirt_rek.RData')
+
+# get parameters from mirt object
+
+p = coef(fit.mirt, as.data.frame=TRUE, IRTpars=TRUE)
+
+pop.mirt = lapply(p,function(x) tibble(mean=x[grepl('MEAN',rownames(x),perl=TRUE)],
+                                       sd=sqrt(x[grepl('COV',rownames(x),perl=TRUE)]))) |>
+  bind_rows(.id='populatie')
+
+
+item.mirt = tibble(item_id = rownames(p[[1]]), value=drop(p[[1]])) |>
+  mutate(pf = gsub('^.+\\.','',item_id), item_id=gsub('\\..+$','',item_id)) 
+
+a = filter(item.mirt, pf=='a1') |>
+  select(item_id, alpha=value)
+
+item.mirt = item.mirt |>
+  filter(startsWith(pf,'b')) |>
+  mutate(item_score=as.integer(gsub('\\D+','',pf))) |>
+  select(item_id,item_score,beta=value) |>
+  inner_join(a,by='item_id')
+
+rm(p,a)
+
+```
+
+```{r fit_dmml}
+time.dmml = system.time({
+  fit.dmml = fit_2pl(db, group='populatie')
+})
+
+```
+
+# Motivation
+
+There is an interesting [publicly available dataset](http://www.toetsspecials.nl/html/referentiesets/default.shtm) that has become a bit of a hobby project for me. The data takes some cleaning and restructuring which we may describe in the future. The interesting thing is that a largish set of math and reading items has been administered to a very diverse sample of students, ranging from the final grade of primary education (11-12 year olds), secondary (15-18 yo) and tertiary education (18-19 yo), `r nrow(get_persons(db))` persons and `r nrow(get_items(db))` items in total. There was some differentiation in that the easiest items were not administered in the highest grades and vice versa. But, as you can imagine, rather than showing a univariate smooth and steady increase of ability through the educational system, this resulted in the motherload of all DIF, not unlike PISA. We will use the mathematics part of this dataset.
+
+I wanted to try a factor analysis to see if there were any interesting differences in the underlying make-up of ability between the sectors. Unfortunately, there are no item properties available so we don't know which items are about geometry or algebra, if there was or was not a context, a graph, etcetera. Therefore we are left with only the possibility for an exploratory factor analysis. Because the data is very incomplete, we need to use an IRT model. The best known option is [mirt](https://CRAN.R-project.org/package=mirt) [@mirt]. Before trying a multi factor model I decided to try a one factor solution to see how well that went. Factor analysis with just one factor is equivalent to the standard 2PL model, which I could compare against our own package [dexterMML](https://github.com/dexter-psychometrics/dexterMML). I noted some differences in the estimates. These point to one of the difficulties one can encounter when calibrating a 2PL that merit a further look, which is what this story will be about.
+
+# Minorization and the 2PL
+
+Fitting a 2PL on this dataset takes `r ptime(time.dmml[3])` in dexterMML and `r ptime(time.mirt[3])` in mirt, but we know dexterMML is relatively fast for incomplete data and in this case every student only did about 10% of the items. Still, the difference is several orders of magnitude and a little concerning since the main cause seems to be that mirt failed to converge.
+
+If we look at the resulting item parameters, we also see a difference:
+
+```{r, out.extra='style="width:48%;display:inline-block;"', fig.show='hold', fig.cap='Parameters for a dichotomous 2PL, estimated with mirt and dexterMML'}
+test = inner_join(item.mirt,coef(fit.dmml), by=c('item_id','item_score'), suffix=c('.mirt','.dmml'))
+
+plot(test$alpha.dmml,test$alpha.mirt, pch=20,xlab='dexterMML',ylab='mirt',
+     main='alpha (scale)',bty='l',cex=1.2)
+
+w = which(test$alpha.mirt<0)
+
+points(mean(test$alpha.dmml[w]), mean(test$alpha.mirt[w]),cex=5,col='red')
+
+plot(test$beta.dmml,test$beta.mirt, pch=20,xlab='dexterMML',ylab='mirt',main='beta (location)',bty='l',
+     cex=1.2)
+
+
+points(mean(test$beta.dmml[w]), mean(test$beta.mirt[w]),cex=23,col='red')
+
+```
+
+For all items but two, mirt and dexterMML seem to agree quite well. But what's going on with those two items? First let's look at the fit plots of the offending items.
+
+```{r, out.extra='style="width:48%;display:inline-block;"', fig.show='hold', fig.cap='Fit according to dexterMML for the two items that get a slight negative discrimination in mirt. Grey lines show the model and black lines show the average observed scores.'}
+plot(fit.dmml, items=test$item_id[w],nbins=7)
+
+```
+
+That seems OK. How about if we compare the classical [Test and item analysis](https://dexter-psychometrics.github.io/dexter/reference/tia_tables.html) then:
+
+
+
+```{r}
+tb = tia_tables(db,type='averaged')$items |> 
+  inner_join(test,by='item_id') |>
+  filter(alpha.mirt<0) |>
+  select(item_id, pvalue, rit, rir, n_persons, alpha.dmml, beta.dmml, alpha.mirt, beta.mirt) 
+
+kable(tb, col.names = gsub('\\..+$','',colnames(tb),perl=TRUE),table.attr='class="kb"',
+      caption='Classical statistics, averaged over booklets, and IRT estimates') |>
+  add_header_above(c("TIA" = ncol(tb)-4, "dexterMML"=2,"mirt"=2))
+  
+```
+
+The two items seem a tad difficult, but a negative discrimination seems clearly wrong. We are inclined to believe the about average discrimination indicated for these two items by dexterMML.
+
+So, what's going on? The short answer is that this is a general problem that may occur in 2PL estimation, namely getting stuck at a local maximum of the likelihood rather than a global maximum.
+
+The long answer demands slightly more explanation and introduction. In a 2PL marginal model the usual method of estimation is the Expectation Maximization [EM\; @Dempster1977] algorithm. This is a general recipe for maximizing an intractable likelihood function. It consists of two steps:
+
+1. _Expectation step_. We define a function *Q* as the expected value of the log likelihood as a function of new estimates of the item and population parameters, based on summary statistics which we compute using the previous parameter estimates and the response data.
+
+2. _Maximization step_. We find the parameters for the items and population(s) that maximize *Q*.
+
+And repeat until some stopping criterium is reached. @Dempster1977 proved that this algorithm is guaranteed to improve the likelihood in each step and so will eventually converge to the optimal solution, although at an increasingly slower pace in each iteration.
+
+Unless, of course, something goes wrong.
+
+The issue we're currently dealing with is probably related to the second step, the maximization. The Q function has many parameters, but usually in IRT software it can be updated one item at a time, independent of the other items^[sometimes a few Newton-Raphson steps are taken near the end of the iterations, which do update the complete set of parameters at the same time, but this is computationally expensive in large datasets and not part of the EM iterations]. 
+
+For a single dichotomous 2PL item this is a function with two inputs and one output and the task is to find the two input values for which the output is maximized. Let's plot this likelihood-related function for our problematic items. We of course use the Q function in dexterMML so the Q function in mirt might be different. 
+
+```{r, out.extra='style="width:48%;display:inline-block;"', fig.show='hold', fig.cap='Likelihood surfaces for the two problematic items. The x denotes the optimum.'}
+
+# the debug plots make use of internal functions in dexterMML and a compilation with extra debug options
+# the specifics might all change at any time, so I'm not including the code since it won't be reproducable
+
+source("c:/projects/dexterMML/derivations/debug_plots.R")
+
+ll_plot(fit.dmml,item_id='R1S_31',alpha_lim=c(-2,3),beta_lim=c(-6,3),res=50,
+        main='Likelihood surface\nitem R1S_31')
+
+
+ll_plot(fit.dmml,item_id='R3F_13',alpha_lim=c(-2,3),beta_lim=c(-4,5),res=50,
+        main='Likelihood surface\nitem R3F_13')
+
+```
+
+These are the functions we need to maximize (in the plot, find the lightest region) for each item. A dichotomous 2PL item always has two local maxima, one with a negative discrimination and one with a positive discrimination. The two plots are rather normal for dichotomous 2PL items. For polytomous items, there is no adequate graphical representation, but they might have more than 2 local maxima.
+
+So, the problem is, a minorization^[for historic reasons, maximization is almost always done by minimizing  -1 * the function to be maximized, so the technique is called minorization, and you usually have to put a minus in front of your target function to be maximized when you supply it to the algorithm. To add to the confusion, minorization and optimization are often used interchangeably] algorithm can get stuck at a local optimum. To see how this works, we have to understand what a minorization algorithm is. Informally, a minorization algorithm finds a local minimum by evaluating a function a finite number of times. There are many optimization algortithms, several of which are included with R. A 'better' algorithm needs fewer function evaluations, since evaluations of functions are potentially time-consuming. Some algorithms just evaluate the function to be minimized, others need its first or higher order derivatives as well.
+
+But the operative word here is __local__ minimum. There are no algorithms that can determine a global minimum for any unknown function^[this is possible for convex functions, where there is necessarily only one minimum]. This means that whether the algorithm arrives at the global minimum or a local minimum depends on the starting point (and the algorithm).
+
+We can easily see the effect of the starting values by running a Minorization function on our likelihood. DexterMML uses the Dennis and Schnabel algorithm [@Dennis1983NumericalMF], used in R's `nlm()` function. We will try that one first. We take only one of the aforementioned items since the two are very similar. We use alpha=1.5, beta=2.5 and alpha=-1, beta=-1 as starting values and we see that we arrive at two minima which look like the resulting parameters from dexterMML and mirt respectively. So we now have a decent idea what's going on.
+
+```{r,out.extra='style="width:60%;display:block;margin:auto;"', fig.cap="Starting minorization at two different points. The numbers denote successive steps taken in the Dennis Schnabel algorithm."}
+
+ll_plot(fit.dmml,item_id='R1S_31',alpha_lim=c(-2,3),beta_lim=c(-6,3),res=50,x=F)
+
+trace_min(fit.dmml, item_id='R1S_31', c(1.5,2.5), method = 'nlm')
+
+trace_min(fit.dmml, item_id='R1S_31', c(-1,-1), method = 'nlm')
+
+```
+
+We can think of a number of possible solutions and the plot above immediately points to one. What if, for example, we always run the algorithm twice, starting once in the upper-right quadrant and once in the lower left quadrant and take the best result? Wouldn't we always get the optimal result? It's not a bad idea, let's try:
+
+```{r,out.extra='style="width:48%;display:inline-block;"', fig.show='hold'}
+ll_plot(fit.dmml,item_id='R1S_31',alpha_lim=c(-2,3),beta_lim=c(-6,3),res=50,x=F)
+
+trace_min(fit.dmml, item_id='R1S_31', c(2.5,3), method = 'nlm')
+
+ll_plot(fit.dmml,item_id='R1S_31',alpha_lim=c(-2,3),beta_lim=c(-6,3),res=50,x=F)
+trace_min(fit.dmml, item_id='R1S_31', c(-1,-2), method = 'nlm')
+
+```
+
+Unfortunately, as we see, starting twice is not guaranteed to finish in different spots. Clearly the relation between start and end value is not so straightforward as we might like. We can be a bit more methodical about this. Let's start at an evenly spaced number of points. We plot the starting values and a minus if the alpha goes to a negative number and a plus sign otherwise. We try this using two different optimizers, nlm which dexterMML uses and the BFGS [@bfgs1; @bfgs2; @bfgs3; @bfgs4] that mirt uses by default (mirt offers a choice of different optimizers to the user, dexterMML does not).
+
+
+```{r,out.extra='style="width:48%;display:inline-block;"', fig.show='hold', fig.cap="The relation between starting values and arriving at a postive (+) or negative (-) alpha value using the nlm and BFGS."}
+
+ll_plot(fit.dmml,item_id='R1S_31',alpha_lim=c(-2,3),beta_lim=c(-6,3),res=50,main='nlm',x=F)
+
+start_points = function(...)
+{
+  s = starts(...)
+  points(s$start_alpha, s$start_beta, pch = if_else(s$alpha>0,'+','-'))
+  s
+}
+
+s.nlm = start_points(fit.dmml, item_id='R1S_31',alpha_lim=c(-1.9,2.9),beta_lim=c(-5.9,2.9),
+           method = 'nlm')
+
+ll_plot(fit.dmml,item_id='R1S_31',alpha_lim=c(-2,3),beta_lim=c(-6,3),res=50,main='BFGS',x=F)
+
+s.bfgs = start_points(fit.dmml, item_id='R1S_31',alpha_lim=c(-1.9,2.9),beta_lim=c(-5.9,2.9),
+           method = 'BFGS')
+
+```
+
+That definitely fixes the problem for either algorithm, but starting in 400 different locations seems a bit excessive and will definitely slow down estimation. There are other options that could alleviate the problem. We could choose an optimizer that constrains the value of the discrimination parameter to be positive and one that constrains the value to be negative, and again compare the results. We might even constrain it to be strictly positive in this case because we inspected the TIA's above. This scheme is  possible, using the box constrained BFGS algorithm. In the present case it does give correct results. However constrained optimization is generally less reliable than unconstrained optimization, especially in higher dimensions. A different solution is to reparametrize in some way, to make the likelihood surface more amenable. Indeed, changing the _itemtype_ option in mirt from 'gpcmIRT' to '2PL' leads to positive alpha values for all items^['2PL' would be the normal choice in mirt in this case, I had 'gpcmIRT' left over in my code from an earlier attempt at the reading part of the dataset, which has polytomous items. 2PL is a special case of the generalized partial credit model, with in this case possibly a different internal parametrization in mirt or it could just be estimated in a slightly different way.].
+
+# Conclusion
+
+This all illustrates that it is not generally possible to have a minorization algorithm that works on any function, unless the function happens to be convex (like a 1PL). You can improve your chances by using different algorithms, different starting values or tweaking the step size. This is more art than science, and can be costly in terms of computation time. The 2PL likelihood for a single item is not a convex function, so these problems can and do sometimes occur. It is not a general failing of mirt, nor can DexterMML be considered immune to this problem. We cannot test all possible datasets after all.
+
+So even if we cannot know whether it is completely reliable, a big advantage of dexterMML in this example is that the two item curves could be easily plotted along with what little is left of the observed data in an IRT model, namely the manifest probabilities plotted against the unobservable latent ability. "Above all else, show the data" [@tufte86] is an advice that should be taken to heart^[A similar plot might be possible to make using mirt but I could not find it].
+
+The example above is not unique. I have seen similar problems before in other software. The usual case is an estimated positive alpha value for a truly negatively discriminating item, so the other way around from the present example. For example, a completely unrelated program also called Mirt [@glasmirt] was prescribed for use in the calibration of the end of primary education tests in the Netherlands. In this program it was impossible to get negative values for alpha parameters, even when purposefully introducing a key error in complete data. I don't know whether this was by design, lack of awareness of the problem or a naive assumption that key-errors do not occur. However, it was used for a number of years and also did not provide any plots, so there is a possibility that negatively discriminating items have been included in (one of the) end of primary education tests in the Netherlands.
+
+Of course, such estimation errors are relatively rare and not a cause for too much concern, depending on the circumstance. We avoid the 2PL for summative tests in any case, for wholly different and more important reasons, see e.g. [here](2020-01-15-my-more-or-less-coherent-views-on-model-fit), [here](2022-06-20-Woes_with_2PL) and [here](2020-05-27-the-information-game).
+
+
+## References
+
+
+
