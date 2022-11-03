@@ -985,7 +985,7 @@ get_items = function(db)
 #'
 get_persons = function(db){
   check_db(db)
-  dbGetQuery(db,'SELECT * FROM dxpersons ORDER BY person_id;')
+  df_format(dbGetQuery(db,'SELECT * FROM dxpersons ORDER BY person_id;'))
 }
 
 #' Get test scores

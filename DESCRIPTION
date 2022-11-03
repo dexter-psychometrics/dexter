@@ -9,7 +9,7 @@ Authors@R: c(
     person("Ivailo","Partchev", role="aut"))
 Maintainer: Jesse Koops <jesse.koops@cito.nl>
 Description: A system for the management, assessment, and psychometric analysis of data from educational and psychological tests. 
-License: GPL-3
+License: LGPL-3
 URL: https://dexter-psychometrics.github.io/dexter/
 BugReports: https://github.com/dexter-psychometrics/dexter/issues
 Encoding: UTF-8
