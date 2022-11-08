@@ -83,12 +83,17 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.2.2" id="dexter-122">dexter 1.2.2<a class="anchor" aria-label="anchor" href="#dexter-122"></a></h2>
-<ul><li>bugfix: the confidence intervals in the fit plots for the enorm were drawn to wide for polytomous items in dexter &lt;= 1.2.1. They are now correct.</li></ul></div>
+<ul><li>changed license from GPL-3 to LGPL-3</li>
+<li>tia_tables optionally includes statistics for distractors for MC questions</li>
+<li>colors for distractor plots can be specigfied per respons</li>
+<li>updated error messages</li>
+<li>bugfix: the confidence intervals in the fit plots for the enorm were drawn too wide for polytomous items in dexter &lt;= 1.2.1. They are now correct.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.2.1" id="dexter-121">dexter 1.2.1<small>2022-05-24</small><a class="anchor" aria-label="anchor" href="#dexter-121"></a></h2>
 <div class="section level3">
 <h3 id="breaking-change-1-2-1">breaking change<a class="anchor" aria-label="anchor" href="#breaking-change-1-2-1"></a></h3>
-<ul><li>an argument ‘design’ has been added to add_response_data. This obligates the user to explicitly specify the design rather than having it inferred from the data, as was the old behavior. The old behavior led to a lot of confusion, nevertheless it can be replicated by using <code>design=distinct(x,booklet_id,item_id)</code> as the design argument But it is better practice to use design information from a separate source to prevent errors.</li></ul></div>
+<ul><li>an argument ‘design’ has been added to add_response_data. This obligates the user to explicitly specify the design rather than having it inferred from the data, as was the old behavior. The old behavior led to a lot of confusion, nevertheless it can be replicated by using <code>design=distinct(x,booklet_id,item_id)</code> as the design argument, but it is better practice to use design information from a separate source to prevent errors.</li></ul></div>
 <div class="section level3">
 <h3 id="other-changes-1-2-1">other changes<a class="anchor" aria-label="anchor" href="#other-changes-1-2-1"></a></h3>
 <ul><li>adapted to comply with a change in the upcoming dplyr version.</li></ul></div>
