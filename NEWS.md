@@ -1,12 +1,16 @@
 # dexter 1.2.2
 
-* bugfix: the confidence intervals in the fit plots for the enorm were drawn to wide for polytomous items in dexter <= 1.2.1. They are now correct.
+* changed license from GPL-3 to LGPL-3
+* tia_tables optionally includes statistics for distractors for MC questions
+* colors for distractor plots can be specigfied per respons
+* updated error messages
+* bugfix: the confidence intervals in the fit plots for the enorm were drawn too wide for polytomous items in dexter <= 1.2.1. They are now correct.
 
 # dexter 1.2.1
 
 ## breaking change
 
-* an argument 'design' has been added to add_response_data. This obligates the user to explicitly specify the design rather than having it inferred from the data, as was the old behavior. The old behavior led to a lot of confusion, nevertheless it can be replicated by using `design=distinct(x,booklet_id,item_id)` as the design argument But it is better practice to use design information from a separate source to prevent errors.  
+* an argument 'design' has been added to add_response_data. This obligates the user to explicitly specify the design rather than having it inferred from the data, as was the old behavior. The old behavior led to a lot of confusion, nevertheless it can be replicated by using `design=distinct(x,booklet_id,item_id)` as the design argument, but it is better practice to use design information from a separate source to prevent errors.  
 
 ## other changes
 

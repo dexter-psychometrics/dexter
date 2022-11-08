@@ -648,12 +648,15 @@ add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_a
         msg = c(msg,sprintf('%i scoring rules with 0 score added to the rules', nrow(new_rules)))
       } else
       {
-        #if(all(new_rules$response == missing_value))
-        #{
-        #  # to do: appropriate message??
-        #}
-        message('Unknown responses (showing first 10):')
-        print(head(new_rules,10))
+        if(all(new_rules$response == missing_value))
+        {
+          message(sprintf('%i missing responses replaced by "%s", but this value is not known in the scoring rules.\nType ?add_response_data for help.',
+                          NA_cnt, missing_value))
+        } else
+        {
+          message('Unknown responses (showing first 10):')
+          print(head(new_rules,10))
+        }
         stop_("Unknown responses")
       }
     }

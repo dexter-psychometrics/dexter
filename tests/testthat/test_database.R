@@ -158,3 +158,23 @@ test_that('adding person and item properties',
   expect_true(all(persons$x == 4) && class(persons$x) == 'integer')
   dbDisconnect(db)
 })
+
+
+test_that('add_response_data',{
+  db = verbAggCopy()
+  
+  dat = tibble(person_id='x',item_id="S1DoScold",response='2',booklet_id='agg')
+
+  expect_message(expect_error({add_response_data(db, dat, missing_value='_missing_')},
+                              'Unknown responses'),
+                 '_missing_.+rules')
+  
+  i=get_items(db)
+  i$response='_missing_'
+  i$item_score=0
+  touch_rules(db,i)
+  
+  expect_output({add_response_data(db,dat,missing_value='_missing_')},'23 missing responses')
+  
+  dbDisconnect(db)
+})

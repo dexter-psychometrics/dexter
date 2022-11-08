@@ -187,14 +187,14 @@ standards_db = function(par.sts, file_name, standards, population=NULL, group_le
       check_df(population, c('booklet_score', 'n'))
       if('booklet_id' %in% colnames(population))
       {
-        unknown_bk = setdiff(population$booklet_id, names(sts_par$est))
+        unknown_bk = setdiff(population$booklet_id, names(par.sts$est))
         if(length(unknown_bk)>0)
         {
           stop(paste('Booklets:',paste(unknown_bk,collapse=', '),'listed in `population` were not found in the sts_par object.'))
         }
       } else
       {
-        population = bind_rows(lapply(names(sts_par$est), function(booklet) mutate(population, booklet_id=booklet))) 
+        population = bind_rows(lapply(names(par.sts$est), function(booklet) mutate(population, booklet_id=booklet))) 
       }
 
       dbExecute(db3dc, 

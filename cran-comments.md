@@ -1,5 +1,5 @@
 
-update includes a fix to comply to next dplyr version
+Regular update. Thanks for all the hard work!
 
 kind regards,
 Jesse
