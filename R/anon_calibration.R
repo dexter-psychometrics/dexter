@@ -189,7 +189,7 @@ EstIM  <- function(first,last, nCat, a, sufI, sufC, scoretab, regs=FALSE) {
   sigma = sigma - mean(sigma)
   ic = exp(sigma)
   se.sigma = sqrt(var.ic)
-  fit.stats = log(ic)/se.sigma
+  fit.stats = sigma/se.sigma
   
   out = list(bRM=bRM,cRM=cRM,bIM=b,cIM=ic,se.sigma=se.sigma,HIM=HIM, fit.stats=fit.stats, possible_scores = (1:length(ps)-1L)[as.logical(ps)])
   if(regs)
