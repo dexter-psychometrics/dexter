@@ -182,7 +182,7 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
   }
   
   
-  lapply(split(rsp_counts, rsp_counts$booklet_id), function(y)
+  lapply(split(rsp_counts, as.character(rsp_counts$booklet_id)), function(y)
   {
     booklet = y$booklet_id[1]
     

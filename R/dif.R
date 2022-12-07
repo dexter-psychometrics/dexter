@@ -1,7 +1,7 @@
 
 
 ## produces a matrix of statistics for pairwise DIF
-PairDIF_ <- function(beta1, beta2, acov.beta1, acov.beta2)
+PairDIF_ = function(beta1, beta2, acov.beta1, acov.beta2)
 {
   labs = rownames(beta1)
   DR = kronecker(beta2,t(beta2),FUN="-")-kronecker(beta1,t(beta1),FUN="-") 
@@ -19,7 +19,7 @@ PairDIF_ <- function(beta1, beta2, acov.beta1, acov.beta2)
 # beta1 and beta1 are both mean centered and do not contain the zero category. 
 # In general, this works if both sets of parameters have the same normalization.
 # If a reference item is set to zero, r should be its index.
-OverallDIF_ <- function(beta1, beta2, acov1, acov2)
+OverallDIF_ = function(beta1, beta2, acov1, acov2)
 {
   r = 1
   nI = length(beta1)
