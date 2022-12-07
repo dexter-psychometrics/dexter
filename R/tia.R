@@ -115,7 +115,7 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
     d = respData$x |>
       mutate(bs=.data$booklet_score-.data$item_score) |>
       group_by(.data$booklet_id, .data$item_id, .data$response) |>
-      summarise(n=n(), rbsum=sum(.data$bs), rb2sum=sum(.data$bs^2), .groups='drop_last') |>
+      summarise(item_score=first(.data$item_score), n=n(), rbsum=sum(.data$bs), rb2sum=sum(.data$bs^2), .groups='drop_last') |>
       mutate(N = sum(.data$n), 
              bmean = sum(.data$rbsum)/.data$N, 
              b2mean = sum(.data$rb2sum)/.data$N,
@@ -128,14 +128,14 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
     if(type=='averaged')
     {
       d = d %>%
-        group_by(.data$item_id, .data$response) %>%
+        group_by(.data$item_id, .data$response, .data$item_score) %>%
         summarise(n=sum(.data$n),
-                  rvalue=weighted.mean(.data$rvalue,.data$N),
-                  rar=weighted.mean(.data$rar,.data$N, na.rm=TRUE)) %>%
+                  rvalue = weighted.mean(.data$rvalue,.data$N),
+                  rar = weighted.mean(.data$rar,.data$N, na.rm=TRUE)) %>%
         ungroup()
     } else
     {
-      d = select(d, .data$booklet_id, .data$item_id, .data$response, .data$n, .data$rvalue, .data$rar)
+      d = select(d, .data$booklet_id, .data$item_id, .data$response, .data$item_score, .data$n, .data$rvalue, .data$rar)
     }
     
     out$distractors = d %>%
