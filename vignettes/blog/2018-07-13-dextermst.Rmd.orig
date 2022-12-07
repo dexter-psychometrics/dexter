@@ -9,12 +9,14 @@ categories:
   - R
 resource_files:
   - img
+editor_options: 
+  chunk_output_type: console
 ---
 
 
 ```{r setup, include=FALSE}
 library(knitr)
-opts_chunk$set(fig.align='center',fig.width=5,fig.height=5, dev='CairoPNG') 
+opts_chunk$set(fig.align='center',fig.width=5,fig.height=5, dev='CairoPNG',message=FALSE,warning=FALSE) 
 
 par_hook = function(before, options, envir)
 {
@@ -274,11 +276,13 @@ observed = dbGetQuery(db,
   summarise(observed_score = sum(item_score)) %>% 
   group_by(booklet_id, person_id) %>% 
   mutate(booklet_score = sum(observed_score))
+
 ## average
 observed_smooth = observed %>%
   group_by(booklet_id, booklet_score, item_domain) %>%
   summarise(observed_score = mean(observed_score)) %>%
   ungroup()
+
 ## Ignore the MST design and use dexter
 prof_naive = dexter::profile_tables(f, dbReadTable(db, 'items'), 'item_domain') %>%
   mutate(booklet_id=gsub('^\\w+-','',booklet_id))
@@ -289,10 +293,10 @@ ggplot(full_join(prof, prof_naive,
                  by=c('booklet_score','booklet_id','item_domain')) %>%
          full_join(observed_smooth, by=c('booklet_score','booklet_id','item_domain')),
        aes(x = booklet_score, y = expected_domain_score.x, colour = item_domain)) +
-  geom_line(size=0.3) + 
+  geom_line(linewidth=0.3) + 
   geom_point(aes(y=observed_score), size = 0.1) +
   facet_grid(booklet_id~.,scale='free_y') + 
-  geom_line(aes(y=expected_domain_score.y), linetype = 'dotted',size=0.4) +
+  geom_line(aes(y=expected_domain_score.y), linetype = 'dotted',linewidth=0.4) +
   theme(panel.background = element_blank()) +
   labs(y='domain score', x ='test score')
 
@@ -352,8 +356,8 @@ Note that a distribution that is not normal is not, in any way, ab-normal. In ed
 delta.cml.mst = coef(f)$beta
 
 # ordinary cml with dexter
-long.data = gather(bk1, key='item_id', value='item_score', -.data$person_id) %>%
-  bind_rows(gather(bk2, key='item_id', value='item_score', -.data$person_id))
+long.data = gather(bk1, key='item_id', value='item_score', -person_id) %>%
+  bind_rows(gather(bk2, key='item_id', value='item_score', -person_id))
 
 par.cml.lin = fit_enorm(long.data)
 delta.cml.lin = coef(par.cml.lin)$beta 
@@ -392,12 +396,12 @@ Note that the colors indicate whether the items occurred in <span style="color:r
 
 ```{r, eval=FALSE}
 tia_tables(get_responses_mst(db))$booklets %>%
-  select(booklet_id, meanP)
+  select(booklet_id, mean_pvalue)
 ```
 
 ```{r, echo=TRUE}
 tia_tables(get_responses_mst(db))$booklets %>%
-  select(booklet_id, meanP) %>%
+  select(booklet_id, mean_pvalue) %>%
   kable(caption='mean item correct')
 
 ```

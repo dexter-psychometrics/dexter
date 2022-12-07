@@ -135,7 +135,7 @@ plot(test$beta.dmml,test$beta.mirt, pch=20,xlab='dexterMML',ylab='mirt',main='be
      cex=1.2)
 
 
-points(mean(test$beta.dmml[w]), mean(test$beta.mirt[w]),cex=26,col='red')
+points(mean(test$beta.dmml[w]), mean(test$beta.mirt[w]),cex=28,col='red')
 
 ```
 
@@ -198,7 +198,7 @@ ll_plot(fit.dmml,item_id='R3F_13',alpha_lim=c(-2,3),beta_lim=c(-4,5),res=50,
 
 These are the functions we need to maximize (in the plot, find the lightest region) for each item. A dichotomous 2PL item always has two local maxima, one with a negative discrimination and one with a positive discrimination. The two plots are rather normal for dichotomous 2PL items. For polytomous items, there is no adequate graphical representation, but they might have more than 2 local maxima.
 
-So, the problem is, a minorization^[for historic reasons, maximization is almost always done by minimizing  -1 * the function to be maximized, so the technique is called minorization, and you usually have to put a minus in front of your target function to be maximized when you supply it to the algorithm. To add to the confusion, minorization and optimization are often used interchangeably] algorithm can get stuck at a local optimum. To see how this works, we have to understand what a minorization algorithm is. Informally, a minorization algorithm finds a local minimum by evaluating a function a finite number of times. There are many optimization algortithms, several of which are included with R. A 'better' algorithm needs fewer function evaluations, since evaluations of functions are potentially time-consuming. Some algorithms just evaluate the function to be minimized, others need its first or higher order derivatives as well.
+So, the problem is, a minorization^[for historic reasons, maximization is almost always done by minimizing  -1 * the function to be maximized, so the technique is called minorization, and you usually have to put a minus in front of your target function to be maximized when you supply it to the algorithm. To add to the confusion, minorization and optimization are often used interchangeably] algorithm can get stuck at a local optimum. To see how this works, we have to understand what a minorization algorithm is. Informally, a minorization algorithm finds a local minimum by evaluating a function a finite number of times. There are many optimization algorithms, several of which are included with R. A 'better' algorithm needs fewer function evaluations, since evaluations of functions are potentially time-consuming. Some algorithms just evaluate the function to be minimized, others need its first or higher order derivatives as well.
 
 But the operative word here is __local__ minimum. There are no algorithms that can determine a global minimum for any unknown function^[this is possible for convex functions, where there is necessarily only one minimum]. This means that whether the algorithm arrives at the global minimum or a local minimum depends on the starting point (and the algorithm).
 

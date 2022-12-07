@@ -14,6 +14,135 @@ The data set in which I was originally interested is a bit large and complicated
 
 150 flowers is a bit too much for my purpose, so I will use just the first ten specimens of each kind. The data is now small enough to show in its entirety:
 
+```{r,include=FALSE}
+library(lattice)
+library(RColorBrewer)
+
+
+columnmean = function(x){tcrossprod(rep(1,nrow(x)), colMeans(x))}
+
+rowmean = function(x){tcrossprod(rowMeans(x),rep(1,ncol(x)))}
+
+overallmean = function(x){0*x+mean(x)}
+
+doublemean =  function(x){columnmean(x)+rowmean(x)-overallmean(x)}
+
+matrixrank = function(x, tolerance=1e-8){
+  xsvd = svd(x);
+  xd = xsvd$d;
+  xtrued = xd[abs(xd)>tolerance]
+  result = length(xtrued)
+  return(result)
+}
+
+svdimage = function(x, ncomp=3, type=c('column','row','double','simple'), 
+                    xlab='Column', ylab='Row', zlab='', ...){
+    data.rank = matrixrank(x);
+    if (ncomp >= data.rank){
+      ncomp = data.rank - 1;
+    }
+
+    data.dim = dim(x);
+    nrow  = data.dim[1];
+    ncol  = data.dim[2];
+    ncell = nrow*ncol;
+    
+    ptype = match.arg(type, c('column','row','double','simple'))
+    xcopy = x
+
+    side_effect = switch(ptype,
+        double={mm=doublemean(x); x=x-mm; mtit='Mean (Double)'; enc=ncomp-1},
+        row={mm=rowmean(x); x=x-mm; mtit='Mean (Row)'; enc=ncomp-1},
+        column={mm=columnmean(x); x=x-mm; mtit='Mean (Column)'; enc=ncomp-1},
+        simple={mm=0*x; mtit=''; enc=ncomp}
+    )
+
+    xsvd = svd(x, nu=enc, nv=enc);
+    umat = xsvd$u;
+    vmat = xsvd$v;
+    svec = xsvd$d[1:enc];
+    
+    app = mm + umat %*% diag(svec) %*% t(vmat);
+    res = xcopy - app;
+    rowmat = tcrossprod(1:nrow, rep(1, ncol))
+    colmat = tcrossprod(rep(1, nrow), 1:ncol)
+    
+    #generate ploting matrix
+    plotmat = data.frame(matvalue=as.vector(xcopy), 
+                         rows=as.vector(rowmat), 
+                         columns=as.vector(colmat), 
+                         label="Original data"
+                         );
+    
+    for (i in 1:ncomp){
+      
+      if (ptype=='simple'){
+        tempmat = svec[i]*(umat[, i] %*% t(vmat[, i]));
+        plotmat = rbind(plotmat, 
+                        data.frame(matvalue=as.vector(tempmat), 
+                                   rows=as.vector(rowmat),  
+                                   columns=as.vector(colmat), 
+                                   label=paste("SVD", i)
+                                   )
+                        );
+      } else {
+        if (i==1){
+          plotmat = rbind(plotmat, 
+                          data.frame(matvalue=as.vector(mm), 
+                                     rows=as.vector(rowmat), 
+                                     columns=as.vector(colmat), 
+                                     label=mtit
+                                     )
+                          )
+        } else {
+          tempmat = svec[i-1]*(umat[, i-1] %*% t(vmat[, i-1]));
+          plotmat = rbind(plotmat, 
+                          data.frame(matvalue=as.vector(tempmat), 
+                                     rows=as.vector(rowmat),  
+                                     columns=as.vector(colmat), 
+                                     label=paste("SVD", i-1)
+                                     )
+                          );      
+        }
+      }
+    }
+    plotmat = rbind(plotmat, 
+                  data.frame(matvalue=as.vector(app), 
+                             rows=as.vector(rowmat), 
+                             columns=as.vector(colmat), 
+                             label="Approximation"
+                             )
+                  );
+    plotmat = rbind(plotmat, 
+                    data.frame(matvalue=as.vector(res), 
+                               rows=as.vector(rowmat), 
+                               columns=as.vector(colmat), 
+                               label="Residual"
+                               )
+                    );
+    
+    nplot=ncomp+3;
+    nplotrow=ceiling(nplot/3);
+    localcondindex=c(1, nplot-1, nplot, 2:(nplot-2))
+
+    brewer.div =
+      colorRampPalette(brewer.pal(11, "PuOr"), interpolate = "spline")
+    
+    print(levelplot(matvalue~columns+rows|label, 
+                    data=plotmat, 
+                    xlab=xlab, 
+                    ylab=ylab, 
+                    zlab=zlab, 
+                    cuts = 19, col.regions = brewer.div(20), 
+                    main='SVD image plot', 
+                    index.cond=list(localcondindex), 
+                    layout=c(3, nplotrow), ...));
+  }
+
+
+
+```
+
 ```{r, echo =FALSE,message=FALSE,warning=FALSE}
 library(dplyr)
 library(flextable)
@@ -66,7 +195,6 @@ Note that this is probably not matrix multiplication the way you studied it at s
 Let us visualize the decomposition -- reconstruction process. Below we see image plots of the actual data matrix, the approximation thereof achieved by adding together the first three components, and the residuals. On top are shown the three components themselves.
 
 ```{r, echo =FALSE,message=FALSE,warning=FALSE}
-source('~/Dropbox/svd/mysvd.R')
 m = as.matrix(ir[,-5])
 svdimage(m, type='s')
 ```

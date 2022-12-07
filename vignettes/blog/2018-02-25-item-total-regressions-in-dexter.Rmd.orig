@@ -75,9 +75,12 @@ plot(m, items=c("PM949Q03"), curtains=0, show.observed=TRUE, main='RM fits less 
 
 The data comes from the large sample (actually, PISA 2012, one of the mathematics booklets), and the interaction model is very close to the empirical regression. The numbers in the brackets are the Wald tests of fit, to be interpreted as normal deviates. 
 
-```{r, echo=FALSE, fig.show='hold', fig.width=3.5, fig.height=3.5, message=FALSE}
+```{r,include=FALSE}
 ex = open_project('c:/Rdatasets/example.db')
 touch_rules(ex, data.frame(item_id='Item_10',response=c('A','B'),item_score=c(1,0)))
+```
+
+```{r, echo=FALSE, fig.show='hold', fig.width=3.5, fig.height=3.5, message=FALSE}
 im = fit_inter(ex, booklet_id=='Part1')
 plot(im, items=c('Item_01'), curtains=0, show.observed=TRUE, main='Correct key',cex=.8)
 plot(im, items=c("Item_10"), curtains=0, show.observed=TRUE, main='Wrong key',cex=.8)
