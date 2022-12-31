@@ -1,0 +1,10 @@
+---
+title: Here comes a new year
+author: Ivailo Partchev
+date: '2022-12-31'
+slug: happy-2023
+categories: []
+tags: []
+---
+
+![](img/2023.svg)
