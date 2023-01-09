@@ -106,7 +106,7 @@
 
       
 
-      </header><script src="2018-10-15-random-variation-and-power-in-profile-plots_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Random variation and power in profile plots</h1>
@@ -121,21 +121,54 @@
 
     
     
-<p>Profile plots are a novel graphical display in <a href="https://cran.r-project.org/web/packages/dexter/index.html" class="external-link">dexter</a> designed to visualize a certain kind of measurement invariance. A profile plot is useful when there are:</p>
+<p>Profile plots are a novel graphical display in <a href="https://cran.r-project.org/web/packages/dexter/index.html" class="external-link">dexter</a>
+designed to visualize a certain kind of measurement invariance. A
+profile plot is useful when there are:</p>
 <ul>
 <li>a population classified in two or more groups,</li>
-<li>a test with items classified into two groups – let us call them domains, and</li>
-<li>a working hypothesis that groups differ in their response to domains, given the same total score on the test.</li>
+<li>a test with items classified into two groups – let us call them
+domains, and</li>
+<li>a working hypothesis that groups differ in their response to
+domains, given the same total score on the test.</li>
 </ul>
-<p>For each distinct total score and each group we show, on the 1-simplex space, the most frequent combination of subscores on the two domains. This may be based on observed data, but we prefer smoothed values from the interaction model. The dots for each group are then connected across the total scores. A more detailed description is given in the <a href="https://cran.r-project.org/web/packages/dexter/vignettes/profile-plots.html" class="external-link">vignette</a>.</p>
-<p>Due to the novelty of this approach, there is no documented research yet on its properties under different conditions. For any new method of investigating differences between groups, two important questions are:</p>
+<p>For each distinct total score and each group we show, on the
+1-simplex space, the most frequent combination of subscores on the two
+domains. This may be based on observed data, but we prefer smoothed
+values from the interaction model. The dots for each group are then
+connected across the total scores. A more detailed description is given
+in the <a href="https://cran.r-project.org/web/packages/dexter/vignettes/profile-plots.html" class="external-link">vignette</a>.</p>
+<p>Due to the novelty of this approach, there is no documented research
+yet on its properties under different conditions. For any new method of
+investigating differences between groups, two important questions
+are:</p>
 <ol style="list-style-type: decimal">
-<li>Is the method able to distinguish differences when they truly exist?</li>
-<li>When the method indicates a difference, does that truly exist or is it possibly caused by random variation?</li>
+<li>Is the method able to distinguish differences when they truly
+exist?</li>
+<li>When the method indicates a difference, does that truly exist or is
+it possibly caused by random variation?</li>
 </ol>
-<p>We hope to offer some insight into these questions with the interactive applet below. Two obvious factors that affect the interpretation of a profile plot are the number of observations per group and the number of items in both domains of a categorization. With the applet, you can study the influence of these variables. You decide whether a difference between groups is present and if so, how large it is, by adjusting the difficulty of the test items in the domains for each group.</p>
-<p>In its initial state, the applet simulates item and person parameters such that the item parameters in the domains and the skills of the groups do not differ. If you increase the difficulty of, say, domain A for group 1, you simultaneously decrease the difficulty of domain B for group 1. Click on <em>Generate data and plot</em> to simulate response data under the Rasch model and display the profile plot.</p>
-<p>When the data is simulated with no differences between the groups, the generated profile plots give an impression of how random variation appears to the eye for various choices of sample size and test length. It is a good idea to generate several plots for any chosen set of conditions to get a feel of their visual representation in profile plots. Comparing profile plots generated from real data to profile plots generated under known conditions may be helpful in assessing the presence and size of group differences in your data.</p>
+<p>We hope to offer some insight into these questions with the
+interactive applet below. Two obvious factors that affect the
+interpretation of a profile plot are the number of observations per
+group and the number of items in both domains of a categorization. With
+the applet, you can study the influence of these variables. You decide
+whether a difference between groups is present and if so, how large it
+is, by adjusting the difficulty of the test items in the domains for
+each group.</p>
+<p>In its initial state, the applet simulates item and person parameters
+such that the item parameters in the domains and the skills of the
+groups do not differ. If you increase the difficulty of, say, domain A
+for group 1, you simultaneously decrease the difficulty of domain B for
+group 1. Click on <em>Generate data and plot</em> to simulate response
+data under the Rasch model and display the profile plot.</p>
+<p>When the data is simulated with no differences between the groups,
+the generated profile plots give an impression of how random variation
+appears to the eye for various choices of sample size and test length.
+It is a good idea to generate several plots for any chosen set of
+conditions to get a feel of their visual representation in profile
+plots. Comparing profile plots generated from real data to profile plots
+generated under known conditions may be helpful in assessing the
+presence and size of group differences in your data.</p>
 <iframe class="shiny-app-inline" src="https://edeschipper.shinyapps.io/profilepower/" style="height:1200px">
 </iframe>
   </div>
@@ -155,7 +188,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

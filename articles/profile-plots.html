@@ -106,13 +106,15 @@
 
       
 
-      </header><script src="profile-plots_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>How Members of Different Groups Obtain the Same Test Score: Profile Plots in Dexter</h1>
-                        <h4 data-toc-skip class="author">Timo Bechger and Ivailo Partchev</h4>
+      <h1 data-toc-skip>How Members of Different Groups Obtain the Same
+Test Score: Profile Plots in Dexter</h1>
+                        <h4 data-toc-skip class="author">Timo Bechger
+and Ivailo Partchev</h4>
             
-            <h4 data-toc-skip class="date">2022-11-15</h4>
+            <h4 data-toc-skip class="date">2023-01-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/vignettes/profile-plots.Rmd" class="external-link"><code>vignettes/profile-plots.Rmd</code></a></small>
       <div class="hidden name"><code>profile-plots.Rmd</code></div>
@@ -135,10 +137,20 @@ div.crop img{
   margin-top: -45px;
 }
 </style>
-<p>The function <code>profile_plot</code> in package dexter produces plots like the following one based on the verbal aggression dataset:</p>
+<p>The function <code>profile_plot</code> in package dexter produces
+plots like the following one based on the verbal aggression dataset:</p>
 <p><img src="profile-plots_files/figure-html/figProf-1.png" width="384" style="display: block; margin: auto;"></p>
-<p>The plot is, as we will try to show, quite informative. However, it is not very easy to understand as it is very condensed and contains some less familiar elements. Furthermore, experience shows that persons who are at ease with complicated formulae or tables may be challenged by a relatively simple graph, or vice versa. May this serve as an excuse for the very elementary level of this vignette.</p>
-<p>Let us assume a test of four dichotomous items. The possible sum scores are then 0 through 4. Let the four items be classified into two non-overlapping domains, A and B, with two items each. The following table could be the frequency distribution of a sample of students by their scores on the two domains:</p>
+<p>The plot is, as we will try to show, quite informative. However, it
+is not very easy to understand as it is very condensed and contains some
+less familiar elements. Furthermore, experience shows that persons who
+are at ease with complicated formulae or tables may be challenged by a
+relatively simple graph, or vice versa. May this serve as an excuse for
+the very elementary level of this vignette.</p>
+<p>Let us assume a test of four dichotomous items. The possible sum
+scores are then 0 through 4. Let the four items be classified into two
+non-overlapping domains, A and B, with two items each. The following
+table could be the frequency distribution of a sample of students by
+their scores on the two domains:</p>
 <table class="table">
 <thead><tr class="header">
 <th align="left"></th>
@@ -167,17 +179,23 @@ div.crop img{
 </tr>
 </tbody>
 </table>
-<p>We never expected to use a 3-dimensional bar plot, ever, but we will make a once-in-a-lifetime exception:</p>
+<p>We never expected to use a 3-dimensional bar plot, ever, but we will
+make a once-in-a-lifetime exception:</p>
 <div class="crop" style="margin:auto">
 <p><img src="profile-plots_files/figure-html/fig1-1.png" width="700" style="margin-left: -30px; margin-top: -45px;"></p>
 </div>
-<p>The well-known function, prop.table, can be used to estimate three kinds of probabilities:</p>
+<p>The well-known function, prop.table, can be used to estimate three
+kinds of probabilities:</p>
 <ul>
-<li>the joint probabilities for each combination of A and B, which sum to 1 over the whole table;</li>
-<li>the conditional probabilities of A given B, which sum to 1 over each row, and</li>
-<li>the conditional probabilities of B given A, which sum to 1 over each column.</li>
+<li>the joint probabilities for each combination of A and B, which sum
+to 1 over the whole table;</li>
+<li>the conditional probabilities of A given B, which sum to 1 over each
+row, and</li>
+<li>the conditional probabilities of B given A, which sum to 1 over each
+column.</li>
 </ul>
-<p>The first and the third of these possibilities are illustrated below:</p>
+<p>The first and the third of these possibilities are illustrated
+below:</p>
 <div style="text-align:center;margin-top:1em;">
 <div style="display:inline-block;text-align: center;">
 Joint
@@ -192,15 +210,23 @@ Conditional
 </div>
 </div>
 </div>
-<p>The profile plot does not use any of these three kinds of probabilities. Instead, it computes the probability of each possible response pattern given the total score:</p>
+<p>The profile plot does not use any of these three kinds of
+probabilities. Instead, it computes the probability of each possible
+response pattern given the total score:</p>
 <div style="text-align: center;margin:auto;">
 Special
 <div class="crop" style="margin:auto;">
 <p><img src="profile-plots_files/figure-html/fig3-1.png" width="700" style="margin-left: -30px; margin-top: -50px;"></p>
 </div>
 </div>
-<p>A total score of 0 on the whole test can be achieved in one way: a subscore of 0 on A and a subscore of 0 on B. Hence, the probability, shown with the lightest bar, is 1. The same is true of the maximum score of 4: to gain it, one must score the maximum in both domains. A sum score of 1 or 3 can be achieved in 2 ways each, and there are 3 possibilities for a sum score of 2.</p>
-<p>What we do now is identify the pattern with the largest probability given a total score of 0, 1, …, 4, and trace a path through them:</p>
+<p>A total score of 0 on the whole test can be achieved in one way: a
+subscore of 0 on A and a subscore of 0 on B. Hence, the probability,
+shown with the lightest bar, is 1. The same is true of the maximum score
+of 4: to gain it, one must score the maximum in both domains. A sum
+score of 1 or 3 can be achieved in 2 ways each, and there are 3
+possibilities for a sum score of 2.</p>
+<p>What we do now is identify the pattern with the largest probability
+given a total score of 0, 1, …, 4, and trace a path through them:</p>
 <div style="text-align:center;">
 <div class="crop" style="display:inline-block;">
 <p><img src="profile-plots_files/figure-html/fig41-1.png" width="700" style="margin-left: -30px; margin-top: -50px;"></p>
@@ -212,27 +238,63 @@ Special
 <p style="margin-top: 0px;margin-left: 24px;">A</p>
 </div>
 </div>
-<p>The thin gray lines connect all patterns that yield the same total score on the test. The path must visit each of them once: it passes through the modal patterns given a total score of 0, 1, …, 4. We are almost there, there are only two more things to mention:</p>
+<p>The thin gray lines connect all patterns that yield the same total
+score on the test. The path must visit each of them once: it passes
+through the modal patterns given a total score of 0, 1, …, 4. We are
+almost there, there are only two more things to mention:</p>
 <ul>
-<li><p>We have drawn one path so far, but the plot becomes interesting when there are two or more paths to compare</p></li>
-<li><p>The plots we made are based on observed proportions while dexter uses probabilities predicted by the interaction model or, optionally, the Rasch model</p></li>
+<li><p>We have drawn one path so far, but the plot becomes interesting
+when there are two or more paths to compare</p></li>
+<li><p>The plots we made are based on observed proportions while dexter
+uses probabilities predicted by the interaction model or, optionally,
+the Rasch model</p></li>
 </ul>
-<p>Back to the original profile plot: what does it mean? There are two paths, one for female respondents, the other one for males. The diagonal lines pass through all pairs of scores on “Want to curse, shout,” and “Actually curse, shout” that result in the same overall score on verbally aggressive behavior. The fact that the curve for the females lies consistently to the left and above the curve for males means that, at each level of verbal aggressiveness, they tend to want more but do less.</p>
+<p>Back to the original profile plot: what does it mean? There are two
+paths, one for female respondents, the other one for males. The diagonal
+lines pass through all pairs of scores on “Want to curse, shout,” and
+“Actually curse, shout” that result in the same overall score on
+verbally aggressive behavior. The fact that the curve for the females
+lies consistently to the left and above the curve for males means that,
+at each level of verbal aggressiveness, they tend to want more but do
+less.</p>
 <p><img src="profile-plots_files/figure-html/prof_plot2-1.png" width="480" style="display: block; margin: auto;"></p>
-<p>Speaking in general, the profile plots can be used to investigate whether two (or more) groups of respondents obtain the same test score in the same way. When applied to educational test data, the plots can be used to detect differences in the relative difficulty of (sets of) items for respondents that belong to different groups and are matched on the test score. In some cases, one would associate this to <em>Differential Item Functioning (or DIF)</em>. Note however, that profile plots are different from regular procedures to detect DIF; and better. First of all, the procedure is not exploratory but requires its user to provide a meaningful classification of the items which should improve the odds that the results make sense to content-experts. Second, it looks explicitly at relations between items and avoids the erroneous conception of DIF as an item property <span class="citation">(Bechger and Maris 2015)</span>.</p>
-<p>Note that the profile plots got their name from their similarity to <em>profile analysis</em> which was proposed by Norman Verhelst <span class="citation">(Verhelst 2012)</span> and suggested by him and his co-workers as a method to test for DIF <span class="citation">(Yildirim, Yildirim, and Verhelst 2014)</span>. Regular profile analysis is also available in dexter.</p>
+<p>Speaking in general, the profile plots can be used to investigate
+whether two (or more) groups of respondents obtain the same test score
+in the same way. When applied to educational test data, the plots can be
+used to detect differences in the relative difficulty of (sets of) items
+for respondents that belong to different groups and are matched on the
+test score. In some cases, one would associate this to <em>Differential
+Item Functioning (or DIF)</em>. Note however, that profile plots are
+different from regular procedures to detect DIF; and better. First of
+all, the procedure is not exploratory but requires its user to provide a
+meaningful classification of the items which should improve the odds
+that the results make sense to content-experts. Second, it looks
+explicitly at relations between items and avoids the erroneous
+conception of DIF as an item property <span class="citation">(Bechger
+and Maris 2015)</span>.</p>
+<p>Note that the profile plots got their name from their similarity to
+<em>profile analysis</em> which was proposed by Norman Verhelst <span class="citation">(Verhelst 2012)</span> and suggested by him and his
+co-workers as a method to test for DIF <span class="citation">(Yildirim,
+Yildirim, and Verhelst 2014)</span>. Regular profile analysis is also
+available in dexter.</p>
 <div class="section level2 unnumbered">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references">
-<div id="ref-BechgerMarisDIF">
-<p>Bechger, Timo M., and Gunter Maris. 2015. “A Statistical Test for Differential Item Pair Functioning.” <em>Psychometrika</em> 80 (2): 317–40.</p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-BechgerMarisDIF" class="csl-entry">
+Bechger, Timo M., and Gunter Maris. 2015. <span>“A Statistical Test for
+Differential Item Pair Functioning.”</span> <em>Psychometrika</em> 80
+(2): 317–40.
 </div>
-<div id="ref-VerhelstPA">
-<p>Verhelst, Norman D. 2012. “Profile Analysis: A Closer Look at the PISA 2000 Reading Data.” <em>Scandinavian Journal of Educational Research</em> 56 (3): 315–32. <a href="https://doi.org/10.1080/00313831.2011.583937" class="external-link">https://doi.org/10.1080/00313831.2011.583937</a>.</p>
+<div id="ref-VerhelstPA" class="csl-entry">
+Verhelst, Norman D. 2012. <span>“Profile Analysis: A Closer Look at the
+<span>PISA</span> 2000 Reading Data.”</span> <em>Scandinavian Journal of
+Educational Research</em> 56 (3): 315–32. <a href="https://doi.org/10.1080/00313831.2011.583937" class="external-link">https://doi.org/10.1080/00313831.2011.583937</a>.
 </div>
-<div id="ref-Yildirim14">
-<p>Yildirim, Hüseyin H., Selma Yildirim, and Norman Verhelst. 2014. “Profile Analysis as a Generalized Differential Items Functioning Analysis Method.” <em>Education and Science</em> 39: 49–64.</p>
+<div id="ref-Yildirim14" class="csl-entry">
+Yildirim, Hüseyin H., Selma Yildirim, and Norman Verhelst. 2014.
+<span>“Profile Analysis as a Generalized Differential Items Functioning
+Analysis Method.”</span> <em>Education and Science</em> 39: 49–64.
 </div>
 </div>
 </div>
@@ -255,7 +317,7 @@ Special
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

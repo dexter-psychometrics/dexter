@@ -106,11 +106,12 @@
 
       
 
-      </header><script src="2018-08-21-dexter-meets-pisa-1_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>dexter meets PISA - The basic skills</h1>
-                        <h4 data-toc-skip class="author">Ivailo Partchev * Robert Zwitser * Jesse Koops * Timo Bechger * Gunter Maris</h4>
+                        <h4 data-toc-skip class="author">Ivailo Partchev
+* Robert Zwitser * Jesse Koops * Timo Bechger * Gunter Maris</h4>
             
             <h4 data-toc-skip class="date">2018-08-21</h4>
       
@@ -121,14 +122,36 @@
 
     
     
-<p>We could have issued a <strong>WARNING: This <del>bag</del> package is not a toy!</strong> But we can do better. In a series of posts, we will discuss how to use <strong>dexter</strong> to analyze data from large scale educational assessments, such as PISA. The task is a rather imposing one, not only in the amount of data to be crunched, but mostly in the number of issues to discuss.</p>
-<p>In this first part, we will analyze the mathematics domain in PISA 2012 <span class="citation">(OECD 2014)</span>. With 65 participating countries, 21 booklets and over half a million of students, this is anything but a toy example. We will focus on the basics: how to obtain the data, get it into <strong>dexter</strong>, estimate the parameters of the IRT model, compute plausible values, and apply survey weights and variance estimation. With these technical aspect under the belt, we can concentrate on more conceptual issues in further blogs.</p>
+<p>We could have issued a <strong>WARNING: This <del>bag</del> package
+is not a toy!</strong> But we can do better. In a series of posts, we
+will discuss how to use <strong>dexter</strong> to analyze data from
+large scale educational assessments, such as PISA. The task is a rather
+imposing one, not only in the amount of data to be crunched, but mostly
+in the number of issues to discuss.</p>
+<p>In this first part, we will analyze the mathematics domain in PISA
+2012 <span class="citation">(OECD 2014)</span>. With 65 participating
+countries, 21 booklets and over half a million of students, this is
+anything but a toy example. We will focus on the basics: how to obtain
+the data, get it into <strong>dexter</strong>, estimate the parameters
+of the IRT model, compute plausible values, and apply survey weights and
+variance estimation. With these technical aspect under the belt, we can
+concentrate on more conceptual issues in further blogs.</p>
 <div class="section level2">
 <h2 id="obtain-and-parse-pisa-data-and-get-it-into-dexter">Obtain and parse PISA data and get it into dexter<a class="anchor" aria-label="anchor" href="#obtain-and-parse-pisa-data-and-get-it-into-dexter"></a>
 </h2>
-<p>As of the time of writing, the following works. We believe that the OECD will keep the data available forever; however, minute changes in the exact location cannot be excluded, and that would necessitate changes in the code.</p>
-<p>We need two files: the <em>scored cognitive item response data file</em>, and the <em>student questionnaire data file</em>. We will first focus on the responses to the cognitive items. The student questionnaire file will be needed later for the survey weights and plausible values it contains.</p>
-<p>The first step is to download the scored cognitive item response data file from the PISA website. This is a compressed text file; to unzip it, we follow the steps suggested by <span class="citation">Koohafkan (2014)</span>.</p>
+<p>As of the time of writing, the following works. We believe that the
+OECD will keep the data available forever; however, minute changes in
+the exact location cannot be excluded, and that would necessitate
+changes in the code.</p>
+<p>We need two files: the <em>scored cognitive item response data
+file</em>, and the <em>student questionnaire data file</em>. We will
+first focus on the responses to the cognitive items. The student
+questionnaire file will be needed later for the survey weights and
+plausible values it contains.</p>
+<p>The first step is to download the scored cognitive item response data
+file from the PISA website. This is a compressed text file; to unzip it,
+we follow the steps suggested by <span class="citation">Koohafkan
+(2014)</span>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dexter-psychometrics.github.io/dexter/" class="external-link">dexter</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
@@ -143,7 +166,13 @@
 <span><span class="va">fname</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/unzip.html" class="external-link">unzip</a></span><span class="op">(</span><span class="va">zipfile</span>, list<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">Name</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/unzip.html" class="external-link">unzip</a></span><span class="op">(</span><span class="va">zipfile</span>, files <span class="op">=</span> <span class="va">fname</span>, overwrite<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">zipfile</span><span class="op">)</span></span></code></pre></div>
-<p>Next, parse the data into a data frame (a tibble, to be more precise) by using the SAS control file and the <code>parse.SAScii()</code> function from the <code>SAScii</code> package. For the sake of simplicity, we recode both codes for missing values (i.e., 7 for N/A, and 8 for ‘not reached’) to <code>NA</code>, although we admit that it could be worth to pay more attention to the structure of the missing values. This is, however, beyond the scope of this paper.</p>
+<p>Next, parse the data into a data frame (a tibble, to be more precise)
+by using the SAS control file and the <code>parse.SAScii()</code>
+function from the <code>SAScii</code> package. For the sake of
+simplicity, we recode both codes for missing values (i.e., 7 for N/A,
+and 8 for ‘not reached’) to <code>NA</code>, although we admit that it
+could be worth to pay more attention to the structure of the missing
+values. This is, however, beyond the scope of this paper.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dict_scored</span> <span class="op">&lt;-</span> <span class="fu">parse.SAScii</span><span class="op">(</span>sas_ri <span class="op">=</span> <span class="va">url2</span><span class="op">)</span></span>
 <span></span>
@@ -157,7 +186,11 @@
 <span><span class="va">data_scored</span><span class="op">$</span><span class="va">BOOKID</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">'B%02d'</span>, <span class="va">data_scored</span><span class="op">$</span><span class="va">BOOKID</span><span class="op">)</span></span>
 <span><span class="va">data_scored</span><span class="op">[</span><span class="va">data_scored</span><span class="op">==</span><span class="fl">7</span><span class="op">]</span> <span class="op">=</span> <span class="cn">NA</span></span>
 <span><span class="va">data_scored</span><span class="op">[</span><span class="va">data_scored</span><span class="op">==</span><span class="fl">8</span><span class="op">]</span> <span class="op">=</span> <span class="cn">NA</span></span></code></pre></div>
-<p>Note that we selected a subset of the data (all math items have variable names starting with PM). Now, start a new dexter project and add the data. First we need to declare all items and their admissible scores in a <code>rules</code> object. We pass that to the <code>start_new_project</code> function.</p>
+<p>Note that we selected a subset of the data (all math items have
+variable names starting with PM). Now, start a new dexter project and
+add the data. First we need to declare all items and their admissible
+scores in a <code>rules</code> object. We pass that to the
+<code>start_new_project</code> function.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rules</span> <span class="op">=</span> <span class="fu"><a href="https://tidyr.tidyverse.org/reference/gather.html" class="external-link">gather</a></span><span class="op">(</span><span class="va">data_scored</span>, key<span class="op">=</span><span class="st">'item_id'</span>, value<span class="op">=</span><span class="st">'response'</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">'PM'</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="va">item_id</span>, <span class="va">response</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -190,7 +223,14 @@
 <span><span class="op">}</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">data_scored</span><span class="op">)</span></span></code></pre></div>
-<p>At some later stage, we will discuss a <em>market basket approach</em> to the definition and estimation of competence <span class="citation">(Mislevy 1998; Zwitser, Glaser, and Maris 2017)</span>. For our purposes, the market basket is the subset of items that is administered in <em>every</em> country (though not to every student, as we have a multi-booklet design within each country). We are not dealing with the market basket approach now, but we will compute an item property, ‘item belongs / does not belong to the basket’, and we will add it to the data base for later use:</p>
+<p>At some later stage, we will discuss a <em>market basket
+approach</em> to the definition and estimation of competence <span class="citation">(Mislevy 1998; Zwitser, Glaser, and Maris 2017)</span>.
+For our purposes, the market basket is the subset of items that is
+administered in <em>every</em> country (though not to every student, as
+we have a multi-booklet design within each country). We are not dealing
+with the market basket approach now, but we will compute an item
+property, ‘item belongs / does not belong to the basket’, and we will
+add it to the data base for later use:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">item_by_cnt</span> <span class="op">=</span> <span class="fu"><a href="../../reference/get_responses.html">get_responses</a></span><span class="op">(</span><span class="va">db</span>, columns<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'item_id'</span>, <span class="st">'cnt'</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -203,13 +243,40 @@
 <pre><code><span><span class="co">## 1 new item_properties defined</span></span>
 <span><span class="co">## 1 item properties for 59 items added or updated</span></span></code></pre>
 <pre><code><span><span class="co">## [1] 0</span></span></code></pre>
-<p>Our data base is complete now (took only a couple of minutes), and we can, and should, do some exploratory analysis to assess the quality of the items and identify possible problems. In a PISA study, this step is usually done at national level, and involves the computation of various statistics derived from classical test theory (CTT). <strong>dexter</strong> has excellent facilities for this kind of analysis, but they are best employed in interactive mode. The two interactive functions, <code>iTIA</code> and <code>iModels</code>, are set up such that all vital computations are performed at the beginning. This means that, with a survey of this size, one must wait for about a minute for a CTT analysis of all booklets, including test and item level statistics and distractor plots; after that, results can be browsed without noticeable delay. The waiting time for a deeper analysis of a separate booklet, including the three item-total regressions, is about a couple of seconds.</p>
-<p>Unfortunately, interactive analysis is difficult to demonstrate in a static paper. The interested readers can try them out by themselves. Alternatively, they could use the new package, <strong>dextergui</strong>, which makes interactive analysis even easier.</p>
+<p>Our data base is complete now (took only a couple of minutes), and we
+can, and should, do some exploratory analysis to assess the quality of
+the items and identify possible problems. In a PISA study, this step is
+usually done at national level, and involves the computation of various
+statistics derived from classical test theory (CTT).
+<strong>dexter</strong> has excellent facilities for this kind of
+analysis, but they are best employed in interactive mode. The two
+interactive functions, <code>iTIA</code> and <code>iModels</code>, are
+set up such that all vital computations are performed at the beginning.
+This means that, with a survey of this size, one must wait for about a
+minute for a CTT analysis of all booklets, including test and item level
+statistics and distractor plots; after that, results can be browsed
+without noticeable delay. The waiting time for a deeper analysis of a
+separate booklet, including the three item-total regressions, is about a
+couple of seconds.</p>
+<p>Unfortunately, interactive analysis is difficult to demonstrate in a
+static paper. The interested readers can try them out by themselves.
+Alternatively, they could use the new package,
+<strong>dextergui</strong>, which makes interactive analysis even
+easier.</p>
 </div>
 <div class="section level2">
 <h2 id="fit-the-irt-model">Fit the IRT model<a class="anchor" aria-label="anchor" href="#fit-the-irt-model"></a>
 </h2>
-<p>The IRT model in <strong>dexter</strong> is not exactly the same as the one used in the original PISA study of 2012. PISA used the Mixed Coefficients Multinomial Logit Model (<span class="citation">Adams, Wilson, and Wang (1997)</span>), which is a multidimensional model fit by marginal maximum likelihood (MML). The extended nominal response model (ENORM) in <strong>dexter</strong> is a unidimensional model fit by conditional maximum likelihood (CML). Still, there is an essential structural similarity: both models default to the Rasch model for the dichotomous items, and to the partial credit model (PCM) items for the polytomous items.</p>
+<p>The IRT model in <strong>dexter</strong> is not exactly the same as
+the one used in the original PISA study of 2012. PISA used the Mixed
+Coefficients Multinomial Logit Model (<span class="citation">Adams,
+Wilson, and Wang (1997)</span>), which is a multidimensional model fit
+by marginal maximum likelihood (MML). The extended nominal response
+model (ENORM) in <strong>dexter</strong> is a unidimensional model fit
+by conditional maximum likelihood (CML). Still, there is an essential
+structural similarity: both models default to the Rasch model for the
+dichotomous items, and to the partial credit model (PCM) items for the
+polytomous items.</p>
 <p>CML estimation tends to be fast:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="op">{</span><span class="va">item_parms</span> <span class="op">=</span> <span class="fu"><a href="../../reference/fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
@@ -219,9 +286,26 @@
 <div class="section level2">
 <h2 id="compute-plausible-values">Compute plausible values<a class="anchor" aria-label="anchor" href="#compute-plausible-values"></a>
 </h2>
-<p>Plausible values (PV) are random draws from the posterior distribution of a person’s ability, given the item parameters and the person’s responses (<span class="citation">Marsman (2014)</span>). Nowadays, they are the standard method of ability estimation when studying populations (when testing individuals in a high stakes exam, we typically use the expectation of the posterior rather than a random draw).</p>
-<p>The plausible values in the original PISA study are drawn with a prior distribution that reflects a large number of background variables measured on the person. We don’t do this. A wonderful property of PV values is that they eventually reproduce the true ability distribution, even when the prior is misspecified (<span class="citation">Marsman et al. (2016)</span>). Using the wrong prior comes with a penalty: one must pay with more data, meaning more items. When the functional form of the posterior resembles the functional form of the prior, this is a sign that convergence is near.</p>
-<p>The algorithm used in <strong>dexter</strong> is based on composition (sample a proposal value, simulate data from it, accept if the simulated sum score matches the observed one), and uses recycling for higher speed (rejected values are saved for some other persons). See <span class="citation">Marsman (2014)</span> for details.</p>
+<p>Plausible values (PV) are random draws from the posterior
+distribution of a person’s ability, given the item parameters and the
+person’s responses (<span class="citation">Maarten Marsman
+(2014)</span>). Nowadays, they are the standard method of ability
+estimation when studying populations (when testing individuals in a high
+stakes exam, we typically use the expectation of the posterior rather
+than a random draw).</p>
+<p>The plausible values in the original PISA study are drawn with a
+prior distribution that reflects a large number of background variables
+measured on the person. We don’t do this. A wonderful property of PV
+values is that they eventually reproduce the true ability distribution,
+even when the prior is misspecified (<span class="citation">M. Marsman
+et al. (2016)</span>). Using the wrong prior comes with a penalty: one
+must pay with more data, meaning more items. When the functional form of
+the posterior resembles the functional form of the prior, this is a sign
+that convergence is near.</p>
+<p>The algorithm used in <strong>dexter</strong> is based on composition
+(sample a proposal value, simulate data from it, accept if the simulated
+sum score matches the observed one), and uses recycling for higher speed
+(rejected values are saved for some other persons). See <span class="citation">Maarten Marsman (2014)</span> for details.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pv</span> <span class="op">=</span> <span class="fu"><a href="../../reference/plausible_values.html">plausible_values</a></span><span class="op">(</span><span class="va">db</span>, parms<span class="op">=</span><span class="va">item_parms</span>, nPV<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pv</span><span class="op">)</span></span></code></pre></div>
@@ -239,14 +323,31 @@
 <span><span class="co">## 4  1.3050071  1.5130896</span></span>
 <span><span class="co">## 5 -3.3043147 -1.8926860</span></span>
 <span><span class="co">## 6 -2.5261844 -3.5770779</span></span></code></pre>
-<p>Note that we could have omitted the <code>parms</code> argument, in which case the IRT model will be estimated automatically. Once we have set up the <strong>dexter</strong> data base, PISA’s original approach, or a good approximation, takes one line of code!</p>
+<p>Note that we could have omitted the <code>parms</code> argument, in
+which case the IRT model will be estimated automatically. Once we have
+set up the <strong>dexter</strong> data base, PISA’s original approach,
+or a good approximation, takes one line of code!</p>
 </div>
 <div class="section level2">
 <h2 id="survey-weights-and-variance-estimation">Survey weights and variance estimation<a class="anchor" aria-label="anchor" href="#survey-weights-and-variance-estimation"></a>
 </h2>
-<p>Large-scale studies like PISA make every effort to represent faithfully particular populations. They use scientific sampling, which, for efficiency reasons, does not necessarily give every student in the population the same probability to be selected. As long the sampling probabilities are known, the potential bias can be neutralized by weighting the individuals’ data with (essentially) the inverse of these probabilities. The weights are also adjusted to reduce the biasing effect of nonresponse.</p>
-<p>Actually, we don’t need the weights to compare our PV to PISA’s original ones. But, for didactic purposes, and to get done with all technicalities before proceeding to more conceptual issues, we will do three comparisons: unweighted, weighted, and exactly as in PISA.</p>
-<p>First, download the student questionnaire file, which contains, along with a huge amount of background data, PISA’s plausible values, and the sampling and replicate weights necessary to compute the estimates and their standard errors. The operations are similar to those we used to get the cognitive response data:</p>
+<p>Large-scale studies like PISA make every effort to represent
+faithfully particular populations. They use scientific sampling, which,
+for efficiency reasons, does not necessarily give every student in the
+population the same probability to be selected. As long the sampling
+probabilities are known, the potential bias can be neutralized by
+weighting the individuals’ data with (essentially) the inverse of these
+probabilities. The weights are also adjusted to reduce the biasing
+effect of nonresponse.</p>
+<p>Actually, we don’t need the weights to compare our PV to PISA’s
+original ones. But, for didactic purposes, and to get done with all
+technicalities before proceeding to more conceptual issues, we will do
+three comparisons: unweighted, weighted, and exactly as in PISA.</p>
+<p>First, download the student questionnaire file, which contains, along
+with a huge amount of background data, PISA’s plausible values, and the
+sampling and replicate weights necessary to compute the estimates and
+their standard errors. The operations are similar to those we used to
+get the cognitive response data:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">url3</span> <span class="op">=</span> <span class="st">'http://www.oecd.org/pisa/pisaproducts/INT_STU12_DEC03.zip'</span></span>
 <span><span class="va">url4</span> <span class="op">=</span> <span class="st">'http://www.oecd.org/pisa/pisaproducts/PISA2012_SAS_student.sas'</span></span>
@@ -268,14 +369,20 @@
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">zipfile</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="va">fname</span><span class="op">)</span></span></code></pre></div>
-<p>We have selected the variables containing the country (CNT), the school and the student IDs, the five plausible values, and a large number of variables whose name starts in <code>W_FST</code>; the latter contain sampling and replicate weights.</p>
-<p>From the <strong>dexter</strong> data base, extract student identification variables and add them to our freshly generated PV, so we can match these with PISA’s PV:</p>
+<p>We have selected the variables containing the country (CNT), the
+school and the student IDs, the five plausible values, and a large
+number of variables whose name starts in <code>W_FST</code>; the latter
+contain sampling and replicate weights.</p>
+<p>From the <strong>dexter</strong> data base, extract student
+identification variables and add them to our freshly generated PV, so we
+can match these with PISA’s PV:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">scores</span> <span class="op">=</span> <span class="fu"><a href="../../reference/get_persons.html">get_persons</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">inner_join</a></span><span class="op">(</span><span class="va">pv</span>, by<span class="op">=</span><span class="st">'person_id'</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/chartr.html" class="external-link">toupper</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">.</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">inner_join</a></span><span class="op">(</span><span class="va">data_quest</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CNT"</span>, <span class="st">"SCHOOLID"</span>, <span class="st">"STIDSTD"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Using just the first PV out of five, compare unweighted and weighted country means:</p>
+<p>Using just the first PV out of five, compare unweighted and weighted
+country means:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">means</span> <span class="op">=</span> <span class="va">scores</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">CNT</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
@@ -290,7 +397,11 @@
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">means</span><span class="op">$</span><span class="va">wP</span>, <span class="va">means</span><span class="op">$</span><span class="va">wD</span>, main<span class="op">=</span><span class="st">'Weighted country means'</span>, xlab<span class="op">=</span><span class="st">'PISA'</span>, ylab<span class="op">=</span><span class="st">'dexter'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="data:image/png;base64,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"></p>
-<p>To estimate country means and their standard estimates as in PISA, we use package <strong>survey</strong> (<span class="citation">Lumley (2004)</span>). First, we make a replication design with <code>W_FSTUWT</code> as sampling weights, and the many variables whose names start in <code>W_FSTR</code> as replicate weights:</p>
+<p>To estimate country means and their standard estimates as in PISA, we
+use package <strong>survey</strong> (<span class="citation">Lumley
+(2004)</span>). First, we make a replication design with
+<code>W_FSTUWT</code> as sampling weights, and the many variables whose
+names start in <code>W_FSTR</code> as replicate weights:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://r-survey.r-forge.r-project.org/survey/" class="external-link">survey</a></span><span class="op">)</span></span>
 <span></span>
@@ -298,7 +409,18 @@
 <span>      weights <span class="op">=</span> <span class="op">~</span><span class="va">W_FSTUWT</span>,</span>
 <span>      combined.weights <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>      data <span class="op">=</span> <span class="va">scores</span><span class="op">)</span></span></code></pre></div>
-<p>The following function will do all computations explained in the PISA Technical Manual. Essentially, we compute, for each country and for each of the five PV, a large number of differently weighted means. The replicate weights are chosen such that, in each replication, the data for half of the schools is ignored while the data for the other half is doubled; the replications differ in which schools fall into the two halves. The uncertainty due to having a sample of schools and students rather than the whole population is reflected in the differences between replications, while the uncertainty due to psychometric measurement is reflected in differences between the five PV. The two kinds of error, sampling variance and imputation variance, are then combined with a simple formula (see the arrow in the code):</p>
+<p>The following function will do all computations explained in the PISA
+Technical Manual. Essentially, we compute, for each country and for each
+of the five PV, a large number of differently weighted means. The
+replicate weights are chosen such that, in each replication, the data
+for half of the schools is ignored while the data for the other half is
+doubled; the replications differ in which schools fall into the two
+halves. The uncertainty due to having a sample of schools and students
+rather than the whole population is reflected in the differences between
+replications, while the uncertainty due to psychometric measurement is
+reflected in differences between the five PV. The two kinds of error,
+sampling variance and imputation variance, are then combined with a
+simple formula (see the arrow in the code):</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pvby</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">formula</span>, <span class="va">by</span>, <span class="va">design</span>, <span class="va">FUN</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
 <span>   <span class="va">npv</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/terms.html" class="external-link">terms</a></span><span class="op">(</span><span class="va">formula</span><span class="op">)</span>,<span class="st">"term.labels"</span><span class="op">)</span><span class="op">)</span></span>
@@ -314,41 +436,61 @@
 <span>   <span class="va">res</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">estimate</span>, <span class="va">stderr</span><span class="op">)</span></span>
 <span>   <span class="va">res</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>We use this function twice to get estimates and standard errors for the plausible values computes with <strong>dexter</strong> and for PISA’s original estimates:</p>
+<p>We use this function twice to get estimates and standard errors for
+the plausible values computes with <strong>dexter</strong> and for
+PISA’s original estimates:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_pv</span>   <span class="op">=</span> <span class="fu">pvby</span><span class="op">(</span><span class="op">~</span><span class="va">PV1</span><span class="op">+</span><span class="va">PV2</span><span class="op">+</span><span class="va">PV3</span><span class="op">+</span><span class="va">PV4</span><span class="op">+</span><span class="va">PV5</span>,<span class="op">~</span><span class="va">CNT</span>,<span class="va">ds</span>,<span class="va">svymean</span><span class="op">)</span></span>
 <span><span class="va">res_pisa</span> <span class="op">=</span> <span class="fu">pvby</span><span class="op">(</span><span class="op">~</span><span class="va">PV1MATH</span><span class="op">+</span><span class="va">PV2MATH</span><span class="op">+</span><span class="va">PV3MATH</span><span class="op">+</span><span class="va">PV4MATH</span><span class="op">+</span><span class="va">PV5MATH</span>,<span class="op">~</span><span class="va">CNT</span>,<span class="va">ds</span>,<span class="va">svymean</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_pisa</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">res_pv</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, main<span class="op">=</span><span class="st">'Computed with survey'</span>, xlab<span class="op">=</span><span class="st">'PISA'</span>, ylab<span class="op">=</span><span class="st">'dexter'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="data:image/png;base64,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"></p>
-<p>Obviously, and in spite of some minor technical differences, the plausible values estimated with <strong>dexter</strong> produce almost the same results as the original PISA survey of 2012. This is nice, but it is neither surprising nor sensational. Having explained, step by step, <em>how</em> to compute with a large data set we are now ready to discuss <em>what</em> to compute, and <em>why</em>: a more entertaining discussion that will be taken up in the next posts.</p>
+<p>Obviously, and in spite of some minor technical differences, the
+plausible values estimated with <strong>dexter</strong> produce almost
+the same results as the original PISA survey of 2012. This is nice, but
+it is neither surprising nor sensational. Having explained, step by
+step, <em>how</em> to compute with a large data set we are now ready to
+discuss <em>what</em> to compute, and <em>why</em>: a more entertaining
+discussion that will be taken up in the next posts.</p>
 </div>
 <div class="section level2 unnumbered">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references">
-<div id="ref-AdamsWilsonWang97">
-<p>Adams, R. J., M. Wilson, and W. Wang. 1997. “The Multidimensional Random Coefficients Multinomial Logit Model.” <em>Applied Psychological Measurement</em> 21 (1): 1–23.</p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-AdamsWilsonWang97" class="csl-entry">
+Adams, R. J., M. Wilson, and W. Wang. 1997. <span>“The Multidimensional
+Random Coefficients Multinomial Logit Model.”</span> <em>Applied
+Psychological Measurement</em> 21 (1): 1–23.
 </div>
-<div id="ref-Koohafkan2014">
-<p>Koohafkan, Michael. 2014. “Downloading, Extracting and Reading Files in R.” 2014. <a href="https://hydroecology.net/downloading-extracting-and-reading-files-in-r/" class="external-link">https://hydroecology.net/downloading-extracting-and-reading-files-in-r/</a>.</p>
+<div id="ref-Koohafkan2014" class="csl-entry">
+Koohafkan, Michael. 2014. <span>“Downloading, Extracting and Reading
+Files in r.”</span> 2014. <a href="https://hydroecology.net/downloading-extracting-and-reading-files-in-r/" class="external-link">https://hydroecology.net/downloading-extracting-and-reading-files-in-r/</a>.
 </div>
-<div id="ref-survey">
-<p>Lumley, Thomas. 2004. “Analysis of Complex Survey Samples.” <em>Journal of Statistical Software</em> 9 (1): 1–19.</p>
+<div id="ref-survey" class="csl-entry">
+Lumley, Thomas. 2004. <span>“Analysis of Complex Survey Samples.”</span>
+<em>Journal of Statistical Software</em> 9 (1): 1–19.
 </div>
-<div id="ref-MM">
-<p>Marsman, Maarten. 2014. “Plausible Values in Statistical Inference.” PhD thesis, Enschede, the Netherlands: University of Twente.</p>
+<div id="ref-MM" class="csl-entry">
+Marsman, Maarten. 2014. <span>“Plausible Values in Statistical
+Inference.”</span> PhD thesis, Enschede, the Netherlands: University of
+Twente.
 </div>
-<div id="ref-MarsmanPV">
-<p>Marsman, M., G. Maris, T. M. Bechger, and C. A. W. Glas. 2016. “What can we learn from plausible values?” <em>Psychometrika</em>, 1–16.</p>
+<div id="ref-MarsmanPV" class="csl-entry">
+Marsman, M., G. Maris, T. M. Bechger, and C. A. W. Glas. 2016.
+<span>“<span class="nocase">What can we learn from plausible
+values?</span>”</span> <em>Psychometrika</em>, 1–16.
 </div>
-<div id="ref-Mislevy98">
-<p>Mislevy, R. J. 1998. “Implications of Market-Basket Reporting for Achievement-Level Setting.” <em>Applied Psychological Measurement</em> 11 (1): 49–63.</p>
+<div id="ref-Mislevy98" class="csl-entry">
+Mislevy, R. J. 1998. <span>“Implications of Market-Basket Reporting for
+Achievement-Level Setting.”</span> <em>Applied Psychological
+Measurement</em> 11 (1): 49–63.
 </div>
-<div id="ref-OECD2014">
-<p>OECD. 2014. “PISA 2012: Technical Report.” <a href="http://www.oecd.org/pisa/pisaproducts/pisa2012technicalreport.htm" class="external-link">http://www.oecd.org/pisa/pisaproducts/pisa2012technicalreport.htm</a>.</p>
+<div id="ref-OECD2014" class="csl-entry">
+OECD. 2014. <span>“<span>PISA 2012: Technical Report</span>.”</span> <a href="http://www.oecd.org/pisa/pisaproducts/pisa2012technicalreport.htm" class="external-link">http://www.oecd.org/pisa/pisaproducts/pisa2012technicalreport.htm</a>.
 </div>
-<div id="ref-Zwitser2017">
-<p>Zwitser, Robert J., S. Sjoerd F. Glaser, and Gunter Maris. 2017. “Monitoring Countries in a Changing World: A New Look at Dif in International Surveys.” <em>Psychometrika</em> 82 (1): 210–32. <a href="https://doi.org/10.1007/s11336-016-9543-8" class="external-link">https://doi.org/10.1007/s11336-016-9543-8</a>.</p>
+<div id="ref-Zwitser2017" class="csl-entry">
+Zwitser, Robert J., S. Sjoerd F. Glaser, and Gunter Maris. 2017.
+<span>“Monitoring Countries in a Changing World: A New Look at DIF in
+International Surveys.”</span> <em>Psychometrika</em> 82 (1): 210–32. <a href="https://doi.org/10.1007/s11336-016-9543-8" class="external-link">https://doi.org/10.1007/s11336-016-9543-8</a>.
 </div>
 </div>
 </div>
@@ -371,7 +513,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

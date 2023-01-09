@@ -106,13 +106,15 @@
 
       
 
-      </header><script src="DIF_vignette_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Exploring Differential Items Functioning with Dexter</h1>
-                        <h4 data-toc-skip class="author">Timo Bechger</h4>
+      <h1 data-toc-skip>Exploring Differential Items Functioning with
+Dexter</h1>
+                        <h4 data-toc-skip class="author">Timo
+Bechger</h4>
             
-            <h4 data-toc-skip class="date">2022-11-15</h4>
+            <h4 data-toc-skip class="date">2023-01-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/vignettes/DIF_vignette.Rmd" class="external-link"><code>vignettes/DIF_vignette.Rmd</code></a></small>
       <div class="hidden name"><code>DIF_vignette.Rmd</code></div>
@@ -127,7 +129,10 @@ img{ border:none;}
 <div class="section level2">
 <h2 id="test-differential-items-functioning">Test Differential Items Functioning<a class="anchor" aria-label="anchor" href="#test-differential-items-functioning"></a>
 </h2>
-<p>Based on the theory given in <span class="citation">Bechger and Maris (2015)</span>, the function <code><a href="../reference/DIF.html">DIF()</a></code> tests for differential items function (DIF) under an extended nominal response model. We illustrate how it works using the verbal aggression data.</p>
+<p>Based on the theory given in <span class="citation">Bechger and Maris
+(2015)</span>, the function <code><a href="../reference/DIF.html">DIF()</a></code> tests for differential
+items function (DIF) under an extended nominal response model. We
+illustrate how it works using the verbal aggression data.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dexter-psychometrics.github.io/dexter/" class="external-link">dexter</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
@@ -135,43 +140,72 @@ img{ border:none;}
 <span><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="../reference/start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="st">":memory:"</span>, person_properties<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>gender<span class="op">=</span><span class="st">""</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/add_booklet.html">add_booklet</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrData</span>, <span class="st">"data"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/add_item_properties.html">add_item_properties</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrProperties</span><span class="op">)</span></span></code></pre></div>
-<p>Gender is available as a discrete covariate which defines two groups: male and female respondents. We first test whether there is DIF.</p>
+<p>Gender is available as a discrete covariate which defines two groups:
+male and female respondents. We first test whether there is DIF.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dif_gender</span> <span class="op">=</span> <span class="fu"><a href="../reference/DIF.html">DIF</a></span><span class="op">(</span><span class="va">db</span>, <span class="st">"gender"</span><span class="op">)</span></span>
 <span><span class="va">dif_gender</span></span></code></pre></div>
 <pre><code><span><span class="co">## Test for DIF: Chi-square = 114.752, df = 47, p = &lt; 0.0006</span></span></code></pre>
-<p>The results shows that there is DIF hence it makes sense to look further to see what is going on. To this aim, we look at the relative positions of the item categories in the two groups.</p>
+<p>The results shows that there is DIF hence it makes sense to look
+further to see what is going on. To this aim, we look at the relative
+positions of the item categories in the two groups.</p>
 </div>
 <div class="section level2">
 <h2 id="exploring-dif">Exploring DIF<a class="anchor" aria-label="anchor" href="#exploring-dif"></a>
 </h2>
-<p>Consider a plot of the ability scale in each of the two groups. <img src="DIF_vignette_files/figure-html/abscale-1.png" width="768" style="display: block; margin: auto;"></p>
-<p>The plot show the ability scale in each group and the location of the score categories of three of the items indicated by their labels. The ability scale is drawn without numbers because the origin is arbitrary but it does show us the relative locations of the item categories as they are estimated from the data.</p>
-<p>On first sight, we would conclude that the locations of the item categories are clearly different. Now we wish to test whether, for each pair of locations whether this is indeed the case or whether the differences we see are due to chance. The simplest way to do this is to plot the output of the DIF function.</p>
+<p>Consider a plot of the ability scale in each of the two groups.
+<img src="DIF_vignette_files/figure-html/abscale-1.png" width="768" style="display: block; margin: auto;"></p>
+<p>The plot show the ability scale in each group and the location of the
+score categories of three of the items indicated by their labels. The
+ability scale is drawn without numbers because the origin is arbitrary
+but it does show us the relative locations of the item categories as
+they are estimated from the data.</p>
+<p>On first sight, we would conclude that the locations of the item
+categories are clearly different. Now we wish to test whether, for each
+pair of locations whether this is indeed the case or whether the
+differences we see are due to chance. The simplest way to do this is to
+plot the output of the DIF function.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dif_gender</span><span class="op">)</span></span></code></pre></div>
 <p><img src="DIF_vignette_files/figure-html/plotdif-1.png" width="576" style="display: block; margin: auto;"></p>
-<p>This produces an image plot of a matrix of differences between groups of the relative positions of each pair of item categories. The entries are standardized and can be interpreted as normally distributed test statistics such that significance can be judged from the colors. It is clear, for instance that, across male and female respondents, the second category of the item S3WantScold has a different position relative to most other item-categories. Note that the matrix can be found in the output of the DIF function.</p>
+<p>This produces an image plot of a matrix of differences between groups
+of the relative positions of each pair of item categories. The entries
+are standardized and can be interpreted as normally distributed test
+statistics such that significance can be judged from the colors. It is
+clear, for instance that, across male and female respondents, the second
+category of the item S3WantScold has a different position relative to
+most other item-categories. Note that the matrix can be found in the
+output of the DIF function.</p>
 </div>
 <div class="section level2">
 <h2 id="limitations">Limitations<a class="anchor" aria-label="anchor" href="#limitations"></a>
 </h2>
-<p>As usual in DIF testing, the procedure we have described is exploratory and there is no guarantee that the results can be interpreted easily. Furthermore, the plots will become cluttered when there are many items. If possible, we therefore recommend to use the profile plots. Note that with three groups, the procedure can be applied to each pair of groups but this will not take us very far when there are many more groups.</p>
-<p>Finally, note that sorting can help to make the picture more interpretable. For example, we can sort on ‘want’ versus ‘do’:</p>
+<p>As usual in DIF testing, the procedure we have described is
+exploratory and there is no guarantee that the results can be
+interpreted easily. Furthermore, the plots will become cluttered when
+there are many items. If possible, we therefore recommend to use the
+profile plots. Note that with three groups, the procedure can be applied
+to each pair of groups but this will not take us very far when there are
+many more groups.</p>
+<p>Finally, note that sorting can help to make the picture more
+interpretable. For example, we can sort on ‘want’ versus ‘do’:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">items</span> <span class="op">=</span> <span class="fu"><a href="../reference/get_items.html">get_items</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">mode</span>, <span class="va">item_id</span><span class="op">)</span></span>
 <span>  </span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dif_gender</span>, items<span class="op">=</span><span class="va">items</span><span class="op">$</span><span class="va">item_id</span><span class="op">)</span></span></code></pre></div>
 <p><img src="DIF_vignette_files/figure-html/sorting-1.png" width="576" style="display: block; margin: auto;"></p>
-<p>Now, we see that the DO-items among themselves keep their relative positions in the two groups.</p>
+<p>Now, we see that the DO-items among themselves keep their relative
+positions in the two groups.</p>
 </div>
 <div class="section level2 unnumbered">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references">
-<div id="ref-BechgerMarisDIF">
-<p>Bechger, Timo M., and Gunter Maris. 2015. “A Statistical Test for Differential Item Pair Functioning.” <em>Psychometrika</em> 80 (2): 317–40.</p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-BechgerMarisDIF" class="csl-entry">
+Bechger, Timo M., and Gunter Maris. 2015. <span>“A Statistical Test for
+Differential Item Pair Functioning.”</span> <em>Psychometrika</em> 80
+(2): 317–40.
 </div>
 </div>
 </div>
@@ -194,7 +228,7 @@ img{ border:none;}
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

@@ -106,13 +106,14 @@
 
       
 
-      </header><script src="Equating_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Equating a Pass-Fail Score</h1>
-                        <h4 data-toc-skip class="author">Timo Bechger, Jesse Koops and Ivailo Partchev</h4>
+                        <h4 data-toc-skip class="author">Timo Bechger,
+Jesse Koops and Ivailo Partchev</h4>
             
-            <h4 data-toc-skip class="date">2022-11-15</h4>
+            <h4 data-toc-skip class="date">2023-01-09</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/vignettes/Equating.Rmd" class="external-link"><code>vignettes/Equating.Rmd</code></a></small>
       <div class="hidden name"><code>Equating.Rmd</code></div>
@@ -124,8 +125,20 @@
 <style>
 img{ border:none;}
 </style>
-<p>Educational tests are often equipped with a threshold to turn the test score into a pass-fail decision. When a new test of the same kind is developed, we need a threshold for it that will be, in some sense, equivalent to the threshold for the old — let us call it <em>reference</em> — test. This is a special case of <em>test equating</em>, and it is similar to some well-studied problems in epidemiology; for the comfort of our predominantly psychometric audience, we start with an outline of those.</p>
-<p>Consider a test for pregnancy. The state of nature is a binary variable (positive / negative). So is the outcome of the test, although the decision is possibly produced by dichotomizing the quantitative measurement of some hormone or other substance, just like we want to do with our educational test scores. There are four possible outcomes in all, which can be represented in a two-by-two table</p>
+<p>Educational tests are often equipped with a threshold to turn the
+test score into a pass-fail decision. When a new test of the same kind
+is developed, we need a threshold for it that will be, in some sense,
+equivalent to the threshold for the old — let us call it
+<em>reference</em> — test. This is a special case of <em>test
+equating</em>, and it is similar to some well-studied problems in
+epidemiology; for the comfort of our predominantly psychometric
+audience, we start with an outline of those.</p>
+<p>Consider a test for pregnancy. The state of nature is a binary
+variable (positive / negative). So is the outcome of the test, although
+the decision is possibly produced by dichotomizing the quantitative
+measurement of some hormone or other substance, just like we want to do
+with our educational test scores. There are four possible outcomes in
+all, which can be represented in a two-by-two table</p>
 <table class="table"><tbody>
 <tr>
 <td rowspan="2" colspan="2">
@@ -168,23 +181,68 @@ True negative (TN)
 </td>
 </tr>
 </tbody></table>
-<p>where TP, FP, FN, and TN are all counts. There is one ideal situation in which FP=FN=0 and all predictions are correct, and very many situations where this is not the case. Many statistics have been developed to measure the various ways in which actual data can depart from the ideal situation — this <a href="https://en.wikipedia.org/wiki/Receiver_operating_characteristic" class="external-link">Wikipedia page</a> lists at least 13 of them. We will mention only three:</p>
+<p>where TP, FP, FN, and TN are all counts. There is one ideal situation
+in which FP=FN=0 and all predictions are correct, and very many
+situations where this is not the case. Many statistics have been
+developed to measure the various ways in which actual data can depart
+from the ideal situation — this <a href="https://en.wikipedia.org/wiki/Receiver_operating_characteristic" class="external-link">Wikipedia
+page</a> lists at least 13 of them. We will mention only three:</p>
 <ul>
-<li>True positive rate (TPR, sensitivity): The proportion of positives that are correctly identified as such, or TP/(TP+FN)</li>
-<li>True negative rate (TNR, specificity): The proportion of negatives that are correctly identified as such, or TN/(TN+FP)</li>
+<li>True positive rate (TPR, sensitivity): The proportion of positives
+that are correctly identified as such, or TP/(TP+FN)</li>
+<li>True negative rate (TNR, specificity): The proportion of negatives
+that are correctly identified as such, or TN/(TN+FP)</li>
 <li>False positive rate (FNR) = 1 - specificity = FP/(TN+FP)</li>
 </ul>
-<p>What we can try to do is select the threshold for the test in such a way that the resulting table gets as close to the optimum as possible (not forgetting that the subjective cost of the two kinds of erroneous predictions may differ). The <em>receiver operating characteristic curve (ROC curve)</em> (<span class="citation">Swets (1996)</span>) is a graphical representations of the trade-offs between the TPR (one possible measure of benefit) and FPR (one possible measure of costs) resulting from all possible choices of such a threshold. The optimal choice would then be the one corresponding to the point on the curve that comes closest to the upper left corner (perfect prediction). An example ROC curve is shown on the left hand plot below.</p>
+<p>What we can try to do is select the threshold for the test in such a
+way that the resulting table gets as close to the optimum as possible
+(not forgetting that the subjective cost of the two kinds of erroneous
+predictions may differ). The <em>receiver operating characteristic curve
+(ROC curve)</em> (<span class="citation">Swets (1996)</span>) is a
+graphical representations of the trade-offs between the TPR (one
+possible measure of benefit) and FPR (one possible measure of costs)
+resulting from all possible choices of such a threshold. The optimal
+choice would then be the one corresponding to the point on the curve
+that comes closest to the upper left corner (perfect prediction). An
+example ROC curve is shown on the left hand plot below.</p>
 <p><img src="Equating_files/figure-html/unnamed-chunk-1-1.png" width="700"><img src="Equating_files/figure-html/unnamed-chunk-1-2.png" width="700"></p>
-<p>Before we explain in more detail, let us go back to our educational example. Let us assume for a moment that all students have taken both the old (reference) test and the new (target) test, and that the decision on the reference test represents the ‘state of nature’. The task is then to select a threshold on the target test such that the decision on the reference is reproduced as closely as possible by the decision on the new test. On the right hand plot, the (fictional) distribution function of the scores on the target test is represented in blue for the students who passed the reference test, and in red for those who failed. We show two of the infinitely many thresholds that can be chosen, and it is clear that the one shown in black is much preferable to the one shown in gray (compare with the two dots on the ROC curve).</p>
+<p>Before we explain in more detail, let us go back to our educational
+example. Let us assume for a moment that all students have taken both
+the old (reference) test and the new (target) test, and that the
+decision on the reference test represents the ‘state of nature’. The
+task is then to select a threshold on the target test such that the
+decision on the reference is reproduced as closely as possible by the
+decision on the new test. On the right hand plot, the (fictional)
+distribution function of the scores on the target test is represented in
+blue for the students who passed the reference test, and in red for
+those who failed. We show two of the infinitely many thresholds that can
+be chosen, and it is clear that the one shown in black is much
+preferable to the one shown in gray (compare with the two dots on the
+ROC curve).</p>
 <div class="section level2">
 <h2 id="an-illustration-with-complete-psychometric-data">An illustration with complete psychometric data<a class="anchor" aria-label="anchor" href="#an-illustration-with-complete-psychometric-data"></a>
 </h2>
-<p>It is time to try out these ideas with (simulated) psychometric data. First, we examine the situation where both tests, the reference test and the new one, have been administered to the same respondents. This is not a typical situation because, in practice, we usually deal with data collected in an <em>incomplete design</em> where no candidates take both tests. In this situation, if we can estimate the parameters of the items, we can use the IRT model to <em>fill in the missing data</em>. Obviously, without observations we no longer know whether an individual has actually passed the reference test or not (see <span class="citation">Bolsinova and Maris (2016)</span>). We can, however, calculate sensitivity and specificity even in that situation.</p>
-<p>We use the verbal aggression data with the first 14 items assumed to be the reference test, and the remaining 10 items to be the target test. The pass-fail score on the reference test is set to 10. All this is quite arbitrary, of course – the test is not intended to measure educational achievement, and we are certainly not handing out diplomas for verbal aggressiveness.</p>
+<p>It is time to try out these ideas with (simulated) psychometric data.
+First, we examine the situation where both tests, the reference test and
+the new one, have been administered to the same respondents. This is not
+a typical situation because, in practice, we usually deal with data
+collected in an <em>incomplete design</em> where no candidates take both
+tests. In this situation, if we can estimate the parameters of the
+items, we can use the IRT model to <em>fill in the missing data</em>.
+Obviously, without observations we no longer know whether an individual
+has actually passed the reference test or not (see <span class="citation">Bolsinova and Maris (2016)</span>). We can, however,
+calculate sensitivity and specificity even in that situation.</p>
+<p>We use the verbal aggression data with the first 14 items assumed to
+be the reference test, and the remaining 10 items to be the target test.
+The pass-fail score on the reference test is set to 10. All this is
+quite arbitrary, of course – the test is not intended to measure
+educational achievement, and we are certainly not handing out diplomas
+for verbal aggressiveness.</p>
 <p>As a start, we produce a scatter plot of the scores:</p>
 <p><img src="Equating_files/figure-html/unnamed-chunk-2-1.png" width="384" style="display: block; margin: auto;"></p>
-<p>The proportion of respondents who pass the reference test gradually increases with the score on the new test; below, it is plotted in red:</p>
+<p>The proportion of respondents who pass the reference test gradually
+increases with the score on the new test; below, it is plotted in
+red:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">prob_pass</span> <span class="op">=</span> <span class="va">tp</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">29</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">28</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
@@ -194,8 +252,13 @@ True negative (TN)
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">28</span>, <span class="va">prob_pass</span>, ylab<span class="op">=</span><span class="st">"Proportion passing the reference test"</span>, xlab<span class="op">=</span><span class="st">"New test score"</span>, ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"o"</span>, col<span class="op">=</span><span class="st">"red"</span>,bty<span class="op">=</span><span class="st">'l'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">28</span>, <span class="va">tp</span>, type<span class="op">=</span><span class="st">"o"</span>, lty<span class="op">=</span><span class="fl">2</span>, col<span class="op">=</span><span class="st">"blue"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Equating_files/figure-html/unnamed-chunk-3-1.png" width="480" style="display: block; margin: auto;"></p>
-<p>The blue dashed line is the percentage of true positives. Among other things, it shows that if the new pass-fail score is zero and everybody passes, about 15 percent will be qualified. If this is high enough we can save ourselves the trouble of administering a new test.</p>
-<p>Since the same respondents have taken both tests, it is straightforward to determine the sensitivity and specificity of the new test for each pass-fail score:</p>
+<p>The blue dashed line is the percentage of true positives. Among other
+things, it shows that if the new pass-fail score is zero and everybody
+passes, about 15 percent will be qualified. If this is high enough we
+can save ourselves the trouble of administering a new test.</p>
+<p>Since the same respondents have taken both tests, it is
+straightforward to determine the sensitivity and specificity of the new
+test for each pass-fail score:</p>
 <!-- to do: might decide against showing some of this code, pictures themselves are important for the story, not the code-->
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">specificity</span> <span class="op">=</span> <span class="va">sensitivity</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">29</span><span class="op">)</span></span>
@@ -206,25 +269,44 @@ True negative (TN)
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">28</span>, <span class="va">sensitivity</span>, ylab<span class="op">=</span><span class="st">"sensitivity/specificity"</span>, xlab<span class="op">=</span><span class="st">"new test score"</span>, ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"o"</span>, col<span class="op">=</span><span class="st">"red"</span>,bty<span class="op">=</span><span class="st">'l'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">28</span>, <span class="va">specificity</span>, col<span class="op">=</span><span class="st">"green"</span>, type<span class="op">=</span><span class="st">"o"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Equating_files/figure-html/unnamed-chunk-4-1.png" width="480" style="display: block; margin: auto;"></p>
-<p>If sensitivity and specificity are deemed equally important, the plot suggests 14 or 15 as appropriate pass-fail scores. Higher values would make the specificity go up (i.e., less false positives) at the expense of sensitivity; lower values would do the reverse. From the plots made earlier, we see that about half of the persons with a score equal to the passing score would actually pass the reference test.</p>
-<p>As candidates are classified into two classes, we can readily show the trade-off between sensitivity and specificity with the ROC curve:</p>
+<p>If sensitivity and specificity are deemed equally important, the plot
+suggests 14 or 15 as appropriate pass-fail scores. Higher values would
+make the specificity go up (i.e., less false positives) at the expense
+of sensitivity; lower values would do the reverse. From the plots made
+earlier, we see that about half of the persons with a score equal to the
+passing score would actually pass the reference test.</p>
+<p>As candidates are classified into two classes, we can readily show
+the trade-off between sensitivity and specificity with the ROC
+curve:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fl">1</span><span class="op">-</span><span class="va">specificity</span>, <span class="va">sensitivity</span>, col<span class="op">=</span><span class="st">"green"</span>, xlim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"l"</span>,bty<span class="op">=</span><span class="st">'l'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/text.html" class="external-link">text</a></span><span class="op">(</span><span class="fl">1</span><span class="op">-</span><span class="va">specificity</span>, <span class="va">sensitivity</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">28</span><span class="op">)</span>, cex<span class="op">=</span><span class="fl">0.7</span>, offset <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,lty<span class="op">=</span><span class="fl">2</span>, col<span class="op">=</span><span class="st">"grey"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Equating_files/figure-html/unnamed-chunk-5-1.png" width="480" style="display: block; margin: auto;"></p>
-<p>Other packages and functions may produce prettier plots — but can they do it without complete data?</p>
+<p>Other packages and functions may produce prettier plots — but can
+they do it without complete data?</p>
 </div>
 <div class="section level2">
 <h2 id="incomplete-data">Incomplete Data<a class="anchor" aria-label="anchor" href="#incomplete-data"></a>
 </h2>
-<p>It is more involved, but practically more useful, to calculate sensitivity and specificity even though the two tests have not been both administered to the same persons. We first simulate a complete data set with responses to 60 items. Then, we select the first 500 persons and 40 items to represent the reference test, and the remaining 200 persons and items 21 through 60 to represent the target test. Note that the two respondent groups are sampled from two different ability populations and cannot be considered as equivalent.</p>
-<p>We create a new <code>dexter</code> project, and we add the two booklets. We assume that the pass-fail limit for the reference test is 23 points.</p>
+<p>It is more involved, but practically more useful, to calculate
+sensitivity and specificity even though the two tests have not been both
+administered to the same persons. We first simulate a complete data set
+with responses to 60 items. Then, we select the first 500 persons and 40
+items to represent the reference test, and the remaining 200 persons and
+items 21 through 60 to represent the target test. Note that the two
+respondent groups are sampled from two different ability populations and
+cannot be considered as equivalent.</p>
+<p>We create a new <code>dexter</code> project, and we add the two
+booklets. We assume that the pass-fail limit for the reference test is
+23 points.</p>
 </div>
 <div class="section level2">
 <h2 id="the-probability-to-pass">The probability to pass<a class="anchor" aria-label="anchor" href="#the-probability-to-pass"></a>
 </h2>
-<p>As a start, we use the function <code>probability_to_pass</code> to estimate, for each score on the target test, the proportion of persons who pass the reference test. We show this as a plot.</p>
+<p>As a start, we use the function <code>probability_to_pass</code> to
+estimate, for each score on the target test, the proportion of persons
+who pass the reference test. We show this as a plot.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_sm</span> <span class="op">=</span> <span class="fu"><a href="../reference/fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db_sm</span>, method<span class="op">=</span><span class="st">'Bayes'</span>, nDraws <span class="op">=</span> <span class="fl">5000</span><span class="op">)</span></span>
 <span></span>
@@ -234,59 +316,110 @@ True negative (TN)
 <span>                           pass_fail <span class="op">=</span> <span class="va">pass_fail</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ou_e</span>, what<span class="op">=</span><span class="st">"equating"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Equating_files/figure-html/unnamed-chunk-10-1.png" width="384" style="display: block; margin: auto;"></p>
-<p>Let the scores on the reference and new test be written, respectively, as <span class="math inline">\(R_+\)</span> and <span class="math inline">\(N_+\)</span>, and let <span class="math inline">\(\mathbf{x}\)</span> denote the available data. We calculate <span class="math inline">\(P(R_+ \geq c|N_+ = s, \mathbf{x})\)</span>, the probability that a person with a score of <span class="math inline">\(s\)</span> on the target test will pass. Simply stated, we calculate this probability by averaging over what could have happened on the basis of all available data. A technical appendix explains a bit more.</p>
-<p>A little extra in the plot are the bars. These refer to the traditional ability-based pass-fail score obtained as follows: First, estimate an ability for each score on the reference and the new test. Then, determine the score on the new test corresponding to the smallest ability equal to or larger than the ability corresponding to the pass-fail score on the reference test. This will then be the pass-fail score in the new test. The bars actually denote the probabilities of pass-fail scores thus obtained. By construction, such pass-fail scores correspond to the lowest scores giving a probability to pass equal or higher than 0.5. While this is the usual procedure to equate a pass-fail score, we believe the procedure that we propose here is more informative.</p>
+<p>Let the scores on the reference and new test be written,
+respectively, as <span class="math inline">\(R_+\)</span> and <span class="math inline">\(N_+\)</span>, and let <span class="math inline">\(\mathbf{x}\)</span> denote the available data. We
+calculate <span class="math inline">\(P(R_+ \geq c|N_+ = s,
+\mathbf{x})\)</span>, the probability that a person with a score of
+<span class="math inline">\(s\)</span> on the target test will pass.
+Simply stated, we calculate this probability by averaging over what
+could have happened on the basis of all available data. A technical
+appendix explains a bit more.</p>
+<p>A little extra in the plot are the bars. These refer to the
+traditional ability-based pass-fail score obtained as follows: First,
+estimate an ability for each score on the reference and the new test.
+Then, determine the score on the new test corresponding to the smallest
+ability equal to or larger than the ability corresponding to the
+pass-fail score on the reference test. This will then be the pass-fail
+score in the new test. The bars actually denote the probabilities of
+pass-fail scores thus obtained. By construction, such pass-fail scores
+correspond to the lowest scores giving a probability to pass equal or
+higher than 0.5. While this is the usual procedure to equate a pass-fail
+score, we believe the procedure that we propose here is more
+informative.</p>
 </div>
 <div class="section level2">
 <h2 id="sensitivity-and-specificity">Sensitivity and specificity<a class="anchor" aria-label="anchor" href="#sensitivity-and-specificity"></a>
 </h2>
-<p>Having the probability to pass and the proportion of respondents, <span class="math inline">\(P(N_+ = s)\)</span>, for all possible scores <span class="math inline">\(s\)</span>, we can calculate sensitivity and specificity and plot them for each possible pass-fail score on the target test:</p>
+<p>Having the probability to pass and the proportion of respondents,
+<span class="math inline">\(P(N_+ = s)\)</span>, for all possible scores
+<span class="math inline">\(s\)</span>, we can calculate sensitivity and
+specificity and plot them for each possible pass-fail score on the
+target test:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ou_e</span>, what<span class="op">=</span><span class="st">'sens/spec'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Equating_files/figure-html/unnamed-chunk-11-1.png" width="384" style="display: block; margin: auto;"></p>
-<p>If sensitivity and specificity are equally important, the plot suggests 22 as a pass-fail score on the new test.</p>
+<p>If sensitivity and specificity are equally important, the plot
+suggests 23 as a pass-fail score on the new test.</p>
 </div>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
-<p>An educational test equipped with a single pass-fail score is a binary test aimed at classifying candidates into those who pass, and those who fail. In fields like medical testing or machine learning, sensitivity and specificity are typically considered to evaluate the performance of such a test. Essentially, what we have tried to do is apply this logic to educational tests. Item response theory was used to deal with incomplete data as we typically see in educational measurement. Presumably, medical testing faces similar complications, but this is beyond our immediate scope.</p>
-<p>In closing, we should mention that this is a first attempt to equate tests in a way that does not involve unobservable quantities; it uses item response theory to fill in missing data, no more. We would like to test the functions more thoroughly before attempting an extension to classification into more than two classes. Feedback from users is very welcome.</p>
+<p>An educational test equipped with a single pass-fail score is a
+binary test aimed at classifying candidates into those who pass, and
+those who fail. In fields like medical testing or machine learning,
+sensitivity and specificity are typically considered to evaluate the
+performance of such a test. Essentially, what we have tried to do is
+apply this logic to educational tests. Item response theory was used to
+deal with incomplete data as we typically see in educational
+measurement. Presumably, medical testing faces similar complications,
+but this is beyond our immediate scope.</p>
+<p>In closing, we should mention that this is a first attempt to equate
+tests in a way that does not involve unobservable quantities; it uses
+item response theory to fill in missing data, no more. We would like to
+test the functions more thoroughly before attempting an extension to
+classification into more than two classes. Feedback from users is very
+welcome.</p>
 </div>
 <div class="section level2">
 <h2 id="technical-appendix">Technical Appendix<a class="anchor" aria-label="anchor" href="#technical-appendix"></a>
 </h2>
-<p>Let us consider how we determine the probability to pass the reference test given a score <span class="math inline">\(N_+=s\)</span> on the target test. This probability can be defined as:<br><span class="math display">\[
+<p>Let us consider how we determine the probability to pass the
+reference test given a score <span class="math inline">\(N_+=s\)</span>
+on the target test. This probability can be defined as:<br><span class="math display">\[
 P(R_+ \geq c|N_+ = s, \mathbf{x})
-      = \int_{\mathbf{b},\theta} 
-             P(R_+ \geq c|\theta,\mathbf{b}) 
+      = \int_{\mathbf{b},\theta}
+             P(R_+ \geq c|\theta,\mathbf{b})
              f(\theta|N_+ = s, \mathbf{b}) f(\mathbf{b}|\mathbf{x})
       d\mathbf{b} d\theta,
 \]</span></p>
-<p>where <span class="math inline">\(Y_+\)</span> denotes the score on the reference test, with pass-fail score <span class="math inline">\(c\)</span>, <span class="math inline">\(\theta\)</span> denotes ability and <span class="math inline">\(\mathbf{b}\)</span> is the vector of item parameters. The integrand has three parts:</p>
+<p>where <span class="math inline">\(Y_+\)</span> denotes the score on
+the reference test, with pass-fail score <span class="math inline">\(c\)</span>, <span class="math inline">\(\theta\)</span> denotes ability and <span class="math inline">\(\mathbf{b}\)</span> is the vector of item
+parameters. The integrand has three parts:</p>
 <ul>
 <li>
-<span class="math inline">\(f(\mathbf{b}|\mathbf{x})\)</span>: The posterior of the item parameters, given all data <span class="math inline">\(\mathbf{x}\)</span>.</li>
+<span class="math inline">\(f(\mathbf{b}|\mathbf{x})\)</span>: The
+posterior of the item parameters, given all data <span class="math inline">\(\mathbf{x}\)</span>.</li>
 <li>
-<span class="math inline">\(f(\theta|N_+ = s, \mathbf{b})\)</span>: The posterior of ability given the score on the new test.</li>
+<span class="math inline">\(f(\theta|N_+ = s, \mathbf{b})\)</span>:
+The posterior of ability given the score on the new test.</li>
 <li>
-<span class="math inline">\(P(R_+ \geq c|\theta,\mathbf{b})\)</span>: The probability to pass given ability equal to <span class="math display">\[
-P(R_+ \geq c|\theta,\mathbf{b}) 
-= \sum_{s \geq c} P(R_+ = s |\theta, \mathbf{b}) 
+<span class="math inline">\(P(R_+ \geq
+c|\theta,\mathbf{b})\)</span>: The probability to pass given ability
+equal to <span class="math display">\[
+P(R_+ \geq c|\theta,\mathbf{b})
+= \sum_{s \geq c} P(R_+ = s |\theta, \mathbf{b})
 = \sum_{s \geq c} \frac{\gamma_s(\mathbf{b}) e^{s \theta}}
                      {\sum_h \gamma_h(\mathbf{b}) e^{h \theta}},
-\]</span> with <span class="math inline">\(\gamma_s(\mathbf{b})\)</span> the elementary symmetric function of order s.</li>
+\]</span> with <span class="math inline">\(\gamma_s(\mathbf{b})\)</span>
+the elementary symmetric function of order s.</li>
 </ul>
 <p>To calculate a Monte-Carlo estimate, repeat:</p>
 <ul>
-<li>sample item parameters <span class="math inline">\(\mathbf{b}^* \sim f(\mathbf{b}|\mathbf{x})\)</span>
+<li>sample item parameters <span class="math inline">\(\mathbf{b}^* \sim
+f(\mathbf{b}|\mathbf{x})\)</span>
 </li>
-<li>sample a plausible value <span class="math inline">\(\theta^* \sim f(\theta|N_+ = s, \mathbf{b}^*)\)</span>
+<li>sample a plausible value <span class="math inline">\(\theta^* \sim
+f(\theta|N_+ = s, \mathbf{b}^*)\)</span>
 </li>
-<li>calculate <span class="math inline">\(P(R_+ \geq c|\theta^*,\mathbf{b}^*)\)</span>
+<li>calculate <span class="math inline">\(P(R_+ \geq
+c|\theta^*,\mathbf{b}^*)\)</span>
 </li>
 </ul>
-<p>We do this as often as we can afford (currently, a thousand times), and we take the average as an estimate of <span class="math inline">\(P(R_+ \geq c|\theta^*,\mathbf{b}^*)\)</span>.</p>
-<p>Sensitivity and specificity are calculated from the score distribution on the new-test and the probability to pass. The following code shows how:</p>
+<p>We do this as often as we can afford (currently, a thousand times),
+and we take the average as an estimate of <span class="math inline">\(P(R_+ \geq c|\theta^*,\mathbf{b}^*)\)</span>.</p>
+<p>Sensitivity and specificity are calculated from the score
+distribution on the new-test and the probability to pass. The following
+code shows how:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>  <span class="va">p_pass_given_s</span> <span class="op">=</span> <span class="va">out</span><span class="op">$</span><span class="va">probability_to_pass</span></span>
 <span>  <span class="va">ps</span> <span class="op">=</span> <span class="va">ou_e</span><span class="op">$</span><span class="va">pnew</span></span>
@@ -297,14 +430,18 @@ P(R_+ \geq c|\theta,\mathbf{b})
 <span>  <span class="va">specificity</span> <span class="op">=</span>  <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="op">(</span><span class="fl">1</span><span class="op">-</span><span class="va">p_pass_given_s</span><span class="op">)</span><span class="op">*</span><span class="va">ps</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="va">tn</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div class="section level2 unnumbered">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references">
-<div id="ref-BolsinovaMaris2016">
-<p>Bolsinova, Maria, and Gunter Maris. 2016. “Can Irt Solve the Missing Data Problem in Test Equating?” <em>Frontiers in Psychology</em> 6: 1956. <a href="https://doi.org/10.3389/fpsyg.2015.01956" class="external-link">https://doi.org/10.3389/fpsyg.2015.01956</a>.</p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-BolsinovaMaris2016" class="csl-entry">
+Bolsinova, Maria, and Gunter Maris. 2016. <span>“Can IRT Solve the
+Missing Data Problem in Test Equating?”</span> <em>Frontiers in
+Psychology</em> 6: 1956. <a href="https://doi.org/10.3389/fpsyg.2015.01956" class="external-link">https://doi.org/10.3389/fpsyg.2015.01956</a>.
 </div>
-<div id="ref-Swets96">
-<p>Swets, John A. 1996. <em>Signal Detection Theory and Roc Analysis in Psychology and Diagnostics: Collected Papers.</em> Hillsdale, NJ: Lawrence Erlbaum Associates, Inc.</p>
+<div id="ref-Swets96" class="csl-entry">
+Swets, John A. 1996. <em>Signal Detection Theory and ROC Analysis in
+Psychology and Diagnostics: Collected Papers.</em> Hillsdale, NJ:
+Lawrence Erlbaum Associates, Inc.
 </div>
 </div>
 </div>
@@ -327,7 +464,7 @@ P(R_+ \geq c|\theta,\mathbf{b})
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

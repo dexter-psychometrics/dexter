@@ -106,11 +106,12 @@
 
       
 
-      </header><script src="2020-05-27-the-information-game_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>The information game</h1>
-                        <h4 data-toc-skip class="author">Ivailo Partchev</h4>
+                        <h4 data-toc-skip class="author">Ivailo
+Partchev</h4>
             
             <h4 data-toc-skip class="date">2020-05-27</h4>
       
@@ -121,16 +122,48 @@
 
     
     
-<p>A typical task in adaptive testing is to select, out of a precalibrated item pool, the most appropriate item to ask, given an interim estimate of ability, <span class="math inline">\(\theta_0\)</span>. A popular approach is to select the item having the largest value of the item information function (IIF) at <span class="math inline">\(\theta_0\)</span>.</p>
-<p>When the IRT model is the Rasch model, the item response function (IRF) is <span class="math display">\[P(X=1|\theta,b)=\frac{1}{1+\exp(b-\theta)}\]</span> where <span class="math inline">\(b\)</span> is the item difficulty, and the IIF can be computed as <span class="math inline">\(P(X=1|\theta,b)[1-P(X=1|\theta,b)]\)</span>. For all items, this function reaches a maximum of 0.25, encountered exactly where <span class="math inline">\(\theta=b\)</span> and <span class="math inline">\(P(X=1|\theta,b)=0.5\)</span>. So picking the item with the maximum IIF is the same as picking the item for which a person of ability of <span class="math inline">\(\theta_0\)</span> has a probability of 0.5 to produce the correct answer.</p>
-<p>If we use the two-parameter logistic (2PL) model instead, the IRF is <span class="math display">\[P(X=1|\theta,a,b)=\frac{1}{1+\exp[a(b-\theta)]}\]</span> where the new parameter <span class="math inline">\(a\)</span> is called the discrimination parameter, and the IIF can be computed as <span class="math inline">\(a^2P(X=1|\theta,a,b)[1-P(X=1|\theta,a,b)]\)</span>. Note that while the contribution of the product, <span class="math inline">\(P(1-P)\)</span>, remains bounded between 0 and 0.25, the influence of <span class="math inline">\(a^2\)</span> can become quite large – for example, if <span class="math inline">\(a=5\)</span>, <span class="math inline">\(P(1-P)\)</span> gets multiplied by 25, ten times the maximum value under the Rasch model. Selecting such an informative item gives us the happy feeling that our error of measurement will decrease a lot, but what happens to the person’s probability to give the correct response?</p>
-<p>In our game, we have one person and two items. The person’s ability is 0, represented with a vertical gray line. One of the item is fixed to be a Rasch item with <span class="math inline">\(b=0\)</span>; its IRF is shown as a solid black curve, and its IIF as a dotted black curve. The second item, shown in red, is 2PL, and you can control its two parameters with the sliders. Initially, <span class="math inline">\(a=1\)</span> and <span class="math inline">\(b=1\)</span>.</p>
-<p>The purpose of the game is to find particularly awkward situations where the more informative item is the most inappropriate in the sense of:</p>
+<p>A typical task in adaptive testing is to select, out of a
+precalibrated item pool, the most appropriate item to ask, given an
+interim estimate of ability, <span class="math inline">\(\theta_0\)</span>. A popular approach is to select
+the item having the largest value of the item information function (IIF)
+at <span class="math inline">\(\theta_0\)</span>.</p>
+<p>When the IRT model is the Rasch model, the item response function
+(IRF) is <span class="math display">\[P(X=1|\theta,b)=\frac{1}{1+\exp(b-\theta)}\]</span>
+where <span class="math inline">\(b\)</span> is the item difficulty, and
+the IIF can be computed as <span class="math inline">\(P(X=1|\theta,b)[1-P(X=1|\theta,b)]\)</span>. For
+all items, this function reaches a maximum of 0.25, encountered exactly
+where <span class="math inline">\(\theta=b\)</span> and <span class="math inline">\(P(X=1|\theta,b)=0.5\)</span>. So picking the item
+with the maximum IIF is the same as picking the item for which a person
+of ability of <span class="math inline">\(\theta_0\)</span> has a
+probability of 0.5 to produce the correct answer.</p>
+<p>If we use the two-parameter logistic (2PL) model instead, the IRF is
+<span class="math display">\[P(X=1|\theta,a,b)=\frac{1}{1+\exp[a(b-\theta)]}\]</span>
+where the new parameter <span class="math inline">\(a\)</span> is called
+the discrimination parameter, and the IIF can be computed as <span class="math inline">\(a^2P(X=1|\theta,a,b)[1-P(X=1|\theta,a,b)]\)</span>.
+Note that while the contribution of the product, <span class="math inline">\(P(1-P)\)</span>, remains bounded between 0 and
+0.25, the influence of <span class="math inline">\(a^2\)</span> can
+become quite large – for example, if <span class="math inline">\(a=5\)</span>, <span class="math inline">\(P(1-P)\)</span> gets multiplied by 25, ten times
+the maximum value under the Rasch model. Selecting such an informative
+item gives us the happy feeling that our error of measurement will
+decrease a lot, but what happens to the person’s probability to give the
+correct response?</p>
+<p>In our game, we have one person and two items. The person’s ability
+is 0, represented with a vertical gray line. One of the item is fixed to
+be a Rasch item with <span class="math inline">\(b=0\)</span>; its IRF
+is shown as a solid black curve, and its IIF as a dotted black curve.
+The second item, shown in red, is 2PL, and you can control its two
+parameters with the sliders. Initially, <span class="math inline">\(a=1\)</span> and <span class="math inline">\(b=1\)</span>.</p>
+<p>The purpose of the game is to find particularly awkward situations
+where the more informative item is the most inappropriate in the sense
+of:</p>
 <ul>
 <li><p>having a difficulty as remote from <span class="math inline">\(\theta=0\)</span> as possible;</p></li>
 <li><p>having a probability of a correct response at <span class="math inline">\(\theta=0\)</span> as low as possible.</p></li>
 </ul>
-<p>Can you find the sweet spots? I have just computed the answer to the second question but I am not telling (in fact, I can tell you the value of <span class="math inline">\(P\)</span>: 0.0022, quite a bit off 0.5).</p>
+<p>Can you find the sweet spots? I have just computed the answer to the
+second question but I am not telling (in fact, I can tell you the value
+of <span class="math inline">\(P\)</span>: 0.0022, quite a bit off
+0.5).</p>
 <iframe src="https://vm66-1.shinyapps.io/theinfogame/" class="shiny-app-inline" style="height:600px;">
 </iframe>
   </div>
@@ -150,7 +183,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

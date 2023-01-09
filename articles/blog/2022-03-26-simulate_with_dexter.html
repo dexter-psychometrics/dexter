@@ -106,11 +106,13 @@
 
       
 
-      </header><script src="2022-03-26-simulate_with_dexter_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Simulating data with dexter: a commented example</h1>
-                        <h4 data-toc-skip class="author">Jesse Koops and Ivailo Partchev</h4>
+      <h1 data-toc-skip>Simulating data with dexter: a commented
+example</h1>
+                        <h4 data-toc-skip class="author">Jesse Koops and
+Ivailo Partchev</h4>
             
             <h4 data-toc-skip class="date">3/26/2022</h4>
       
@@ -121,8 +123,18 @@
 
     
     
-<p>We are busy people. We spend most of our time analyzing the large-scale national and international assessments for which <strong>dexter</strong> was developed. So far, we have not had the time to discuss at length the facilities for simulating item response data with <strong>dexter</strong>. Of course they are there, since simulation plays a vital role in our approach to generating plausible values and modelling in general – see <span class="citation">Marsman et al. (2017)</span>. But they are somewhat hidden among several ‘functions of theta’ – anyway, here is the overdue introduction to data simulation with <strong>dexter</strong>.</p>
-<p>Simulating IRT data for a single booklet of Rasch items is quite easy – it can be done with a single line in plain R:</p>
+<p>We are busy people. We spend most of our time analyzing the
+large-scale national and international assessments for which
+<strong>dexter</strong> was developed. So far, we have not had the time
+to discuss at length the facilities for simulating item response data
+with <strong>dexter</strong>. Of course they are there, since simulation
+plays a vital role in our approach to generating plausible values and
+modelling in general – see <span class="citation">Marsman et al.
+(2017)</span>. But they are somewhat hidden among several ‘functions of
+theta’ – anyway, here is the overdue introduction to data simulation
+with <strong>dexter</strong>.</p>
+<p>Simulating IRT data for a single booklet of Rasch items is quite easy
+– it can be done with a single line in plain R:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">Rasch_data</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">rlogis</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">20</span>,<span class="op">-</span><span class="fl">2</span>,<span class="fl">2</span><span class="op">)</span> ,<span class="st">'-'</span><span class="op">)</span><span class="op">)</span><span class="op">&gt;</span><span class="fl">0</span><span class="op">)</span>, <span class="fl">500</span>, <span class="fl">20</span><span class="op">)</span></span></code></pre></div>
 <p>The <strong>dexter</strong> way would be:</p>
@@ -133,7 +145,11 @@
 <span>               item_score <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>               beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">20</span>, <span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">Rasch_data</span> <span class="op">=</span> <span class="fu"><a href="../../reference/information.html">r_score</a></span><span class="op">(</span><span class="va">items</span><span class="op">)</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">500</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>We just construct a tibble with the item parameters in the expected format, after which it is a single line again. We now discuss a more interesting and complicated case. The example is by Jesse and the comments by me, so the perception of a certain age difference is inevitable even if not deliberate.</p>
+<p>We just construct a tibble with the item parameters in the expected
+format, after which it is a single line again. We now discuss a more
+interesting and complicated case. The example is by Jesse and the
+comments by me, so the perception of a certain age difference is
+inevitable even if not deliberate.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://mvtnorm.R-forge.R-project.org" class="external-link">mvtnorm</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
@@ -148,13 +164,24 @@
 <span>  <span class="st">'boys'</span>,  <span class="st">'bao'</span>,         <span class="fl">.7</span>,        <span class="fl">.5</span>,       <span class="fl">.2</span>         , <span class="fl">1</span>,   <span class="fl">1200</span>,</span>
 <span>  <span class="st">'girls'</span>, <span class="st">'bao'</span>,         <span class="fl">.5</span>,        <span class="fl">.5</span>,       <span class="fl">.5</span>         , <span class="fl">1</span>,   <span class="fl">1100</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>The <code>tribble</code>, ot transposed tibble, defines the combinations of gender, two Dutch school types, and three domains that will be treated as three highly correlated but distinct abilities. The hypothesized abilities will have a multivariate normal distribution with means varying across domains, sexes, and school types, and standard deviations differing just across school types. The last column has the number of fictional students in each cell.</p>
+<p>The <code>tribble</code>, ot transposed tibble, defines the
+combinations of gender, two Dutch school types, and three domains that
+will be treated as three highly correlated but distinct abilities. The
+hypothesized abilities will have a multivariate normal distribution with
+means varying across domains, sexes, and school types, and standard
+deviations differing just across school types. The last column has the
+number of fictional students in each cell.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">items</span> <span class="op">=</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>domain <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">domains</span>, <span class="va">nit</span>, <span class="cn">TRUE</span><span class="op">)</span>,</span>
 <span>               item_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">'item%03i-%s'</span>, <span class="fl">1</span><span class="op">:</span><span class="va">nit</span>, <span class="fu"><a href="https://rdrr.io/r/base/substr.html" class="external-link">substring</a></span><span class="op">(</span><span class="va">domain</span>,<span class="fl">1</span>,<span class="fl">3</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>               item_score <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>               beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="va">nit</span>, <span class="op">-</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Here we constructed the tibble that defines the items, just as in the initial example. <code>sprintf</code> is a much better choice than <code>paste0</code> because it produces sortable names: we don’t get items 10 through 19 sorted before item 2, for example. Next, define the correlation matrix for the three domains and use the <strong>mvtnorm</strong> package to generate the abilities:</p>
+<p>Here we constructed the tibble that defines the items, just as in the
+initial example. <code>sprintf</code> is a much better choice than
+<code>paste0</code> because it produces sortable names: we don’t get
+items 10 through 19 sorted before item 2, for example. Next, define the
+correlation matrix for the three domains and use the
+<strong>mvtnorm</strong> package to generate the abilities:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rho</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">.8</span>, <span class="fl">.8</span>,</span>
 <span>              <span class="fl">.8</span>, <span class="fl">1</span>,  <span class="fl">.8</span>,</span>
@@ -170,7 +197,11 @@
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span> <span class="op">=</span> <span class="va">domains</span></span>
 <span>    <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span>  <span class="op">}</span><span class="op">)</span></span></code></pre></div>
-<p>This happens in a <strong>dplyr</strong> pipe that groups by gender and school type, effectively calling <code>rmvnorm</code> four times and combining the results in a tibble. Now that we have the items and the thetas, call <code>r_score</code> three times to generate the simulated item responses, and stack the output:</p>
+<p>This happens in a <strong>dplyr</strong> pipe that groups by gender
+and school type, effectively calling <code>rmvnorm</code> four times and
+combining the results in a tibble. Now that we have the items and the
+thetas, call <code>r_score</code> three times to generate the simulated
+item responses, and stack the output:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dat</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../../reference/information.html">r_score</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">items</span>, <span class="va">domain</span><span class="op">==</span><span class="st">'geometry'</span><span class="op">)</span><span class="op">)</span><span class="op">(</span><span class="va">theta</span><span class="op">$</span><span class="va">geometry</span><span class="op">)</span>,</span>
@@ -182,15 +213,28 @@
 <code class="sourceCode R"><span><span class="va">dat</span> <span class="op">=</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="va">dat</span><span class="op">)</span></span>
 <span><span class="va">dat</span><span class="op">$</span><span class="va">gender</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">pop_theta</span><span class="op">$</span><span class="va">gender</span>, <span class="va">pop_theta</span><span class="op">$</span><span class="va">n</span><span class="op">)</span></span>
 <span><span class="va">dat</span><span class="op">$</span><span class="va">school_type</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">pop_theta</span><span class="op">$</span><span class="va">school_type</span>, <span class="va">pop_theta</span><span class="op">$</span><span class="va">n</span><span class="op">)</span></span></code></pre></div>
-<p>The simulated data is ready now, but we are going to put it in a <strong>dexter</strong> database and have some more fun with generating an incomplete design. The creation of a <strong>dexter</strong> database (a.k.a. project) always starts with a set of scoring rules. We shall make some trivial rules, where responses can be only 0 or 1, and will be scored as 0 or 1:</p>
+<p>The simulated data is ready now, but we are going to put it in a
+<strong>dexter</strong> database and have some more fun with generating
+an incomplete design. The creation of a <strong>dexter</strong> database
+(a.k.a. project) always starts with a set of scoring rules. We shall
+make some trivial rules, where responses can be only 0 or 1, and will be
+scored as 0 or 1:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dummy_rules</span> <span class="op">=</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>item_id<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">items</span><span class="op">$</span><span class="va">item_id</span>,<span class="fl">2</span><span class="op">)</span>, item_score<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">1</span>,each<span class="op">=</span><span class="va">nit</span><span class="op">)</span>, response<span class="op">=</span><span class="va">item_score</span><span class="op">)</span></span></code></pre></div>
-<p>From the rules, we generate an empty database, announcing the two person properties included with the data:</p>
+<p>From the rules, we generate an empty database, announcing the two
+person properties included with the data:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="../../reference/start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">dummy_rules</span>, </span>
 <span>                       <span class="st">':memory:'</span>, </span>
 <span>                       person_properties<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>gender<span class="op">=</span><span class="st">'&lt;unknown&gt;'</span>, school_type<span class="op">=</span><span class="st">'&lt;unknown&gt;'</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Now, let us have an incomplete design, 30 items per booklet. SBO students will get the easier booklet, and BAO students will get the more difficult one. In real life, this would be determined by a pretest with a small sample of students, but we will simply sort items on their true difficulty parameters. The easy booklet will contain all items except the 20 most difficult ones, and the difficult booklets all items except the 20 easiest ones; thus, the two booklets have an overlap of 10 items of average difficulty:</p>
+<p>Now, let us have an incomplete design, 30 items per booklet. SBO
+students will get the easier booklet, and BAO students will get the more
+difficult one. In real life, this would be determined by a pretest with
+a small sample of students, but we will simply sort items on their true
+difficulty parameters. The easy booklet will contain all items except
+the 20 most difficult ones, and the difficult booklets all items except
+the 20 easiest ones; thus, the two booklets have an overlap of 10 items
+of average difficulty:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">items_SBO</span> <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">items</span>,<span class="va">beta</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span>  <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">item_id</span><span class="op">)</span></span>
 <span><span class="va">items_BAO</span> <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">items</span>,<span class="va">beta</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice</a></span><span class="op">(</span><span class="fl">31</span><span class="op">:</span><span class="fl">50</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">item_id</span><span class="op">)</span></span>
@@ -205,13 +249,19 @@
 <p>Finally, we add the domains as an item property:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../../reference/add_item_properties.html">add_item_properties</a></span><span class="op">(</span><span class="va">db</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">items</span>, <span class="va">item_id</span>, <span class="va">domain</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>We are now ready to check how the models available in <strong>dexter</strong> will cope with this simulated data set, or how the diagnostic facilities might help us investigate its particular properties.</p>
+<p>We are now ready to check how the models available in
+<strong>dexter</strong> will cope with this simulated data set, or how
+the diagnostic facilities might help us investigate its particular
+properties.</p>
 <div class="section level2 unnumbered">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references">
-<div id="ref-marsman2017turning">
-<p>Marsman, Maarten, Gunter Maris, Timo Bechger, and Cees Glas. 2017. “Turning Simulation into Estimation: Generalized Exchange Algorithms for Exponential Family Models.” <em>PloS One</em> 12 (1): e0169787.</p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-marsman2017turning" class="csl-entry">
+Marsman, Maarten, Gunter Maris, Timo Bechger, and Cees Glas. 2017.
+<span>“Turning Simulation into Estimation: Generalized Exchange
+Algorithms for Exponential Family Models.”</span> <em>PloS One</em> 12
+(1): e0169787.
 </div>
 </div>
 </div>
@@ -234,7 +284,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

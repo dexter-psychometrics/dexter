@@ -106,11 +106,12 @@
 
       
 
-      </header><script src="2020-11-23-hot-on-the-trail-of-warm_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Hot on the Trail of Warm</h1>
-                        <h4 data-toc-skip class="author">Timo Bechger, Ivailo Partchev (foreword)</h4>
+                        <h4 data-toc-skip class="author">Timo Bechger,
+Ivailo Partchev (foreword)</h4>
             
             <h4 data-toc-skip class="date">2020-11-23</h4>
       
@@ -121,81 +122,181 @@
 
     
     
-<p><em>Back in 1989, Thomas A. Warm (1937–2019) published <a href="https://eric.ed.gov/?id=EJ401718" class="external-link">a paper</a> in Psychometrika that was to have an important influence on practical testing. It described a way to reduce the inherent bias in the maximum likelihood estimate of the person’s ability, given the responses and the item parameters. All testing is ultimately about estimating ability, so the paper naturally got a lot of attention.</em></p>
-<p><em>We are not aware of any subsequent publications by T.A., although we did find a highly readable <a href="https://apps.dtic.mil/dtic/tr/fulltext/u2/a063072.pdf" class="external-link">IRT primer</a> on the Internet. Sadly, we also found an <a href="https://obits.oklahoman.com/obituaries/oklahoman/obituary.aspx?pid=193693805&amp;fhid=4206" class="external-link">obituary</a>. It says that he was in the army and that he enjoyed Japanese drumming (who doesn’t?), but there is no mention of psychometrics at all. Looking further, we found this picture on LinkedIn:</em></p>
+<p><em>Back in 1989, Thomas A. Warm (1937–2019) published <a href="https://eric.ed.gov/?id=EJ401718" class="external-link">a paper</a> in Psychometrika
+that was to have an important influence on practical testing. It
+described a way to reduce the inherent bias in the maximum likelihood
+estimate of the person’s ability, given the responses and the item
+parameters. All testing is ultimately about estimating ability, so the
+paper naturally got a lot of attention.</em></p>
+<p><em>We are not aware of any subsequent publications by T.A., although
+we did find a highly readable <a href="https://apps.dtic.mil/dtic/tr/fulltext/u2/a063072.pdf" class="external-link">IRT
+primer</a> on the Internet. Sadly, we also found an <a href="https://obits.oklahoman.com/obituaries/oklahoman/obituary.aspx?pid=193693805&amp;fhid=4206" class="external-link">obituary</a>.
+It says that he was in the army and that he enjoyed Japanese drumming
+(who doesn’t?), but there is no mention of psychometrics at all. Looking
+further, we found this picture on LinkedIn:</em></p>
 <p><img src="img/ThomasWarm.jpeg"></p>
-<p><em>We don’t know whether this elusiveness was due to the extreme modesty of a private person, or to the military status of some of his employers, such as the U.S. Coastal Guard Institute. But we feel that T.A. deserves some kind of tribute by our community, and Timo proposed to write one. Predictably, the formulae started pouring out immediately, but what nicer tribute for a scientist?</em></p>
+<p><em>We don’t know whether this elusiveness was due to the extreme
+modesty of a private person, or to the military status of some of his
+employers, such as the U.S. Coastal Guard Institute. But we feel that
+T.A. deserves some kind of tribute by our community, and Timo proposed
+to write one. Predictably, the formulae started pouring out immediately,
+but what nicer tribute for a scientist?</em></p>
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Starting with the simplest non-trivial case, we assume that the test consists of <span class="math inline">\(n\)</span> equally difficult Rasch items with <span class="math display">\[
+<p>Starting with the simplest non-trivial case, we assume that the test
+consists of <span class="math inline">\(n\)</span> equally difficult
+Rasch items with <span class="math display">\[
 \pi(\theta) = \frac{\exp(\theta)}{1+\exp(\theta)},
-\]</span> the probability to find the correct answer on any of the items. The ML estimate (MLE) of <span class="math inline">\(\pi(\theta)\)</span> is <span class="math inline">\(\hat{\pi} = \frac{x_+}{n}\)</span> where <span class="math inline">\(x_+\)</span> is the number of items answered correctly. From the invariance property of the MLE, it follows that <span class="math display">\[
+\]</span> the probability to find the correct answer on any of the
+items. The ML estimate (MLE) of <span class="math inline">\(\pi(\theta)\)</span> is <span class="math inline">\(\hat{\pi} = \frac{x_+}{n}\)</span> where <span class="math inline">\(x_+\)</span> is the number of items answered
+correctly. From the invariance property of the MLE, it follows that
+<span class="math display">\[
 \hat{\theta} = \ln \frac{\frac{x_+}{n}}{1-\frac{x_+}{n}}
 \]</span> is the MLE of ability.</p>
-<p>Unfortunately, <span class="math inline">\(\hat{\theta}\)</span> is infinite for extreme scores; that is, <span class="math inline">\(-\infty\)</span> when <span class="math inline">\(x_+=0\)</span> or <span class="math inline">\(+\infty\)</span> when <span class="math inline">\(x_+=n\)</span>. One could say that <span class="math inline">\(\hat{\theta}\)</span> is extremely biased and (under) over-estimates the ability corresponding to (<span class="math inline">\(x_+=0\)</span>) <span class="math inline">\(x_+=n\)</span>. To reduce bias, Haldane (1956) suggested that we replace <span class="math inline">\(\hat{\pi}\)</span> by <span class="math display">\[
+<p>Unfortunately, <span class="math inline">\(\hat{\theta}\)</span> is
+infinite for extreme scores; that is, <span class="math inline">\(-\infty\)</span> when <span class="math inline">\(x_+=0\)</span> or <span class="math inline">\(+\infty\)</span> when <span class="math inline">\(x_+=n\)</span>. One could say that <span class="math inline">\(\hat{\theta}\)</span> is extremely biased and
+(under) over-estimates the ability corresponding to (<span class="math inline">\(x_+=0\)</span>) <span class="math inline">\(x_+=n\)</span>. To reduce bias, Haldane (1956)
+suggested that we replace <span class="math inline">\(\hat{\pi}\)</span>
+by <span class="math display">\[
 \hat{\pi}^*=\frac{x_++\frac{1}{2}}{n+1}.
 \]</span> If we do so, we find <span class="math display">\[
-\hat{\theta}^* = \ln \frac{x_++\frac{1}{2}}{n+1-\left(x_+ + \frac{1}{2}\right)}
-\]</span> which we will call <em>Haldane’s estimate</em>. As Haldene’s estimate is finite even for the extreme scores, it is obviously less biased than the MLE.</p>
-<p>The Warm estimate was similarly developed to prevent small-sample bias but, apparently, using a very different approach. Specifically, the Warm estimator is a weighted maximum likelihood estimate (WMLE) that maximizes a weighted likelihood function <span class="math inline">\(L(\theta)W(\theta)\)</span>. We obtain the Warm estimate when <span class="math inline">\(W(\theta) = \sqrt{I(\theta)}\)</span>, where <span class="math inline">\(I(\theta)\)</span> is the test information function. Here,<br><span class="math display">\[
-L(\theta)\sqrt{I(\theta)} \propto \frac{e^{x_+\theta}}{(1+e^\theta)^{n}}\sqrt{ \frac{ne^{\theta}}{(1+e^{\theta})^2}}
+\hat{\theta}^* = \ln \frac{x_++\frac{1}{2}}{n+1-\left(x_+ +
+\frac{1}{2}\right)}
+\]</span> which we will call <em>Haldane’s estimate</em>. As Haldene’s
+estimate is finite even for the extreme scores, it is obviously less
+biased than the MLE.</p>
+<p>The Warm estimate was similarly developed to prevent small-sample
+bias but, apparently, using a very different approach. Specifically, the
+Warm estimator is a weighted maximum likelihood estimate (WMLE) that
+maximizes a weighted likelihood function <span class="math inline">\(L(\theta)W(\theta)\)</span>. We obtain the Warm
+estimate when <span class="math inline">\(W(\theta) =
+\sqrt{I(\theta)}\)</span>, where <span class="math inline">\(I(\theta)\)</span> is the test information
+function. Here,<br><span class="math display">\[
+L(\theta)\sqrt{I(\theta)} \propto
+\frac{e^{x_+\theta}}{(1+e^\theta)^{n}}\sqrt{
+\frac{ne^{\theta}}{(1+e^{\theta})^2}}
 \propto\frac{e^{(x_++\frac{1}{2})\theta}}{(1+e^\theta)^{n+1}}
-\]</span> As the right-hand side is the original likelihood function with <span class="math inline">\(x_+\)</span> replaced by <span class="math inline">\(x_++1/2\)</span> and <span class="math inline">\(n\)</span> replaced by <span class="math inline">\(n+1\)</span>, it follows that the Warm estimate of ability equals Haldane’s estimate; see also <span class="citation">Verhelst, Verstralen, and Jansen (1997)</span>.</p>
-<p>This blog intends to explain the Warm estimate. We assume that the IRT model is a nominal response model. That is, a person with ability <span class="math inline">\(\theta\)</span> answers independently to different items and has a probability<br><span class="math display">\[
-P_{ij}(\theta) = \frac{b_{ij} e^{a_{ij}\theta}}{\sum_h b_{ih} e^{a_{ih}\theta}}
-\]</span> to earn an item score of <span class="math inline">\(a_{ij}\)</span> on item <span class="math inline">\(i\)</span> where <span class="math inline">\(b_{ij}\)</span> is an item category parameter with <span class="math inline">\(j=0, \dots, m_i\)</span>, <span class="math inline">\(a_{i0}=0\)</span> and <span class="math inline">\(b_{i0}=1\)</span>. We focus on the estimation of <span class="math inline">\(\theta\)</span> and we assume both the <span class="math inline">\(a_{ij}\)</span> and <span class="math inline">\(b_{ij}\)</span> to be fixed. The IRT model is then a member of the exponential family with canonical parameter <span class="math inline">\(\theta\)</span> where the test score is a sufficient statistic for <span class="math inline">\(\theta\)</span>. This includes the Rasch model and the OPLM as special case. If the <span class="math inline">\(a_{ij}\)</span> are fixed, it also includes the 2PL.</p>
+\]</span> As the right-hand side is the original likelihood function
+with <span class="math inline">\(x_+\)</span> replaced by <span class="math inline">\(x_++1/2\)</span> and <span class="math inline">\(n\)</span> replaced by <span class="math inline">\(n+1\)</span>, it follows that the Warm estimate of
+ability equals Haldane’s estimate; see also <span class="citation">Verhelst, Verstralen, and Jansen (1997)</span>.</p>
+<p>This blog intends to explain the Warm estimate. We assume that the
+IRT model is a nominal response model. That is, a person with ability
+<span class="math inline">\(\theta\)</span> answers independently to
+different items and has a probability<br><span class="math display">\[
+P_{ij}(\theta) = \frac{b_{ij} e^{a_{ij}\theta}}{\sum_h b_{ih}
+e^{a_{ih}\theta}}
+\]</span> to earn an item score of <span class="math inline">\(a_{ij}\)</span> on item <span class="math inline">\(i\)</span> where <span class="math inline">\(b_{ij}\)</span> is an item category parameter with
+<span class="math inline">\(j=0, \dots, m_i\)</span>, <span class="math inline">\(a_{i0}=0\)</span> and <span class="math inline">\(b_{i0}=1\)</span>. We focus on the estimation of
+<span class="math inline">\(\theta\)</span> and we assume both the <span class="math inline">\(a_{ij}\)</span> and <span class="math inline">\(b_{ij}\)</span> to be fixed. The IRT model is then
+a member of the exponential family with canonical parameter <span class="math inline">\(\theta\)</span> where the test score is a
+sufficient statistic for <span class="math inline">\(\theta\)</span>.
+This includes the Rasch model and the OPLM as special case. If the <span class="math inline">\(a_{ij}\)</span> are fixed, it also includes the
+2PL.</p>
 </div>
 <div class="section level2">
 <h2 id="preliminaries">Preliminaries<a class="anchor" aria-label="anchor" href="#preliminaries"></a>
 </h2>
-<p>We have a scalar parameter <span class="math inline">\(\theta\)</span> and a statistic <span class="math inline">\(\hat{\theta}\)</span>. When estimating <span class="math inline">\(\theta\)</span>, <span class="math inline">\(\hat{\theta}\)</span> is called an estimator and its observed value an estimate. For simplicity, we use the single term estimate and a single symbol; i.e., <span class="math inline">\(\hat{\theta}\)</span> for the MLE and <span class="math inline">\(\hat{\theta}^*\)</span> for the Warm estimate.</p>
+<p>We have a scalar parameter <span class="math inline">\(\theta\)</span> and a statistic <span class="math inline">\(\hat{\theta}\)</span>. When estimating <span class="math inline">\(\theta\)</span>, <span class="math inline">\(\hat{\theta}\)</span> is called an estimator and
+its observed value an estimate. For simplicity, we use the single term
+estimate and a single symbol; i.e., <span class="math inline">\(\hat{\theta}\)</span> for the MLE and <span class="math inline">\(\hat{\theta}^*\)</span> for the Warm estimate.</p>
 <div class="section level3">
 <h3 id="mle-wmle-and-the-warm-estimate">MLE, WMLE and the Warm estimate<a class="anchor" aria-label="anchor" href="#mle-wmle-and-the-warm-estimate"></a>
 </h3>
-<p>The MLE <span class="math inline">\(\hat{\theta}\)</span> is the value that maximizes the likelihood function or, equivalently, its natural logarithm the log-likelihood function <span class="math inline">\(l(\theta)=\ln L(\theta)\)</span>. It is defined as the root of the score function: <span class="math display">\[
+<p>The MLE <span class="math inline">\(\hat{\theta}\)</span> is the
+value that maximizes the likelihood function or, equivalently, its
+natural logarithm the log-likelihood function <span class="math inline">\(l(\theta)=\ln L(\theta)\)</span>. It is defined as
+the root of the score function: <span class="math display">\[
 S(\theta) = \frac{d}{d\theta} l(\theta).
 \]</span></p>
-<p>The WMLE is the root <span class="math inline">\(\hat{\theta}^*\)</span> of the weighted score function <span class="math display">\[
+<p>The WMLE is the root <span class="math inline">\(\hat{\theta}^*\)</span> of the weighted score
+function <span class="math display">\[
 S^*(\theta) = \frac{d}{d\theta} \left[l(\theta) + w(\theta)\right]
-\]</span> where <span class="math inline">\(w(\theta)=\ln W(\theta)\)</span> is the log-weight function. The Warm estimate is a special kind of WMLE where <span class="math inline">\(w(\theta) = \frac{1}{2}\ln I(\theta)\)</span>. Note that <span class="math inline">\(I(\theta) = -S'(\theta)\)</span>.</p>
+\]</span> where <span class="math inline">\(w(\theta)=\ln
+W(\theta)\)</span> is the log-weight function. The Warm estimate is a
+special kind of WMLE where <span class="math inline">\(w(\theta) =
+\frac{1}{2}\ln I(\theta)\)</span>. Note that <span class="math inline">\(I(\theta) = -S'(\theta)\)</span>.</p>
 </div>
 <div class="section level3">
 <h3 id="bias">Bias<a class="anchor" aria-label="anchor" href="#bias"></a>
 </h3>
-<p>Bias is the difference between the expected value of the estimate and the true value <span class="math display">\[
-B(\theta) = E_{\theta}[\hat{\theta}|\mathbf{x}] - \theta 
-\]</span> where the expectation is taken with respect to the distribution of the data given the true value of ability. In the example with equivalent Rasch items, the MLE, <span class="math inline">\(\hat{\pi} = x_+/n\)</span>, is an unbiased estimate of <span class="math inline">\(\pi\)</span>. However, the estimate <span class="math inline">\(\hat{\theta}\)</span>, although it is the MLE of <span class="math inline">\(\theta\)</span>, was not unbiased. This is not surprising given that <span class="math display">\[
-E[\hat{\theta}] = E\left[\ln \frac{\hat{\pi}}{1-\hat{\pi}}\right] \neq \ln \frac{E[\hat{\pi}]}{1+E[\hat{\pi}]} =\theta. 
-\]</span> An estimate of <span class="math inline">\(\theta\)</span> would only be unbiased if <span class="math inline">\(\theta\)</span> is a linear function of <span class="math inline">\(\pi\)</span>. To obtain the Warm estimate, we essentially ‘biased’ the MLE of <span class="math inline">\(\pi\)</span> to obtain an estimate of <span class="math inline">\(\theta\)</span> that was less biased.</p>
+<p>Bias is the difference between the expected value of the estimate and
+the true value <span class="math display">\[
+B(\theta) = E_{\theta}[\hat{\theta}|\mathbf{x}] - \theta
+\]</span> where the expectation is taken with respect to the
+distribution of the data given the true value of ability. In the example
+with equivalent Rasch items, the MLE, <span class="math inline">\(\hat{\pi} = x_+/n\)</span>, is an unbiased
+estimate of <span class="math inline">\(\pi\)</span>. However, the
+estimate <span class="math inline">\(\hat{\theta}\)</span>, although it
+is the MLE of <span class="math inline">\(\theta\)</span>, was not
+unbiased. This is not surprising given that <span class="math display">\[
+E[\hat{\theta}] = E\left[\ln \frac{\hat{\pi}}{1-\hat{\pi}}\right] \neq
+\ln \frac{E[\hat{\pi}]}{1+E[\hat{\pi}]} =\theta.
+\]</span> An estimate of <span class="math inline">\(\theta\)</span>
+would only be unbiased if <span class="math inline">\(\theta\)</span> is
+a linear function of <span class="math inline">\(\pi\)</span>. To obtain
+the Warm estimate, we essentially ‘biased’ the MLE of <span class="math inline">\(\pi\)</span> to obtain an estimate of <span class="math inline">\(\theta\)</span> that was less biased.</p>
 <p>In general, the MLE is not unbiased but the bias is of order <span class="math inline">\(1/n\)</span>: <span class="math display">\[
 B(\hat{\theta}) = \frac{b(\theta)}{n}+o\left(\frac{1}{n}\right)
-\]</span> So the bias vanishes as <span class="math inline">\(n\rightarrow \infty\)</span>. Unfortunately, the number of items is typically small which is why we have to worry about bias. The term <span class="math inline">\(b(\theta)/n\)</span> is called the first-order bias.</p>
+\]</span> So the bias vanishes as <span class="math inline">\(n\rightarrow \infty\)</span>. Unfortunately, the
+number of items is typically small which is why we have to worry about
+bias. The term <span class="math inline">\(b(\theta)/n\)</span> is
+called the first-order bias.</p>
 <p>Note that the mean-squared error, <span class="math display">\[
-E_{\theta}[(\hat{\theta}-\theta)^2] = Var_{\theta}(\hat{\theta})+B^2(\theta)
-\]</span> is also of order <span class="math inline">\(n^{-1}\)</span> with its main contribution the variance since <span class="math inline">\(B^2\)</span> is of order <span class="math inline">\(n^{-2}\)</span>. Thus, a biased estimator may be better than an unbiased one if it has smaller variance and hence smaller mean-squared error.</p>
+E_{\theta}[(\hat{\theta}-\theta)^2] =
+Var_{\theta}(\hat{\theta})+B^2(\theta)
+\]</span> is also of order <span class="math inline">\(n^{-1}\)</span>
+with its main contribution the variance since <span class="math inline">\(B^2\)</span> is of order <span class="math inline">\(n^{-2}\)</span>. Thus, a biased estimator may be
+better than an unbiased one if it has smaller variance and hence smaller
+mean-squared error.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="first-order-bias-of-the-mle">First-order bias of the MLE<a class="anchor" aria-label="anchor" href="#first-order-bias-of-the-mle"></a>
 </h2>
-<p>Using a Taylor-series expansion to approximate <span class="math inline">\(S(\hat{\theta})\)</span> around the true value <span class="math inline">\(\theta\)</span>, Lord (1983) found: <span class="math display">\[
+<p>Using a Taylor-series expansion to approximate <span class="math inline">\(S(\hat{\theta})\)</span> around the true value
+<span class="math inline">\(\theta\)</span>, Lord (1983) found: <span class="math display">\[
 E[\hat{\theta}-\theta] = \frac{-J(\theta)}{2I^2(\theta)} +o(n^{-1})
-\]</span> where <span class="math inline">\(J(\theta)=I'(\theta)=-S''(\theta)\)</span>. Lord’s result is an instance of a general result derived, for example, in <span class="citation">Cox and Hinkley (1974)</span> or, slightly easier, in <span class="citation">Mardia, Southworth, and Taylor (1999)</span>.</p>
-<p>Note that <span class="math inline">\(I(\theta)=\sum_i I_i(\theta)\)</span> with <span class="math inline">\(I_i(\theta)\)</span> the item information function. If we write <span class="math inline">\(\bar{I}(\theta) = n^{-1}\sum_i I(\theta)\)</span> for the average information per item, we find that <span class="math display">\[
-b(\theta) = -\frac{\bar{J}(\theta)}{2\bar{I}^2(\theta)} =-\frac{d}{d\theta} \ln \sqrt{\bar{I}(\theta)}
-\]</span> Thus, the first-order bias is zero at the value of <span class="math inline">\(\theta\)</span> where the (average) information function reaches its maximum value. It follows that first-order bias is smallest for those persons whose ability matches the difficulty of the test. For example, in the case of equally difficult Rasch items, <span class="math display">\[
+\]</span> where <span class="math inline">\(J(\theta)=I'(\theta)=-S''(\theta)\)</span>.
+Lord’s result is an instance of a general result derived, for example,
+in <span class="citation">Cox and Hinkley (1974)</span> or, slightly
+easier, in <span class="citation">Mardia, Southworth, and Taylor
+(1999)</span>.</p>
+<p>Note that <span class="math inline">\(I(\theta)=\sum_i
+I_i(\theta)\)</span> with <span class="math inline">\(I_i(\theta)\)</span> the item information
+function. If we write <span class="math inline">\(\bar{I}(\theta) =
+n^{-1}\sum_i I(\theta)\)</span> for the average information per item, we
+find that <span class="math display">\[
+b(\theta) = -\frac{\bar{J}(\theta)}{2\bar{I}^2(\theta)}
+=-\frac{d}{d\theta} \ln \sqrt{\bar{I}(\theta)}
+\]</span> Thus, the first-order bias is zero at the value of <span class="math inline">\(\theta\)</span> where the (average) information
+function reaches its maximum value. It follows that first-order bias is
+smallest for those persons whose ability matches the difficulty of the
+test. For example, in the case of equally difficult Rasch items, <span class="math display">\[
 b(\theta) = -\frac{1-e^{\theta-\delta}}{2(1+e^{\theta-\delta})}
-\]</span> which is zero when <span class="math inline">\(\theta=\delta\)</span> and the ability of the test taker matches exactly the difficulty of the items.</p>
+\]</span> which is zero when <span class="math inline">\(\theta=\delta\)</span> and the ability of the test
+taker matches exactly the difficulty of the items.</p>
 </div>
 <div class="section level2">
 <h2 id="correction-or-prevention">Correction or prevention<a class="anchor" aria-label="anchor" href="#correction-or-prevention"></a>
 </h2>
-<p>Lord suggests to correct the MLE for first-order bias. That is, to use <span class="math inline">\(\tilde{\theta} = \hat{\theta} - \frac{b(\theta)}{n}\)</span> whose bias <span class="math inline">\(B(\tilde{\theta})=o(n^{-1})\)</span>. <span class="citation">Efron and others (1975)</span> shows that this still holds if we substitute <span class="math inline">\(\theta=\hat{\theta}\)</span> for the true value. The problem is that this ‘bias-corrected’ estimate would be undefined when the ML estimates are infinite.</p>
-<p>Like Haldane, Warm suggests instead a method to <em>prevent</em> bias. Namely, to weight (or bias) the score function to <em>reduce</em> the bias in the MLE. He found that: <span class="math display">\[
-B(\theta^*) = \frac{1}{I(\theta)}\left[w'(\theta) - \frac{J(\theta)}{2I(\theta)}\right] + o(n^{-1})
-\]</span> such that <span class="math inline">\(B(\theta^*) = o(n^{-1})\)</span> if we define <span class="math inline">\(w(\theta) =\frac{1}{2}\ln I(\theta)\)</span>.</p>
-<p>Warm also succeeded in showing that the asymptotic distribution of the WMLE equals that of the MLE. As <span class="math inline">\(n\)</span> grows to infinity, both estimates are normally distributed around the true value with variance <span class="math inline">\(I(\theta)^{-1}\)</span>.</p>
+<p>Lord suggests to correct the MLE for first-order bias. That is, to
+use <span class="math inline">\(\tilde{\theta} = \hat{\theta} -
+\frac{b(\theta)}{n}\)</span> whose bias <span class="math inline">\(B(\tilde{\theta})=o(n^{-1})\)</span>. <span class="citation">Efron et al. (1975)</span> shows that this still holds
+if we substitute <span class="math inline">\(\theta=\hat{\theta}\)</span> for the true value.
+The problem is that this ‘bias-corrected’ estimate would be undefined
+when the ML estimates are infinite.</p>
+<p>Like Haldane, Warm suggests instead a method to <em>prevent</em>
+bias. Namely, to weight (or bias) the score function to <em>reduce</em>
+the bias in the MLE. He found that: <span class="math display">\[
+B(\theta^*) = \frac{1}{I(\theta)}\left[w'(\theta) -
+\frac{J(\theta)}{2I(\theta)}\right] + o(n^{-1})
+\]</span> such that <span class="math inline">\(B(\theta^*) =
+o(n^{-1})\)</span> if we define <span class="math inline">\(w(\theta)
+=\frac{1}{2}\ln I(\theta)\)</span>.</p>
+<p>Warm also succeeded in showing that the asymptotic distribution of
+the WMLE equals that of the MLE. As <span class="math inline">\(n\)</span> grows to infinity, both estimates are
+normally distributed around the true value with variance <span class="math inline">\(I(\theta)^{-1}\)</span>.</p>
 <!-- As an aside, we note that there are other ways to correct for bias. @quenouille1956notes noted that, if we leave the i-th item responses out of the original response pattern, the MLE has the same bias expression but with $n$ replaced by $n-1$. In light of this observation, he suggested the estimator -->
 <!-- $$ -->
 <!-- \tilde{\theta} = \hat{\theta}-(n-1)\left[\bar{\theta}-\hat{\theta}\right] -->
@@ -205,12 +306,32 @@ B(\theta^*) = \frac{1}{I(\theta)}\left[w'(\theta) - \frac{J(\theta)}{2I(\theta)}
 <div class="section level2">
 <h2 id="the-connection-to-jeffreys-prior">The connection to Jeffrey’s prior<a class="anchor" aria-label="anchor" href="#the-connection-to-jeffreys-prior"></a>
 </h2>
-<p>If <span class="math inline">\(W(\theta)\)</span> is a prior density function of <span class="math inline">\(\theta\)</span>, the weighted likelihood is (proportional to) a posterior density function. It follows that <span class="math inline">\(\hat{\theta}^*\)</span> is a Bayesian modal estimate of <span class="math inline">\(\theta\)</span> when the prior <span class="math inline">\(W(\theta) \propto \sqrt{\ln I(\theta)}\)</span>. This prior is is known as <em>Jeffreys prior</em>.</p>
-<p>Jeffreys prior was named after the statistician who introduced it as a prior distribution that results in a posterior that is invariant under reparametrization <span class="citation">Jeffreys (1946)</span>. Warm notes the connection but doesn’t seem to believe that Jeffreys prior makes sense. He writes:</p>
+<p>If <span class="math inline">\(W(\theta)\)</span> is a prior density
+function of <span class="math inline">\(\theta\)</span>, the weighted
+likelihood is (proportional to) a posterior density function. It follows
+that <span class="math inline">\(\hat{\theta}^*\)</span> is a Bayesian
+modal estimate of <span class="math inline">\(\theta\)</span> when the
+prior <span class="math inline">\(W(\theta) \propto \sqrt{\ln
+I(\theta)}\)</span>. This prior is is known as <em>Jeffreys
+prior</em>.</p>
+<p>Jeffreys prior was named after the statistician who introduced it as
+a prior distribution that results in a posterior that is invariant under
+reparametrization <span class="citation">Jeffreys (1946)</span>. Warm
+notes the connection but doesn’t seem to believe that Jeffreys prior
+makes sense. He writes:</p>
 <blockquote>
-<p>Suppose the same test was given to two groups of examinees, whose distributions of <span class="math inline">\(\theta\)</span> are different and known. Bayesians will be obliged to use different priors for the two groups. For WLE the same <span class="math inline">\(w(\theta)\)</span> would be used for both groups, because <span class="math inline">\(w(\theta)\)</span> is a function of the test only. Similarly, if two different tests of the same ability are given to a single group, Bayesians would use the same prior for both tests, whereas for WLE a different <span class="math inline">\(w(\theta)\)</span> would be used for each test.</p>
+<p>Suppose the same test was given to two groups of examinees, whose
+distributions of <span class="math inline">\(\theta\)</span> are
+different and known. Bayesians will be obliged to use different priors
+for the two groups. For WLE the same <span class="math inline">\(w(\theta)\)</span> would be used for both groups,
+because <span class="math inline">\(w(\theta)\)</span> is a function of
+the test only. Similarly, if two different tests of the same ability are
+given to a single group, Bayesians would use the same prior for both
+tests, whereas for WLE a different <span class="math inline">\(w(\theta)\)</span> would be used for each
+test.</p>
 </blockquote>
-<p>Personally, we see no objection to being ignorant of group differences and base our ability estimate on the test only.</p>
+<p>Personally, we see no objection to being ignorant of group
+differences and base our ability estimate on the test only.</p>
 </div>
 <div class="section level2">
 <h2 id="calculating-the-warm-estimate-in-r">Calculating the Warm estimate in R<a class="anchor" aria-label="anchor" href="#calculating-the-warm-estimate-in-r"></a>
@@ -219,22 +340,30 @@ B(\theta^*) = \frac{1}{I(\theta)}\left[w'(\theta) - \frac{J(\theta)}{2I(\theta)}
 <div class="section level3">
 <h3 id="rasch-model">Rasch model<a class="anchor" aria-label="anchor" href="#rasch-model"></a>
 </h3>
-<p>For the Rasch model it is relatively simple. The log-likelihood function is <span class="math display">\[
+<p>For the Rasch model it is relatively simple. The log-likelihood
+function is <span class="math display">\[
 l(\theta) = x_+ \theta -\sum_i \ln(1+e^{\theta-\delta_i})
 \]</span> The corresponding score function is <span class="math display">\[\begin{align*}
-S(\theta) 
-= l'(\theta) &amp;= x_+ - \sum_i \frac{e^{\theta-\delta_i}}{1+e^{\theta-\delta_i}} \\
+S(\theta)
+= l'(\theta) &amp;= x_+ - \sum_i
+\frac{e^{\theta-\delta_i}}{1+e^{\theta-\delta_i}} \\
 &amp;= x_+ - \sum_i P_i(\theta) \\
 &amp;= x_+ -E[X_+|\theta]
-\end{align*}\]</span> As a property of the exponential family, this has the form <span class="math inline">\(x_+ -E[X_+|\theta]\)</span>. Hence, finding the MLE of ability means finding the ability such that the expected test score equals the observed one. The information function is <span class="math display">\[\begin{align*}
-I(\theta) 
-&amp;= -S'(\theta) \\ 
+\end{align*}\]</span> As a property of the exponential family, this has
+the form <span class="math inline">\(x_+ -E[X_+|\theta]\)</span>. Hence,
+finding the MLE of ability means finding the ability such that the
+expected test score equals the observed one. The information function is
+<span class="math display">\[\begin{align*}
+I(\theta)
+&amp;= -S'(\theta) \\
 &amp;= \sum_i P'_i(\theta)\\
-\end{align*}\]</span> where <span class="math inline">\(P'_i(\theta) = P_i(\theta)(1-P_i(\theta))\)</span>. Finally, <span class="math display">\[
+\end{align*}\]</span> where <span class="math inline">\(P'_i(\theta)
+= P_i(\theta)(1-P_i(\theta))\)</span>. Finally, <span class="math display">\[
 J(\theta) = \sum_i P'_i(\theta)\left[1-2P_i(\theta)\right]\\
 \]</span> The log-weighted score is thus: <span class="math display">\[\begin{align*}
 S*(\theta) &amp;= x_+ -E[X_+|\theta] + \frac{J(\theta)}{2I(\theta)}\\
-&amp;=x_+ - \sum_i P_i(\theta) +\frac{\sum_i P'_i(\theta)\left[1-2P_i(\theta)\right]}
+&amp;=x_+ - \sum_i P_i(\theta) +\frac{\sum_i
+P'_i(\theta)\left[1-2P_i(\theta)\right]}
 {2\sum_h P_h(\theta)(1-P_h(\theta))}
 \end{align*}\]</span> This leads to a very simple function.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -251,25 +380,47 @@ S*(\theta) &amp;= x_+ -E[X_+|\theta] + \frac{J(\theta)}{2I(\theta)}\\
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/uniroot.html" class="external-link">uniroot</a></span><span class="op">(</span><span class="va">Sw</span>, interval<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>,<span class="fl">10</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">root</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <!-- Haldane's estimate, assuming that the items are (about) equal is simple. For a test of 100 Rasch items with difficulties uniformly chosen between -1 and 1, a plot of Warm against Haldane shows that the two are very similar but Haldane's estimator pulls the extremes slightly more to the mean.   -->
-<p>It is more complex for the full NRM allowing for polytomous items. We have already discussed the calculation of the information function in an <a href="2018-11-05-test-and-item-information-functions-in-dexter">earlier blog entry</a>. As before, let <span class="math inline">\(x_{ij}=1\)</span> be a dummy coded response where <span class="math inline">\(x_{ij}=1\)</span> if the response to item <span class="math inline">\(i\)</span> was scored in category <span class="math inline">\(j\)</span> was picked. Specifically, we derived:</p>
+<p>It is more complex for the full NRM allowing for polytomous items. We
+have already discussed the calculation of the information function in an
+<a href="2018-11-05-test-and-item-information-functions-in-dexter">earlier
+blog entry</a>. As before, let <span class="math inline">\(x_{ij}=1\)</span> be a dummy coded response where
+<span class="math inline">\(x_{ij}=1\)</span> if the response to item
+<span class="math inline">\(i\)</span> was scored in category <span class="math inline">\(j\)</span> was picked. Specifically, we
+derived:</p>
 <ul>
 <li>The score function: <span class="math display">\[
 S(\theta) = x_{++} - \sum_i \sum_j a_{ij}P_{ij}(\theta),
-\]</span> where <span class="math inline">\(x_{++}=\sum_i \sum_j x_{ij} a_{ij}\)</span> is the test score and <span class="math inline">\(\sum_i \sum_j P_{ih}(\theta)a_{ih} = E[X_{++}|\theta]\)</span> is expectation.</li>
-<li>The test information: <span class="math inline">\(I(\theta) = \sum_i I_i(\theta)\)</span> where <span class="math display">\[
-I_i(\theta) 
-= \sum_j a^2_{ij} P_{ij}(\theta) -  \left(\sum_j a_{ij} P_{ij}(\theta)\right)^2
-\]</span> is the item information. Note that <span class="math inline">\(I(\theta) = E[X^2_{++}]-E[X_{++}|\theta]^2 = Var(X_{++}|\theta)\)</span>.</li>
+\]</span> where <span class="math inline">\(x_{++}=\sum_i \sum_j x_{ij}
+a_{ij}\)</span> is the test score and <span class="math inline">\(\sum_i
+\sum_j P_{ih}(\theta)a_{ih} = E[X_{++}|\theta]\)</span> is
+expectation.</li>
+<li>The test information: <span class="math inline">\(I(\theta) = \sum_i
+I_i(\theta)\)</span> where <span class="math display">\[
+I_i(\theta)
+= \sum_j a^2_{ij} P_{ij}(\theta) -  \left(\sum_j a_{ij}
+P_{ij}(\theta)\right)^2
+\]</span> is the item information. Note that <span class="math inline">\(I(\theta) = E[X^2_{++}]-E[X_{++}|\theta]^2 =
+Var(X_{++}|\theta)\)</span>.</li>
 </ul>
-<p>We now need <span class="math inline">\(J(\theta) = \sum_i J_i(\theta)\)</span> where <span class="math display">\[
-J_i(\theta) = I'_i(\theta) = \sum_j a^2_{ij} P'_{ij}(\theta) - 2\left(\sum_j a_{ij}P_{ij}(\theta)\right)\left(\sum_j a_{ij}P'_{ij}(\theta)\right)
+<p>We now need <span class="math inline">\(J(\theta) = \sum_i
+J_i(\theta)\)</span> where <span class="math display">\[
+J_i(\theta) = I'_i(\theta) = \sum_j a^2_{ij} P'_{ij}(\theta) -
+2\left(\sum_j a_{ij}P_{ij}(\theta)\right)\left(\sum_j
+a_{ij}P'_{ij}(\theta)\right)
 \]</span> Noting that <span class="math display">\[
-\frac{d}{d\theta} P_{ij}(\theta) = 
+\frac{d}{d\theta} P_{ij}(\theta) =
 P_{ij}(\theta)\left(a_{ij} - \sum_h a_{ih}P_{ih}(\theta)\right)
-\]</span> we find, after some tedious but straightforward algebra, that we can write: <span class="math display">\[
-J_i(\theta) = \sum_j a^3_{ij} P_{ij}(\theta) - 3\left(\sum_j a^2_{ij}P_{ij}(\theta)\right)\left(\sum_h a_{ih}P_{ih}(\theta)\right) +2\left(\sum_j a_{ij} P_{ij}(\theta)\right)^3
+\]</span> we find, after some tedious but straightforward algebra, that
+we can write: <span class="math display">\[
+J_i(\theta) = \sum_j a^3_{ij} P_{ij}(\theta) - 3\left(\sum_j
+a^2_{ij}P_{ij}(\theta)\right)\left(\sum_h a_{ih}P_{ih}(\theta)\right)
++2\left(\sum_j a_{ij} P_{ij}(\theta)\right)^3
 \]</span></p>
-<p>All we need can be written in terms of sums <span class="math inline">\(M_{ri} = \sum_j a^r_{ij}P_{ij}(\theta)\)</span>, for <span class="math inline">\(r \in \{1,2,3\}\)</span>. which inspired the following function to calculate the Warm estimate using a <strong>parms</strong> object produced by <strong>fit_enorm</strong>.</p>
+<p>All we need can be written in terms of sums <span class="math inline">\(M_{ri} = \sum_j a^r_{ij}P_{ij}(\theta)\)</span>,
+for <span class="math inline">\(r \in \{1,2,3\}\)</span>. which inspired
+the following function to calculate the Warm estimate using a
+<strong>parms</strong> object produced by
+<strong>fit_enorm</strong>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">Warm</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">test_score</span>, <span class="va">parms</span><span class="op">)</span></span>
 <span><span class="op">{</span></span>
@@ -302,58 +453,87 @@ J_i(\theta) = \sum_j a^3_{ij} P_{ij}(\theta) - 3\left(\sum_j a^2_{ij}P_{ij}(\the
 <span>  <span class="op">}</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/stats/uniroot.html" class="external-link">uniroot</a></span><span class="op">(</span><span class="va">weighted_score</span>, interval<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">10</span>,<span class="fl">10</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">root</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>The user-function <strong>ability</strong> in dexter will of course do the job using a dedicated method to locate the root of the weighted (log-) likelihood.</p>
+<p>The user-function <strong>ability</strong> in dexter will of course
+do the job using a dedicated method to locate the root of the weighted
+(log-) likelihood.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
-<p>In closing, we mention that <span class="citation">Firth (1993)</span>, independently of Warm, developed the idea beyond the exponential family. In these very capable hands, Warm’s legacy was taken up and generalized by <span class="citation">Kosmidis and Firth (2009)</span> and implemented in an R package called <em>brgl</em>.</p>
+<p>In closing, we mention that <span class="citation">Firth
+(1993)</span>, independently of Warm, developed the idea beyond the
+exponential family. In these very capable hands, Warm’s legacy was taken
+up and generalized by <span class="citation">Kosmidis and Firth
+(2009)</span> and implemented in an R package called <em>brgl</em>.</p>
 </div>
 <div class="section level2">
 <h2 id="appendix-first-order-bias-in-the-mle">Appendix: First-order bias in the MLE<a class="anchor" aria-label="anchor" href="#appendix-first-order-bias-in-the-mle"></a>
 </h2>
-<p>We derive an expression for the first-order bias term <span class="math inline">\(b(\theta)/n\)</span>. To this effect, we use a Taylor-series expansion to approximate <span class="math inline">\(S(\hat{\theta})\)</span> around the true ability <span class="math inline">\(\theta\)</span>. <span class="math display">\[
-S(\hat{\theta}) = S(\theta)+(\hat{\theta}-\theta)S'(\theta)+\frac{1}{2}(\hat{\theta}-\theta)^2S''(\theta) + o(n^{-1/2})= 0
-\]</span> By definition, <span class="math inline">\(S(\hat{\theta})=0\)</span>. Thus, if we take expectations on both sides we find: <span class="math display">\[
-E[\hat{\theta}-\theta]S'(\theta) + \frac{1}{2}E[(\hat{\theta}-\theta)^2]S''(\theta) = 0
+<p>We derive an expression for the first-order bias term <span class="math inline">\(b(\theta)/n\)</span>. To this effect, we use a
+Taylor-series expansion to approximate <span class="math inline">\(S(\hat{\theta})\)</span> around the true ability
+<span class="math inline">\(\theta\)</span>. <span class="math display">\[
+S(\hat{\theta}) =
+S(\theta)+(\hat{\theta}-\theta)S'(\theta)+\frac{1}{2}(\hat{\theta}-\theta)^2S''(\theta)
++ o(n^{-1/2})= 0
+\]</span> By definition, <span class="math inline">\(S(\hat{\theta})=0\)</span>. Thus, if we take
+expectations on both sides we find: <span class="math display">\[
+E[\hat{\theta}-\theta]S'(\theta) +
+\frac{1}{2}E[(\hat{\theta}-\theta)^2]S''(\theta) = 0
 \]</span> Using:</p>
 <ul>
 <li><span class="math inline">\(E[S(\theta)] = 0\)</span></li>
 <li>We consider the situation where all derivatives of <span class="math inline">\(S\)</span> are independent of data.</li>
 <li>
-<span class="math inline">\(E[(\hat{\theta}-\theta)^2]=Var(\hat{\theta}) + o(n^{-1}) = \frac{1}{I(\theta)} + o(n^{-1})\)</span>,</li>
+<span class="math inline">\(E[(\hat{\theta}-\theta)^2]=Var(\hat{\theta}) +
+o(n^{-1}) = \frac{1}{I(\theta)} + o(n^{-1})\)</span>,</li>
 </ul>
 <p>we find that <span class="math display">\[
-E[\hat{\theta}-\theta]S'(\theta) + \frac{S''(\theta)}{2I(\theta)} +o(n^{-1})= 0
+E[\hat{\theta}-\theta]S'(\theta) +
+\frac{S''(\theta)}{2I(\theta)} +o(n^{-1})= 0
 \]</span> Rearranging shows that: <span class="math display">\[
-E[\hat{\theta}-\theta] = \frac{-S''(\theta)}{2I^2(\theta)} +o(n^{-1})
-\]</span> Since <span class="math inline">\(I(\theta)=-S'(\theta)\)</span>, it follows that <span class="math inline">\(S''(\theta)=-I'(\theta)\)</span>.</p>
+E[\hat{\theta}-\theta] = \frac{-S''(\theta)}{2I^2(\theta)}
++o(n^{-1})
+\]</span> Since <span class="math inline">\(I(\theta)=-S'(\theta)\)</span>, it follows
+that <span class="math inline">\(S''(\theta)=-I'(\theta)\)</span>.</p>
 </div>
 <div class="section level2">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references">
-<div id="ref-cox1974theoretical">
-<p>Cox, David Roxbee, and David Victor Hinkley. 1974. <em>Theoretical Statistics</em>. CRC Press.</p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-cox1974theoretical" class="csl-entry">
+Cox, David Roxbee, and David Victor Hinkley. 1974. <em>Theoretical
+Statistics</em>. CRC Press.
 </div>
-<div id="ref-efron1975defining">
-<p>Efron, Bradley, and others. 1975. “Defining the Curvature of a Statistical Problem (with Applications to Second Order Efficiency).” <em>The Annals of Statistics</em> 3 (6): 1189–1242.</p>
+<div id="ref-efron1975defining" class="csl-entry">
+Efron, Bradley et al. 1975. <span>“Defining the Curvature of a
+Statistical Problem (with Applications to Second Order
+Efficiency).”</span> <em>The Annals of Statistics</em> 3 (6): 1189–1242.
 </div>
-<div id="ref-firth1993bias">
-<p>Firth, David. 1993. “Bias Reduction of Maximum Likelihood Estimates.” <em>Biometrika</em>, 27–38.</p>
+<div id="ref-firth1993bias" class="csl-entry">
+Firth, David. 1993. <span>“Bias Reduction of Maximum Likelihood
+Estimates.”</span> <em>Biometrika</em>, 27–38.
 </div>
-<div id="ref-jeffreys1946invariant">
-<p>Jeffreys, Harold. 1946. “An Invariant Form for the Prior Probability in Estimation Problems.” <em>Proceedings of the Royal Society of London. Series A. Mathematical and Physical Sciences</em> 186 (1007): 453–61.</p>
+<div id="ref-jeffreys1946invariant" class="csl-entry">
+Jeffreys, Harold. 1946. <span>“An Invariant Form for the Prior
+Probability in Estimation Problems.”</span> <em>Proceedings of the Royal
+Society of London. Series A. Mathematical and Physical Sciences</em> 186
+(1007): 453–61.
 </div>
-<div id="ref-kosmidis2009bias">
-<p>Kosmidis, Ioannis, and David Firth. 2009. “Bias Reduction in Exponential Family Nonlinear Models.” <em>Biometrika</em> 96 (4): 793–804.</p>
+<div id="ref-kosmidis2009bias" class="csl-entry">
+Kosmidis, Ioannis, and David Firth. 2009. <span>“Bias Reduction in
+Exponential Family Nonlinear Models.”</span> <em>Biometrika</em> 96 (4):
+793–804.
 </div>
-<div id="ref-mardia1999bias">
-<p>Mardia, KV, HR Southworth, and CC Taylor. 1999. “On Bias in Maximum Likelihood Estimators.” <em>Journal of Statistical Planning and Inference</em> 76 (1-2): 31–39.</p>
+<div id="ref-mardia1999bias" class="csl-entry">
+Mardia, KV, HR Southworth, and CC Taylor. 1999. <span>“On Bias in
+Maximum Likelihood Estimators.”</span> <em>Journal of Statistical
+Planning and Inference</em> 76 (1-2): 31–39.
 </div>
-<div id="ref-verhelst1997logistic">
-<p>Verhelst, Norman D, Huub HFM Verstralen, and MGH Jansen. 1997. “A Logistic Model for Time-Limit Tests.” In <em>Handbook of Modern Item Response Theory</em>, 169–85. Springer.</p>
+<div id="ref-verhelst1997logistic" class="csl-entry">
+Verhelst, Norman D, Huub HFM Verstralen, and MGH Jansen. 1997. <span>“A
+Logistic Model for Time-Limit Tests.”</span> In <em>Handbook of Modern
+Item Response Theory</em>, 169–85. Springer.
 </div>
 </div>
 </div>
@@ -376,7 +556,7 @@ E[\hat{\theta}-\theta] = \frac{-S''(\theta)}{2I^2(\theta)} +o(n^{-1})
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

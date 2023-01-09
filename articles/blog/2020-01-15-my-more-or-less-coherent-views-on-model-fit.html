@@ -106,11 +106,13 @@
 
       
 
-      </header><script src="2020-01-15-my-more-or-less-coherent-views-on-model-fit_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>My (more or less coherent) views on model fit</h1>
-                        <h4 data-toc-skip class="author">Ivailo Partchev</h4>
+      <h1 data-toc-skip>My (more or less coherent) views on model
+fit</h1>
+                        <h4 data-toc-skip class="author">Ivailo
+Partchev</h4>
             
             <h4 data-toc-skip class="date">2020-01-15</h4>
       
@@ -124,15 +126,60 @@
 <div class="section level2">
 <h2 id="why-measure">Why measure<a class="anchor" aria-label="anchor" href="#why-measure"></a>
 </h2>
-<p>Your psychometric model should fit the data, they keep telling me, or else you are in trouble. I find the idea bizarre. I am certainly not out there to <em>explain</em> the exam with a model, I just want to <em>grade</em> it. My (Rasch) model fits the scoring rule, and it is there basically to serve as an equating tool for multiple test forms, an alternative to equipercentile or kernel equating. If I am modeling anything, it is not the data but a particular social situation: mutual agreement that the sum score is a reasonable, acceptable, sensible, optimal way to grade the exam. Some theory but, ultimately, decades of collective experience keep me convinced that the model will also generally fit the data, as there is precious little useful information that is not already in the sum score. After all, the test was <em>made</em> this way.</p>
-<p>Hence, in the realm of practical testing (as opposed to research, which is a different story altogether), item fit is primarily a quality control thing. If an item has no correlation with the sum score, it is badly written. If the correlation is negative, the scoring key is wrong. Such situations can usually be identified and corrected quite easily. When the items are decently written and correctly scored, the Rasch model will fit the data <em>in grosso modo</em>, and differences in discrimination will cancel – certainly at test level but possibly even when we put together a small number of items as a subscale.</p>
+<p>Your psychometric model should fit the data, they keep telling me, or
+else you are in trouble. I find the idea bizarre. I am certainly not out
+there to <em>explain</em> the exam with a model, I just want to
+<em>grade</em> it. My (Rasch) model fits the scoring rule, and it is
+there basically to serve as an equating tool for multiple test forms, an
+alternative to equipercentile or kernel equating. If I am modeling
+anything, it is not the data but a particular social situation: mutual
+agreement that the sum score is a reasonable, acceptable, sensible,
+optimal way to grade the exam. Some theory but, ultimately, decades of
+collective experience keep me convinced that the model will also
+generally fit the data, as there is precious little useful information
+that is not already in the sum score. After all, the test was
+<em>made</em> this way.</p>
+<p>Hence, in the realm of practical testing (as opposed to research,
+which is a different story altogether), item fit is primarily a quality
+control thing. If an item has no correlation with the sum score, it is
+badly written. If the correlation is negative, the scoring key is wrong.
+Such situations can usually be identified and corrected quite easily.
+When the items are decently written and correctly scored, the Rasch
+model will fit the data <em>in grosso modo</em>, and differences in
+discrimination will cancel – certainly at test level but possibly even
+when we put together a small number of items as a subscale.</p>
 </div>
 <div class="section level2">
 <h2 id="how-to-measure">How to measure<a class="anchor" aria-label="anchor" href="#how-to-measure"></a>
 </h2>
-<p>As a quality control measure or otherwise, it is of course a good idea to look at item fit. In <strong>dexter</strong>, our preferred approach is a visual inspection of the item-total regressions. These provide a detailed picture of fit over the whole ability range, involving the observed data, the calibration model, and the interaction model. An overall number might be useful, if anything, to sort the plots for the individual items, such that we look at the worst (or best) fitting items first.</p>
-<p>As we dexter people have stated elsewhere, the interaction models captures and reproduces the three aspects of the data that play a role in classical test theory: item difficulty, the item-total correlation, and the score distribution. Moreover, all our practical experience to date shows that the observe data tends to cluster around the interaction model as the sample size increases. As long as we use the interaction model to summarize everything of interest in the data, and the Rasch model to calibrate (i.e., estimate and equate) our multiple test forms, I would only be interested in a numerical summary of the disagreement between these two regressions.</p>
-<p>A practice-based gauge (excellent – good – … – check and revise item) on that summary might be useful. But I am not keen to know whether, at my sample size, I have enough evidence to reject a particular statistical hypothesis because, to start with, there is no particular apriori hypothesis in which I am interested. Some sort of variance breakdown of the data between the two models might be feasible, but I am not sure I want to look at the test. All I want is to be able to arrange those lovely item-total regression by the degree of departure between the calibration model and the <em>systematic</em> component in the data.</p>
+<p>As a quality control measure or otherwise, it is of course a good
+idea to look at item fit. In <strong>dexter</strong>, our preferred
+approach is a visual inspection of the item-total regressions. These
+provide a detailed picture of fit over the whole ability range,
+involving the observed data, the calibration model, and the interaction
+model. An overall number might be useful, if anything, to sort the plots
+for the individual items, such that we look at the worst (or best)
+fitting items first.</p>
+<p>As we dexter people have stated elsewhere, the interaction models
+captures and reproduces the three aspects of the data that play a role
+in classical test theory: item difficulty, the item-total correlation,
+and the score distribution. Moreover, all our practical experience to
+date shows that the observe data tends to cluster around the interaction
+model as the sample size increases. As long as we use the interaction
+model to summarize everything of interest in the data, and the Rasch
+model to calibrate (i.e., estimate and equate) our multiple test forms,
+I would only be interested in a numerical summary of the disagreement
+between these two regressions.</p>
+<p>A practice-based gauge (excellent – good – … – check and revise item)
+on that summary might be useful. But I am not keen to know whether, at
+my sample size, I have enough evidence to reject a particular
+statistical hypothesis because, to start with, there is no particular
+apriori hypothesis in which I am interested. Some sort of variance
+breakdown of the data between the two models might be feasible, but I am
+not sure I want to look at the test. All I want is to be able to arrange
+those lovely item-total regression by the degree of departure between
+the calibration model and the <em>systematic</em> component in the
+data.</p>
 </div>
   </div>
 
@@ -153,7 +200,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>

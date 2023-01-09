@@ -1,5 +1,5 @@
-pandoc: 2.7.3
-pkgdown: 2.0.6
+pandoc: 2.19.2
+pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
   DIF_vignette: DIF_vignette.html
@@ -36,6 +36,7 @@ articles:
   2020-03-06-local-in-dependence-and-polytomization: blog/2020-03-06-local-in-dependence-and-polytomization.html
   2020-05-15-calculating-the-score-distribution-giving-ability: blog/2020-05-15-calculating-the-score-distribution-giving-ability.html
   2020-05-27-the-information-game: blog/2020-05-27-the-information-game.html
+  2020-06-09-round-about-svd: blog/2020-06-09-round-about-svd.html
   2020-11-23-hot-on-the-trail-of-warm: blog/2020-11-23-hot-on-the-trail-of-warm.html
   2020-12-22-analysing-continuous-responses-with-dexter: blog/2020-12-22-analysing-continuous-responses-with-dexter.html
   2020-12-22-happy-new-year: blog/2020-12-22-happy-new-year.html
@@ -50,9 +51,10 @@ articles:
   2022-06-16-a_linux_rant: blog/2022-06-16-a_linux_rant.html
   2022-06-20-Woes_with_2PL: blog/2022-06-20-Woes_with_2PL.html
   2022-11-03-Minorization: blog/2022-11-03-Minorization.html
+  2022-12-31-happy-2023: blog/2022-12-31-happy-2023.html
   about: blog/about.html
   index: blog/index.html
   dexter: dexter.html
   profile-plots: profile-plots.html
-last_built: 2022-11-15T14:32Z
+last_built: 2023-01-09T09:20Z
 

@@ -106,11 +106,13 @@
 
       
 
-      </header><script src="2018-08-31-dexter-meets-pisa-the-market-basket-approach_files/accessible-code-block-0.0.1/empty-anchor.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>dexter meets PISA - The market basket approach</h1>
-                        <h4 data-toc-skip class="author">Ivailo Partchev * Robert Zwitser</h4>
+      <h1 data-toc-skip>dexter meets PISA - The market basket
+approach</h1>
+                        <h4 data-toc-skip class="author">Ivailo Partchev
+* Robert Zwitser</h4>
             
             <h4 data-toc-skip class="date">2018-09-11</h4>
       
@@ -121,28 +123,121 @@
 
     
     
-<p>In this part, we show how to use <strong>dexter</strong> to apply the market basket approach <span class="citation">(Mislevy 1998)</span> to the mathematics domain in PISA 2012, following the logic in <span class="citation">Zwitser, Glaser, and Maris (2017)</span>. Once we have read in the data and created the <strong>dexter</strong> database, as shown <a href="2018-08-21-dexter-meets-pisa-1">here</a>, this takes only several lines of code. Still, the article will be a bit longer as the market basket approach deserves some attention on its own.</p>
-<p>The market basket approach has been borrowed from economics – more precisely, from the study of inflation and purchasing power. To confuse matters further, the machine learning field has appropriated the term to denote something completely different – we can ignore this except that their version is the more likely to show up on top in a Google search.</p>
-<p>A market basket contains a mix of goods and services in given proportions that, by social consensus, mirrors the prevalent consumption patterns; the cost of obtaining it, in money or work time, can be compared across countries or over time. The idea is simple but the implementation is not trivial. In comparisons over time, the contents of the basket cannot remain constant forever. In the 1970s, your teenager vitally needed a cassette recorder, today it is a smartphone. The commodity that you buy – domestic peace – is the same, but the physical carrier has changed.</p>
-<p>In comparisons across countries or social groups, one may ask: whose basket? For example, the basket of older people contains mostly food and health care; minimal changes in the prices of these may be barely perceptible for richer, active people, but they may have a large impact on the welfare of the specific group. Because of this, many national statistical services maintain separate price indices for the retired.</p>
-<p>It appears, however, that no statistical office has come to the idea of representing inflation or purchasing power as an unobservable value on an arbitrary scale. This has been the privilege of psychometricians. Society asks us a simple question – for example, how well 15-year old students around the globe have mastered mathematics – and we respond by educating them about the mathematical properties of our favorite abstractions.</p>
-<p>One of the ways to come back to reality has been <em>standard setting</em> – a procedure in which a panel of experts tries to relate cut points on the Great Unobservable to specific skills that candidates are socially expected to have. <strong>dexter</strong> has some support for standard setting: it is compatible with software implementing the 3DS method <span class="citation">(Keuning, Straat, and Feskens 2017)</span>.</p>
-<p>The <em>market basket approach</em>, as introduced by <span class="citation">Mislevy (1998)</span>, is seen primarily as a way to report results of educational surveys in a way that will be more transparent to the public and policy makers, and simplify a key step in the standard-setting process, namely, mapping item- or booklet-level judgements to the reporting scale.</p>
-<p>Rather than goods and services, the educational market baskets contains items that, by social consensus again, mirror the skills that students are expected to develop. It is essential that the scoring rules are well defined. Tests are typically scored with the sum score. The number of items in the basket may be commensurate with the typical length of a test – in that case, it is easy to publish the items themselves along with the test results.</p>
-<p>Alternatively, the market basket may be larger – even as large as the domain. Forgetting for a while about the concept of infinite item pools, we notice that a good collection of maths problems like <a href="https://www.amazon.com/Original-Collection-Math-Contest-Problems/dp/1503161390" class="external-link">this one</a> covers “the areas of Algebra, Geometry, Counting and Probability, and Number Sense … over 500 examples and problems with fully explained solutions represent the commonly seen competition questions and essential strategies experienced and developed by all the authors throughout their math careers”. We can safely think of this as <em>the domain</em>. Others may swear by a different collection, but there will be considerable overlap. If the domain is captured in about 500 problems that we can possibly teach, then the 109 items asked in all countries participating in PISA 2012 must represent it rather well.</p>
-<p>Of course, we cannot administer 500 or even 109 items to any student, so we can do the usual and distribute them among a number of test forms (booklets) in a connected design. PISA 2012 had 21 booklets for the maths domain. To apply the market basket approach, we fit an IRT model, we draw plausible values given the responses and the item parameters, and we use the plausible values and the model to predict the missing responses. All that remains is compute sum scores over the whole domain, using actual responses where the item was administered and predicted ones where it was not.</p>
-<p>We are accustomed to the view of classical test theory (CTT) used as a prelude to IRT modelling, but the market basket approach follows a circular route from CTT to IRT and back to CTT. In this process, IRT modeling appears more like an intermediate stage where it solves the issue it shines in: the missing data problem.</p>
-<p>In the context of an international comparative survey like PISA, <span class="citation">Zwitser, Glaser, and Maris (2017)</span> go one step further and propose to predict the missing scores from country-specific IRT models. A country-specific model will achieve better fit and predict better than an overall model. Once the missing scores have been filled in in the best way possible, we apply the same summary function to all national data sets. It is a popular one, and available in basic R: <code>rowSums</code>.</p>
+<p>In this part, we show how to use <strong>dexter</strong> to apply the
+market basket approach <span class="citation">(Mislevy 1998)</span> to
+the mathematics domain in PISA 2012, following the logic in <span class="citation">Zwitser, Glaser, and Maris (2017)</span>. Once we have
+read in the data and created the <strong>dexter</strong> database, as
+shown <a href="2018-08-21-dexter-meets-pisa-1">here</a>, this takes only
+several lines of code. Still, the article will be a bit longer as the
+market basket approach deserves some attention on its own.</p>
+<p>The market basket approach has been borrowed from economics – more
+precisely, from the study of inflation and purchasing power. To confuse
+matters further, the machine learning field has appropriated the term to
+denote something completely different – we can ignore this except that
+their version is the more likely to show up on top in a Google
+search.</p>
+<p>A market basket contains a mix of goods and services in given
+proportions that, by social consensus, mirrors the prevalent consumption
+patterns; the cost of obtaining it, in money or work time, can be
+compared across countries or over time. The idea is simple but the
+implementation is not trivial. In comparisons over time, the contents of
+the basket cannot remain constant forever. In the 1970s, your teenager
+vitally needed a cassette recorder, today it is a smartphone. The
+commodity that you buy – domestic peace – is the same, but the physical
+carrier has changed.</p>
+<p>In comparisons across countries or social groups, one may ask: whose
+basket? For example, the basket of older people contains mostly food and
+health care; minimal changes in the prices of these may be barely
+perceptible for richer, active people, but they may have a large impact
+on the welfare of the specific group. Because of this, many national
+statistical services maintain separate price indices for the
+retired.</p>
+<p>It appears, however, that no statistical office has come to the idea
+of representing inflation or purchasing power as an unobservable value
+on an arbitrary scale. This has been the privilege of psychometricians.
+Society asks us a simple question – for example, how well 15-year old
+students around the globe have mastered mathematics – and we respond by
+educating them about the mathematical properties of our favorite
+abstractions.</p>
+<p>One of the ways to come back to reality has been <em>standard
+setting</em> – a procedure in which a panel of experts tries to relate
+cut points on the Great Unobservable to specific skills that candidates
+are socially expected to have. <strong>dexter</strong> has some support
+for standard setting: it is compatible with software implementing the
+3DS method <span class="citation">(Keuning, Straat, and Feskens
+2017)</span>.</p>
+<p>The <em>market basket approach</em>, as introduced by <span class="citation">Mislevy (1998)</span>, is seen primarily as a way to
+report results of educational surveys in a way that will be more
+transparent to the public and policy makers, and simplify a key step in
+the standard-setting process, namely, mapping item- or booklet-level
+judgements to the reporting scale.</p>
+<p>Rather than goods and services, the educational market baskets
+contains items that, by social consensus again, mirror the skills that
+students are expected to develop. It is essential that the scoring rules
+are well defined. Tests are typically scored with the sum score. The
+number of items in the basket may be commensurate with the typical
+length of a test – in that case, it is easy to publish the items
+themselves along with the test results.</p>
+<p>Alternatively, the market basket may be larger – even as large as the
+domain. Forgetting for a while about the concept of infinite item pools,
+we notice that a good collection of maths problems like <a href="https://www.amazon.com/Original-Collection-Math-Contest-Problems/dp/1503161390" class="external-link">this
+one</a> covers “the areas of Algebra, Geometry, Counting and
+Probability, and Number Sense … over 500 examples and problems with
+fully explained solutions represent the commonly seen competition
+questions and essential strategies experienced and developed by all the
+authors throughout their math careers”. We can safely think of this as
+<em>the domain</em>. Others may swear by a different collection, but
+there will be considerable overlap. If the domain is captured in about
+500 problems that we can possibly teach, then the 109 items asked in all
+countries participating in PISA 2012 must represent it rather well.</p>
+<p>Of course, we cannot administer 500 or even 109 items to any student,
+so we can do the usual and distribute them among a number of test forms
+(booklets) in a connected design. PISA 2012 had 21 booklets for the
+maths domain. To apply the market basket approach, we fit an IRT model,
+we draw plausible values given the responses and the item parameters,
+and we use the plausible values and the model to predict the missing
+responses. All that remains is compute sum scores over the whole domain,
+using actual responses where the item was administered and predicted
+ones where it was not.</p>
+<p>We are accustomed to the view of classical test theory (CTT) used as
+a prelude to IRT modelling, but the market basket approach follows a
+circular route from CTT to IRT and back to CTT. In this process, IRT
+modeling appears more like an intermediate stage where it solves the
+issue it shines in: the missing data problem.</p>
+<p>In the context of an international comparative survey like PISA,
+<span class="citation">Zwitser, Glaser, and Maris (2017)</span> go one
+step further and propose to predict the missing scores from
+country-specific IRT models. A country-specific model will achieve
+better fit and predict better than an overall model. Once the missing
+scores have been filled in in the best way possible, we apply the same
+summary function to all national data sets. It is a popular one, and
+available in basic R: <code>rowSums</code>.</p>
 <p>On to work, then.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dexter-psychometrics.github.io/dexter/" class="external-link">dexter</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="../../reference/open_project.html">open_project</a></span><span class="op">(</span><span class="st">'/Rdatasets/pisa2012.db'</span><span class="op">)</span></span></code></pre></div>
-<p>Note that the nice data base that we created <a href="2018-08-21-dexter-meets-pisa-1">last time</a> is available and ready for analysis, including the item property that determines which items go into the basket. Once again: these are the items that were administered in all countries, though not necessarily to all students within a country.</p>
-<p>As a start, let us draw some plausible values (one per person is enough). This is basically the PISA approach, and even if we don’t get exactly their numbers, it is some basis for comparison. First, extract response data with two extra variables added: (i) the country (<code>cnt</code>), which will be necessary for country-specific IRT modeling, and (ii) <code>in_basket</code>, the item property that indicates whether an item belongs to the market basket (most do). Then, select just the responses to the items in the basket:</p>
+<p>Note that the nice data base that we created <a href="2018-08-21-dexter-meets-pisa-1">last time</a> is available and
+ready for analysis, including the item property that determines which
+items go into the basket. Once again: these are the items that were
+administered in all countries, though not necessarily to all students
+within a country.</p>
+<p>As a start, let us draw some plausible values (one per person is
+enough). This is basically the PISA approach, and even if we don’t get
+exactly their numbers, it is some basis for comparison. First, extract
+response data with two extra variables added: (i) the country
+(<code>cnt</code>), which will be necessary for country-specific IRT
+modeling, and (ii) <code>in_basket</code>, the item property that
+indicates whether an item belongs to the market basket (most do). Then,
+select just the responses to the items in the basket:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pv</span> <span class="op">=</span> <span class="fu"><a href="../../reference/plausible_values.html">plausible_values</a></span><span class="op">(</span><span class="va">db</span>, nPV<span class="op">=</span><span class="fl">1</span>, covariates<span class="op">=</span><span class="st">'cnt'</span><span class="op">)</span></span></code></pre></div>
-<p>For the country-specific estimation, we have to trick a bit. We know in advance that there are three instances in which an item did not get a single correct response in a particular country, so we have to do a minimal adjustment to be able to fit the IRT model. Other than that, all we have to do is group the data by country and execute the <code>plausible_scores</code> function in a <code>do</code>:</p>
+<p>For the country-specific estimation, we have to trick a bit. We know
+in advance that there are three instances in which an item did not get a
+single correct response in a particular country, so we have to do a
+minimal adjustment to be able to fit the IRT model. Other than that, all
+we have to do is group the data by country and execute the
+<code>plausible_scores</code> function in a <code>do</code>:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">basket</span> <span class="op">=</span> <span class="fu"><a href="../../reference/get_items.html">get_items</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">in_basket</span> <span class="op">==</span> <span class="fl">1</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -160,7 +255,8 @@
 <span>             <span class="op">(</span><span class="va">cnt</span><span class="op">==</span><span class="st">'BRA'</span> <span class="op">&amp;</span> <span class="va">item_id</span><span class="op">==</span><span class="st">'PM985Q03'</span><span class="op">)</span><span class="op">)</span> <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">cnt</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/do.html" class="external-link">do</a></span><span class="op">(</span><span class="op">{</span><span class="fu"><a href="../../reference/plausible_scores.html">plausible_scores</a></span><span class="op">(</span><span class="va">.</span>, items <span class="op">=</span> <span class="va">basket</span>, nPS<span class="op">=</span><span class="fl">1</span><span class="op">)</span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
-<p>Almost done. Combine the plausible values and the plausible scores, group by country, aggregate, plot:</p>
+<p>Almost done. Combine the plausible values and the plausible scores,
+group by country, aggregate, plot:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">league</span> <span class="op">=</span> <span class="va">ps</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">inner_join</a></span><span class="op">(</span><span class="va">pv</span>, by<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'cnt'</span>,<span class="st">'person_id'</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
@@ -168,20 +264,43 @@
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>Traditional<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">PV1</span>, na.rm<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>, Basket<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">PS1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">league</span><span class="op">$</span><span class="va">Traditional</span>, <span class="va">league</span><span class="op">$</span><span class="va">Basket</span>, xlab<span class="op">=</span><span class="st">"Traditional"</span>, ylab<span class="op">=</span><span class="st">"Market basket"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="data:image/png;base64,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"></p>
-<p>It appears that the two methods rank the countries in more or less the same way. Whether this is perceived as a good or a bad thing depends on the point of view. To others, it may look as if we have not contributed anything new. From our perspective, PISA 2012 results are close to what we believe is the state of the art. This is not always the case – some alternative methods can produce very different results, as we hope to show in future posts.</p>
-<p>In closing, we observe that the data management model of <strong>dexter</strong>, which fully ‘understands’ the structure of multi-booklet designs, is very practical – far more than the SPSS and SAS files that PISA have been delivering. The situation took a turn for the worse in 2015 when the ASCII data – syntax file pairs were abandoned in favor of huge binary files. These have enormous memory demands when being read into R, which is a bit difficult to swallow as they contain a huge amount of missing value indicators while not being self-sufficient. All these difficulties are eliminated in the <strong>dexter</strong> data base, which is also a single file but ready to roll.</p>
+<p>It appears that the two methods rank the countries in more or less
+the same way. Whether this is perceived as a good or a bad thing depends
+on the point of view. To others, it may look as if we have not
+contributed anything new. From our perspective, PISA 2012 results are
+close to what we believe is the state of the art. This is not always the
+case – some alternative methods can produce very different results, as
+we hope to show in future posts.</p>
+<p>In closing, we observe that the data management model of
+<strong>dexter</strong>, which fully ‘understands’ the structure of
+multi-booklet designs, is very practical – far more than the SPSS and
+SAS files that PISA have been delivering. The situation took a turn for
+the worse in 2015 when the ASCII data – syntax file pairs were abandoned
+in favor of huge binary files. These have enormous memory demands when
+being read into R, which is a bit difficult to swallow as they contain a
+huge amount of missing value indicators while not being self-sufficient.
+All these difficulties are eliminated in the <strong>dexter</strong>
+data base, which is also a single file but ready to roll.</p>
 <div class="section level2 unnumbered">
-<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references">
-<div id="ref-keuning2017">
-<p>Keuning, Jos, J. Hendrik Straat, and Remco C. W. Feskens. 2017. “The Data-Driven Direct Consensus (3DC) Procedure: A New Approach to Standard Setting.” In <em>Methodology of Educational Measurement and Assessment</em>, 263–78. Springer International Publishing. <a href="https://doi.org/10.1007/978-3-319-50856-6_15" class="external-link">https://doi.org/10.1007/978-3-319-50856-6_15</a>.</p>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-keuning2017" class="csl-entry">
+Keuning, Jos, J. Hendrik Straat, and Remco C. W. Feskens. 2017.
+<span>“The Data-Driven Direct Consensus (3DC) Procedure: A New Approach
+to Standard Setting.”</span> In <em>Methodology of Educational
+Measurement and Assessment</em>, 263–78. Springer International
+Publishing. <a href="https://doi.org/10.1007/978-3-319-50856-6_15" class="external-link">https://doi.org/10.1007/978-3-319-50856-6_15</a>.
 </div>
-<div id="ref-Mislevy98">
-<p>Mislevy, R. J. 1998. “Implications of Market-Basket Reporting for Achievement-Level Setting.” <em>Applied Psychological Measurement</em> 11 (1): 49–63.</p>
+<div id="ref-Mislevy98" class="csl-entry">
+Mislevy, R. J. 1998. <span>“Implications of Market-Basket Reporting for
+Achievement-Level Setting.”</span> <em>Applied Psychological
+Measurement</em> 11 (1): 49–63.
 </div>
-<div id="ref-Zwitser2017">
-<p>Zwitser, Robert J., S. Sjoerd F. Glaser, and Gunter Maris. 2017. “Monitoring Countries in a Changing World: A New Look at Dif in International Surveys.” <em>Psychometrika</em> 82 (1): 210–32. <a href="https://doi.org/10.1007/s11336-016-9543-8" class="external-link">https://doi.org/10.1007/s11336-016-9543-8</a>.</p>
+<div id="ref-Zwitser2017" class="csl-entry">
+Zwitser, Robert J., S. Sjoerd F. Glaser, and Gunter Maris. 2017.
+<span>“Monitoring Countries in a Changing World: A New Look at DIF in
+International Surveys.”</span> <em>Psychometrika</em> 82 (1): 210–32. <a href="https://doi.org/10.1007/s11336-016-9543-8" class="external-link">https://doi.org/10.1007/s11336-016-9543-8</a>.
 </div>
 </div>
 </div>
@@ -204,7 +323,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
