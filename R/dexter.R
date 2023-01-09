@@ -912,7 +912,7 @@ get_booklets = function(db) {
           GROUP BY booklet_id;")
     bk = inner_join(bk,ms,by='booklet_id')
   }
-  bk
+  df_format(bk)
 }
 
 

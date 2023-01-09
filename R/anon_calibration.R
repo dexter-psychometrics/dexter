@@ -65,7 +65,7 @@ logL = function(parms, mean_gibbs=FALSE)
 #########################################################################
 # future~to~d0: switch to ittotmat mean if overflow, use full Hessian
 
-EstIM  <- function(first,last, nCat, a, sufI, sufC, scoretab, regs=FALSE) {
+EstIM = function(first,last, nCat, a, sufI, sufC, scoretab, regs=FALSE) {
   
   C = rep(1:length(first), nCat)
   
