@@ -28,11 +28,8 @@ jobs:
       - name: Install package
         run: R CMD INSTALL .
 
-      - name: Build site
-        run: Rscript -e 'pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)'
-
-      - name: Deploy package
+      - name: Build and deploy site
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          Rscript -e 'assignInNamespace("check_missing_topics",function(rows,pkg){TRUE},"pkgdown");pkgdown::deploy_to_branch(new_process = FALSE)'
+          Rscript -e 'assignInNamespace("check_missing_topics",function(rows,pkg){TRUE},"pkgdown");pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE);pkgdown::deploy_to_branch(new_process = FALSE)'
