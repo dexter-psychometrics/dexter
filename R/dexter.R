@@ -419,14 +419,15 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
 
   dbTransaction(db,{
     out = list()
-    if (dbExists(db,'SELECT 1 FROM dxbooklets WHERE booklet_id=:b;',tibble(b=booklet_id)) ) 
+    is_existing_booklet = dbExists(db,'SELECT 1 FROM dxbooklets WHERE booklet_id=:b;',tibble(b=booklet_id))
+    if (is_existing_booklet) 
     {
       if(!df_identical(dbGetQuery_param(db,
               'SELECT item_id FROM dxbooklet_design WHERE booklet_id=:b ORDER BY item_position;', 
               tibble(b=booklet_id)),
            tibble(item_id = design$item_id)))
       {
-        stop("There is already a booklet with this ID which has different items or a different item order")
+        stop_("There is already a booklet with this ID which has different items or a different item order")
       }
     } else
     {  
@@ -451,10 +452,19 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
       x$person_id = as.character(x$person_id)
       known_people = dbGetQuery(db,'SELECT person_id FROM dxpersons;')$person_id
       new_people = setdiff(x$person_id,known_people)
+      if(anyDuplicated(x$person_id))
+        stop_("The column `person_id` has duplicate values, this is not allowed.")
+
+      if(length(new_people) < nrow(x) && is_existing_booklet)
+      {
+        known_admin = dbGetQuery_param(db,"SELECT person_id FROM dxadministrations WHERE booklet_id=:b;",
+                                       tibble(b=booklet_id))$person_id
+        if(length(intersect(known_admin, x$person_id))>0)
+          stop_("One or more person_id's in your data overlap with persons already imported who made the same booklet. This is not allowed. ")
+      }
     }
                   
     dbExecute_param(db,'INSERT INTO dxpersons(person_id) VALUES(:person_id);', tibble(person_id=new_people))
-    # double admin, double items, etc.
     
     dbExecute_param(db,'INSERT INTO dxadministrations(person_id,booklet_id) VALUES(:person_id,:booklet_id);', 
               select(x,.data$person_id, .data$booklet_id))
@@ -479,7 +489,7 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
     {
       message('The following responses are not in your rules (showing first 30):\n')
       print(head(as.data.frame(new_rules), 30), row.names=FALSE)
-      stop('unknown responses')
+      stop_('unknown responses')
     }
     dbExecute_param(db,'INSERT INTO dxresponses(booklet_id,person_id,item_id,response) 
                                 VALUES(:booklet_id,:person_id,:item_id,:response);', 
@@ -820,7 +830,7 @@ add_person_properties = function(db, person_properties = NULL, default_values = 
   check_db(db)
   check_df(person_properties, 'person_id', nullable=TRUE)
   check_list(default_values, nullable=TRUE)
-  person_properties$person_id = as.character(person_properties$person_id)
+  
   dbTransaction(db, 
   { 
     existing_props = dbListFields(db, 'dxpersons')
@@ -840,6 +850,7 @@ add_person_properties = function(db, person_properties = NULL, default_values = 
     }
     if(!is.null(person_properties))
     {
+      person_properties$person_id = as.character(person_properties$person_id)
       colnames(person_properties) = dbValid_colnames(colnames(person_properties))
 
       dbCheck_reserved_colnames(setdiff(colnames(person_properties), existing_props))
