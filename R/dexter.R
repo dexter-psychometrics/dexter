@@ -448,6 +448,7 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
       message("no column `person_id` provided, automatically generating unique person id's")
     } else
     {
+      x$person_id = as.character(x$person_id)
       known_people = dbGetQuery(db,'SELECT person_id FROM dxpersons;')$person_id
       new_people = setdiff(x$person_id,known_people)
     }
@@ -819,6 +820,7 @@ add_person_properties = function(db, person_properties = NULL, default_values = 
   check_db(db)
   check_df(person_properties, 'person_id', nullable=TRUE)
   check_list(default_values, nullable=TRUE)
+  person_properties$person_id = as.character(person_properties$person_id)
   dbTransaction(db, 
   { 
     existing_props = dbListFields(db, 'dxpersons')
@@ -839,9 +841,7 @@ add_person_properties = function(db, person_properties = NULL, default_values = 
     if(!is.null(person_properties))
     {
       colnames(person_properties) = dbValid_colnames(colnames(person_properties))
-      if(!('person_id' %in% colnames(person_properties))) 
-        stop('column person_id not found in person_properties')
-      
+
       dbCheck_reserved_colnames(setdiff(colnames(person_properties), existing_props))
       
       if(inherits(db,'SQLiteConnection'))
