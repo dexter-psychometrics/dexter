@@ -2,7 +2,7 @@
 
 * changed license from GPL-3 to LGPL-3
 * tia_tables optionally includes statistics for distractors for MC questions
-* colors for distractor plots can be specigfied per respons
+* colors for distractor plots can be specified per response
 * updated error messages
 * bugfix: the confidence intervals in the fit plots for the enorm were drawn too wide for polytomous items in dexter <= 1.2.1. They are now correct.
 

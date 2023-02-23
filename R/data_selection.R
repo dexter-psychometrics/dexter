@@ -253,7 +253,7 @@ db_get_design = function(db, qtpredicate=NULL, env=NULL)
   }
   
   # fail safe + case when !booklet_safe, will be slower  
-  rsp = get_resp_data(db, qtpredicate, env=env, extra_columns = 'item_position')$x %>%
+  get_resp_data(db, qtpredicate, env=env, extra_columns = 'item_position')$x %>%
     count(.data$booklet_id, .data$item_id, .data$item_position, name='n_persons')
 
 }

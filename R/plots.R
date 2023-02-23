@@ -134,20 +134,22 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
 
   if('item_position' %in% colnames(respData$design))
   {
-    ipos = respData$design
+    ipos = filter(respData$design, .data$item_id==item)
   } else if(is_bkl_safe(dataSrc, qtpredicate, env) && is_db(dataSrc))
   {
     ipos = dbGetQuery(dataSrc, paste("SELECT booklet_id, item_position FROM dxbooklet_design WHERE item_id=", 
                                      sql_quote(item,"'")))
   } else if(inherits(dataSrc,'data.frame') && 'item_position' %in% colnames(dataSrc))
   {
-    ipos = respData$design = dataSrc %>%
+    ipos = dataSrc %>%
       filter(.data$item_id==item) %>%
       distinct(.data$booklet_id,.keep_all=TRUE)
   } else
   {
-    ipos = respData$design
+    ipos = filter(respData$design, .data$item_id==item)
   }
+  ipos=select(ipos,any_of(c('booklet_id','item_position')))
+  
   if(inherits(dataSrc,'data.frame'))
      respData$x = mutate(respData$x,response=coalesce(.data$response,'<NA>'))
 
@@ -201,7 +203,7 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
                   rit = weighted_cor(y$item_score, y$booklet_score, y$n),
                   rir = weighted_cor(y$item_score, y$booklet_score - y$item_score, y$n),
                   n = N,
-                  item_position = filter(respData$design, .data$booklet_id==booklet)$item_position,
+                  item_position = filter(ipos, .data$booklet_id==booklet)$item_position,
                   booklet_id=booklet,
                   item_id=item))
       

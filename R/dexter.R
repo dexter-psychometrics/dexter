@@ -895,7 +895,7 @@ add_person_properties = function(db, person_properties = NULL, default_values = 
 get_rules = function(db)
 {
   check_db(db)
-  dbGetQuery(db, 'SELECT item_id, response, item_score FROM dxscoring_rules ORDER BY item_id, response;')
+  df_format(dbGetQuery(db, 'SELECT item_id, response, item_score FROM dxscoring_rules ORDER BY item_id, response;'))
 }
 
 
