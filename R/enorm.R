@@ -481,6 +481,9 @@ theta_function = function(parms, items=NULL, booklet=NULL, which.draw=NULL,
                           what=c('information','expected','sim','pmf'))
 {
   what = match.arg(what)
+  check_character(items,nullable=TRUE)
+  check_string(booklet,name='booklet_id',nullable=TRUE)
+  check_num(which.draw,nullable=TRUE)
   
   # data preparation
   # create fl(item_id,first,last), a, b
@@ -544,7 +547,7 @@ theta_function = function(parms, items=NULL, booklet=NULL, which.draw=NULL,
         distinct(.data$item_id, .keep_all=TRUE)
     }  
     fl = arrange(fl,.data$first)
-  }  
+  } else stop_('parms must be a data.frame or an object of type `prms`') 
   rm(parms)  
   #output
   

@@ -312,7 +312,7 @@ check_db = function(x)
 
 
 check_vector = function(x, type=c('character','numeric','integer'), name = deparse(substitute(x)), 
-                        nullable = FALSE, .length = NULL, .min=NULL, .max=NULL )
+                        nullable = FALSE, .length = NULL, .min=NULL, .max=NULL, min_length=NULL )
 {
   if(nullable && is.null(x))
     return(NULL)
@@ -340,23 +340,27 @@ check_vector = function(x, type=c('character','numeric','integer'), name = depar
 
   if(!is.null(.length) && length(x) != .length )  
     stop_("Argument '",name, "' must have length ", .length)
+  
+  if(is.null(length) && !is.null(min_length) && length(x)<min_length)
+    stop_("Argument '",name, "' must have minimum length ", min_length)
  
+  NULL
 }
   
   
 check_num = function(x, type=c('numeric','integer'), name = deparse(substitute(x)), 
-                     nullable = FALSE, .length = NULL, .min=NULL, .max=NULL )
+                     nullable = FALSE, .length = NULL, .min=NULL, .max=NULL, min_length=1 )
 {
   type=match.arg(type)
   name=force(name)
-  check_vector(x,type=type,name=name,nullable=nullable,.length=.length,.min=.min,.max=.max)
+  check_vector(x,type=type,name=name,nullable=nullable,.length=.length,.min=.min,.max=.max,min_length=min_length)
 }
 
 
-check_character = function(x, name = deparse(substitute(x)), nullable = FALSE, .length = NULL)
+check_character = function(x, name = deparse(substitute(x)), nullable = FALSE, .length = NULL,min_length=1)
 {
   name=force(name)
-  check_vector(x,type='character',name=name,nullable=nullable,.length=.length)
+  check_vector(x,type='character',name=name,nullable=nullable,.length=.length,min_length=min_length)
 }
 
 check_string = function(x, name = deparse(substitute(x)), nullable = FALSE)
