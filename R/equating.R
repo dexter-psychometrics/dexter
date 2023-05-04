@@ -35,6 +35,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
   check_dataSrc(dataSrc)
   check_num(pass_fail, 'integer', .min=0, .length=1)
   check_df(target_booklets, 'item_id', nullable=TRUE)
+  if(is.factor(ref_items)) ref_items = as.character(ref_items)
   check_character(ref_items)
   design=target_booklets
   

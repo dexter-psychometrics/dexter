@@ -481,6 +481,7 @@ theta_function = function(parms, items=NULL, booklet=NULL, which.draw=NULL,
                           what=c('information','expected','sim','pmf'))
 {
   what = match.arg(what)
+  if(is.factor(items)) items = as.character(items)
   check_character(items,nullable=TRUE)
   check_string(booklet,name='booklet_id',nullable=TRUE)
   check_num(which.draw,nullable=TRUE)
