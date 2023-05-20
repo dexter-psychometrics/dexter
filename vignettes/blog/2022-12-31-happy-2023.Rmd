@@ -7,4 +7,4 @@ categories: []
 tags: []
 ---
 
-![](img/2023.svg)
+![](img/2023.svg){width=80%}

@@ -1,0 +1,14 @@
+---
+title: dexter in the academic world
+author: Ivailo Partchev
+date: '2023-05-20'
+slug: dexter-paper
+categories: []
+tags: []
+---
+
+![](img/oxford.jpg){width=50%}
+
+
+__dexter__ finally has an academic paper all to and about himself! Get it [here](https://www.mdpi.com/2624-8611/5/2/24/pdf) in PDF.
+
