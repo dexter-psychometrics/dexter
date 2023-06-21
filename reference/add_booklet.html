@@ -161,8 +161,8 @@ and person_id will be ignored.</p>
 data.frame in long format with columns <code>person_id</code>, <code>booklet_id</code>, 
 <code>item_id</code> and <code>response</code> such as can usually be found in databases for example. 
 For booklets that are not already known in your project, you need to specify the design via the <code>design</code> argument.
-Failure to do so will result in an error. Responses to items that should be there according to the design but which do not have a correpsoning
-row in <code>data</code> will be added with <code>missing_value</code> used for the response. If this missing value is not defined in your scoring rules and 
+Failure to do so will result in an error. Responses to items that should be there according to the design but which do not have a corresponding
+row in <code>data</code> will be added with <code>missing_value</code> used for the response. If this missing value is not defined in your scoring rules 
 and <code>auto_add_unknown_rules</code> is set to FALSE, this will lead to an error message.</p>
 
 <p>Note that responses are always treated as strings (in both functions), and <code>NA</code>
