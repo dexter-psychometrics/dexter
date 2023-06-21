@@ -8,7 +8,7 @@ profile_tables = function(parms, domains, item_property, design = NULL)
   if(length(unique(domains$item_id)) < nrow(domains))
     stop('column domains$item_id must be unique')
 
-  parms = simplify_parms(parms,design=design,collapse_b = TRUE)
+  parms = simplify_parms(parms,design=design,draw='average')
   
   domains$item_id = ffactor(as.character(domains$item_id), levels = levels(parms$items$item_id))
   
@@ -127,7 +127,7 @@ profiles = function(dataSrc, parms, item_property, predicate=NULL, merge_within_
                            parms_check=parms_check,
                            merge_within_persons=merge_within_persons)
   
-  parms = simplify_parms(parms,design=respData$design,collapse_b=TRUE)
+  parms = simplify_parms(parms,design=respData$design,draw='average')
   
   if(!is.integer(respData$x[[item_property]]))
     respData$x[[item_property]] = ffactor(respData$x[[item_property]])
@@ -215,7 +215,7 @@ E_profile = function(b, a, first, last, A, cIM=NULL)
 
 
 # Chi-square disctance between observed and expected
-profile_dist <-function(obs, expt)
+profile_dist = function(obs, expt)
 {
   return(sum((obs-expt)^2/expt))
 }

@@ -16,11 +16,8 @@
 #' @param method   Maximum Likelihood (MLE), Expected A posteriori (EAP) or Weighted Likelihood (WLE)
 #' @param prior    If an EAP estimate is produced one can choose a normal prior or
 #'                 Jeffreys prior; i.e., a prior proportional to the square root of test information.
-#' @param use_draw When parms is Bayesian, use_draw is 
-#'                 the index of the posterior sample of the item 
-#'                 parameters that will be used for generating plausible values. 
-#'                 If use_draw=NULL, a posterior mean is used. 
-#'                 If outside range, the last iteration will be used. 
+#' @param parms_draw When parms is Bayesian, parms_draw can be the index of the posterior sample of the item 
+#' parameters that will be used for generating abilities. If parms_draw='average', the posterior mean is used. 
 #' @param mu Mean of the normal prior
 #' @param sigma Standard deviation of the normal prior
 #' @param standard_errors If true standard-errors are produced
@@ -62,7 +59,7 @@
 #' Psychometrika, 54(3), 427-450. 
 #' 
 ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), prior=c("normal", "Jeffreys"), 
-                   use_draw=NULL, mu=0, sigma=4, standard_errors=FALSE, merge_within_persons=FALSE)
+                   parms_draw='average', mu=0, sigma=4, standard_errors=FALSE, merge_within_persons=FALSE)
 {
   check_dataSrc(dataSrc)
 
@@ -84,9 +81,11 @@ ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), 
                            parms_check=parms_check, merge_within_persons = merge_within_persons)
   
 
-  abl = ability_tables(parms=parms, design = respData$design, method = method, prior=prior, use_draw = use_draw, 
+  abl = ability_tables(parms=parms, design = respData$design, method = method, prior=prior, parms_draw = parms_draw, 
                        mu=mu, sigma=sigma, standard_errors=standard_errors)
+  
   abl$booklet_id = ffactor(abl$booklet_id, levels = levels(respData$design$booklet_id))
+  
   respData$x %>% 
     inner_join(abl, by = c("booklet_id", "booklet_score")) %>% 
     select(any_of(c('booklet_id', 'person_id', 'booklet_score', 'theta', 'se'))) %>%
@@ -98,21 +97,22 @@ ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), 
 
 #' @rdname ability
 ability_tables = function(parms, design = NULL, method = c("MLE","EAP","WLE"), prior=c("normal", "Jeffreys"), 
-                          use_draw = NULL, mu=0, sigma=4, standard_errors = TRUE)
+                          parms_draw = 'average', mu=0, sigma=4, standard_errors = TRUE)
 {
   method = match.arg(method)
   prior = match.arg(prior) 
+  if(is.numeric(parms_draw)) check_num(parms_draw,.length=1)
+  else parms_draw = match.arg(parms_draw)
   
   if(method=='EAP' && prior=="normal")
   {
     check_num(mu, .length=1)
     check_num(sigma, .length=1, .min=0)
-    check_num(use_draw, 'integer', .length=1, nullable=TRUE)
   }
   
   if (method=="EAP" && prior=="Jeffreys") method="jEAP"
   
-  simple_parms = simplify_parms(parms, design, use_draw, collapse_b=TRUE) 
+  simple_parms = simplify_parms(parms, design, parms_draw) 
   b = simple_parms$b
   a = simple_parms$a
   

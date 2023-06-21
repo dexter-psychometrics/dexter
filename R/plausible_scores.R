@@ -1,9 +1,8 @@
 
-
-##########################################
-#' Generate plausible test scores
+#' Draw plausible test scores
 #'
-#' Generate plausible i.e., posterior predictive sumscores on a set of items. 
+#' Draw plausible, i.e. posterior predictive sumscores on a set of items. 
+#' 
 #' A typical use of this function is to generate plausible scores on
 #' a complete item bank when data is collected using an incomplete design
 #'
@@ -13,6 +12,9 @@
 #' @param parms An object returned by function \code{fit_enorm} and containing
 #' parameter estimates. If parms is given the function provides plausible scores conditional on the 
 #' item parameters. These are considered known. If \code{parms} is \code{NULL}, Bayesian parameters are calculated from the datasrc
+#' @param parms_draw when the item parameters are estimated Bayesianly (see: \code{\link{fit_enorm}}), 
+#' parms_draw specifies whether to use a sample(a different item parameter draw for each plausible values draw) or the posterior mean
+#' of the item draws. Alternatively, it can be an integer specifying a specific draw. Ignored when parms is not estimated Bayesianly.
 #' @param items vector of item_id's, this specifies the itemset to generate the testscores for. If \code{items} is \code{NULL} 
 #' all items occurring in \code{dataSrc} are used.
 #' @param covariates name or a vector of names of the variables to group the population, used to update the prior.
@@ -26,13 +28,13 @@
 #' @return A data.frame with columns booklet_id, person_id, booklet_score and nPS plausible scores
 #' named PS1...PSn.
 #'  
-plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, 
+plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, parms_draw = c('sample','average'),
                             covariates=NULL, keep.observed=TRUE, nPS=1,merge_within_persons=FALSE)  
 {
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
   check_dataSrc(dataSrc)
-
+  
   plausible_scores_(dataSrc, parms=parms, qtpredicate=qtpredicate, items=items, covariates=covariates, 
                     keep.observed=keep.observed, nPS=nPS, env=env,
                     merge_within_persons=merge_within_persons) %>%
@@ -41,12 +43,15 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL,
 }
 
 # to do: this has become a messy function
-plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL, 
+plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL, parms_draw = c('sample','average'),
                              covariates=NULL, keep.observed=TRUE, nPS=1, env=NULL,
                              merge_within_persons=FALSE)
 {
   if (is.null(env))
     env = caller_env()
+  
+  if(is.numeric(parms_draw)) parms_draw = as.integer(parms_draw)
+  else parms_draw = match.arg(parms_draw)
   
   from = Gibbs.settings$from.ps 
   step = Gibbs.settings$step.ps # from and step are burnin and thinning
@@ -69,13 +74,13 @@ plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL,
     pcheck = parms$inputs$ssIS[,c('item_id','item_score')]
   }
   
+  use_b_matrix = FALSE
   
   respData = get_resp_data(dataSrc, qtpredicate, summarised = FALSE, 
                            extra_columns = covariates, env = env, 
                            parms_check=pcheck,
                            merge_within_persons=merge_within_persons)
   
-  use_b_matrix = FALSE
   
   # if no parms, we calculate parms from the full data source
   # and we opt for a Bayesian approach
@@ -91,8 +96,8 @@ plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL,
     if (nrow(parms$est$b) < nPS.needed) # are there enough samples ?
     {
       stop(paste("Not enough posterior samples in fit_enorm for", 
-              nPS, "plausible scores. Use at least", nPS.needed, "samples in fit_enorm"))
-
+                 nPS, "plausible scores. Use at least", nPS.needed, "samples in fit_enorm"))
+      
     } else
     {
       use_b_matrix = TRUE
@@ -117,7 +122,7 @@ plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL,
     items = unique(as.character(items))
   }
   
-  simple_parms = simplify_parms(parms, collapse_b = !use_b_matrix, design = tibble(item_id=items))
+  simple_parms = simplify_parms(parms, draw=parms_draw, design = tibble(item_id=items))
   items = select(simple_parms$design, -'booklet_id') 
   a = simple_parms$a
   b = simple_parms$b
@@ -183,8 +188,7 @@ plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL,
   
   pv = select(pv, all_of(covariates), 'booklet_id', 'person_id', matches('^PV\\d+$')) %>%
     rename_with(gsub,pattern='^PV(?=\\d+$)',replacement='PS', perl=TRUE) 
-
+  
 }
-
 
 

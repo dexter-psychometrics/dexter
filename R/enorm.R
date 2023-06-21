@@ -1,8 +1,4 @@
 
-
-
-
-##########################################
 #' Fit the extended nominal response model
 #'
 #' Fits an Extended NOminal Response Model (ENORM) using conditional maximum likelihood (CML)
@@ -739,6 +735,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   out_cor = acor
   
   # make everything simple and zero indexed
+  # parms = cml
   models = lapply(models, simplify_parms, zero_indexed=TRUE)
   respData = lapply(respData, get_resp_data, summarised=TRUE)
   for(d in 1:nd)

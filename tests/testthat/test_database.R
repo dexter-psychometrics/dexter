@@ -4,7 +4,6 @@ library(dplyr)
 library(DBI)
 library(RSQLite)
 
-expect_no_error = function(object, info=NULL) expect_error(object, regexp=NA, info=info)
 
 verbAggCopy = function(pth = '../verbAggression.db')
 {
@@ -47,7 +46,7 @@ test_that('rule updates and sanity checks',
   
   # update set does not have to pass this sanity check on it's own
   expect_no_error(touch_rules(db, filter(rules, item_id=='S1DoCurse' & response ==1) %>% mutate(item_score=0)),
-                  info='expect allowed to set an item score to 0')
+                  message='expect allowed to set an item score to 0')
   
   # but it should shout when every score is set to 0 for an item
   expect_output(

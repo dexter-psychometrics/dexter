@@ -2,11 +2,28 @@
 # returns a simplified parms object mainly useful for person ability estimation
 # parms can be data frame or a parms object
 #
-# returns list: a, b, design (including first and last), items(including first and last)
-simplify_parms = function(parms, design=NULL, use_draw=NULL, collapse_b=FALSE,
-                          zero_indexed=FALSE)
+# returns list: a, b, design (including first and last), items(including first and last), method (CML or Bayes)
+#
+# draw can be a number
+# the default 'sample' returns the complete matrix, i.e. the sample is the census in the original order
+# any subsequent 'sampling' must be done in the caller function itself
+# zero indexed refers to c-style indexes. (the 0 score parameter is always included either way)
+
+simplify_parms = function(parms, design=NULL, 
+                           draw = c('sample','average'),
+                           zero_indexed=FALSE)
 {
   check_df(design, 'item_id', nullable=TRUE)
+  if(!is.numeric(draw))
+  {
+    draw = match.arg(draw)
+  } else
+  {
+    draw = as.integer(draw)
+    check_num(draw,'integer',.length=1)
+    
+  }
+  
   if(!is.null(design))
   {
     if(!('booklet_id' %in% colnames(design)))
@@ -23,15 +40,20 @@ simplify_parms = function(parms, design=NULL, use_draw=NULL, collapse_b=FALSE,
     parms = coef(parms)
   }
   
+  
+  
   if(inherits(parms,'prms'))
   {
+    method = parms$inputs$method
     a = parms$inputs$ssIS$item_score
-    if(parms$inputs$method=="CML"){
+    if(method=="CML"){
       b = parms$est$b
-    } else if(!is.null(use_draw)) 
+    } else if(is.numeric(draw)) 
     {
-      b = parms$est$b[min(nrow(parms$est$b),use_draw),]	
-    } else if(collapse_b)
+      if(draw>nrow(parms$est$b)) 
+        stop_(sprintf('Draw %i is larger than the number of item parameter draws (%i)', draw,nrow(parms$est$b)))
+      b = parms$est$b[draw,]	
+    } else if(draw == 'average')
     {
       b = colMeans(parms$est$b)  
     } else 
@@ -58,12 +80,14 @@ simplify_parms = function(parms, design=NULL, use_draw=NULL, collapse_b=FALSE,
     }
   } else
   {
+    method='CML'
     parms = transform.df.parms(parms,'b',include.zero=TRUE)
     parms$item_id = ffactor(as.character(parms$item_id))
     a = parms$item_score
     b = parms$b
     
     fl = parms %>%
+      arrange(.data$item_id) %>%
       mutate(rn=row_number()) %>%
       group_by(.data$item_id) %>%
       summarise(first=as.integer(min(.data$rn)), last=as.integer(max(.data$rn))) %>%
@@ -93,8 +117,9 @@ simplify_parms = function(parms, design=NULL, use_draw=NULL, collapse_b=FALSE,
     design$last = design$last - 1L
   }
   
-  list(a=a, b=b, design=design, items = fl)
+  list(a=a, b=b, design=design, items = fl, method=method)
 }
+
 
 
 

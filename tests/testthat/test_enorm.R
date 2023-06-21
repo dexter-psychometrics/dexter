@@ -2,9 +2,6 @@ context('Check fit_enorm')
 
 library(dplyr)
 
-expect_no_error = function(object) expect_error(object, regexp=NA)
-
-
 
 
 test_that('calibration of verbal aggression dataset matches oplm results, with fixed and unfixed',{

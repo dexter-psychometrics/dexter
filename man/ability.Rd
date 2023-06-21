@@ -11,7 +11,7 @@ ability(
   predicate = NULL,
   method = c("MLE", "EAP", "WLE"),
   prior = c("normal", "Jeffreys"),
-  use_draw = NULL,
+  parms_draw = "average",
   mu = 0,
   sigma = 4,
   standard_errors = FALSE,
@@ -23,7 +23,7 @@ ability_tables(
   design = NULL,
   method = c("MLE", "EAP", "WLE"),
   prior = c("normal", "Jeffreys"),
-  use_draw = NULL,
+  parms_draw = "average",
   mu = 0,
   sigma = 4,
   standard_errors = TRUE
@@ -42,11 +42,8 @@ depending on parametrization, a column named either beta/delta, eta or b}
 \item{prior}{If an EAP estimate is produced one can choose a normal prior or
 Jeffreys prior; i.e., a prior proportional to the square root of test information.}
 
-\item{use_draw}{When parms is Bayesian, use_draw is 
-the index of the posterior sample of the item 
-parameters that will be used for generating plausible values. 
-If use_draw=NULL, a posterior mean is used. 
-If outside range, the last iteration will be used.}
+\item{parms_draw}{When parms is Bayesian, parms_draw can be the index of the posterior sample of the item 
+parameters that will be used for generating abilities. If parms_draw='average', the posterior mean is used.}
 
 \item{mu}{Mean of the normal prior}
 

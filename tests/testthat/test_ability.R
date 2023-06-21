@@ -2,9 +2,6 @@ context('check ability')
 
 library(dplyr)
 
-expect_no_error = function(object, info=NULL) expect_error(object, regexp=NA, info=info)
-
-
 
 test_that('inconsistencies between data and parms are handled correctly',{
 
@@ -54,14 +51,14 @@ test_that('verbAgg abilities', {
   {
     for(prior in eval(formals(ability_tables)$prior))
       {
-      expect_no_error({abl = ability_tables(f, method = method)}, info = paste('fit_enorm verbAgg -', method))
+      expect_no_error({abl = ability_tables(f, method = method)}, message = paste('fit_enorm verbAgg -', method))
       expect_true(nrow(abl) == nscores)
-      
+
       abl = abl %>%  
         filter(is.finite(.data$theta)) %>%
         arrange(booklet_score) %>%
         mutate(p = lag(theta, default = -Inf)) %>%
-        filter(theta < p)
+        filter(.data$theta < .data$p)
   
       expect_true(nrow(abl) == 0, info = paste('abilities not increasing verbAgg -',method))  
     }

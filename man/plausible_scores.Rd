@@ -2,13 +2,14 @@
 % Please edit documentation in R/plausible_scores.R
 \name{plausible_scores}
 \alias{plausible_scores}
-\title{Generate plausible test scores}
+\title{Draw plausible test scores}
 \usage{
 plausible_scores(
   dataSrc,
   parms = NULL,
   predicate = NULL,
   items = NULL,
+  parms_draw = c("sample", "average"),
   covariates = NULL,
   keep.observed = TRUE,
   nPS = 1,
@@ -28,6 +29,10 @@ all data in dataSrc}
 \item{items}{vector of item_id's, this specifies the itemset to generate the testscores for. If \code{items} is \code{NULL} 
 all items occurring in \code{dataSrc} are used.}
 
+\item{parms_draw}{when the item parameters are estimated Bayesianly (see: \code{\link{fit_enorm}}), 
+parms_draw specifies whether to use a sample(a different item parameter draw for each plausible values draw) or the posterior mean
+of the item draws. Alternatively, it can be an integer specifying a specific draw. Ignored when parms is not estimated Bayesianly.}
+
 \item{covariates}{name or a vector of names of the variables to group the population, used to update the prior.
 A covariate must be a discrete person covariate (e.g. not a float) that indicates nominal categories, e.g. gender or school
 If dataSrc is a data.frame, it must contain the covariate.}
@@ -45,7 +50,9 @@ A data.frame with columns booklet_id, person_id, booklet_score and nPS plausible
 named PS1...PSn.
 }
 \description{
-Generate plausible i.e., posterior predictive sumscores on a set of items. 
+Draw plausible, i.e. posterior predictive sumscores on a set of items.
+}
+\details{
 A typical use of this function is to generate plausible scores on
 a complete item bank when data is collected using an incomplete design
 }

@@ -108,7 +108,7 @@ The remarkable thing about plausible values is that they will _eventually_ repro
 
 Observe that the gray bands are not wide, suggesting little uncertainty in determining the ECDF of ability. It may be more realistic to take the uncertainty in the item parameters into account. To do this, we will use a Gibbs sampler to draw 50 samples from the posterior distribution of the item parameters, and we will pick one of these at random each time we produce a plausible value. 
 
-First, a little function to accomplish this; note the use of the `use_draw` option which enables us to select every fifth sample from
+First, a little function to accomplish this; note the use of the `parms_draw` option which enables us to select every fifth sample from
 the Gibbs sampler that produced the sample of item parameters. Note that we have chosen every fifth sample to get rid of (most of) the autocorrelation in the samples of item parameters.
 
 ```{r}
@@ -123,7 +123,7 @@ sim_PV2 = function(theta, delta) {
   
   which.draw = 5*(1:10)
   for (iter in 1:10) {
-    pv = plausible_values(simulated_data, parms, use_draw=which.draw[iter])
+    pv = plausible_values(simulated_data, parms, parms_draw=which.draw[iter])
     lines(ecdf(pv$PV1-mean(pv$PV1)), col=rgb(.7,.7,.7,.5))
   }
   lines(ecdf(theta-mean(theta)))

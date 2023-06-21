@@ -10,8 +10,8 @@ plausible_values(
   predicate = NULL,
   covariates = NULL,
   nPV = 1,
-  use_draw = NULL,
-  prior.dist = c("normal", "mixture"),
+  parms_draw = c("sample", "average"),
+  prior_dist = c("normal", "mixture"),
   merge_within_persons = FALSE
 )
 }
@@ -19,7 +19,7 @@ plausible_values(
 \item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}
 
 \item{parms}{An object returned by function \code{fit_enorm} containing parameter estimates. If parms are provided, item parameters are considered known. 
-If parms = NULL, plausible values are marginalized over the posterior distribution of the item parameters and uncertainty of the item parameters is taken into account.}
+If parms = NULL, they will be estimated Bayesianly.}
 
 \item{predicate}{an expression to filter data. If missing, the function will use 
 all data in dataSrc}
@@ -30,11 +30,11 @@ If dataSrc is a data.frame, it must contain the covariate.}
 
 \item{nPV}{Number of plausible values to draw per person.}
 
-\item{use_draw}{When the ENORM was fitted with a Gibbs sampler, 
-this specifies the use of a particular sample of item parameters used to generate the plausible value(s). 
-If NULL, the posterior means are used.}
+\item{parms_draw}{when the item parameters are estimated Bayesianly (see: \code{\link{fit_enorm}}), 
+parms_draw specifies whether to use a sample(a different item parameter draw for each plausible values draw) or the posterior mean
+of the item draws. Alternatively, it can be an integer specifying a specific draw. Ignored when parms is not estimated Bayesianly.}
 
-\item{prior.dist}{use a normal prior or a mixture of two normals}
+\item{prior_dist}{use a normal prior or a mixture of two normals}
 
 \item{merge_within_persons}{If a person took multiple booklets, this indicates
 whether plausible values are generated per person (TRUE) or per booklet (FALSE)}
@@ -45,6 +45,10 @@ named PV1...PVn.
 }
 \description{
 Draws plausible values based on test scores
+}
+\details{
+When The item parameters are estimated using \code{fit_enorm(..., method='Bayes')} and parms_draw = 'sample', the uncertainty 
+of the item parameters estimates is taken into account when drawing multiple plausible values.
 }
 \examples{
 db = start_new_project(verbAggrRules, ":memory:", 
