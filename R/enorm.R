@@ -109,7 +109,7 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
       cat(paste('Some score categories are fixed while some are not, for the same item.',
                 'Dexter does not know how to deal with that.\nThe following score categories are missing:\n'))
       missing_cat %>% 
-        select(.data$item_id, .data$item_score) %>%
+        select('item_id', 'item_score') %>%
         arrange(.data$item_id, .data$item_score) %>%
         as.data.frame() %>%
         print()
@@ -225,12 +225,12 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
       stop('unknown item',call.=FALSE)
     }
     
-    x$abl_tables = list() # in dexmst it was briefly an environment
+    x$abl_tables = list()
     
-	  x$abl_tables$mle = suppressWarnings({inner_join(respData$design,x$inputs$ssI,by='item_id')}) %>%
+	  x$abl_tables$mle =  suppressWarnings({inner_join(respData$design, x$inputs$ssI,by='item_id')}) %>%
       group_by(.data$booklet_id) %>%
       do({
-        est = theta_MLE(x$est$b, a=x$inputs$ssIS$item_score, .$first, .$last, se=FALSE)
+        est = theta_MLE(b=x$est$b, a=x$inputs$ssIS$item_score, first=.$first, last=.$last, se=FALSE)
         theta = est$theta[2:(length(est$theta)-1)]
         tibble(booklet_score=1:length(theta), theta = theta)
       }) %>%
@@ -622,8 +622,6 @@ print.pmf_func = function(x,...) cat('Conditional score distribution function: P
 #'
 #' Estimates correlations between latent traits. Use an item_property to distinguish the different scales. 
 #' This function uses plausible values so results may differ slightly between calls. 
-#' Note: this is a new and slightly experimental function and therefore still a bit slow. It will probably 
-#' become faster in future versions of dexter.
 #'
 #' @param dataSrc A connection to a dexter database or a data.frame with columns: person_id, item_id, item_score and 
 #' the item_property

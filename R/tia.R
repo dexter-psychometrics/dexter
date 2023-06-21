@@ -43,7 +43,7 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
   {
     items$item_id = as.character(items$item_id)
     items = inner_join(
-      select(items, -.data$max_score),
+      select(items, -'max_score'),
       dbGetQuery(dataSrc, 'SELECT item_id, MAX(item_score) AS max_score FROM dxscoring_rules GROUP BY item_id;'),
       by='item_id')
   } 
@@ -77,8 +77,8 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
   # different views of item statistics
   if(type=='raw')
   {
-    out$items = select(items, .data$booklet_id, .data$item_id, .data$mean_score, .data$sd_score, 
-                           .data$max_score, .data$pvalue, .data$rit, .data$rir, .data$n_persons) %>%
+    out$items = select(items, 'booklet_id', 'item_id', 'mean_score', 'sd_score', 
+                           'max_score', 'pvalue', 'rit', 'rir', 'n_persons') %>%
       mutate_if(is.factor, as.character) %>%
       df_format()
     
@@ -96,7 +96,7 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
                  n_persons = sum(.data$n_persons)) %>%
       ungroup() %>%
       mutate_if(is.factor, as.character) %>%
-      rename(mean_score=.data$w_mean_score) %>%
+      rename(mean_score = 'w_mean_score') %>%
       df_format()
   } else
   {
@@ -104,16 +104,16 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
     
     out$items = list(
       pvalue = items %>% 
-        select(.data$booklet_id,.data$item_id,.data$pvalue) %>% 
-        spread(key=.data$booklet_id, value=.data$pvalue),
+        select('booklet_id', 'item_id', 'pvalue') %>% 
+        pivot_wider(names_from='booklet_id', values_from='pvalue', names_sort=TRUE),
       
       rit = items %>% 
-        select(.data$booklet_id,.data$item_id,.data$rit) %>% 
-        spread(key=.data$booklet_id,value=.data$rit),
+        select('booklet_id', 'item_id', 'rit') %>% 
+        pivot_wider(names_from='booklet_id', values_from='rit', names_sort=TRUE),
       
       rir = items %>% 
-        select(.data$booklet_id,.data$item_id,.data$rir) %>% 
-        spread(key=.data$booklet_id,value=.data$rir)
+        select('booklet_id', 'item_id', 'rir') %>% 
+        pivot_wider(names_from='booklet_id', values_from='rir', names_sort=TRUE)
     )
   }
   
@@ -142,7 +142,7 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
         ungroup()
     } else
     {
-      d = select(d, .data$booklet_id, .data$item_id, .data$response, .data$item_score, .data$n, .data$rvalue, .data$rar)
+      d = select(d, 'booklet_id', 'item_id', 'response', 'item_score', 'n', 'rvalue', 'rar')
     }
     
     out$distractors = d %>%

@@ -147,16 +147,15 @@ To simulate abilities from a bi-modal distribution we assumed that the data cons
 sim_PV3 = function(theta, delta, group) {
   nit = length(delta)
   sim_func = r_score( tibble(item_id=1:nit, item_score=1, delta=delta))
-  simulated_data = sim_func(theta)
+  
+  # turn simulated data into long format
+  simulated_data = sim_func(theta) %>%
+    get_responses() %>%
+    inner_join(tibble(person_id=1:length(group), group = group), 
+               by='person_id')
+  
   parms = fit_enorm(simulated_data)
   
-  # because our data structure gets multi dimensional by the inclusion of groups
-  # we  switch to a tidy format
-  simulated_data = simulated_data %>%
-    as_tibble() %>%
-    mutate(person_id=row_number(), group=group) %>%
-    gather(key='item_id', value='item_score', -person_id, -group)
-    
   pv = plausible_values(simulated_data, parms, covariates='group',nPV = 10)
   
   plot(x=c(min(theta)-.5, max(theta)+.5), y=0:1, main=paste(nit, "items"), bty='l', type='n',

@@ -12,7 +12,7 @@ test_that('plausible scores works',{
   design = data.frame(booklet_id = sort(rep_len(paste0('b',1:5),120)), item_id = paste0('i',1:60), stringsAsFactors = F)
   persons = data.frame(person_id = 1:5000, booklet_id = paste0('b',1:5), stringsAsFactors = F, theta = rnorm(5000))
   responses = persons %>%
-    inner_join(design, by='booklet_id') %>%
+    inner_join(design, by='booklet_id', relationship = "many-to-many") %>%
     inner_join(items, by ='item_id') %>%
     mutate(item_score = as.integer(rlogis(n(), theta-delta) > 0)) %>%
     select(person_id, booklet_id, item_id, item_score)
@@ -24,7 +24,7 @@ test_that('plausible scores works',{
   
   sc_b2 = persons %>%
     mutate(booklet_id = 'b2') %>%
-    inner_join(design, by='booklet_id') %>%
+    inner_join(design, by='booklet_id',relationship = "many-to-many") %>%
     inner_join(items, by ='item_id') %>%
     mutate(item_score = as.integer(rlogis(n(), theta-delta) > 0)) %>%
     group_by(person_id) %>%

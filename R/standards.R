@@ -86,7 +86,7 @@ standards_3dc = function(parms, design)
   {
       es = expected_score(parms, items=tds$item_id)
       
-      select(tds, booklet_id='cluster_id', .data$item_id) %>%
+      select(tds, booklet_id='cluster_id', 'item_id') %>%
         ability_tables(parms, design = ., standard_errors=FALSE) %>%
         rename(cluster_id='booklet_id', cluster_score='booklet_score') %>%
         mutate(booklet_score = es(.data$theta)) %>%
@@ -200,7 +200,7 @@ standards_db = function(par.sts, file_name, standards, population=NULL, group_le
       dbExecute(db3dc, 
               "INSERT INTO Population(test_id,test_score,test_score_frequency) 
                 VALUES(:booklet_id, :booklet_score, :n);",
-                select(population, .data$booklet_id, .data$booklet_score, .data$n))
+                select(population, 'booklet_id', 'booklet_score', 'n'))
     } 
   }, on_error=function(e){
     dbDisconnect(db3dc); file.remove(file_name); stop(e)})

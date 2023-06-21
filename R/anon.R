@@ -119,7 +119,7 @@ possible_scores = function(a, first, last)
   drop(possible_scores_C(as.integer(a), as.integer(first-1L), as.integer(last-1L)))
 
 
-theta_MLE <- function(b,a,first,last, se=FALSE)
+theta_MLE = function(b,a,first,last, se=FALSE)
 {
   a = as.integer(a)
   theta = theta_mle_sec(b, a, as.integer(first-1L), as.integer(last-1L))[,1,drop=TRUE]
@@ -135,7 +135,7 @@ theta_MLE <- function(b,a,first,last, se=FALSE)
   return(list(theta = c(-Inf,theta,Inf), se=sem))
 }
 
-theta_WLE <- function(b,a,first,last, se=FALSE)
+theta_WLE = function(b,a,first,last, se=FALSE)
 {
   a = as.integer(a)
   theta = theta_wle_sec(b, a, as.integer(first-1L), as.integer(last-1L))[,1,drop=TRUE]

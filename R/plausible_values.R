@@ -168,8 +168,8 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
   }
   design = split(design, design$booklet_id, drop=TRUE)
   
-  y = pv(select(x, .data$booklet_id, .data$person_id, .data$booklet_score, pop = .data$pop__),
-         design, b, a, nPV, from = from, by = step, prior.dist=prior.dist)
+  y = pv(select(x, 'booklet_id', 'person_id', 'booklet_score', pop = 'pop__'),
+         design, b, a, nPV, from = from, by = step, prior.dist = prior.dist)
   
   colnames(y) = c('booklet_id','person_id','booklet_score',paste0('PV',1:nPV))
   

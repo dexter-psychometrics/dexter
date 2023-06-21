@@ -83,7 +83,7 @@ fit_inter_ = function(dataSrc, qtpredicate = NULL, env=NULL, regs=TRUE)
 
   # scoretab, include unachieved and impossible scores
   scoretab = plt %>%
-    select(.data$booklet_score, .data$N) %>%
+    select('booklet_score', 'N') %>%
     distinct(.data$booklet_score, .keep_all=TRUE) %>%
     right_join(tibble(booklet_score=0L:maxTestScore), by="booklet_score") %>%
     mutate(N=coalesce(.data$N, 0L)) %>%

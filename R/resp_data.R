@@ -648,7 +648,7 @@ intersection = function(respData)
     if(nrow(items) == 0)
       stop('There are no items in your data that were answered by all respondents')
     
-    respData$design = select(items, -.data$n)
+    respData$design = select(items, -'n')
     
     respData$design$booklet_id = 1L
     class(respData$design$booklet_id) = "factor"

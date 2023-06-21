@@ -126,7 +126,7 @@ DIF = function(dataSrc, person_property, predicate=NULL)
   items = models[[1]]$inputs$ssIS %>%
     semi_join(common_items,by='item_id') %>%
     filter(.data$item_score > 0) %>%
-    select(.data$item_id, .data$item_score) %>%
+    select('item_id', 'item_score') %>%
     arrange(.data$item_id, .data$item_score) %>%
     mutate(item_id=as.character(.data$item_id))
   
@@ -245,7 +245,7 @@ plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, alpha
                                          col=col,breaks=breaks),
                          default = default.args))
   
-  cex.axis = c(user.args$cex.axis, 0.6)[1]
+  cex.axis = coalesce(user.args$cex.axis, 0.6)
   axis(1, at=1:length(yLabels), labels=yLabels, las=3, cex.axis=cex.axis, hadj=1,padj=0.5)
   axis(2, at=1:length(xLabels), labels=xLabels, las=1, cex.axis=cex.axis, hadj=1,padj=0.5)
   

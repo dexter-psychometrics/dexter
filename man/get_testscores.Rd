@@ -2,7 +2,7 @@
 % Please edit documentation in R/dexter.R
 \name{get_testscores}
 \alias{get_testscores}
-\title{Provide test scores}
+\title{Get test scores}
 \usage{
 get_testscores(dataSrc, predicate = NULL)
 }

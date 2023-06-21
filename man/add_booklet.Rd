@@ -66,8 +66,8 @@ and person_id will be ignored.
 data.frame in long format with columns \code{person_id}, \code{booklet_id}, 
 \code{item_id} and \code{response} such as can usually be found in databases for example. 
 For booklets that are not already known in your project, you need to specify the design via the \code{design} argument.
-Failure to do so will result in an error. Responses to items that should be there according to the design but which do not have a correpsoning
-row in \code{data} will be added with \code{missing_value} used for the response. If this missing value is not defined in your scoring rules and 
+Failure to do so will result in an error. Responses to items that should be there according to the design but which do not have a corresponding
+row in \code{data} will be added with \code{missing_value} used for the response. If this missing value is not defined in your scoring rules 
 and \code{auto_add_unknown_rules} is set to FALSE, this will lead to an error message.
 
 

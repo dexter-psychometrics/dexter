@@ -58,7 +58,7 @@ test_that('verbAgg abilities', {
       expect_true(nrow(abl) == nscores)
       
       abl = abl %>%  
-        filter(is.finite(theta)) %>%
+        filter(is.finite(.data$theta)) %>%
         arrange(booklet_score) %>%
         mutate(p = lag(theta, default = -Inf)) %>%
         filter(theta < p)

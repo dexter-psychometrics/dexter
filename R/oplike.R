@@ -125,7 +125,7 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
                       tibble(b=as.character(1:scr$nBook),onoff=scr$bookOn))
     dbExecute_param(db,'INSERT INTO dxbooklet_design(booklet_id, item_id, item_position, item_local_on_off) 
                             VALUES(:booklet_id,:item_id,:item_position, :onoff);', 
-					select(design, .data$booklet_id,.data$item_id,.data$item_position, .data$onoff))     
+					select(design, 'booklet_id', 'item_id', 'item_position', 'onoff'))     
     
     if(length(scr$margLabels)>1)
     {
@@ -191,7 +191,7 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
                     response=trimws(unlist(rsp)), 
                     item_position = unlist(sapply(rsp, function(n) 1:length(n),simplify=FALSE))) %>%
         inner_join(design, by=c('booklet_id','item_position')) %>%
-        select(.data$person_id, .data$booklet_id, .data$item_id, .data$response)
+        select('person_id', 'booklet_id', 'item_id', 'response')
       
       dbExecute_param(db,'INSERT INTO dxpersons(person_id) VALUES(:person_id);',tibble(person_id=prs) )
       dbExecute_param(db,'INSERT INTO dxadministrations(person_id,booklet_id) VALUES(:person_id,:booklet_id);', 
@@ -200,7 +200,7 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
       dbExecute_param(db,
                 'INSERT INTO dxresponses(booklet_id,person_id,item_id,response) 
                                   VALUES(:booklet_id,:person_id,:item_id,:response);', 
-                select(data, .data$booklet_id,.data$person_id,.data$item_id,.data$response))
+                select(data, 'booklet_id', 'person_id', 'item_id', 'response'))
     
     }
     
@@ -324,7 +324,7 @@ readCML = function(cml_path)
   
   # fill out the NA's in the first two columns
   pars %>% 
-    fill(.data$nr, .data$item_id) %>% 
+    fill('nr', 'item_id') %>% 
     rename(nbr = 'nr') %>%
 	df_format()
 }

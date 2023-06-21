@@ -335,7 +335,7 @@ pv = function(x, design, b, a, nPV, from = NULL, by = NULL, prior.dist = c("norm
       }
       pb$tick()
     }
-    return(select(x, .data$booklet_id, .data$person_id,.data$booklet_score, matches('PV\\d+')))
+    return(select(x, 'booklet_id', 'person_id','booklet_score', matches('PV\\d+')))
     
   }else # if b is not a matrix
   {
@@ -380,7 +380,7 @@ pv = function(x, design, b, a, nPV, from = NULL, by = NULL, prior.dist = c("norm
             data.frame(.$person_id, .$booklet_score, as.data.frame(out_pv), stringsAsFactors = FALSE)
           }) %>%
           ungroup() %>%
-          select(-.data$pop)
+          select(-'pop')
     )
   }
 }

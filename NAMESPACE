@@ -6,7 +6,9 @@ importFrom(DBI,"dbExecute", "dbGetQuery","dbDisconnect", "dbConnect", "dbListFie
             "dbCommit","dbRollback","dbBegin", "dbReadTable", "dbExistsTable", "dbIsValid",
             "dbSendQuery","dbColumnInfo","dbClearResult") 
 importFrom(rlang,"caller_env",".data","eval_tidy","duplicate","env_has")
-importFrom(tidyr, "gather", "spread", "fill")
+importFrom(tidyr, "pivot_longer", "pivot_wider", "fill")
+importFrom(MASS, "lmsreg")
+
 importFrom(stats, "complete.cases", "cor", "quantile","var",
             "sd", "weighted.mean", "as.formula", "density",
             "cov", "mahalanobis", "model.matrix", "pchisq","rchisq",
@@ -18,8 +20,6 @@ importFrom(graphics, "plot", "axis", "image", "layout", "par", "lines", "hist",
 importFrom(grDevices, "rainbow","colorRampPalette","col2rgb","rgb")
 importFrom(methods, "is", "new")
 importFrom(utils, "str", "head", "person", "tail", "modifyList")
-importFrom(MASS, "lmsreg")
-#importFrom(pheatmap, "pheatmap")
 
 
 # dexter.R

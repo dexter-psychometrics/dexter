@@ -1,7 +1,6 @@
 
 
 
-##########################################
 #' Estimate abilities
 #'
 #' Computes estimates of ability for persons or for booklet scores
@@ -90,7 +89,7 @@ ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), 
   abl$booklet_id = ffactor(abl$booklet_id, levels = levels(respData$design$booklet_id))
   respData$x %>% 
     inner_join(abl, by = c("booklet_id", "booklet_score")) %>% 
-    select(suppressWarnings(one_of('booklet_id', 'person_id', 'booklet_score', 'theta', 'se'))) %>%
+    select(any_of(c('booklet_id', 'person_id', 'booklet_score', 'theta', 'se'))) %>%
     mutate_if(is.factor, as.character) %>%
     df_format()
 }

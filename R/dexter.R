@@ -279,15 +279,15 @@ touch_rules = function(db, rules)
   
   rules$item_score = as.integer(rules$item_score)
   
-  # check if same options are supplied multiple times, this is the only check not done in conjuntion
+  # check if same options are supplied multiple times, this is the only check not done in conjunction
   # with the existing rules so it has to be gotten out of the way
-  items_with_duplicate_options = unique(rules[duplicated(select(rules,.data$item_id,.data$response)),]$item_id)
+  items_with_duplicate_options = unique(rules[duplicated(select(rules,'item_id', 'response')),]$item_id)
 
   existing_rules = dbGetQuery(db, 'SELECT item_id, response, item_score FROM dxscoring_rules;')
   # remove the no-ops
   rules = dplyr::setdiff(rules, existing_rules)
   
-  existing_opts = existing_rules %>% select(-.data$item_score)
+  existing_opts = existing_rules %>% select(-'item_score')
   
   # new items or responses
   new_rules = rules %>% anti_join(existing_opts, by=c('item_id','response'))
@@ -328,13 +328,13 @@ touch_rules = function(db, rules)
       
       dbExecute_param(db,'INSERT INTO dxscoring_rules(item_id, response, item_score) 
 							                            VALUES(:item_id, :response, :item_score);', 
-				select(new_rules, .data$item_id, .data$response, .data$item_score))
+				select(new_rules, 'item_id', 'response', 'item_score'))
     }
     if(nrow(amended_rules)>0) 
     {
       dbExecute_param(db,'UPDATE dxscoring_rules SET item_score=:item_score 
                       WHERE item_id=:item_id AND response=:response;', 
-                select(amended_rules, .data$item_id, .data$response, .data$item_score))
+                select(amended_rules, 'item_id', 'response', 'item_score'))
     }
   })
   cat(paste0('\nrules_changed: ', nrow(amended_rules), '\nrules_added: ', nrow(new_rules)),'\n')
@@ -413,7 +413,7 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
   design = tibble(booklet_id = booklet_id, item_id = names(x), col_order=c(1:ncol(x))) %>%
     inner_join(dbGetQuery(db, "SELECT item_id FROM dxitems;"), by='item_id') %>%
     mutate(item_position = dense_rank(.data$col_order)) %>%
-    select(-.data$col_order)
+    select(-'col_order')
 
   if(nrow(design) == 0) stop('None of the column names in x correspond to known items in your project')
 
@@ -438,7 +438,7 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
       }
       dbExecute_param(db,'INSERT INTO dxbooklet_design(booklet_id, item_id, item_position) 
                           VALUES(:booklet_id,:item_id,:item_position);', 
-				select(design, .data$booklet_id,.data$item_id,.data$item_position))
+				select(design, 'booklet_id', 'item_id', 'item_position'))
     }
                   
     x$booklet_id = booklet_id
@@ -467,10 +467,13 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
     dbExecute_param(db,'INSERT INTO dxpersons(person_id) VALUES(:person_id);', tibble(person_id=new_people))
     
     dbExecute_param(db,'INSERT INTO dxadministrations(person_id,booklet_id) VALUES(:person_id,:booklet_id);', 
-              select(x,.data$person_id, .data$booklet_id))
+              select(x, 'person_id', 'booklet_id'))
           
-    responses = x[,c(design$item_id, "booklet_id", "person_id")] %>%
-      gather(key='item_id', value='response', -.data$booklet_id, -.data$person_id, na.rm = FALSE)
+    responses = x %>%
+      select(all_of(c(design$item_id, "booklet_id", "person_id"))) %>%
+      pivot_longer(all_of(design$item_id), values_drop_na = FALSE,
+                   names_to='item_id', values_to='response')
+    
             
     responses$response = as.character(responses$response)
     responses$response[is.na(responses$response)] = 'NA'
@@ -483,7 +486,7 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
     {
 		  dbExecute_param(db,
 				'INSERT INTO dxscoring_rules(item_id,response,item_score) VALUES(:item_id,:response,0);',
-				select(new_rules, .data$item_id, .data$response))
+				select(new_rules, 'item_id', 'response'))
       out$zero_rules_added = new_rules
     } else if(nrow(new_rules)>0) 
     {
@@ -493,7 +496,7 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
     }
     dbExecute_param(db,'INSERT INTO dxresponses(booklet_id,person_id,item_id,response) 
                                 VALUES(:booklet_id,:person_id,:item_id,:response);', 
-					select(responses, .data$booklet_id, .data$person_id, .data$item_id, .data$response))
+					select(responses, 'booklet_id', 'person_id', 'item_id', 'response'))
             
     # make this report before we mutilate the colnames  
     columns_ignored = setdiff(names(x), c(design$item_id,'person_id','item_id','booklet_id') )
@@ -613,7 +616,8 @@ add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_a
     
     # check data
     data_design = distinct(data, .data$booklet_id, .data$item_id)
-    design = semi_join(get_design(db), data_design, by='booklet_id') %>% select(.data$booklet_id, .data$item_id)
+    design = semi_join(get_design(db), data_design, by='booklet_id') %>% 
+      select('booklet_id', 'item_id')
     
     invalid_bk_item = anti_join(data_design, design, by=c('booklet_id','item_id'))
     if(NROW(invalid_bk_item) > 0)
@@ -627,7 +631,7 @@ add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_a
     administrations = distinct(data,.data$booklet_id, .data$person_id)
     
     data = administrations %>%
-      inner_join(design, by='booklet_id') %>%
+      inner_join(design, by='booklet_id', relationship = "many-to-many") %>%
       left_join(data, by=c('person_id','booklet_id','item_id'))
     
     NA_cnt = sum(is.na(data$response))
@@ -1081,10 +1085,11 @@ get_design = function(dataSrc,
     val_col = setdiff(c('booklet_id','item_id','item_position'), c(rows, columns))
 
     design %>%
-        select(.data$item_id,.data$item_position,.data$booklet_id) %>%
-        spread(key = columns, value = val_col, fill = fill) %>%
-        arrange_at(rows) %>%
-        df_format()
+      select('item_id','item_position','booklet_id') %>%
+      pivot_wider(names_from=columns, values_from=val_col, values_fill=fill, names_sort=TRUE) %>%
+      arrange(all_of(rows)) %>%
+      df_format()
+        
   } else
   {
     df_format(design)

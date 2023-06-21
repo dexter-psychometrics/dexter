@@ -118,7 +118,7 @@ plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL,
   }
   
   simple_parms = simplify_parms(parms, collapse_b = !use_b_matrix, design = tibble(item_id=items))
-  items = select(simple_parms$design, -.data$booklet_id) 
+  items = select(simple_parms$design, -'booklet_id') 
   a = simple_parms$a
   b = simple_parms$b
   items$item_id = re_factor_item_id(respData, items$item_id)
@@ -143,7 +143,7 @@ plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL,
     respData = get_resp_data(respData, summarised = TRUE, protect_x=FALSE)
     
     pv = pv %>% 
-      select(-.data$booklet_score) %>%
+      select(-'booklet_score') %>%
       left_join(respData$x,  by=c("person_id", "booklet_id")) %>%
       mutate(booklet_score = coalesce(.data$booklet_score, 0L))
   }
@@ -181,7 +181,7 @@ plausible_scores_ = function(dataSrc, parms=NULL, qtpredicate=NULL, items=NULL,
       mutate_at(vars(starts_with('PV')), rscore, b=b, a=a, first=items$first,last=items$last,cntr=cnt, use_b_matrix = use_b_matrix)
   }
   
-  pv = select(pv, all_of(covariates), .data$booklet_id,.data$person_id, matches('^PV\\d+$')) %>%
+  pv = select(pv, all_of(covariates), 'booklet_id', 'person_id', matches('^PV\\d+$')) %>%
     rename_with(gsub,pattern='^PV(?=\\d+$)',replacement='PS', perl=TRUE) 
 
 }

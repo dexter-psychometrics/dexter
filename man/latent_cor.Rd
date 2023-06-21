@@ -36,7 +36,5 @@ and the lower and upper limits of the highest posterior density interval
 }
 \description{
 Estimates correlations between latent traits. Use an item_property to distinguish the different scales. 
-This function uses plausible values so results may differ slightly between calls. 
-Note: this is a new and slightly experimental function and therefore still a bit slow. It will probably 
-become faster in future versions of dexter.
+This function uses plausible values so results may differ slightly between calls.
 }

@@ -14,7 +14,7 @@ test_that('latent correlations work',{
     group_by(person_id,behavior) %>%
     summarise(score=sum(item_score)) %>%
     ungroup() %>%
-    spread(behavior,score)
+    pivot_wider(names_from=behavior, values_from=score)
     
   xcor = cor(select(x,-person_id))
   ut = upper.tri(lt$cor)

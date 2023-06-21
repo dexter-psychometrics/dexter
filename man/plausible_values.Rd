@@ -30,7 +30,9 @@ If dataSrc is a data.frame, it must contain the covariate.}
 
 \item{nPV}{Number of plausible values to draw per person.}
 
-\item{use_draw}{When the ENORM was fitted with a Gibbs sampler, this specifies the use of a particular sample of item parameters used to generate the plausible value(s). If NULL, the posterior means are used. If outside range, the last iteration will be used.}
+\item{use_draw}{When the ENORM was fitted with a Gibbs sampler, 
+this specifies the use of a particular sample of item parameters used to generate the plausible value(s). 
+If NULL, the posterior means are used.}
 
 \item{prior.dist}{use a normal prior or a mixture of two normals}
 
