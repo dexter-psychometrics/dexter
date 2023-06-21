@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dexter</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.2.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.3.0</span>
       </span>
     </div>
 
@@ -93,8 +93,8 @@
 <span>  predicate <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nPV <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  use_draw <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  prior.dist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>, <span class="st">"mixture"</span><span class="op">)</span>,</span>
+<span>  parms_draw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sample"</span>, <span class="st">"average"</span><span class="op">)</span>,</span>
+<span>  prior_dist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>, <span class="st">"mixture"</span><span class="op">)</span>,</span>
 <span>  merge_within_persons <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -107,7 +107,7 @@
 
 <dt>parms</dt>
 <dd><p>An object returned by function <code>fit_enorm</code> containing parameter estimates. If parms are provided, item parameters are considered known. 
-If parms = NULL, plausible values are marginalized over the posterior distribution of the item parameters and uncertainty of the item parameters is taken into account.</p></dd>
+If parms = NULL, they will be estimated Bayesianly.</p></dd>
 
 
 <dt>predicate</dt>
@@ -125,13 +125,13 @@ If dataSrc is a data.frame, it must contain the covariate.</p></dd>
 <dd><p>Number of plausible values to draw per person.</p></dd>
 
 
-<dt>use_draw</dt>
-<dd><p>When the ENORM was fitted with a Gibbs sampler, 
-this specifies the use of a particular sample of item parameters used to generate the plausible value(s). 
-If NULL, the posterior means are used.</p></dd>
+<dt>parms_draw</dt>
+<dd><p>when the item parameters are estimated Bayesianly (see: <code><a href="fit_enorm.html">fit_enorm</a></code>), 
+parms_draw specifies whether to use a sample(a different item parameter draw for each plausible values draw) or the posterior mean
+of the item draws. Alternatively, it can be an integer specifying a specific draw. Ignored when parms is not estimated Bayesianly.</p></dd>
 
 
-<dt>prior.dist</dt>
+<dt>prior_dist</dt>
 <dd><p>use a normal prior or a mixture of two normals</p></dd>
 
 
@@ -146,6 +146,11 @@ whether plausible values are generated per person (TRUE) or per booklet (FALSE)<
 
 <p>A data.frame with columns booklet_id, person_id, booklet_score and nPV plausible values
 named PV1...PVn.</p>
+    </div>
+    <div id="details">
+    <h2>Details</h2>
+    <p>When The item parameters are estimated using <code>fit_enorm(..., method='Bayes')</code> and parms_draw = 'sample', the uncertainty 
+of the item parameters estimates is taken into account when drawing multiple plausible values.</p>
     </div>
     <div id="references">
     <h2>References</h2>

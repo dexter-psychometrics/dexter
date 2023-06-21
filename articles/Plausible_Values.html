@@ -40,7 +40,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dexter</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.2.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.3.0</span>
       </span>
     </div>
 
@@ -224,7 +224,7 @@ we will use a Gibbs sampler to draw 50 samples from the posterior
 distribution of the item parameters, and we will pick one of these at
 random each time we produce a plausible value.</p>
 <p>First, a little function to accomplish this; note the use of the
-<code>use_draw</code> option which enables us to select every fifth
+<code>parms_draw</code> option which enables us to select every fifth
 sample from the Gibbs sampler that produced the sample of item
 parameters. Note that we have chosen every fifth sample to get rid of
 (most of) the autocorrelation in the samples of item parameters.</p>
@@ -240,7 +240,7 @@ parameters. Note that we have chosen every fifth sample to get rid of
 <span>  </span>
 <span>  <span class="va">which.draw</span> <span class="op">=</span> <span class="fl">5</span><span class="op">*</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span>
 <span>  <span class="kw">for</span> <span class="op">(</span><span class="va">iter</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">pv</span> <span class="op">=</span> <span class="fu"><a href="../reference/plausible_values.html">plausible_values</a></span><span class="op">(</span><span class="va">simulated_data</span>, <span class="va">parms</span>, use_draw<span class="op">=</span><span class="va">which.draw</span><span class="op">[</span><span class="va">iter</span><span class="op">]</span><span class="op">)</span></span>
+<span>    <span class="va">pv</span> <span class="op">=</span> <span class="fu"><a href="../reference/plausible_values.html">plausible_values</a></span><span class="op">(</span><span class="va">simulated_data</span>, <span class="va">parms</span>, parms_draw<span class="op">=</span><span class="va">which.draw</span><span class="op">[</span><span class="va">iter</span><span class="op">]</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/ecdf.html" class="external-link">ecdf</a></span><span class="op">(</span><span class="va">pv</span><span class="op">$</span><span class="va">PV1</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">pv</span><span class="op">$</span><span class="va">PV1</span><span class="op">)</span><span class="op">)</span>, col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/grDevices/rgb.html" class="external-link">rgb</a></span><span class="op">(</span><span class="fl">.7</span>,<span class="fl">.7</span>,<span class="fl">.7</span>,<span class="fl">.5</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="op">}</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/ecdf.html" class="external-link">ecdf</a></span><span class="op">(</span><span class="va">theta</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">theta</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
