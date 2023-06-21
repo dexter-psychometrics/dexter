@@ -11,9 +11,15 @@ p.blog-authors{font-style:italic}
 </style>
 
 
+## [dexter in the academic world](2023-05-20-dexter-paper)
+<p class="blog-authors">Ivailo Partchev</p><p>
+![](img/oxford.jpg){width=50%}
+__dexter__ finally has an academic paper all to and about himself! Get it [here](https://www.mdpi.com/2624-8611/5/2/24/pdf) in PDF.
+</p>
+
 ## [Here comes a new year](2022-12-31-happy-2023)
 <p class="blog-authors">Ivailo Partchev</p><p>
-![](img/2023.svg)
+![](img/2023.svg){width=80%}
 </p>
 
 ## [Minorization and the 2PL](2022-11-03-Minorization)
