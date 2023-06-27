@@ -73,6 +73,7 @@ export(ability_tables)
 
 #plausible_values.R
 export(plausible_values)
+export(plausible_values2)
 
 #plausible_scores.R
 export(plausible_scores)

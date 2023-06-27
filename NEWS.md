@@ -1,3 +1,18 @@
+# dexter 1.3.0
+
+## breaking change
+
+* the interface for the plausible_values and plausible_scores functions have changed in case
+of Bayesianly estimated item parameters
+
+
+## other changes
+
+* argument prior.dist in plausible values has become prior_dist to obtain a consistent naming scheme in dexter
+* The implementation of the algorithm for plausible values was changed slightly. This means that the use of a consistent seed will no longer give the same exact plausible values or scores  as were obtained in previous versions of dexter.
+* Multiple draws of  plausible values/scores with CML estimated item parameters will vary slightly more between draws. This will probably only be noticeable for small sample sizes.
+
+
 # dexter 1.2.2
 
 * changed license from GPL-3 to LGPL-3

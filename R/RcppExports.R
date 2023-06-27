@@ -129,6 +129,18 @@ ss_table_im_C <- function(a, b, c, first, last, firstA, lastA, firstB, lastB) {
     .Call(`_dexter_ss_table_im_C`, a, b, c, first, last, firstA, lastA, firstB, lastB)
 }
 
+score_tab_double <- function(scores, group, max_score) {
+    .Call(`_dexter_score_tab_double`, scores, group, max_score)
+}
+
+arrange_pv <- function(theta, scoretab_np, group) {
+    .Call(`_dexter_arrange_pv`, theta, scoretab_np, group)
+}
+
+pv_draw <- function(b, a, A, first, last, bk_cnit, bk_max_a, const_scoretab, cscoretab, scoretab_bk, scoretab_pop, scoretab_nscores, scoretab_cnscores, scoretab_np, mu, sigma, theta, col_indx) {
+    invisible(.Call(`_dexter_pv_draw`, b, a, A, first, last, bk_cnit, bk_max_a, const_scoretab, cscoretab, scoretab_bk, scoretab_pop, scoretab_nscores, scoretab_cnscores, scoretab_np, mu, sigma, theta, col_indx))
+}
+
 sampleNRM2_test <- function(theta, b, a, first, last) {
     .Call(`_dexter_sampleNRM2_test`, theta, b, a, first, last)
 }

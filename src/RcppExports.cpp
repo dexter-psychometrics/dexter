@@ -507,6 +507,59 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// score_tab_double
+arma::imat score_tab_double(const arma::ivec& scores, const arma::ivec& group, const int max_score);
+RcppExport SEXP _dexter_score_tab_double(SEXP scoresSEXP, SEXP groupSEXP, SEXP max_scoreSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::ivec& >::type scores(scoresSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type group(groupSEXP);
+    Rcpp::traits::input_parameter< const int >::type max_score(max_scoreSEXP);
+    rcpp_result_gen = Rcpp::wrap(score_tab_double(scores, group, max_score));
+    return rcpp_result_gen;
+END_RCPP
+}
+// arrange_pv
+arma::vec arrange_pv(const arma::vec& theta, const arma::ivec& scoretab_np, const arma::ivec& group);
+RcppExport SEXP _dexter_arrange_pv(SEXP thetaSEXP, SEXP scoretab_npSEXP, SEXP groupSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type scoretab_np(scoretab_npSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type group(groupSEXP);
+    rcpp_result_gen = Rcpp::wrap(arrange_pv(theta, scoretab_np, group));
+    return rcpp_result_gen;
+END_RCPP
+}
+// pv_draw
+void pv_draw(const arma::vec& b, const arma::ivec& a, const arma::ivec& A, const arma::ivec& first, const arma::ivec& last, const arma::ivec& bk_cnit, const arma::ivec& bk_max_a, const arma::ivec& const_scoretab, const arma::ivec& cscoretab, const arma::ivec& scoretab_bk, const arma::ivec& scoretab_pop, const arma::ivec& scoretab_nscores, const arma::ivec& scoretab_cnscores, const arma::ivec& scoretab_np, const arma::vec& mu, const arma::vec& sigma, arma::mat& theta, const int col_indx);
+RcppExport SEXP _dexter_pv_draw(SEXP bSEXP, SEXP aSEXP, SEXP ASEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP bk_cnitSEXP, SEXP bk_max_aSEXP, SEXP const_scoretabSEXP, SEXP cscoretabSEXP, SEXP scoretab_bkSEXP, SEXP scoretab_popSEXP, SEXP scoretab_nscoresSEXP, SEXP scoretab_cnscoresSEXP, SEXP scoretab_npSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP thetaSEXP, SEXP col_indxSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type bk_cnit(bk_cnitSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type bk_max_a(bk_max_aSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type const_scoretab(const_scoretabSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type cscoretab(cscoretabSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type scoretab_bk(scoretab_bkSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type scoretab_pop(scoretab_popSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type scoretab_nscores(scoretab_nscoresSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type scoretab_cnscores(scoretab_cnscoresSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type scoretab_np(scoretab_npSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< const int >::type col_indx(col_indxSEXP);
+    pv_draw(b, a, A, first, last, bk_cnit, bk_max_a, const_scoretab, cscoretab, scoretab_bk, scoretab_pop, scoretab_nscores, scoretab_cnscores, scoretab_np, mu, sigma, theta, col_indx);
+    return R_NilValue;
+END_RCPP
+}
 // sampleNRM2_test
 arma::ivec sampleNRM2_test(const arma::vec& theta, const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last);
 RcppExport SEXP _dexter_sampleNRM2_test(SEXP thetaSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP) {
@@ -737,6 +790,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dexter_ittotmat_C", (DL_FUNC) &_dexter_ittotmat_C, 6},
     {"_dexter_ss_table_enorm_C", (DL_FUNC) &_dexter_ss_table_enorm_C, 8},
     {"_dexter_ss_table_im_C", (DL_FUNC) &_dexter_ss_table_im_C, 9},
+    {"_dexter_score_tab_double", (DL_FUNC) &_dexter_score_tab_double, 3},
+    {"_dexter_arrange_pv", (DL_FUNC) &_dexter_arrange_pv, 3},
+    {"_dexter_pv_draw", (DL_FUNC) &_dexter_pv_draw, 18},
     {"_dexter_sampleNRM2_test", (DL_FUNC) &_dexter_sampleNRM2_test, 5},
     {"_dexter_sampleNRM2_item", (DL_FUNC) &_dexter_sampleNRM2_item, 5},
     {"_dexter_Escore_C", (DL_FUNC) &_dexter_Escore_C, 5},

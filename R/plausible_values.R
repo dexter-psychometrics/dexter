@@ -89,14 +89,15 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
                              merge_within_persons=merge_within_persons)
 {
   if(is.null(env)) env = caller_env()
-  from = Gibbs.settings$from.pv
-  step = Gibbs.settings$step.pv # burnin and thinning for pvs
-  nIter.enorm = from + step*(nPV-1) # nr. of posterior samples of item parameters needed
   
   if(is.numeric(parms_draw)) parms_draw = as.integer(parms_draw)
   else parms_draw = match.arg(parms_draw)
   
   prior_dist = match.arg(prior_dist)
+  
+  pv_from = Gibbs.settings$from.pv 
+  pv_step = Gibbs.settings$step.pv
+  niter_req = pv_from + pv_step*(nPV-1) 
   
   pb = get_prog_bar(nsteps=if(is.null(parms)) 120 else 100, 
                     retrieve_data = is_db(dataSrc))
@@ -106,7 +107,7 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
   {
     respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, extra_columns=covariates, env=env)
     pb$new_area(20)
-    parms = fit_enorm_(respData, method = 'Bayes', nDraws = nIter.enorm) 
+    parms = fit_enorm_(respData, method = 'Bayes', nDraws = niter_req) 
     
     respData = get_resp_data(respData, summarised=TRUE, extra_columns=covariates, 
                              protect_x=!is_db(dataSrc))
@@ -132,11 +133,11 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
   
   parms = simplify_parms(parms, draw=parms_draw)
   
-  if(parms_draw == 'sample' && parms$method != 'CML' && nrow(parms$b) < nIter.enorm ) 
+  if(parms_draw == 'sample' && parms$method != 'CML')
   {
-    stop(paste("To produce", nPV, "plausible values, use at least", nIter.enorm, "iterations in fit_enorm" ))
-  } 
-  
+    if(nrow(parms$b) < niter_req )
+      stop_(paste("To produce", nPV, "plausible values, use at least", niter_req, "iterations in fit_enorm" ))
+  }
   if(!is.null(covariates))
   {
     group_number = (function(){i = 0L; function() i <<- i+1L })()
@@ -159,7 +160,7 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
   design = split(design, design$booklet_id, drop=TRUE)
   
   y = pv(select(respData$x, 'booklet_id', 'person_id', 'booklet_score', pop = 'pop__'),
-         design, parms$b, parms$a, nPV, from = from, by = step, prior.dist = prior_dist)
+         design, parms$b, parms$a, nPV, from = pv_from, by = pv_step, prior.dist = prior_dist)
   
   colnames(y) = c('booklet_id','person_id','booklet_score',paste0('PV',1:nPV))
   
