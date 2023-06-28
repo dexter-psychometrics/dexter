@@ -87,16 +87,17 @@ sim_PV = function(theta, delta) {
 Let us try it out:
 
 ```{r,fig.align='center', fig.height=4,fig.width=4}
-theta = rnorm(300)
-delta = runif(50, -2, 1)
+nP = 600
+theta = rnorm(nP)
+delta = runif(50, -2, 2)
 sim_PV(theta, delta)
 ```
 
 So far, so good. The true abilities were sampled from the standard normal distribution, which was also used as the default prior in the `plausible_values` function. To make things a bit more exciting, we will generate true abilities from a markedly bi-modal distribution whilst keeping a normal prior, which will be obviously misspecified in this case. We will then examine the plausible value from tests using the first 10, the first 20, and all 50 items simulated above.
 
 ```{r,fig.align='center',  fig.width=7}
-grp = sample(2, 300, replace = TRUE, prob = c(.5,.5))
-theta = rnorm(300, mean = c(-2,2)[grp], sd = c(1,1)[grp])
+grp = sample(2, nP, replace = TRUE, prob = c(.5,.5))
+theta = rnorm(nP, mean = c(-2,2)[grp], sd = c(0.5,1.5)[grp])
 plot(density(theta),bty='l',main='')
 par(mfrow=c(1,3))
 sim_PV(theta, delta[1:10])
@@ -138,13 +139,39 @@ sim_PV2(theta, delta[1:20])
 sim_PV2(theta, delta)
 ```
 
-The results show a small increase in variance but, with 300 persons, the item parameters have been estimated very precisely. Note that the user can accomplish the same goal by calling `plausible_values` without parms.
+The results show a small increase in variance but, with `r nP` persons, the item parameters have been estimated very precisely. Note that the user can accomplish the same goal by calling `plausible_values` without parms.
 
-To simulate abilities from a bi-modal distribution we assumed that the data consist of two groups of subjects; each with a different distribution of ability. To speed-up convergence to the true distribution, dexter allow the user to specify a mixture of two normals as a prior. A mixture of two normal distributions provides a flexible prior that can be bimodal but also skewed. If we had been aware of the presence of two groups we could have done even better by specifying a different prior in each group. To this aim, the `plausible_values` function has the option to provide covariates. These covariates are assumed to be discrete and define groups. Each group will be allowed a possibly different (normal) prior. To show how this is done and also to illustrate that it is effective, we now include the group-membership in the model.
+To simulate abilities from a bi-modal distribution we assumed that the data consist of two groups of subjects; each with a different distribution of ability. To speed-up convergence to the true distribution, dexter allow the user to specify a mixture of two normals as a prior. A mixture of two normal distributions provides a flexible prior that can be bimodal but also skewed. 
 
 ```{r make_pv3, fig.align='center',fig.width=7,par=list(mfrow=c(1,3))}
+sim_PV3 = function(theta, delta) {
+  nit = length(delta)
+  sim_func = r_score( tibble(item_id=1:nit, item_score=1, delta=delta))
+  simulated_data = sim_func(theta)
+  parms = fit_enorm(simulated_data)
+  pv = plausible_values(simulated_data, parms, nPV = 10, prior_dist = "mixture")
+  
+  plot(x=c(min(theta)-.5, max(theta)+.5), y=0:1, 
+       main=paste(nit, "items"), bty='l', type='n',
+       xlab=bquote(theta), ylab = bquote(Fn(theta)))
+  
+  select(pv, starts_with('PV')) %>%
+    lapply(function(x) lines(ecdf(x-mean(x)), col=rgb(.7,.7,.7,.5)))
 
-sim_PV3 = function(theta, delta, group) {
+  lines(ecdf(theta-mean(theta)))
+}
+
+sim_PV3(theta, delta[1:10])
+sim_PV3(theta, delta[1:20])
+sim_PV3(theta, delta)
+```
+
+
+If we had been aware of the presence of two groups we could have done even better by specifying a different prior in each group. To this aim, the `plausible_values` function has the option to provide covariates. These covariates are assumed to be discrete and define groups. Each group will be allowed a possibly different (normal) prior. To show how this is done and also to illustrate that it is effective, we now include the group-membership in the model.
+
+```{r make_pv4, fig.align='center',fig.width=7,par=list(mfrow=c(1,3))}
+
+sim_PV4 = function(theta, delta, group) {
   nit = length(delta)
   sim_func = r_score( tibble(item_id=1:nit, item_score=1, delta=delta))
   
@@ -165,13 +192,13 @@ sim_PV3 = function(theta, delta, group) {
   lines(ecdf(theta-mean(theta)))
 }
 
-sim_PV3(theta, delta[1:10],grp)
-sim_PV3(theta, delta[1:20],grp)
-sim_PV3(theta, delta,grp)
+sim_PV4(theta, delta[1:10],grp)
+sim_PV4(theta, delta[1:20],grp)
+sim_PV4(theta, delta,grp)
 
 ```
 
-It will be clear that the distribution of the plausible values converges much faster (i.e., with fewer items) to the true distribution of ability.
+This illustrates what the theory, in @MarsmanPV, tells us: The more the prior resembles the true distribution, the faster (i.e., with fewer items) the distribution of the plausible values converges to the true distribution of ability.  
 
 
 ### References
