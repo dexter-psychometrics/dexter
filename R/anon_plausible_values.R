@@ -189,8 +189,8 @@ update_pv_prior_mixnorm = function (pv, p, mu, sigma, prior.dist=c('normal','Jef
   if (prior.dist == 'normal')
   {
      ## hyper-prior
-    l = rep(2,2) #rep(1,2)
-    v = rep(5,2)
+    l = rep(1,2)
+    v = rep(3,2)
 
       ## latent group membership
     for (t in 1:n)
@@ -219,9 +219,9 @@ update_pv_prior_mixnorm = function (pv, p, mu, sigma, prior.dist=c('normal','Jef
                                                (l[j]*nj[j]/(l[j]+nj[j]))*(mean_pv - mean(pv[z==j]))^2)))
         }
     }
-  
+
       ## membership probabilities
-    p = rgamma(2, shape = nj + 1, scale = 1)
+    p = rgamma(2, shape = nj + 2, scale = 1)
     p = p/sum(p)
   }
   

@@ -36,7 +36,7 @@ explicit_NA = function(x, replace_NA_with = c('<NA>','.NA.','<<NA>>','__NA__'))
 # pv: plausible values
 # ps: plausible scores
 Gibbs.settings = list(from.cal = 20L, step.cal = 2L, start_b='cml',
-                      from.pv = 20L, step.pv = 5L,
+                      from.pv = 100L, step.pv = 5L,
                       from.pv.cml = 11L, step.pv.cml = 1L,
                       from.pv.bayes = 20L, step.pv.bayes = 5L,
                       from.ps = 1L, step.ps = 1L)
