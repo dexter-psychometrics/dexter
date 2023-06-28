@@ -129,9 +129,8 @@ update_pv_prior = function(pv, pop, mu, sigma)
 #
 # @details      Given samples of plausible values from an hierarchical model with >=2 groups
 # this function samples means and variances of plausible values from their posterior
-# It updates the prior used in sampling plausible values. Our implementation is based on code 
-# provided by Gelman, A., & Hill, J. (2006). Data analysis using regression and 
-# multilevel/hierarchical models. Cambridge university press.
+# It updates the prior used in sampling plausible values. Our implementation is based on 
+# Section 11.6 of Gelman, et al. (2014) Bayesian Data analysis. 
 #
 # to do: test n>=5, anders geen sd update
 # to do: Allow within group variance to be different
@@ -148,7 +147,7 @@ update_pv_prior_H = function(pv, pop, mu, sigma, mu.a, sigma.a)
     mu[j] = rnorm(1, a.hat.j, sqrt(V.a.j))
   }
   mu.a = rnorm (1, mean(mu), sigma.a/sqrt(J))
-  sigma = sqrt(sum((pv-mu[pop])^2)/rchisq(1,n-1))
+  sigma = sqrt(sum((pv-mu[pop])^2)/rchisq(1,n))
   sigma.a = sqrt(sum((mu-mu.a)^2)/rchisq(1,J-1))
   
   return(list(mu=mu, sigma=rep(sigma,J), mu.a=mu.a, sigma.a=sigma.a))
