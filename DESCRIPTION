@@ -28,7 +28,7 @@ Imports:
     grDevices,
     methods,
     utils
-LinkingTo: Rcpp, RcppArmadillo (>= 0.10.0)
+LinkingTo: Rcpp, RcppArmadillo (>= 0.10.0), dqrng, BH, sitmo
 RoxygenNote: 7.2.3
 Suggests:
     knitr,

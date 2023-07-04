@@ -12,7 +12,8 @@ plausible_values2(
   nPV = 1,
   parms_draw = c("sample", "average"),
   prior_dist = c("normal", "mixture"),
-  merge_within_persons = FALSE
+  merge_within_persons = FALSE,
+  implementation = c("vanilla", "parallel", "chain", "full_chain")
 )
 }
 \arguments{
@@ -39,6 +40,8 @@ A mixture is only possible when there are no covariates.}
 
 \item{merge_within_persons}{If a person took multiple booklets, this indicates
 whether plausible values are generated per person (TRUE) or per booklet (FALSE)}
+
+\item{implementation}{for testing of dev version}
 }
 \value{
 A data.frame with columns booklet_id, person_id, booklet_score and nPV plausible values

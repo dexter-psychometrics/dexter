@@ -3,6 +3,10 @@
 
 #include <RcppArmadillo.h>
 
+static void chkIntFn(void *dummy) {
+  R_CheckUserInterrupt();
+}
+
 struct progress
 {
 	int step, step_before_sub, sub_nsteps, sub_length, nsteps, w, sub_step,p,l;
@@ -45,5 +49,36 @@ struct progress
 		draw_perc();
 	}
 };	
+
+struct progress_prl : progress
+{
+	std::atomic<int> atm_tick;
+	bool interrupted;	
+	
+	progress_prl(const int nsteps_, const arma::ivec& settings)
+		: progress(nsteps_ , settings)
+	{
+		atm_tick = 0;
+		interrupted = false;
+	}
+	
+	bool checkInterrupt() {
+		return (R_ToplevelExec(chkIntFn, NULL) == 0);
+	}
+	
+	void tick(const bool main_thread, const int nticks = 1)
+	{
+		atm_tick += nticks;
+		if(main_thread)
+		{
+			progress::tick(atm_tick.load());
+			if(checkInterrupt())
+			{
+				interrupted = true;
+			}
+			atm_tick = 0;
+		}		
+	}	
+};
 	
 #endif

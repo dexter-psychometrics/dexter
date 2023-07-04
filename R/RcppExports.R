@@ -129,16 +129,28 @@ ss_table_im_C <- function(a, b, c, first, last, firstA, lastA, firstB, lastB) {
     .Call(`_dexter_ss_table_im_C`, a, b, c, first, last, firstA, lastA, firstB, lastB)
 }
 
-score_tab_double <- function(scores, group, max_score) {
-    .Call(`_dexter_score_tab_double`, scores, group, max_score)
+test_rgamma <- function(n, alpha, beta) {
+    .Call(`_dexter_test_rgamma`, n, alpha, beta)
 }
 
-arrange_pv <- function(theta, scoretab_np, group) {
-    .Call(`_dexter_arrange_pv`, theta, scoretab_np, group)
+test_rinvchisq <- function(n, df, scale) {
+    .Call(`_dexter_test_rinvchisq`, n, df, scale)
 }
 
-pv_draw <- function(b, a, A, first, last, bk_cnit, bk_max_a, const_scoretab, cscoretab, scoretab_bk, scoretab_pop, scoretab_nscores, scoretab_cnscores, scoretab_np, mu, sigma, theta, col_indx) {
-    invisible(.Call(`_dexter_pv_draw`, b, a, A, first, last, bk_cnit, bk_max_a, const_scoretab, cscoretab, scoretab_bk, scoretab_pop, scoretab_nscores, scoretab_cnscores, scoretab_np, mu, sigma, theta, col_indx))
+test_rbeta <- function(n, alpha, beta) {
+    .Call(`_dexter_test_rbeta`, n, alpha, beta)
+}
+
+ncores <- function() {
+    .Call(`_dexter_ncores`)
+}
+
+pv_chain_normal <- function(bmat, a, A, first, last, bk_cnit, bk_max_a, const_scoretab, scoretab_bk, scoretab_pop, scoretab_nscores, scoretab_np, mu_start, sigma_start, npv, progress_init, warmup = 10L, step = 1L) {
+    .Call(`_dexter_pv_chain_normal`, bmat, a, A, first, last, bk_cnit, bk_max_a, const_scoretab, scoretab_bk, scoretab_pop, scoretab_nscores, scoretab_np, mu_start, sigma_start, npv, progress_init, warmup, step)
+}
+
+pv_chain_mix <- function(bmat, a, A, first, last, bk_cnit, bk_max_a, gscoretab, gscoretab_bk, gscoretab_nscores, gscoretab_np, mu_start, sigma_start, p_start, npv, progress_init, warmup = 10L, step = 1L) {
+    .Call(`_dexter_pv_chain_mix`, bmat, a, A, first, last, bk_cnit, bk_max_a, gscoretab, gscoretab_bk, gscoretab_nscores, gscoretab_np, mu_start, sigma_start, p_start, npv, progress_init, warmup, step)
 }
 
 sampleNRM2_test <- function(theta, b, a, first, last) {
