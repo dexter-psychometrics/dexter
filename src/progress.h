@@ -1,17 +1,21 @@
 #ifndef DEXTER_PROG_
 #define DEXTER_PROG_
-
+#include <atomic>
+#include <string>
 #include <RcppArmadillo.h>
 
+
+// see https://stat.ethz.ch/pipermail/r-devel/2011-April/060702.html
 static void chkIntFn(void *dummy) {
   R_CheckUserInterrupt();
 }
 
-struct progress
+class progress
 {
+private:
 	int step, step_before_sub, sub_nsteps, sub_length, nsteps, w, sub_step,p,l;
 	std::string fmt;
-	
+public:	
 	progress(const int nsteps_, const arma::ivec& settings)
 	{
 		step_before_sub = settings(0);
@@ -26,6 +30,7 @@ struct progress
 		if(w>0)
 			fmt = std::string("\r|%-") + std::to_string(w) + std::string("s| %3i%%");	
 	}
+	
 	void draw_perc()
 	{
 		if(w>0)
@@ -41,6 +46,7 @@ struct progress
 			}
 		}		
 	}
+	
 	void tick(const int nticks = 1)
 	{
 		sub_step = sub_step + nticks;
@@ -50,20 +56,29 @@ struct progress
 	}
 };	
 
-struct progress_prl : progress
+class progress_prl : progress
 {
+private:
 	std::atomic<int> atm_tick;
-	bool interrupted;	
+	std::atomic<bool> atm_interrupted;
+public:
 	
 	progress_prl(const int nsteps_, const arma::ivec& settings)
 		: progress(nsteps_ , settings)
 	{
 		atm_tick = 0;
-		interrupted = false;
+		atm_interrupted = false;
 	}
 	
-	bool checkInterrupt() {
-		return (R_ToplevelExec(chkIntFn, NULL) == 0);
+	// NEVER call checkInterrupt outside of the main thread
+	void checkInterrupt() 
+	{
+		if(R_ToplevelExec(chkIntFn, NULL) == 0)	atm_interrupted = true; // the if is necessary
+	}
+	
+	bool interrupted()
+	{
+		return atm_interrupted.load();
 	}
 	
 	void tick(const bool main_thread, const int nticks = 1)
@@ -72,10 +87,7 @@ struct progress_prl : progress
 		if(main_thread)
 		{
 			progress::tick(atm_tick.load());
-			if(checkInterrupt())
-			{
-				interrupted = true;
-			}
+			checkInterrupt();
 			atm_tick = 0;
 		}		
 	}	

@@ -1,3 +1,4 @@
+#include <random>
 #include <RcppArmadillo.h>
 #include <xoshiro.h>
 #include <dqrng_distribution.h>
@@ -17,6 +18,15 @@ int ncores()
 	return omp_get_max_threads();
 }
 
+// to do: move to shared since it is useful elsewhere
+ivec cum_iter_ivec(const ivec& v)
+{
+	const int n = v.n_elem;
+	ivec out(n+1);
+	out[0] = 0;
+	out.tail(n) = cumsum(v);
+	return out;
+}
 
 
 // [[Rcpp::export]]
@@ -31,21 +41,15 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 	const int nchains = mu_start.n_cols;
 	const int N = accu(scoretab_np);
 	
-	progress_prl pb(step*npv + nchains*warmup, progress_init);
+	progress_prl pb(step*(npv-nchains) + nchains*warmup, progress_init);
 	
 	dqrng::xoshiro256plus rng(SEED);
 	dqrng::uniform_distribution prl_runif(0, 1);
 	dqrng::normal_distribution prl_rnorm(0, 1);
 	
-
+	ivec scoretab_cnp = cum_iter_ivec(scoretab_np);
 	
-	ivec scoretab_cnp(ntab+1);
-	scoretab_cnp[0] = 0;
-	scoretab_cnp.tail(ntab) = cumsum(scoretab_np);
-	
-	ivec scoretab_cnscores(ntab+1);
-	scoretab_cnscores[0] = 0;
-	scoretab_cnscores.tail(ntab) = cumsum(scoretab_nscores);
+	ivec scoretab_cnscores = cum_iter_ivec(scoretab_nscores);
 	
 	const ivec cscoretab = cumsum(const_scoretab); // not for iteration, so no zero added at the front	
 	
@@ -71,7 +75,7 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 			
 		vec b(bmat.n_rows), expat(bk_max_a.max()+1, fill::zeros), p(bk_max_a.max()+1, fill::zeros);
 		
-		int x,y,k, pvcol;
+		int x,y,k, pvcol, cntr;
 		double u, atheta;
 
 		dqrng::xoshiro256plus lrng(rng);      		
@@ -90,17 +94,17 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 			if(bstep>0) bcol = chain;
 			
 			for(int iter=0; iter<=niter; iter++)
-			{	
-				if(pb.interrupted) break;
-				
+			{					
 				scoretab = const_scoretab; // will get eaten
 				
 				mu = priors.theta;
 				sigma = priors.sigma;	
 				b = bmat.col(bcol);
-
+				cntr = 0;
+				
 				for(int tab=0; tab < ntab; tab++)
 				{
+					if(pb.interrupted()) break;
 					int np = scoretab_np[tab];
 					int max_score = scoretab_nscores[tab] - 1;			
 					
@@ -158,7 +162,13 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 								for(;max_score>=0; max_score--)
 									if(scoretab[scoretab_start + max_score] > 0)
 										break;
-						}		
+						}
+						if(cntr++ > 50000)
+						{
+							if(thread==0) pb.checkInterrupt(); 
+							if(pb.interrupted()) break;
+							cntr = 0;
+						}
 					}	
 				}
 				
@@ -170,7 +180,11 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 			}
 		}
 	}
-	if(pb.interrupted) Rcpp::stop("user interrupt");
+	pb.tick(true);
+	if(pb.interrupted())
+	{ 
+		Rcpp::stop("user interrupt");
+	}
 	return Rcpp::List::create(Named("theta") = theta, Named("prior_log") = prior_log);
 }
 
@@ -189,7 +203,7 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 	const int nchains = mu_start.n_cols;
 	const int N = accu(gscoretab_np), len_gscoretab = gscoretab.n_elem;
 	
-	progress_prl pb(step*npv + nchains*warmup, progress_init);
+	progress_prl pb(step*(npv-nchains) + nchains*warmup, progress_init);
 	
 	dqrng::xoshiro256plus rng(SEED);
 	dqrng::uniform_distribution prl_runif(0, 1);
@@ -206,9 +220,7 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 		bstep = bmat.n_cols/chain_iter;	
 	}
 	
-	ivec gscoretab_cnscores(ntab+1);
-	gscoretab_cnscores[0] = 0;
-	gscoretab_cnscores.tail(ntab) = cumsum(gscoretab_nscores);
+	ivec gscoretab_cnscores = cum_iter_ivec(gscoretab_nscores);
 	
 #pragma omp parallel
 	{	
@@ -220,13 +232,12 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 			
 		vec b(bmat.n_rows), expat(bk_max_a.max()+1, fill::zeros), p(bk_max_a.max()+1, fill::zeros);
 	
-		int x,y,k, pvcol, prs;
+		int x,y,k, pvcol, prs, cntr;
 		double u, atheta;
 
 		dqrng::xoshiro256plus lrng(rng);      		
 		lrng.long_jump(thread + 1);			
 		
-		//int cntr=0;
 #pragma omp for
 		for(int chain=0; chain<nchains; chain++)
 		{	
@@ -239,29 +250,23 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 			int bcol = 0;
 			if(bstep>0) bcol = chain;
 			
-			scoretab.zeros();
+			scoretab.zeros();			
 	
 			for(int iter=0; iter<=niter; iter++)
-			{
-				if(pb.interrupted) break;
+			{				
 				// make two scoretab cols, one for each prior
 				prs = 0;
 				for(int i=0; i<len_gscoretab; i++)
 					for(int sp=0; sp < gscoretab[i]; sp++)
 						scoretab.at(i, priors.pop[prs++])++;
 				
-				// little trickery to get theta's in the right position in output
-				// all pop 0 with same score will come before pop 1 theta's always though
-				// this is not desirable
-				// we could also randomize a bit
-				// or we would need to keep track of old and new pop which is rather complicated
-				// but that order matters is also not good
-		
+				// little trickery to get theta's in the right (= relating to booklet and score) position in output
 				cscoretab.col(1) = cumsum(sum(scoretab,1));			
 				cscoretab.col(0) = cscoretab.col(1) - scoretab.col(1);
 				
 				b = bmat.col(bcol);
 				
+				cntr = 0;
 				for(int prior_num=0; prior_num <=1; prior_num++)
 				{
 					mu = priors.mu[prior_num];
@@ -269,6 +274,8 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 
 					for(int tab=0; tab<ntab; tab++)
 					{					
+						if(pb.interrupted()) break;
+						
 						const int scoretab_start = gscoretab_cnscores[tab]; // startpoint in scoretab 
 						const int bk = gscoretab_bk[tab];
 						
@@ -314,12 +321,6 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 									break;
 							}	
 							y = scoretab_start + x;
-							/*
-							if(++cntr > 50000)
-							{
-								Rcpp::checkUserInterrupt();
-								cntr = 0;
-							}*/
 
 							if(scoretab.at(y, prior_num) > 0)
 							{
@@ -332,7 +333,13 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 									for(;max_score>=0; max_score--)
 										if(scoretab.at(scoretab_start + max_score, prior_num) > 0)
 											break;
-							}	
+							}
+							if(cntr++ > 50000)
+							{
+								if(thread==0) pb.checkInterrupt(); 
+								if(pb.interrupted()) break;
+								cntr = 0;
+							}
 						}						
 					}
 				}	
@@ -344,7 +351,45 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 			}
 		}
 	}
-	if(pb.interrupted) Rcpp::stop("user interrupt");
+	
+	pb.tick(true);
+	
+	if(pb.interrupted())
+	{ 
+		Rcpp::stop("user interrupt");
+	}
+	
+	
+	// The above will have sorted the theta's by booklet, booklet_score, assigned pop
+	// the last part of the sort is undesirable since it may introduce an artefact or bias
+	// so we shuffle within (booklet, booklet_score) for each column in the resulting pv's
+	// tested that shuffle is correctly within bk-score and does actually shuffle
+	
+	// define gcscoretab
+	ivec gcscoretab = cum_iter_ivec(gscoretab);	
+
+	
+// this seems to be seed safe, but might not be depending on what else is going on on the computer
+#pragma omp parallel
+	{	
+		const int thread = omp_get_thread_num();
+		dqrng::xoshiro256plus lrng(rng);      		
+		lrng.jump(thread + 1);
+		
+#pragma omp for		
+		for(int pvcol=0; pvcol < npv; pvcol++)
+		{
+			auto itr = theta.begin_col(pvcol);
+			for(int i=0; i<len_gscoretab; i++)
+			{
+				if(gscoretab[i] > 1)
+				{
+					std::shuffle(itr + gcscoretab[i], itr + gcscoretab[i+1], lrng);
+				}		
+			}
+		}
+	}
+	
 	return Rcpp::List::create(Named("theta") = theta, Named("prior_log") = prior_log);
 }
 

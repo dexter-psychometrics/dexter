@@ -36,7 +36,7 @@ double rgamma(dqrng::xoshiro256plus& lrng, const double alpha, const double ibet
 			
 		} while (v<=0);			
 			
-		v = v*v*v;
+		v = CUB(v);
 		u = runif(lrng);
 			
 	} while(u > 1-0.331 * QRT(x) && std::log(u) > 0.5 * SQR(x) + a1*(1-v+std::log(v)));
@@ -59,7 +59,7 @@ double rgamma(dqrng::xoshiro256plus& lrng, const double alpha, const double ibet
 	
 double rchisq(dqrng::xoshiro256plus& lrng, const double df)
 {
-	return 2 * rgamma(lrng, df/2, 1);
+	return 2 * rgamma(lrng, df/2, 1.0);
 }
 	
 double rinvchisq(dqrng::xoshiro256plus& lrng, const double df, const double scale)
@@ -148,7 +148,7 @@ void hnorm_prior::update(dqrng::xoshiro256plus& lrng, const vec& pv, const ivec&
 	{
 		// Single normal prior in case of one group
 		const double m = mean(pv);
-		const double v = mean(square(pv-m));
+		const double v = var(pv-m);
 		sigma = std::sqrt(1/rgamma(lrng, (N-1)/2, 1/(((N-1)/2)*v)));
 		theta[0] = rnorm(lrng) * (sigma/std::sqrt(N)) + m;	
 	}
@@ -156,27 +156,27 @@ void hnorm_prior::update(dqrng::xoshiro256plus& lrng, const vec& pv, const ivec&
 	{
 		// data summary, walk over pv's per scoretab to produce y_bar and sigma_hat2
 		
-		// to do: make markdown describing data structures to ease Timo's life
 		const int ntab = scoretab_pop.n_elem;
 		
 		int pop;			
-		double theta_hat, mu_hat, tau_hat2, sigma2, sigma_hat2 = 0;
-			
-		vec n(npop, fill::zeros), ybar(npop,fill::zeros), V_theta(npop);
+		double theta_hat, V_theta, mu_hat, tau_hat2, sigma2, sigma_hat2 = 0;
+		
+		ivec n(npop, fill::zeros);
+		vec ybar(npop,fill::zeros);
 
 		for(int tab=0;tab<ntab;tab++)
 		{
 			pop = scoretab_pop[tab];
-			n[pop] += (double)scoretab_np[tab];
+			n[pop] += scoretab_np[tab];
 			for(int p=scoretab_cnp[tab]; p<scoretab_cnp[tab+1]; p++)
 			{
 				ybar[pop] += pv[p];
 				sigma_hat2 += SQR(pv[p] - theta[pop]);
 			}
 		}
-		sigma_hat2 /= N;
-		ybar /= n;
-			
+		sigma_hat2 /= N-1; // N-1, ff boek checken
+		ybar /= conv_to<vec>::from(n);
+		
 		// The sampling
 		
 		if(npop<5)
@@ -201,12 +201,12 @@ void hnorm_prior::update(dqrng::xoshiro256plus& lrng, const vec& pv, const ivec&
 		mu_hat = mean(theta);
 		mu = rnorm(lrng) * std::sqrt(tau2/J) + mu_hat;
 		
-		V_theta = 1/(1/tau2 + n/sigma2); 			
-		
 		for(int j=0; j<npop; j++)
 		{
+			V_theta = 1/(1/tau2 + n[j]/sigma2); 
+			
 			theta_hat = (mu/tau2 + ybar[j]*n[j]/sigma2)/(1/tau2+n[j]/sigma2);
-			theta[j] = rnorm(lrng) * std::sqrt(V_theta[j]) + theta_hat;
+			theta[j] = rnorm(lrng) * std::sqrt(V_theta) + theta_hat;
 		}		
 		sigma = std::sqrt(sigma2);
 	}
@@ -286,7 +286,7 @@ void mixture_prior::upd_normal(dqrng::xoshiro256plus& lrng, const vec& pv)
 	
 	// variances
 	for(int i=0; i<n; i++) popvar[pop[i]] += SQR(pv[i] - popmean[pop[i]]);
-	popvar /= conv_to<vec>::from(popn);
+	popvar /= conv_to<vec>::from(popn-1);
 	
 	for(int j=0; j<2; j++) if(popn[j] > 1)
 	{
@@ -296,10 +296,7 @@ void mixture_prior::upd_normal(dqrng::xoshiro256plus& lrng, const vec& pv)
 		sigma[j] = std::sqrt(1/rgamma(lrng, shape, 1/rate));	
 	}
 	
-	p1 = rgamma(lrng, popn[0] + 2.0, 1.0);
-	p2 = rgamma(lrng, popn[1] + 2.0, 1.0);
-	
-    p = p1/(p1+p2);
+    p = rbeta(lrng, popn[0] + 2.0, popn[1] + 2.0);
 }
 
 
@@ -323,7 +320,7 @@ void mixture_prior::upd_jeffreys(dqrng::xoshiro256plus& lrng, const vec& pv)
 		popn[pop[i]]++;
 		popmean[pop[i]] += pv[i];
 	}
-	popmean /= conv_to<vec>::from(popn);
+	popmean /= conv_to<vec>::from(popn-1);
 	
 	// means
 	for(int j=0; j<2; j++)
