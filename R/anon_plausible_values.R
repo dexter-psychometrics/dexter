@@ -385,27 +385,5 @@ pv = function(x, design, b, a, nPV, from = NULL, by = NULL, prior.dist = c("norm
 }
 
 
-# borrowed the following from mvtnorm source for the time being
-# so we don't have to import a whole package
-# will make a cpp implementation for next version so this can be removed
-rmvnorm = function(n,mean,sigma)
-{
-  ev = eigen(sigma, symmetric = TRUE)
-  R = t(ev$vectors %*% (t(ev$vectors) * sqrt(pmax(ev$values, 0))))
-  retval = matrix(rnorm(n * ncol(sigma)), nrow = n, byrow = TRUE) %*% R
-  retval = sweep(retval, 2, mean, "+")
-  colnames(retval) = names(mean)
-  retval
-}
 
 
-update_MVNprior = function(pvs,Sigma)
-{
-  m_pv = colMeans(pvs)
-  nP = nrow(pvs)
-  mu = rmvnorm(1, mean=m_pv,sigma=Sigma/nP)
-  
-  S=(t(pvs)-m_pv)%*%t(t(pvs)-m_pv)
-  Sigma = solve(rWishart(1,nP-1,solve(S))[,,1]) 
-  return(list(mu = mu, Sigma = Sigma))
-}

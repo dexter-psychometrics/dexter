@@ -695,35 +695,6 @@ blockMatrixDiagonal<-function(...){
   finalMatrix
 }
 
-#
-# mean and variance of Y|x if x,y is multivariate normal
-#
-# with mean mu and variance-covariance matrix sigma
-# @param m vector of means
-# @param sigma covariance matrix
-# @param y.ind indices dependent variable(s)
-# @param x.ind indices conditioning variables. If null its just all others
-# @param x.value value of conditioning variables
-# 
-condMoments = function(mu, sigma, y.ind, x.ind=NULL, x.value )
-{
-  if (is.null(x.ind)) x.ind = setdiff(1:length(mu), y.ind)
-  B = sigma[y.ind, y.ind]
-  C = sigma[y.ind, x.ind, drop = FALSE]
-  D = sigma[x.ind, x.ind]
-  CDinv = C %*% solve(D)
-  if (is.vector(x.value))
-  {
-    cMu = c(mu[y.ind] + CDinv %*% (x.value - mu[x.ind]))
-  }else
-  {
-    nP = nrow(x.value)
-    cMu = rep(0,nP)
-    for (i in 1:nP) cMu[i] = mu[y.ind] + CDinv %*% (x.value[i,] - mu[x.ind])
-  }
-  cVar = B - CDinv %*% t(C)
-  return(list(mu=cMu, sigma=cVar))
-}
 
 
 # log(sum(exp(x)))

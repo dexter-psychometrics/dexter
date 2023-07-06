@@ -2,8 +2,12 @@
 
 ## breaking change
 
-* the interface for the plausible_values and plausible_scores functions have changed in case
-of Bayesianly estimated item parameters
+* A minor change in the interface for the plausible_values and plausible_scores functions, the slightly different argument parms_draw replaces use_draw.
+
+
+## other changes
+
+* internal changes in the plausible values function will cause slight increases in confidence intervals which we think are realistic. On the other hand, the results should be more stable with different seeds/between different function calls
 
 
 ## other changes
