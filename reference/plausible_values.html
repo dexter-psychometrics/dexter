@@ -78,7 +78,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Draw plausible values</h1>
-    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/R/plausible_values.R" class="external-link"><code>R/plausible_values.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/R/pv2.R" class="external-link"><code>R/pv2.R</code></a></small>
     <div class="hidden name"><code>plausible_values.Rd</code></div>
     </div>
 
@@ -132,7 +132,8 @@ of the item draws. Alternatively, it can be an integer specifying a specific dra
 
 
 <dt>prior_dist</dt>
-<dd><p>use a normal prior or a mixture of two normals</p></dd>
+<dd><p>use a normal prior for the plausible values or a mixture of two normals. 
+A mixture is only possible when there are no covariates.</p></dd>
 
 
 <dt>merge_within_persons</dt>
@@ -144,13 +145,16 @@ whether plausible values are generated per person (TRUE) or per booklet (FALSE)<
     <h2>Value</h2>
     
 
-<p>A data.frame with columns booklet_id, person_id, booklet_score and nPV plausible values
+<p>A data.frame with columns booklet_id, person_id, booklet_score, any covariate columns, and nPV plausible values
 named PV1...PVn.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>When The item parameters are estimated using <code>fit_enorm(..., method='Bayes')</code> and parms_draw = 'sample', the uncertainty 
+    <p>When the item parameters are estimated using <code>fit_enorm(..., method='Bayes')</code> and parms_draw = 'sample', the uncertainty 
 of the item parameters estimates is taken into account when drawing multiple plausible values.</p>
+<p>In there are covariates, the prior distribution is a hierarchical normal with equal variances across groups. When there is only
+one group this becomes a regular normal distribution. When there are no covariates and prior_dist = "mixture", the prior is a mixture
+distribution of two normal distributions which gives a little more flexibility than a normal prior.</p>
     </div>
     <div id="references">
     <h2>References</h2>
