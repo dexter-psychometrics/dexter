@@ -60,7 +60,7 @@
 #'    
 #' close_project(db)    
 #' 
-plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL, 
+plausible_values_old = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL, 
                             nPV=1, 
                             parms_draw = c('sample','average'), 
                             prior_dist = c("normal", "mixture"),
@@ -72,7 +72,7 @@ plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL
   check_dataSrc(dataSrc)
   check_num(nPV, .length=1, .min=1)
   
-  plausible_values_(dataSrc, parms, qtpredicate=qtpredicate, covariates=covariates, nPV=nPV, 
+  plausible_values_old_(dataSrc, parms, qtpredicate=qtpredicate, covariates=covariates, nPV=nPV, 
                     parms_draw = parms_draw, env=env,prior_dist = prior_dist ,
                     merge_within_persons=merge_within_persons) %>%
     mutate_if(is.factor, as.character) %>%
@@ -84,7 +84,7 @@ plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL
 # would, in general, the proper way to deal with the pathological case be to add a dummy covariate
 # based on characteristics of scoretab? (per booklet and per user covariate of course) 
 
-plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=NULL, nPV=1, parms_draw = c('sample','average'), 
+plausible_values_old_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=NULL, nPV=1, parms_draw = c('sample','average'), 
                              env=NULL, prior_dist = c("normal", "mixture"),
                              merge_within_persons=merge_within_persons)
 {

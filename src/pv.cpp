@@ -13,7 +13,7 @@ using Rcpp::Named;
 #define SEED std::round(R::runif(0,1) * 2147483647)
 
 // [[Rcpp::export]]
-int ncores()
+int omp_ncores()
 {
 	return omp_get_max_threads();
 }
@@ -35,7 +35,7 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 		     const arma::ivec& const_scoretab, const arma::ivec& scoretab_bk, const arma::ivec& scoretab_pop, 
 			 const arma::ivec& scoretab_nscores, const arma::ivec& scoretab_np,
 			 const arma::mat& mu_start, const arma::vec& sigma_start, const int npv, 
-			 const arma::ivec progress_init, const int warmup=10, const int step=1)
+			 const arma::ivec progress_init, const int max_cores, const int warmup=10, const int step=1)
 {
 	const int ntab = scoretab_bk.n_elem;
 	const int nchains = mu_start.n_cols;
@@ -61,11 +61,11 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 	if(bmat.n_cols > 1)
 	{
 		const int chain_iter = step * (npv/nchains)  + warmup;
-		bstep = bmat.n_cols/chain_iter;	
+		bstep = std::max(1u, bmat.n_cols/chain_iter);
 	}
 	
 
-#pragma omp parallel
+#pragma omp parallel num_threads(max_cores)
 	{	
 		const int thread = omp_get_thread_num();
 		
@@ -174,7 +174,8 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 				
 				prior_log.slice(chain).col(iter) = priors.as_vec();
 				priors.update(lrng, theta.col(pvcol), scoretab_pop, scoretab_np, scoretab_cnp);
-				bcol += bstep;							
+				bcol += bstep;
+				if(bcol >= bmat.n_cols) bcol = chain;
 				if(iter >= warmup && (iter - warmup) % step == 0) pvcol++;		
 				pb.tick(thread == 0);	
 			}
@@ -196,7 +197,7 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 		     const arma::ivec& gscoretab, const arma::ivec& gscoretab_bk, 
 			 const arma::ivec& gscoretab_nscores, const arma::ivec& gscoretab_np,
 			 const arma::mat& mu_start, const arma::mat& sigma_start, const arma::vec& p_start, const int npv, 
-			 const arma::ivec progress_init,
+			 const arma::ivec progress_init, const int max_cores,
 			 const int warmup=10, const int step=1)
 {
 	const int ntab = gscoretab_bk.n_elem;
@@ -217,12 +218,12 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 	if(bmat.n_cols > 1)
 	{
 		const int chain_iter = step * (npv/nchains)  + warmup;
-		bstep = bmat.n_cols/chain_iter;	
+		bstep = std::max(1u, bmat.n_cols/chain_iter);	
 	}
 	
 	ivec gscoretab_cnscores = cum_iter_ivec(gscoretab_nscores);
 	
-#pragma omp parallel
+#pragma omp parallel num_threads(max_cores)
 	{	
 		const int thread = omp_get_thread_num();
 		
@@ -346,6 +347,7 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 				prior_log.slice(chain).col(iter) = priors.as_vec();
 				priors.upd_normal(lrng, theta.col(pvcol));
 				bcol += bstep;
+				if(bcol >= bmat.n_cols) bcol = chain;
 				if(iter >= warmup && (iter - warmup) % step == 0) pvcol++;		
 				pb.tick(thread == 0);	
 			}
@@ -391,5 +393,76 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 	}
 	
 	return Rcpp::List::create(Named("theta") = theta, Named("prior_log") = prior_log);
+}
+
+
+
+
+
+
+// [[Rcpp::export]]
+void PV_sve(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first, const arma::ivec& bk_last, 					
+			const arma::ivec& bcni,
+			const arma::ivec& booklet_id, const arma::ivec& booklet_score, const arma::vec& mu, const double sigma,
+			arma::mat& pv_mat, const int pv_col_indx=0, const int niter=1)
+{
+	const int np = pv_mat.n_rows;
+	const int maxA = max(a);
+	
+	
+	dqrng::xoshiro256plus rng(SEED);
+	dqrng::uniform_distribution prl_runif(0, 1);
+	dqrng::normal_distribution prl_rnorm(0, 1);
+	
+	vec pv(pv_mat.colptr(pv_col_indx),np, false, true);
+	
+	
+#pragma omp parallel	
+	{
+		const int thread = omp_get_thread_num();
+		dqrng::xoshiro256plus lrng(rng);      		
+		lrng.long_jump(thread + 1);
+		
+		double theta, u, acc;
+		
+		int x, bk, k;
+		
+		vec lookup(maxA+1);
+		vec p(maxA+1, fill::zeros); 
+		lookup[0] = 1.0;
+	
+#pragma omp for		
+		for(int prs=0; prs<np; prs++)
+		{
+			bk = booklet_id[prs];
+			for(int iter=0; iter<niter; iter++)
+			{
+				theta = prl_rnorm(lrng) * sigma + mu[prs];
+				for(int j=1;j<=maxA;j++) 
+					lookup[j] = std::exp(j*theta);
+				
+				x=0;
+				for(int i=bcni[bk]; i<bcni[bk+1]; i++)
+				{
+					p[0] = b[bk_first[i]]; 
+					k=1;
+					for (int j=bk_first[i]+1;j<=bk_last[i];j++) 
+					{
+						p[k] = p[k-1] + b[j]*lookup[a[j]]; 
+						k++;
+					}
+					u = p[k-1] * prl_runif(lrng);
+					k = 0;
+					while (u > p[k])
+						k++;
+					x += a[bk_first[i]+k];
+				}
+				
+				acc = std::exp((theta-pv[prs])*(booklet_score[prs]-x));
+				if(prl_runif(lrng)<acc)
+					pv[prs] = theta;
+			}
+		}
+	}
 }
 

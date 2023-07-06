@@ -12,6 +12,27 @@
   invisible()
 }
 
+get_ncores = function(desired=256L, maintain_free=0L)
+{
+  # relevant discussion: https://github.com/Rdatatable/data.table/issues/5658
+  
+  if(Sys.getenv("_R_CHECK_LIMIT_CORES_") != "" || 
+     Sys.getenv("_R_CHECK_EXAMPLE_TIMING_CPU_TO_ELAPSED_THRESHOLD_") != "")
+  {
+    # we are on cran
+    min(as.integer(desired), 2L)
+  } else
+  {
+    available = min(c(omp_ncores(), 
+                      as.integer(Sys.getenv("OMP_THREAD_LIMIT")),
+                      getOption("Ncpus",NA_integer_)),
+                    na.rm=TRUE)
+    
+    min(desired, max(1L, as.integer(available - maintain_free)))
+  }
+}
+
+
 
 explicit_NA = function(x, replace_NA_with = c('<NA>','.NA.','<<NA>>','__NA__'))
 {

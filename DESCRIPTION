@@ -15,7 +15,7 @@ BugReports: https://github.com/dexter-psychometrics/dexter/issues
 Encoding: UTF-8
 LazyData: yes
 Depends:
-    R (>= 3.4)
+    R (>= 3.6)
 Imports:
     RSQLite (>= 2.2.7),
     DBI (>= 1.0.0),
