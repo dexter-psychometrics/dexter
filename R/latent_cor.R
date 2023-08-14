@@ -134,6 +134,8 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   
   store = matrix(0, length(which.keep), length(as.vector(prior$Sigma)))
   tel = 1
+  
+  max_cores = get_ncores(desired = 256, maintain_free = 1L)
   for (i in 1:nIter)
   {
     for (d in 1:nd)
@@ -143,6 +145,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
       PV_sve(models[[d]]$b, models[[d]]$a, models[[d]]$design$first, models[[d]]$design$last, 					
              models[[d]]$bcni,
              respData[[d]]$x$booklet_id, respData[[d]]$x$booklet_score, cons$mu, sqrt(cons$sigma),
+             max_cores,
              pv,d-1L, 10L)
     }
     

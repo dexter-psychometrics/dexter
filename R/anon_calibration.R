@@ -485,7 +485,7 @@ calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fix
 # TO DO: At this moment b and lambda are not consistent. b and delta are. We must recalculate the 
 # lambda' s using the renormalized b to solve this.
 calibrate_Bayes = function(scoretab, design, sufI, a, first, last,  nIter, fixed_b=NULL, 
-                           from = Gibbs.settings$from.cal, step = Gibbs.settings$step.cal,
+                           from = 20L, step = 2L,
                            start_b=NULL)
 {
   # decide on starting values

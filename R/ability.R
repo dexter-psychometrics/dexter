@@ -20,7 +20,6 @@
 #' parameters that will be used for generating abilities. If parms_draw='average', the posterior mean is used. 
 #' @param mu Mean of the normal prior
 #' @param sigma Standard deviation of the normal prior
-#' @param standard_errors If true standard-errors are produced
 #' @param merge_within_persons for persons who were administered multiple booklets, 
 #' whether to provide just one ability value (TRUE) or one per booklet(FALSE)
 #' 
@@ -59,7 +58,7 @@
 #' Psychometrika, 54(3), 427-450. 
 #' 
 ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), prior=c("normal", "Jeffreys"), 
-                   parms_draw='average', mu=0, sigma=4, standard_errors=FALSE, merge_within_persons=FALSE)
+                   parms_draw='average', mu=0, sigma=4, merge_within_persons=FALSE)
 {
   check_dataSrc(dataSrc)
 
@@ -82,7 +81,7 @@ ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), 
   
 
   abl = ability_tables(parms=parms, design = respData$design, method = method, prior=prior, parms_draw = parms_draw, 
-                       mu=mu, sigma=sigma, standard_errors=standard_errors)
+                       mu=mu, sigma=sigma)
   
   abl$booklet_id = ffactor(abl$booklet_id, levels = levels(respData$design$booklet_id))
   
@@ -97,8 +96,9 @@ ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), 
 
 #' @rdname ability
 ability_tables = function(parms, design = NULL, method = c("MLE","EAP","WLE"), prior=c("normal", "Jeffreys"), 
-                          parms_draw = 'average', mu=0, sigma=4, standard_errors = TRUE)
+                          parms_draw = 'average', mu=0, sigma=4)
 {
+  standard_errors = TRUE
   method = match.arg(method)
   prior = match.arg(prior) 
   if(is.numeric(parms_draw)) check_num(parms_draw,.length=1)

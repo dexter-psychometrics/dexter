@@ -312,7 +312,8 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
       
       lvls = bmap %>%
         group_by(.data$booklet_id) %>%
-        summarize(lev = paste0('(',paste0(.data$old_booklet_id, collapse=', '),')')) %>%
+        summarise(lev = paste0('(',paste0(.data$old_booklet_id, collapse=', '),')')) %>%
+        ungroup() %>%
         arrange(.data$booklet_id) %>%
         pull('lev')
       

@@ -475,14 +475,16 @@ Rcpp::List calibrate_Bayes_C(const arma::ivec& a, const arma::ivec& first, const
 	mat bx(ndraws, b.n_elem);
 	
 	//Gibbs
-	int row_index=0;
+	int k,row_index=0;
+	long double sm;
+	
 	for (int iter=0; iter<nIter; iter++)
 	{
 		for (int k=0; k<nB; k++)
 		{
 			elsym_helper(b,a, bfirst.memptr() + cnib[k], blast.memptr() + cnib[k], -1, nib[k], bmax[k], g);
 			
-			long double sm = 0;
+			sm = 0;
 			for (int s=0; s<=bmax[k];s++)
 			{
 			  if (g[s]>0){
@@ -509,7 +511,7 @@ Rcpp::List calibrate_Bayes_C(const arma::ivec& a, const arma::ivec& first, const
 			y.zeros();
 			for (int ib_indx=cnbi[i]; ib_indx<cnbi[i+1]; ib_indx++)
 			{
-				int k = ib[ib_indx];
+				k = ib[ib_indx];
 				elsym_helper(b, a, bfirst.memptr() + cnib[k], blast.memptr() + cnib[k], bi[ib_indx], nib[k], bmax[k], g);
 					
 				for (int s=0; s<=bmax[k]-a[last[i]]; s++)

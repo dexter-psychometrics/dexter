@@ -1,13 +1,14 @@
 # dexter 1.3.0
 
-## breaking change
+## breaking changes
 
 * A minor change in the interface for the plausible_values and plausible_scores functions, the slightly different argument parms_draw replaces use_draw.
 
+* argument `standard_errors` in functions `ability` and `ability_tables` has been removed. Standard errors are now always returned.
 
 ## other changes
 
-* internal changes in the plausible values function will cause slight increases in confidence intervals which we think are realistic. On the other hand, the results should be more stable with different seeds/between different function calls
+* internal changes in the plausible values function will cause a slight increase in confidence intervals of ensuing population estimates. We think this is more realistic. On the other hand, population estimates based on plausible values are more stable with different seeds or consecutive calls of `plausible_values`.
 
 
 ## other changes

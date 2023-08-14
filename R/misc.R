@@ -51,34 +51,6 @@ explicit_NA = function(x, replace_NA_with = c('<NA>','.NA.','<<NA>>','__NA__'))
   
 }
 
-
-## Burnin and thinning for different purposes:
-# cal: Bayesian calibration
-# pv: plausible values
-# ps: plausible scores
-Gibbs.settings = list(from.cal = 20L, step.cal = 2L, start_b='cml',
-                      from.pv = 100L, step.pv = 5L,
-                      from.pv.cml = 11L, step.pv.cml = 1L,
-                      from.pv.bayes = 20L, step.pv.bayes = 5L,
-                      from.ps = 1L, step.ps = 1L)
-
-
-
-which_gibbs = function(n_samples, n_gibbs)
-{
-  step = n_gibbs %/% n_samples
-  from = (n_gibbs %% n_samples) + 1L
-  
-  which = 
-    if(step>0)
-      seq(from, n_gibbs, step)
-    else
-      1:n_samples
-  
-  list(step=step, from=from, which=which, enough = step>0)
-}
-
-
 df_format = function(df)
 {
   if(getOption('dexter.use_tibble', FALSE))
@@ -571,20 +543,6 @@ hpdens = function(x, conf=0.95)
 }
 
 
-# For a discrete vector x, this function gives 
-# Frequencies P(x operator i) for i in min_max[1]:min_max[2]
-# where operator can be ==, <, <=, etc.
-# is min_max=NULL the range is min(x):max(x)
-my_freq = function(x, min_max = min(x):max(x), operator = c("==", "<", "<=", ">", ">=","!="))
-{
-  if(!is.function(operator))
-    operator = get(match.arg(operator))
-  
-  out = sapply(min_max, function(i) {sum(operator(x, i))} )/length(x)
-  names(out) = min_max
-  out
-}
-
 geo_mean = function(x)
 {
    return(exp(mean(log(x))))
@@ -602,7 +560,7 @@ r2gm = function(x, J)
 
 ### Weights based on a rank-one approximation to the
 # Interaction model
-c2weights<-function(cIM)
+c2weights = function(cIM)
 {
   hh=kronecker(t(cIM),cIM,'+')
   gg=eigen(hh)
@@ -681,16 +639,16 @@ conf_env = function(mat, level = 0.95)
 ## Regular Block-Diagnal Matrix from List of matrices
 # Courtesy of C.Ladroue
 blockMatrixDiagonal<-function(...){  
-  matrixList<-list(...)
-  if(is.list(matrixList[[1]])) matrixList<-matrixList[[1]]
+  matrixList =list(...)
+  if(is.list(matrixList[[1]])) matrixList = matrixList[[1]]
   
-  dimensions<-sapply(matrixList,FUN=function(x) dim(x)[1])
-  finalDimension<-sum(dimensions)
-  finalMatrix<-matrix(0,nrow=finalDimension,ncol=finalDimension)
-  index<-1
+  dimensions = sapply(matrixList,FUN=function(x) dim(x)[1])
+  finalDimension = sum(dimensions)
+  finalMatrix = matrix(0,nrow=finalDimension,ncol=finalDimension)
+  index = 1
   for(k in 1:length(dimensions)){
-    finalMatrix[index:(index+dimensions[k]-1),index:(index+dimensions[k]-1)]<-matrixList[[k]]
-    index<-index+dimensions[k]
+    finalMatrix[index:(index+dimensions[k]-1),index:(index+dimensions[k]-1)] = matrixList[[k]]
+    index = index+dimensions[k]
   }
   finalMatrix
 }

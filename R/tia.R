@@ -119,16 +119,16 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
   
   if(distractor)
   {
-    d = respData$x |>
-      mutate(bs=.data$booklet_score-.data$item_score) |>
-      group_by(.data$booklet_id, .data$item_id, .data$response) |>
-      summarise(item_score=first(.data$item_score), n=n(), rbsum=sum(.data$bs), rb2sum=sum(.data$bs^2), .groups='drop_last') |>
+    d = respData$x %>%
+      mutate(bs=.data$booklet_score-.data$item_score) %>%
+      group_by(.data$booklet_id, .data$item_id, .data$response) %>%
+      summarise(item_score=first(.data$item_score), n=n(), rbsum=sum(.data$bs), rb2sum=sum(.data$bs^2), .groups='drop_last') %>%
       mutate(N = sum(.data$n), 
              bmean = sum(.data$rbsum)/.data$N, 
              b2mean = sum(.data$rb2sum)/.data$N,
              rvalue = .data$n/.data$N,
              rar = (.data$rbsum/.data$N - .data$rvalue*.data$bmean)/
-                   sqrt(.data$rvalue*(1-.data$rvalue)*(.data$b2mean - .data$bmean^2)) ) |>
+                   sqrt(.data$rvalue*(1-.data$rvalue)*(.data$b2mean - .data$bmean^2)) ) %>%
       ungroup() 
     
     # type==compared makes little sense to me for distractors, so treated same as raw

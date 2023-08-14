@@ -177,8 +177,8 @@ pv_chain_mix <- function(bmat, a, A, first, last, bk_cnit, bk_max_a, gscoretab, 
     .Call(`_dexter_pv_chain_mix`, bmat, a, A, first, last, bk_cnit, bk_max_a, gscoretab, gscoretab_bk, gscoretab_nscores, gscoretab_np, mu_start, sigma_start, p_start, npv, progress_init, max_cores, warmup, step)
 }
 
-PV_sve <- function(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, pv_mat, pv_col_indx = 0L, niter = 1L) {
-    invisible(.Call(`_dexter_PV_sve`, b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, pv_mat, pv_col_indx, niter))
+PV_sve <- function(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, max_cores, pv_mat, pv_col_indx = 0L, niter = 1L) {
+    invisible(.Call(`_dexter_PV_sve`, b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, max_cores, pv_mat, pv_col_indx, niter))
 }
 
 PVrecycle <- function(b, a, first, last, mu, sigma, scoretb, A, alpha = -1.0) {

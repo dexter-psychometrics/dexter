@@ -231,7 +231,7 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
           cat('\nThe following responses were found in the data but they are not defined in the .scr file or coded as missing responses.')
           cat('Possible causes are that not all missing characters are correctly specified, your screen and dat files do not match ')
           cat('or responses_start is incorrect.\n')
-          unknown_responses = dbGetQuery(db, 'SELECT item_id, response, COUNT(*) AS tally FROM dxresponses GROUP BY item_id, response;') |>
+          unknown_responses = dbGetQuery(db, 'SELECT item_id, response, COUNT(*) AS tally FROM dxresponses GROUP BY item_id, response;') %>%
             semi_join(unknown_responses, by=c('item_id','response'))
                   
           print(unknown_responses)

@@ -174,23 +174,16 @@ void hnorm_prior::update(dqrng::xoshiro256plus& lrng, const vec& pv, const ivec&
 				sigma_hat2 += SQR(pv[p] - theta[pop]);
 			}
 		}
-		sigma_hat2 /= N-1; // N-1, ff boek checken
+		sigma_hat2 /= N;
 		ybar /= conv_to<vec>::from(n);
 		
-		// The sampling
-		
+		// The sampling		
 		if(npop<5)
 		{
-			// per http://www.stat.columbia.edu/~gelman/research/published/taumain.pdf
-			// the invchisq prior for tau is expected to work well for 5 or more groups 
-			// but (as personally observed) has fat tails for less than 5 groups leading 
-			// to extreme samples, and is actually improper for two groups.
-			// For this case we simply draw  tau2 ~invgamma(1,1)
 			tau2 = 1/rgamma(lrng,1.0,1.0);
 		}
 		else
 		{		
-			// see Section 11.6 of Gelman, et al. (2014) Bayesian Data analysis 3. 
 			tau_hat2 = accu(square(theta-mu))/(J-1);
 			tau2 = rinvchisq(lrng, J-1, tau_hat2);
 		} 

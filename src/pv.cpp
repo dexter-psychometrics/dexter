@@ -403,7 +403,8 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 // [[Rcpp::export]]
 void PV_sve(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first, const arma::ivec& bk_last, 					
 			const arma::ivec& bcni,
-			const arma::ivec& booklet_id, const arma::ivec& booklet_score, const arma::vec& mu, const double sigma,
+			const arma::ivec& booklet_id, const arma::ivec& booklet_score, const arma::vec& mu, const double sigma, 
+			const int max_cores,
 			arma::mat& pv_mat, const int pv_col_indx=0, const int niter=1)
 {
 	const int np = pv_mat.n_rows;
@@ -417,7 +418,7 @@ void PV_sve(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first,
 	vec pv(pv_mat.colptr(pv_col_indx),np, false, true);
 	
 	
-#pragma omp parallel	
+#pragma omp parallel num_threads(max_cores)	
 	{
 		const int thread = omp_get_thread_num();
 		dqrng::xoshiro256plus lrng(rng);      		
