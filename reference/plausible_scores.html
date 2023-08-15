@@ -94,8 +94,9 @@
 <span>  items <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  parms_draw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sample"</span>, <span class="st">"average"</span><span class="op">)</span>,</span>
 <span>  covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  keep.observed <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  nPS <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  prior_dist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>, <span class="st">"mixture"</span><span class="op">)</span>,</span>
+<span>  keep.observed <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  merge_within_persons <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -134,13 +135,18 @@ A covariate must be a discrete person covariate (e.g. not a float) that indicate
 If dataSrc is a data.frame, it must contain the covariate.</p></dd>
 
 
+<dt>nPS</dt>
+<dd><p>Number of plausible testscores to generate per person.</p></dd>
+
+
+<dt>prior_dist</dt>
+<dd><p>use a normal prior for the plausible values or a mixture of two normals. 
+A mixture is only possible when there are no covariates.</p></dd>
+
+
 <dt>keep.observed</dt>
 <dd><p>If responses to one or more of the items have been observed,
 the user can choose to keep these observations or generate new ones.</p></dd>
-
-
-<dt>nPS</dt>
-<dd><p>Number of plausible testscores to generate per person.</p></dd>
 
 
 <dt>merge_within_persons</dt>
