@@ -11,8 +11,9 @@ plausible_scores(
   items = NULL,
   parms_draw = c("sample", "average"),
   covariates = NULL,
-  keep.observed = TRUE,
   nPS = 1,
+  prior_dist = c("normal", "mixture"),
+  keep.observed = TRUE,
   merge_within_persons = FALSE
 )
 }
@@ -37,10 +38,13 @@ of the item draws. Alternatively, it can be an integer specifying a specific dra
 A covariate must be a discrete person covariate (e.g. not a float) that indicates nominal categories, e.g. gender or school
 If dataSrc is a data.frame, it must contain the covariate.}
 
+\item{nPS}{Number of plausible testscores to generate per person.}
+
+\item{prior_dist}{use a normal prior for the plausible values or a mixture of two normals. 
+A mixture is only possible when there are no covariates.}
+
 \item{keep.observed}{If responses to one or more of the items have been observed,
 the user can choose to keep these observations or generate new ones.}
-
-\item{nPS}{Number of plausible testscores to generate per person.}
 
 \item{merge_within_persons}{If a person took multiple booklets, this indicates
 whether plausible scores are generated per person (TRUE) or per booklet (FALSE)}

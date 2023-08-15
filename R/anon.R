@@ -30,22 +30,6 @@ IJ_ = function(b, a, first, last, theta, log=FALSE)
 }
 
 
-# simulate test-scores rather then response patterns. Adapted for inclusion zero
-rscore = function(theta,b,a,first,last, cntr=NULL, use_b_matrix=FALSE)
-{
-  if(use_b_matrix)
-  {
-    if(is.null(cntr)) stop('use_b_matrix is true, need a counter')
-    b = b[cntr(),]
-  }
-  first = as.integer(first-1L)
-  last = as.integer(last-1L)
-  a = as.integer(a)
-  
-  sampleNRM2_test(theta, b, a, first, last)[,1,drop=TRUE]
-
-}
-
 rscore_item = function(theta,b,a,first,last)
 {
   first = as.integer(first-1L)
@@ -181,7 +165,7 @@ theta_EAP_GH = function(b, a, first,last, se=TRUE, mu=0, sigma=4)
   nodes = quadpoints$nodes * sigma + mu
   weights = quadpoints$weights
   ps = t(pscore(nodes,b,a,first,last))
-  theta_EAP_GH_c(ps,nodes,weights)
+  lapply(theta_EAP_GH_c(ps,nodes,weights), drop)
 }
 
 

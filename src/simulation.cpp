@@ -5,7 +5,7 @@ using namespace arma;
 
 #define SEED std::round(R::runif(0,1) * 2147483647)
 
-
+// cat 0 must be present
 // [[Rcpp::export]]
 arma::ivec sampleNRM2_test(	const arma::vec& theta, const arma::vec& b, const arma::ivec& a, 
 							const arma::ivec& first, const arma::ivec& last)

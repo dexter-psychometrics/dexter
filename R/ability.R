@@ -118,7 +118,6 @@ ability_tables = function(parms, design = NULL, method = c("MLE","EAP","WLE"), p
   
   estimate = switch(method, 
                     'MLE'  = function(.){ theta_MLE(b, a, .$first, .$last, se=standard_errors) }, 
-                    # 'EAP'  = function(.){ theta_EAP(b, a, .$first, .$last, npv=npv, mu=mu, sigma=sigma, se=standard_errors) }, 
                     'EAP'  = function(.){ theta_EAP_GH(b, a, .$first, .$last, mu=mu, sigma=sigma) },
                     'jEAP' = function(.){ theta_jEAP(b, a, .$first, .$last, se=standard_errors) },
                     'WLE' = function(.){ theta_WLE(b, a, .$first, .$last, se=standard_errors) })

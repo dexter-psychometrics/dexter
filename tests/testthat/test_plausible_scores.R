@@ -45,6 +45,6 @@ test_that('plausible scores works',{
   
   expect_gt(cor(ps$PS_keep_true, ps$booklet_score), cor(ps$PS1, ps$booklet_score)+.05)
   
-  
+  # to do: test more cases
   
 })

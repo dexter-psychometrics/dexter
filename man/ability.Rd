@@ -14,7 +14,6 @@ ability(
   parms_draw = "average",
   mu = 0,
   sigma = 4,
-  standard_errors = FALSE,
   merge_within_persons = FALSE
 )
 
@@ -25,8 +24,7 @@ ability_tables(
   prior = c("normal", "Jeffreys"),
   parms_draw = "average",
   mu = 0,
-  sigma = 4,
-  standard_errors = TRUE
+  sigma = 4
 )
 }
 \arguments{
@@ -48,8 +46,6 @@ parameters that will be used for generating abilities. If parms_draw='average', 
 \item{mu}{Mean of the normal prior}
 
 \item{sigma}{Standard deviation of the normal prior}
-
-\item{standard_errors}{If true standard-errors are produced}
 
 \item{merge_within_persons}{for persons who were administered multiple booklets, 
 whether to provide just one ability value (TRUE) or one per booklet(FALSE)}

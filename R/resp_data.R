@@ -83,7 +83,8 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
       stop("predicates don't work in combination with dx_resp_data object yet")
     
     return(resp_data.from_resp_data(dataSrc, extra_columns=extra_columns, summarised=summarised, 
-                                    protect_x=protect_x,merge_within_persons = merge_within_persons))
+                                    protect_x=protect_x,merge_within_persons = merge_within_persons,
+                                    parms_check=parms_check))
   }
   if(!is.null(extra_columns))
   {
@@ -167,7 +168,7 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
     
     if(!is.null(parms_check))
     {
-      # is inputs$ssIS a superset of the items and scores that were used to generate the parms?
+      # is item_id,item_score a superset of the items and scores in the data?
       
       # parms can be generated in weird unkown ways
       # we know scoring rules is always a superset of responses in the db, so if parms => rules, we're ok
@@ -341,8 +342,15 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
 
 
 resp_data.from_resp_data = function(rsp, extra_columns=NULL, summarised=FALSE, protect_x=TRUE,
-                                    merge_within_persons = merge_within_persons) 
+                                    merge_within_persons = merge_within_persons, parms_check=NULL) 
 {
+  
+  if(!is.null(parms_check))
+  {
+    suppressWarnings({no_par = dplyr::setdiff(rsp$x[,c('item_id','item_score')], parms_check)})
+    if(nrow(no_par) > 0)
+      stop_no_param(no_par)
+  }
   
   if(merge_within_persons && !rsp$merge_within_persons)
   {

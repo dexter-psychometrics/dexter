@@ -74,7 +74,6 @@ export(ability_tables)
 
 #plausible_values.R
 export(plausible_values)
-export(plausible_values_old)
 
 #plausible_scores.R
 export(plausible_scores)

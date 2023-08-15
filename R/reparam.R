@@ -40,8 +40,6 @@ simplify_parms = function(parms, design=NULL,
     parms = coef(parms)
   }
   
-  
-  
   if(inherits(parms,'prms'))
   {
     method = parms$inputs$method

@@ -76,7 +76,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
   
   # Get mean and sd of ability in sample
   pb$new_area(10)
-  pv = plausible_values_(respData, parms)
+  pv = plausible_values_(respData, parms)$pv
   new_mu = mean(pv$PV1)
   new_sigma = sd(pv$PV1)
   
@@ -137,6 +137,8 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
     cbk = integer(length(scores))
     cmu = rep(new_mu,length(scores))
     
+    max_cores = get_ncores(desired = 256, maintain_free = 1L)
+    
     if (parms$inputs$method == "Bayes")
     {
       eq_score = rep(-1L, length(iter_set))
@@ -147,7 +149,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
       {
         eq_score[tel] = min(which(theta_MLE(b[iter,],a, dsg$first, dsg$last)$theta >= ref_theta[tel])) - 1
         #spv = pv_recycle_sorted(b[iter,], a,dsg$first, dsg$last, scores, npv=1, mu=new_mu, sigma=new_sigma)
-        PV_sve(b[iter,],a, first0, last0, bcni,cbk, scores, cmu, new_sigma,spv, niter=50L)
+        PV_sve(b[iter,],a, first0, last0, bcni,cbk, scores, cmu, new_sigma,spv, niter=30L, max_cores=max_cores)
         
         prf = pscore(spv, b[iter,],a,ref_first,ref_last)
         probs[,tel] = apply(prf, 2, function(x) sum(x[ref_range]))
@@ -164,7 +166,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
       
       for (iter in 1:nDraws)
       {
-        PV_sve(b,a, first0, last0, bcni,cbk, scores, cmu, new_sigma,spv, niter=50L)
+        PV_sve(b,a, first0, last0, bcni,cbk, scores, cmu, new_sigma,spv, niter=30L, max_cores=max_cores)
         prf = pscore(spv, b, a, ref_first, ref_last)
         #prf = pscore(spv[,iter], b, a, ref_first, ref_last)
         probs[,iter] = apply(prf, 2, function(x) sum(x[ref_range]))

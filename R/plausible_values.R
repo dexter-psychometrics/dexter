@@ -139,7 +139,7 @@ pv_chain = function(x, design, b, a, nPV,
                           pb$cpp_prog_init(), gibbs_settings$ncores,
                           gibbs_settings$warm_up,  gibbs_settings$step)
     
-    dimnames(res$prior_log) = list(var=c('mu','sigma','tau', sprintf("theta_%i",1:(nrow(res$prior_log)-3))),iter=NULL,chain=NULL)
+    #dimnames(res$prior_log) = list(var=c('mu','sigma','tau', sprintf("theta_%i",1:(nrow(res$prior_log)-3))),iter=NULL,chain=NULL)
   } else
   {
     start_p = runif(gibbs_settings$nchains, .4, .6)
@@ -154,10 +154,10 @@ pv_chain = function(x, design, b, a, nPV,
                        pb$cpp_prog_init(), gibbs_settings$ncores,
                        gibbs_settings$warm_up,  gibbs_settings$step)
     
-    dimnames(res$prior_log) = list(var=c('p','mu_1','mu_2','sigma_1','sigma_2'),iter=NULL,chain=NULL)
+    #dimnames(res$prior_log) = list(var=c('p','mu_1','mu_2','sigma_1','sigma_2'),iter=NULL,chain=NULL)
   }
   # for testing only  
-  assign("prior_log", res$prior_log, envir = .GlobalEnv)
+  #assign("prior_log", res$prior_log, envir = .GlobalEnv)
   
   colnames(res$theta) = sprintf("PV%i",1:ncol(res$theta))
   
@@ -249,7 +249,7 @@ plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL
   
   plausible_values_(dataSrc, parms, qtpredicate=qtpredicate, covariates=covariates, nPV=nPV, 
                      parms_draw = parms_draw, env=env,prior_dist = prior_dist ,
-                     merge_within_persons=merge_within_persons) %>%
+                     merge_within_persons=merge_within_persons)$pv %>%
     mutate_if(is.factor, as.character) %>%
     df_format()
 }
@@ -258,7 +258,7 @@ plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL
 plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=NULL, 
                               nPV=1, parms_draw = c('sample','average'), 
                               env=NULL, prior_dist = c("normal", "mixture"),
-                              merge_within_persons = merge_within_persons)
+                              merge_within_persons = FALSE)
 {
   if(is.null(env)) env = caller_env()
   
@@ -277,13 +277,14 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
                     retrieve_data = is_db(dataSrc))
   on.exit({pb$close()})
   
-  if(is.null(parms)) # to do: test if omitting f works
+  if(is.null(parms)) # to do: test if omitting parms works
   {
     nrm_draws = 1000L
     if(is.numeric(parms_draw)) nrm_draws =  parms_draw
     if(parms_draw == 'sample ') nrm_draws = 2 * pv_gibbs_settings(nPV, parms_sample=TRUE, prior_dist = prior_dist)$min_b_samples
 
-    respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, extra_columns=covariates, env=env)
+    respData = get_resp_data(dataSrc, qtpredicate, summarised=FALSE, extra_columns=covariates, env=env,
+                             merge_within_persons=merge_within_persons)
     pb$new_area(20)
     parms = fit_enorm_(respData, method = 'Bayes', nDraws = nrm_draws) 
     
@@ -305,7 +306,7 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
     respData = get_resp_data(dataSrc, qtpredicate, summarised=TRUE, 
                              extra_columns=covariates,env=env, 
                              parms_check=pcheck,
-                             merge_within_persons=FALSE)
+                             merge_within_persons=merge_within_persons)
   }
   
   parms = simplify_parms(parms, draw=parms_draw)
@@ -343,6 +344,6 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
     y = inner_join(respData$x[,unique(c('booklet_id','person_id',covariates))], y, 
                    by=c('booklet_id','person_id') )
   }
-  
-  y
+
+  list(pv=y,parms=parms)
 }

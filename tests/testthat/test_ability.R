@@ -28,6 +28,7 @@ test_that('verbAgg abilities', {
   db = open_project('../verbAggression.db')
   f = fit_enorm(db)
   
+  
   # check ability mle is inverse of expected_score
   es = expected_score(f)
   expect_lt(
@@ -36,8 +37,8 @@ test_that('verbAgg abilities', {
       mutate(error = abs(booklet_score - es(theta))) %>%
       pull(error) %>%
       mean(),
-    0.001,
-    label = "ability_tables mle on average estimated to within .001 of test_score")
+    0.00001,
+    label = "ability_tables mle on average estimated to within .00001 of test_score")
   
   
   nscores = get_rules(db) %>%
@@ -47,24 +48,22 @@ test_that('verbAgg abilities', {
     pull(m) %>%
     sum() + 1
   
-  for(method in eval(formals(ability_tables)$method))
-  {
-    for(prior in eval(formals(ability_tables)$prior))
-      {
-      expect_no_error({abl = ability_tables(f, method = method)}, message = paste('fit_enorm verbAgg -', method))
-      expect_true(nrow(abl) == nscores)
-
-      abl = abl %>%  
-        filter(is.finite(.data$theta)) %>%
-        arrange(booklet_score) %>%
-        mutate(p = lag(theta, default = -Inf)) %>%
-        filter(.data$theta < .data$p)
+  test_cases = list(MLE = c('MLE','normal'), WLE = c('WLE','normal'), EAP_normal = c('EAP','normal'), EAP_J = c('EAP','Jeffreys'))
   
-      expect_true(nrow(abl) == 0, info = paste('abilities not increasing verbAgg -',method))  
-    }
-  }
+  res = lapply(test_cases, function(s){ ability_tables(f, method = s[1], prior = s[2])})
+  
+  expect_false(any(sapply(lapply(res,'[[','theta'), is.unsorted)), info='abilities not increasing verbAgg')
+  
+  theta = do.call(cbind,lapply(res,'[[','theta'))
+  expect_true(sum(!apply(theta,1,is.finite)) == 2 && !any(is.finite(theta[c(1,nscores),1])), info='inifinity only in MLE')
+  theta[!is.finite(theta)] = NA
+  r = cor(theta,use='pairwise')
+  expect_true(all(r >= .99), info='high correlation ability estimates one booklet')
+  expect_true(all(r[upper.tri(r)] < 1), info='different abnility methods are different')
+  
 
   dbDisconnect(db)
+  
 })
 
 

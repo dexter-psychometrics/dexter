@@ -726,66 +726,6 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// PVrecycle
-arma::vec PVrecycle(const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const arma::vec& mu, const arma::vec& sigma, arma::ivec& scoretb, const arma::ivec& A, const double alpha);
-RcppExport SEXP _dexter_PVrecycle(SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP scoretbSEXP, SEXP ASEXP, SEXP alphaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type sigma(sigmaSEXP);
-    Rcpp::traits::input_parameter< arma::ivec& >::type scoretb(scoretbSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type A(ASEXP);
-    Rcpp::traits::input_parameter< const double >::type alpha(alphaSEXP);
-    rcpp_result_gen = Rcpp::wrap(PVrecycle(b, a, first, last, mu, sigma, scoretb, A, alpha));
-    return rcpp_result_gen;
-END_RCPP
-}
-// PV_slow
-void PV_slow(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first, const arma::ivec& bk_last, const arma::ivec& bcni, const arma::ivec& booklet_id, const arma::ivec& booklet_score, const arma::vec& mu, const double sigma, arma::mat& pv_mat, const int pv_col_indx);
-RcppExport SEXP _dexter_PV_slow(SEXP bSEXP, SEXP aSEXP, SEXP bk_firstSEXP, SEXP bk_lastSEXP, SEXP bcniSEXP, SEXP booklet_idSEXP, SEXP booklet_scoreSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP pv_matSEXP, SEXP pv_col_indxSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type bk_first(bk_firstSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type bk_last(bk_lastSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type bcni(bcniSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type booklet_id(booklet_idSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type booklet_score(booklet_scoreSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< const double >::type sigma(sigmaSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type pv_mat(pv_matSEXP);
-    Rcpp::traits::input_parameter< const int >::type pv_col_indx(pv_col_indxSEXP);
-    PV_slow(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, pv_mat, pv_col_indx);
-    return R_NilValue;
-END_RCPP
-}
-// PV_sve_old
-void PV_sve_old(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first, const arma::ivec& bk_last, const arma::ivec& bcni, const arma::ivec& booklet_id, const arma::ivec& booklet_score, const arma::vec& mu, const double sigma, arma::mat& pv_mat, const int pv_col_indx, const int niter);
-RcppExport SEXP _dexter_PV_sve_old(SEXP bSEXP, SEXP aSEXP, SEXP bk_firstSEXP, SEXP bk_lastSEXP, SEXP bcniSEXP, SEXP booklet_idSEXP, SEXP booklet_scoreSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP pv_matSEXP, SEXP pv_col_indxSEXP, SEXP niterSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type bk_first(bk_firstSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type bk_last(bk_lastSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type bcni(bcniSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type booklet_id(booklet_idSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type booklet_score(booklet_scoreSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< const double >::type sigma(sigmaSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type pv_mat(pv_matSEXP);
-    Rcpp::traits::input_parameter< const int >::type pv_col_indx(pv_col_indxSEXP);
-    Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
-    PV_sve_old(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, pv_mat, pv_col_indx, niter);
-    return R_NilValue;
-END_RCPP
-}
 // sampleNRM2_test
 arma::ivec sampleNRM2_test(const arma::vec& theta, const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last);
 RcppExport SEXP _dexter_sampleNRM2_test(SEXP thetaSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP) {
@@ -879,9 +819,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dexter_pv_chain_normal", (DL_FUNC) &_dexter_pv_chain_normal, 19},
     {"_dexter_pv_chain_mix", (DL_FUNC) &_dexter_pv_chain_mix, 19},
     {"_dexter_PV_sve", (DL_FUNC) &_dexter_PV_sve, 13},
-    {"_dexter_PVrecycle", (DL_FUNC) &_dexter_PVrecycle, 9},
-    {"_dexter_PV_slow", (DL_FUNC) &_dexter_PV_slow, 11},
-    {"_dexter_PV_sve_old", (DL_FUNC) &_dexter_PV_sve_old, 12},
     {"_dexter_sampleNRM2_test", (DL_FUNC) &_dexter_sampleNRM2_test, 5},
     {"_dexter_sampleNRM2_item", (DL_FUNC) &_dexter_sampleNRM2_item, 5},
     {"_dexter_sampleIM", (DL_FUNC) &_dexter_sampleIM, 6},

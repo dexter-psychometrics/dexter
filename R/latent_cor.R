@@ -82,7 +82,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   }
   
   abl = mapply(ability, respData, models, SIMPLIFY=FALSE,
-               MoreArgs = list(method="EAP", prior="Jeffreys",standard_errors=FALSE))
+               MoreArgs = list(method="EAP", prior="Jeffreys"))
   
   pb$tick(2*nd)
   

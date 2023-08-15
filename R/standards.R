@@ -1,5 +1,4 @@
 
-
 #' Standard setting
 #'
 #' Set performance standards on one or more test forms using the data driven direct consensus (3DC) method
@@ -87,7 +86,7 @@ standards_3dc = function(parms, design)
       es = expected_score(parms, items=tds$item_id)
       
       select(tds, booklet_id='cluster_id', 'item_id') %>%
-        ability_tables(parms, design = ., standard_errors=FALSE) %>%
+        ability_tables(parms, design = .) %>%
         rename(cluster_id='booklet_id', cluster_score='booklet_score') %>%
         mutate(booklet_score = es(.data$theta)) %>%
         inner_join(distinct(tds, .data$cluster_nbr, .data$cluster_id), by='cluster_id')
