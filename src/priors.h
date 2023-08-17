@@ -5,6 +5,7 @@
 #include <xoshiro.h>
 #include <dqrng_distribution.h>
 
+double rgamma(dqrng::xoshiro256plus& lrng, const double alpha, const double ibeta);
 
 class hnorm_prior
 {

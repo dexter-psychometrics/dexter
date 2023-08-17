@@ -253,7 +253,7 @@ NR_bkl = function(..., use_mean = FALSE)
 }
 
 
-calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fixed_b=NULL, NR=TRUE) 
+calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fixed_b=NULL) 
 {
   pb = get_prog_bar()
   on.exit({pb$close()})
@@ -338,7 +338,7 @@ calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fix
     converged=FALSE
     nr_iter=0
     scale=1 #to~do: ask timo, scale does not do anything at all
-    while (NR && !converged && nr_iter<max_nr_iter)
+    while (!converged && nr_iter<max_nr_iter)
     {
       iter=iter+1
       nr_iter=nr_iter+1
@@ -418,7 +418,7 @@ calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fix
     converged=FALSE
     nr_iter=0
     scale=1
-    while (NR && !converged && nr_iter<max_nr_iter)
+    while (!converged && nr_iter<max_nr_iter)
     {
       iter=iter+1
       nr_iter=nr_iter+1
@@ -485,7 +485,7 @@ calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fix
 # TO DO: At this moment b and lambda are not consistent. b and delta are. We must recalculate the 
 # lambda' s using the renormalized b to solve this.
 calibrate_Bayes = function(scoretab, design, sufI, a, first, last,  nIter, fixed_b=NULL, 
-                           from = 20L, step = 2L,
+                           from = 25L, step = 5L,
                            start_b=NULL)
 {
   # decide on starting values
@@ -539,14 +539,19 @@ calibrate_Bayes = function(scoretab, design, sufI, a, first, last,  nIter, fixed
   if(is.null(fixed_b))
     fixed_b_vec = rep(NA_real_, length(b))
   
-  # end bookkeeping
   
-  out = calibrate_Bayes_C(as.integer(a), as.integer(first-1L), as.integer(last-1L),
-                         ib, bi, nbi, nib, bfirst, blast, bmax, m,
-                         sufI, scoretab$N, b, fixed_b_vec, 
-                         from, step, 
-                         as.integer(nIter), pb$cpp_prog_init(),
-                         prior_eta, prior_rho)
+  nchains = ncores = get_ncores(desired = min(ceiling(nIter/4),256L), maintain_free = 1L)
+  b = matrix(rep(b,nchains), ncol=nchains)
+  
+  #end bookkeeping
+  
+  out = calibrate_Bayes_chains(as.integer(a), as.integer(first-1L), as.integer(last-1L),
+                            ib, bi, nbi, nib, bfirst, blast, bmax, m,
+                            sufI, scoretab$N, b, fixed_b_vec, 
+                            from, step, 
+                            as.integer(nIter), pb$cpp_prog_init(), ncores,
+                            prior_eta, prior_rho)
+
 
   report = toOPLM(a, out$b, first, last, H=NULL,fixed_b=fixed_b)
   

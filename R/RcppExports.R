@@ -129,6 +129,10 @@ calibrate_Bayes_C <- function(a, first, last, ib, bi, nbi, nib, bfirst, blast, b
     .Call(`_dexter_calibrate_Bayes_C`, a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, bkscoretab, b_in, fixed_b, from, step, ndraws, progress_init, prior_eta, prior_rho)
 }
 
+calibrate_Bayes_chains <- function(a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, bkscoretab, b_start, fixed_b, warmup, step, ndraws, progress_init, max_cores, prior_eta = 0.5, prior_rho = 0.5) {
+    .Call(`_dexter_calibrate_Bayes_chains`, a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, bkscoretab, b_start, fixed_b, warmup, step, ndraws, progress_init, max_cores, prior_eta, prior_rho)
+}
+
 meanElSym <- function(b, a, first, last, item1, item2, nI, mS, g) {
     invisible(.Call(`_dexter_meanElSym`, b, a, first, last, item1, item2, nI, mS, g))
 }
@@ -151,18 +155,6 @@ ss_table_enorm_C <- function(a, b, first, last, firstA, lastA, firstB, lastB) {
 
 ss_table_im_C <- function(a, b, c, first, last, firstA, lastA, firstB, lastB) {
     .Call(`_dexter_ss_table_im_C`, a, b, c, first, last, firstA, lastA, firstB, lastB)
-}
-
-test_rgamma <- function(n, alpha, beta) {
-    .Call(`_dexter_test_rgamma`, n, alpha, beta)
-}
-
-test_rinvchisq <- function(n, df, scale) {
-    .Call(`_dexter_test_rinvchisq`, n, df, scale)
-}
-
-test_rbeta <- function(n, alpha, beta) {
-    .Call(`_dexter_test_rbeta`, n, alpha, beta)
 }
 
 omp_ncores <- function() {

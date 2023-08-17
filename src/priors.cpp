@@ -15,6 +15,8 @@ using namespace arma;
 *
 ************************************************************************************************************/
 
+
+// rgamma is equal to R::rgamma(a,b) in cpp and rgamma(a,1/b) in R
 double rgamma(dqrng::xoshiro256plus& lrng, const double alpha, const double ibeta)
 {
 	const double beta = 1/ibeta;
@@ -78,7 +80,7 @@ double rbeta(dqrng::xoshiro256plus& lrng, const double alpha, const double beta)
 }
 
 // for testing
-
+/*
 // [[Rcpp::export]]
 arma::vec test_rgamma(const int n, const double alpha, const double beta)
 {
@@ -91,6 +93,17 @@ arma::vec test_rgamma(const int n, const double alpha, const double beta)
 	return out;
 }
 
+
+// [[Rcpp::export]]
+arma::vec test_R_rgamma(const int n, const double alpha, const double beta)
+{
+	vec out(n);
+	for(int i=0; i<n; i++)
+	{
+		out[i] = R::rgamma(alpha, beta);	
+	}
+	return out;
+}
 
 // [[Rcpp::export]]
 arma::vec test_rinvchisq(const int n, const double df, const double scale)
@@ -115,7 +128,7 @@ arma::vec test_rbeta(const int n, const double alpha, const double beta)
 	}
 	return out;
 }
-
+*/
 
 
 /* *********************************************************************************************************

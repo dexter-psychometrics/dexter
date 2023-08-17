@@ -20,7 +20,7 @@ get_ncores = function(desired=256L, maintain_free=0L)
      Sys.getenv("_R_CHECK_EXAMPLE_TIMING_CPU_TO_ELAPSED_THRESHOLD_") != "")
   {
     # we are on cran
-    min(as.integer(desired), 2L)
+    as.integer(min(desired, 2L))
   } else
   {
     available = min(c(omp_ncores(), 
@@ -28,7 +28,7 @@ get_ncores = function(desired=256L, maintain_free=0L)
                       getOption("Ncpus",NA_integer_)),
                     na.rm=TRUE)
     
-    min(desired, max(1L, as.integer(available - maintain_free)))
+    as.integer(min(desired, max(1L, as.integer(available - maintain_free))))
   }
 }
 

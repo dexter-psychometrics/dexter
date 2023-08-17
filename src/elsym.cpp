@@ -1,9 +1,13 @@
 #include <RcppArmadillo.h>
+#include <xoshiro.h>
+#include <omp.h>
 #include "progress.h"
+#include "priors.h"
+
 
 using namespace arma;
 
-
+#define SEED std::round(R::runif(0,1) * 2147483647)
 
 void ElSym(const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const int item1, const int item2, const int nI, const int mS,  
 			std::vector<long double>& g) 
@@ -524,40 +528,11 @@ Rcpp::List calibrate_Bayes_C(const arma::ivec& a, const arma::ivec& first, const
 		}
 		
 
-		if (free_calibration)
-		{
-		  /*
-		  for(int i=0; i<nI; i++)
-		    for(int j = first[i]+1; j<= last[i]; j++)
-		      b[j] /= std::pow(b[1], ((double)(a[j]))/a[1]);
-
-			double log_ba = 0;
-			for(int i=0; i<nI; i++)
-				log_ba += std::log(b[last[i]])/a[last[i]];
-			double f = std::exp(log_ba/nI);
-	
-			for(int i=0; i<nI; i++)
-				for(int j = first[i]+1; j<= last[i]; j++)
-					b[j] /= f;
-		  
-			// Lambda
-			fpwr[1] = b[1];
-			for(int s=2; s <= max_bscore; s++)
-				fpwr[s] = fpwr[s-1] * b[1];
-			
-			for (int k=0; k<nB; k++)
-			{	
-				bklambda.subvec(cbmax[k], cbmax[k+1]-1) %= fpwr.head(bmax[k]+1);
-				
-				if (bklambda[cbmax[k]] > 0)
-					bklambda.subvec(cbmax[k], cbmax[k+1]-1) /= bklambda[cbmax[k]];
-			}
-		   */
-		}
-		else
+		if (!free_calibration)
 		{
 			b.elem(find_finite(fixed_b)) = fixed_b.elem(find_finite(fixed_b));
 		}
+
 		b.replace(datum::nan, 1); 
 		if(iter >= from && (iter-from) % step == 0)
 		{
@@ -572,187 +547,133 @@ Rcpp::List calibrate_Bayes_C(const arma::ivec& a, const arma::ivec& first, const
 }
 
 
-
-
-
-/* *********************
-
-experimental
-expects first and last to be 0-indexed
-
-Timo's H_IM
-
-enjoy!
-
-*********************** */
-
-// possible scores omitted for the moment
-/*
-template <bool diagonal>
-void H_im_tmpl(const arma::ivec& a, const arma::vec& b, const arma::vec& c, const arma::ivec& first, const arma::ivec& last, const arma::ivec& sufI, const arma::ivec& sufC, const arma::ivec& scoretab,
-			arma::mat& H, arma::vec& Grad, arma::mat& pi_s)
-{
-	const int nI = first.n_elem;
-	const ivec nCat = last-first+1;	
-	const int nscores = scoretab.n_elem;
-	const int ms = nscores-1;
-  
-	const vec logb = log(b);
-	const vec alogc = a % log(c);
-	
-	for (int i=0; i<nI; i++)
-	{
-		Grad[last[i]] = sufC[i];
-		for (int j = first[i]+1; j<=last[i]; j++)
-		{
-		  Grad[j-1] = sufI[j];
-		}
-	}
-
-#pragma omp parallel
-	{
-		std::vector<long double> g(nscores), gi(nscores), gik(nscores);
-		vec eta(b.n_elem);
-#pragma omp for
-		for (int s=0; s<=ms; s++)
-		{
-			eta = exp(logb + s*alogc);
-			ElSym(eta,a,first,last,-1,-1,nI,ms,g);
-
-			for (int i=0; i<nI; i++)
-			{
-				ElSym(eta,a,first,last,i,-1,nI,ms,gi);
-
-				for (int j = first[i]; j<=last[i]; j++)
-				{
-					int idx = s - a[j];
-					if (idx>=0 && idx <= ms-a[j])
-					{
-						pi_s.at(j,s) = exp(log(eta[j]) + log(gi[idx]) - log(g[s]));
-					}
-				}
-			}
-	  
-			for (int i=0; i<nI; i++)
-			{
-				for (int k=0; k<nI; k++)
-				{
-					if (k==i)
-					{
-						double sm_j1 = 0.0, sm_j2 = 0.0;
-						for (int j=first[i]+1; j<=last[i]; j++)
-						{
-							sm_j1 += a[j]*a[j]*pi_s.at(j,s);
-							sm_j2 += a[j]*pi_s.at(j,s);
-							double sm_h = 0;
-							for (int h=first[k]+1; h<=last[k]; h++)
-							{
-								sm_h += a[h]*(pi_s.at(j,s)*pi_s.at(h,s));
-								if (j==h)
-								{
-									H.at(j-1,h-1) +=  scoretab[s]*(pi_s.at(j,s)*(1-pi_s.at(j,s)));
-								}
-								else
-								{
-									H.at(j-1,h-1) -= scoretab[s]*(pi_s.at(j,s)*pi_s.at(h,s));
-								}
-							}
-							H.at(j-1,last[i]) += s * scoretab[s]*(a[j]*pi_s.at(j,s) - sm_h);
-							H.at(last[i],j-1) = H.at(j-1,last[i]);
-						}
-						H.at(last[i],last[i]) += s * s * scoretab[s] * (sm_j1 - sm_j2 * sm_j2);
-					}
-					else if(!diagonal)
-					{
-						ElSym(b,a,first,last,i,k,nI,ms,gik);
-						double sm_jh = 0;
-						int ms_ik = ms - a[last[i]] - a[last[k]];
-						for (int j=first[i]+1; j<=last[i]; j++)
-						{
-							double sm_h = 0;
-							for (int h=first[k]+1; h<=last[k]; h++)
-							{
-								double pi_ijhk = 0;
-								int idx = s - a[j] - a[h];
-								if (idx>=0 && idx <= ms_ik)
-								{
-									if (g[s] != 0) 
-										pi_ijhk = (gik[idx]*eta[j]*eta[h]) / g[s];
-									sm_jh += a[j] * a[h] * (pi_ijhk - pi_s.at(j,s) * pi_s.at(h,s));
-									sm_h += a[h] * (pi_ijhk - pi_s.at(j,s) * pi_s.at(h,s));
-								}
-								// delta_i delta_k
-								H.at(j-1,h-1) -= scoretab[s] * (pi_ijhk - pi_s.at(j,s)*pi_s.at(h,s));
-							}
-							H.at(last[k],j-1) -= s * scoretab[s] * sm_h; // \delta-\sigma
-							H.at(j-1,last[k]) = H.at(last[k],j-1);
-						}
-						H.at(last[i],last[k]) -= s * s * scoretab[s] * sm_jh; // sigma/sigma
-					}
-				}
-			}
-		}
-	}
-
-	// compute gradient sequentially
-	for (int s=0; s<=ms; s++)
-		for (int i=0; i<nI; i++)
-		{
-			double sm_j2 = 0;
-			for (int j = first[i]+1; j<=last[i]; j++)
-			{
-				Grad[j-1] = Grad[j-1] - scoretab[s] * pi_s.at(j,s); 
-				sm_j2 = sm_j2 + a[j]*pi_s.at(j,s);
-			}			
-			Grad[last[i]] = Grad[last[i]] - s * scoretab[s] * sm_j2;
-		}
-	
-	
-    // identification
-	if (!diagonal)
-	{
-		H.col(0).zeros();
-		H.row(0).zeros();
-		Grad[0] = 0;
-		H.at(0,0) = 1;
-	}
-}
-
-
-
-//	Cpp:
-//	mat H(b.n_elem, b.n_elem, fill::zeros);
-//	vec Grad(b.n_elem, fill::zeros);
-//	mat pi_s(b.n_elem, scoretab.n_elem);
-	
-//	R:
-//	H = matrix(0, length(b), length(b))
-//	Grad = double(length(b))
-//	pi_s = matrix(0, length(b), length(scoretab))	
-
-//	for the moment without use of possible scores
-//	c is expected to have length equal to b
-
-
-
-
 // [[Rcpp::export]]
-void H_im(const arma::ivec& a, const arma::vec& b, const arma::vec& c, const arma::ivec& first, const arma::ivec& last, const arma::ivec& sufI, const arma::ivec& sufC, const arma::ivec& scoretab,
-			arma::mat& H, arma::vec& Grad, arma::mat& pi_s,
-			const bool diagonal=false)
-{	
-	if(diagonal)
+Rcpp::List calibrate_Bayes_chains(const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, 
+				 const arma::ivec& ib, const arma::ivec& bi, const arma::ivec& nbi, 
+				 const arma::ivec& nib,
+				 arma::ivec& bfirst, arma::ivec& blast,
+				 const arma::ivec& bmax, const arma::ivec& m,
+				 const arma::ivec& sufI, const arma::ivec& bkscoretab,
+				 const arma::mat& b_start,  const arma::vec& fixed_b, 
+				 const int warmup, const int step, const int ndraws,
+				 const arma::ivec progress_init, const int max_cores,
+				 const double prior_eta=0.5, const double prior_rho=0.5)
+{
+	const int nchains = b_start.n_cols;
+	const bool free_calibration = all(fixed_b != fixed_b); // NA != NA
+	const int max_cat = max(last-first)+1;
+	
+	progress_prl pb(ndraws, progress_init);	
+	dqrng::xoshiro256plus rng(SEED);
+	
+	// cumulatives for bookkeeping
+	const int nit = nbi.n_elem;
+	ivec cnbi(nit+1);
+	cnbi(0) = 0;
+	cnbi.tail(nit) = cumsum(nbi);
+	
+	const int nbk = nib.n_elem;
+	ivec cnib(nbk+1);
+	cnib(0) = 0;
+	cnib.tail(nbk) = cumsum(nib);
+	
+	ivec cbmax(nbk+1);
+	cbmax[0] = 0;	
+	for(int k=0; k<nbk; k++)
+		cbmax[k+1] = cbmax[k] + bmax[k]+1;
+	
+
+	const int max_bscore = max(bmax);
+
+	mat out_b(b_start.n_rows,ndraws), out_bklambda(bkscoretab.n_elem, ndraws);
+	
+#pragma omp parallel num_threads(max_cores)
 	{
-		H_im_tmpl<true>(a, b, c, first, last, sufI, sufC, scoretab, H, Grad, pi_s);
-	} 
-	else
-	{
-		H_im_tmpl<false>(a, b, c, first, last, sufI, sufC, scoretab, H, Grad, pi_s);
-	}
+		const int thread = omp_get_thread_num();
+		// working variables
+		vec y(max_cat, fill::zeros), z(nbk, fill::zeros);
+		vec bklambda(bkscoretab.n_elem, fill::ones);	// to do: fill 0 lijkt beter, onmogelijke scores?
+		
+		std::vector<long double> g(max_bscore+1);
+		vec pi_k(max_bscore+1, fill::zeros);
+	
+		vec b(b_start.n_rows);
+
+		int bk,out_index;
+		long double sm;
+		
+		dqrng::xoshiro256plus lrng(rng);      		
+		lrng.long_jump(thread + 1);	
+		
+#pragma omp for
+		for(int chain=0; chain<nchains; chain++)
+		{
+			out_index = chain*(ndraws/nchains) + std::min(ndraws % nchains, chain);
+			b = b_start.col(chain);
+			const int niter = (ndraws/nchains + (chain < ndraws % nchains)-1)*step + warmup + 1;
+			
+			for (int iter=0; iter<niter; iter++)
+			{
+				if(pb.interrupted()) break;
+				for (int k=0; k<nbk; k++)
+				{
+					elsym_helper(b,a, bfirst.memptr() + cnib[k], blast.memptr() + cnib[k], -1, nib[k], bmax[k], g);
+					
+					sm = 0;
+					for (int s=0; s<=bmax[k];s++)
+					{
+					  if (g[s]>0){
+						pi_k[s] = rgamma(lrng, bkscoretab[cbmax[k]+s]+0.1, 1.0);
+						sm += pi_k[s];
+					  }
+					}
+					
+					for (int s=0; s<=bmax[k];s++)
+					{
+					  if(g[s]>0)
+					  {
+						pi_k[s] = pi_k[s]/sm;
+						bklambda[cbmax[k]+s] = (pi_k[s]*m[k])/g[s];
+					  }
+					}
+					
+					z[k] = rgamma(lrng, m[k], 1.0/m[k]);
+					
+				}
+				// bayes_items
+				for (int i=0; i<nit;i++)
+				{
+					y.zeros();
+					for (int ib_indx=cnbi[i]; ib_indx<cnbi[i+1]; ib_indx++)
+					{
+						bk = ib[ib_indx];
+						elsym_helper(b, a, bfirst.memptr() + cnib[bk], blast.memptr() + cnib[bk], bi[ib_indx], nib[bk], bmax[bk], g);
+							
+						for (int s=0; s<=bmax[bk]-a[last[i]]; s++)
+							for (int j=first[i]+1, c=0; j<=last[i]; j++,c++)
+								y[c] += z[bk] * g[s] * bklambda[cbmax[bk]+s+a[j]];			
+					}
+
+					for (int j=first[i]+1, c=0; j<=last[i]; j++,c++)
+						b[j] = rgamma(lrng, sufI[j] + prior_eta, 1/(y[c] + prior_rho));
+				}
+				
+				if (!free_calibration)
+				{
+					b.elem(find_finite(fixed_b)) = fixed_b.elem(find_finite(fixed_b));
+				}
+				b.replace(datum::nan, 1); 		
+				if(iter >= warmup && (iter - warmup) % step == 0)	
+				{
+					pb.tick(thread == 0);
+					out_bklambda.col(out_index) = bklambda;
+					out_b.col(out_index++) = b;
+					if(thread==0) pb.checkInterrupt(); 
+				}
+			}
+		}
+	}	
+	
+	return Rcpp::List::create(Rcpp::Named("b") = out_b.t(), Rcpp::Named("lambda") = out_bklambda.t());
 }
-
-
-*/
-
-
 
