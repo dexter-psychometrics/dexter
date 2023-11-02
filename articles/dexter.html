@@ -113,7 +113,7 @@
                         <h4 data-toc-skip class="author">Ivailo
 Partchev, Jesse Koops, Timo Bechger, Gunter Maris</h4>
             
-            <h4 data-toc-skip class="date">2023-08-17</h4>
+            <h4 data-toc-skip class="date">2023-11-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/vignettes/dexter.Rmd" class="external-link"><code>vignettes/dexter.Rmd</code></a></small>
       <div class="hidden name"><code>dexter.Rmd</code></div>
@@ -643,8 +643,6 @@ cognitive, so the distractor plots resemble the trace lines of partial
 credit items:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/distractor_plot.html">distractor_plot</a></span><span class="op">(</span><span class="va">db</span>, <span class="st">'S1DoShout'</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Warning in density.default(bkl_scores$booklet_score, n = 512, weights =</span></span>
-<span><span class="co">## bkl_scores$n/N, : Selecting bandwidth *not* using 'weights'</span></span></code></pre>
 <p><img src="dexter_files/figure-html/unnamed-chunk-13-1.png" width="576" style="display: block; margin: auto;"></p>
 <p>In addition, <strong>dexter</strong> provides a new diagnostic tool
 with Haberman’s <em>interaction model</em> <span class="citation">(Haberman 2007)</span>, which we have generalized to
@@ -668,7 +666,7 @@ the case of dichotomous data).</p>
 <p>The interaction model can be fit for any booklet in the test with
 function <code>fit_inter</code>; results are best appreciated in
 graphical form:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span> <span class="op">=</span> <span class="fu"><a href="../reference/fit_inter.html">fit_inter</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">booklet_id</span><span class="op">==</span><span class="st">'agg'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">"S1DoScold"</span>, show.observed<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="dexter_files/figure-html/unnamed-chunk-14-1.png" width="576" style="display: block; margin: auto;"></p>
@@ -687,14 +685,14 @@ detailed discussion of the item-total regressions may be found on <a href="https
 blog</a>.</p>
 <p>We can show the response category probabilities instead of the
 expected item score:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">'S1DoCurse'</span>, summate<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="dexter_files/figure-html/unnamed-chunk-15-1.png" width="576" style="display: block; margin: auto;"></p>
 <p>On the other hand, we can represent scores on subtests as super-items
 and analyse these as normal items (function <code>fit_domains</code>).
 For example, treating the four frustrating situations in the verbal
 aggression example as domains, we get:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mSit</span> <span class="op">=</span> <span class="fu"><a href="../reference/fit_domains.html">fit_domains</a></span><span class="op">(</span><span class="va">db</span>, item_property<span class="op">=</span> <span class="st">"situation"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mSit</span><span class="op">)</span></span></code></pre></div>
 <p><img src="dexter_files/figure-html/unnamed-chunk-16-1.png" width="576" style="display: block; margin: auto;"></p>
@@ -703,16 +701,16 @@ sure that there are no obvious issues, that item quality is acceptable,
 and the model we intend to use for calibration fits the data reasonably
 well. The actual estimation of the calibration model, over all booklets
 concurrently, is done with function <code>fit_enorm</code>:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">parms</span> <span class="op">=</span> <span class="fu"><a href="../reference/fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></code></pre></div>
 <p>The default estimation method is conditional maximum likelihood
 (CML). The alternative is to use a Gibbs sampler (Bayesian
 Calibration).</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">parms_gibbs</span> <span class="op">=</span> <span class="fu"><a href="../reference/fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db</span>, method<span class="op">=</span><span class="st">'Bayes'</span><span class="op">)</span></span></code></pre></div>
 <p>The function returns a parameters object, which has <code>plot</code>
 and <code>coef</code> methods.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">parms_gibbs</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -735,50 +733,50 @@ and <code>coef</code> methods.</p>
 <tr class="odd">
 <td align="left">S1DoCurse</td>
 <td align="right">1</td>
-<td align="right">-1.354</td>
-<td align="right">0.155</td>
-<td align="right">-1.668</td>
-<td align="right">-1.065</td>
+<td align="right">-1.328</td>
+<td align="right">0.159</td>
+<td align="right">-1.618</td>
+<td align="right">-0.998</td>
 </tr>
 <tr class="even">
 <td align="left">S1DoCurse</td>
 <td align="right">2</td>
-<td align="right">-0.633</td>
-<td align="right">0.140</td>
-<td align="right">-0.912</td>
+<td align="right">-0.635</td>
+<td align="right">0.142</td>
+<td align="right">-0.930</td>
 <td align="right">-0.371</td>
 </tr>
 <tr class="odd">
 <td align="left">S1DoScold</td>
 <td align="right">1</td>
-<td align="right">-0.695</td>
-<td align="right">0.144</td>
-<td align="right">-0.945</td>
-<td align="right">-0.394</td>
+<td align="right">-0.679</td>
+<td align="right">0.143</td>
+<td align="right">-0.946</td>
+<td align="right">-0.395</td>
 </tr>
 <tr class="even">
 <td align="left">S1DoScold</td>
 <td align="right">2</td>
-<td align="right">-0.254</td>
-<td align="right">0.157</td>
-<td align="right">-0.552</td>
-<td align="right">0.072</td>
+<td align="right">-0.247</td>
+<td align="right">0.152</td>
+<td align="right">-0.529</td>
+<td align="right">0.054</td>
 </tr>
 <tr class="odd">
 <td align="left">S1DoShout</td>
 <td align="right">1</td>
-<td align="right">0.317</td>
+<td align="right">0.320</td>
 <td align="right">0.148</td>
-<td align="right">0.024</td>
-<td align="right">0.603</td>
+<td align="right">0.023</td>
+<td align="right">0.607</td>
 </tr>
 <tr class="even">
 <td align="left">S1DoShout</td>
 <td align="right">2</td>
-<td align="right">0.377</td>
-<td align="right">0.213</td>
-<td align="right">-0.051</td>
-<td align="right">0.777</td>
+<td align="right">0.394</td>
+<td align="right">0.206</td>
+<td align="right">0.024</td>
+<td align="right">0.786</td>
 </tr>
 </tbody>
 </table>
@@ -791,12 +789,12 @@ estimation of either the item parameters or the person parameters
 enables the user to consider various sources of uncertainty.</p>
 <p>Plausible values are most often used for characterizing and comparing
 populations. For the verbal aggression example, we get:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pv</span> <span class="op">=</span> <span class="fu"><a href="../reference/plausible_values.html">plausible_values</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">parms</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/density.html" class="external-link">density</a></span><span class="op">(</span><span class="va">pv</span><span class="op">$</span><span class="va">PV1</span><span class="op">)</span>, bty<span class="op">=</span><span class="st">'l'</span>, main<span class="op">=</span><span class="st">'verbal aggression'</span>, xlab<span class="op">=</span><span class="st">'plausible value'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="dexter_files/figure-html/unnamed-chunk-21-1.png" width="576" style="display: block; margin: auto;"></p>
 <p>For a direct comparison on gender:</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pv</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">pv</span>, <span class="fu"><a href="../reference/get_persons.html">get_persons</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">PV1</span><span class="op">~</span><span class="va">gender</span>, data<span class="op">=</span><span class="va">pv</span>, border<span class="op">=</span><span class="st">'black'</span><span class="op">)</span></span></code></pre></div>
@@ -812,7 +810,7 @@ Maris 2015)</span>, and a hypothesis-driven one, the profile plot. There
 is a separate vignette for either. In our verbal aggression example, we
 can explore visually the hypothesis that men and women differ in the
 mode of behaviour (do or want to do):</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/profile_plot.html">profile_plot</a></span><span class="op">(</span><span class="va">db</span>, item_property<span class="op">=</span><span class="st">'mode'</span>, covariate<span class="op">=</span><span class="st">'gender'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="dexter_files/figure-html/unnamed-chunk-23-1.png" width="480" style="display: block; margin: auto;"></p>
 <p>The results are striking: at any level of overall aggression, women
@@ -828,7 +826,7 @@ which to subset the data. An obvious use is to exclude, in a flexible
 way, some data from analysis. As subsetting can be applied to the
 functions independently, we can, e.g., estimate a model on one subset of
 examinees and apply it to another.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/close_project.html">close_project</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2 unnumbered">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
