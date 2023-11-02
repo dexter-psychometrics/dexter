@@ -164,7 +164,9 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   res = list(cor = matrix(colMeans(store),nd,nd), sd = out_sd,
              hpd_l = matrix(pd[,1], nd, nd), hpd_h = matrix(pd[,2], nd, nd))
   
-  lapply(res, function(x){colnames(x) = rownames(x) = names(models); x})
+  res = lapply(res, function(x){colnames(x) = rownames(x) = names(models); x})
+  res$n_persons = np
+  res
 }
 
 
