@@ -224,7 +224,8 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
       do.call(plot, plot.args)
       draw_curtains(qnt)
       
-      dAll = density(bkl_scores$booklet_score, n = 512, weights = bkl_scores$n/N, adjust=adjust)
+      dAll = density(bkl_scores$booklet_score, n = 512, weights = bkl_scores$n/N, adjust=adjust,
+                     from=0,to=max(bkl_scores$booklet_score),warnWbw=FALSE)
       
       lgnd = y %>% 
         group_by(.data$response)  %>% 
@@ -238,7 +239,7 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
           } else
           {
             dxi = density(.$booklet_score, weights = .$n/sum(.$n), n = 512,
-                        bw = dAll$bw, from = min(dAll$x), to = max(dAll$x))
+                        bw = dAll$bw, from = min(dAll$x), to = max(dAll$x),warnWbw=FALSE)
             yy = dxi$y/dAll$y * sum(.$n)/N
             lines(dAll$x, yy, col = k, lw = 2)
           }
