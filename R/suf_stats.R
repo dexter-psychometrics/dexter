@@ -148,6 +148,7 @@ get_sufStats_im = function(respData)
 #   mutate(maxScore = max(.data$maxScore)) %>%
 #   ungroup() 
 
+
 get_sufStats_tia = function(respData)
 {
   # take length of levels as protection for out of range indexing

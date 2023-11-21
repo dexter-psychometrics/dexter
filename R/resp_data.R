@@ -402,15 +402,22 @@ resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
                              parms_check=NULL) 
 {
   if(NROW(x)==0)
-    stop("no data to analyse")
+    stop_("no data to analyse")
   
   if(!all(c('person_id','item_id','item_score') %in% colnames(x)))
-    stop("data should contain the columns 'item_id','item_score','person_id'")
+    stop_("data should contain the columns 'item_id','item_score','person_id'")
   
   all_columns = intersect(c('person_id','item_id','item_score','booklet_id','item_position', 
                             extra_columns),
                           colnames(x))
   x = x[,all_columns]
+  
+  if(anyNA(x[,intersect(colnames(x),c('person_id','item_id','item_score','booklet_id'))]))
+  {
+    cnm = intersect(colnames(x),c('person_id','item_id','item_score','booklet_id'))
+    cnm = cnm[sapply(cnm,function(cn) anyNA(x[[cn]]))]
+    stop_(sprintf("column(s) %s in dataSrc contain NA values", paste0('`',cnm,'`',collapse=', ')))
+  }
   
   pointers = lapply(x, ppoint)
   
