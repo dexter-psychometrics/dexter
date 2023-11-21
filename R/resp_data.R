@@ -792,6 +792,8 @@ anti_join.dx_resp_data = function(respData, y, by, .recompute_sumscores = FALSE)
 
 
 # to do: this should create new test scores if INDICES is an item property, no?
+# --> true but not urgent since it is not used that way anywhere
+
 # INDICES must be one string that indicates column in respData$x
 # assumed that the operation is booklet_safe in the sense that it does not create more booklets
 # in subgroups

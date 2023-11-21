@@ -65,8 +65,6 @@ pv_design = function(design, a)
 # @param prior_dist       Prior distribution
 # @returns                data.frame
 
-# to do: missing elements in booklet factor or item factor: can they occur and do they mess everything up?
-
 pv_chain = function(x, design, b, a, nPV, 
                      gibbs_settings,
                      A=a, prior_dist = c("normal", "mixture"))
@@ -120,10 +118,7 @@ pv_chain = function(x, design, b, a, nPV,
   scoretab = unlist(scoretab)
 
   ### end prepare bookkeeping
-  
-  # to do: named arguments in cpp call, unnamed is a bit error prone
-  # message(sprintf("running on %i cores", gibbs_settings$ncores))
-  
+
   if(prior_dist=='normal')
   {
     npop = max(scoretab_counts$pop_c) + 1L
@@ -131,13 +126,13 @@ pv_chain = function(x, design, b, a, nPV,
     start_mu = matrix(rnorm(npop*gibbs_settings$nchains), ncol=gibbs_settings$nchains)
     start_sigma = runif(gibbs_settings$nchains,3,4)
     
-    res = pv_chain_normal(b,a,A, 
-                          design$first_c, design$last_c, design$bk_cnit, design$bk_max_a,
-                          scoretab, scoretab_counts$booklet_c, scoretab_counts$pop_c,
-                          scoretab_counts$n_scores, scoretab_counts$n_persons,
-                          start_mu, start_sigma, as.integer(nPV), 
-                          pb$cpp_prog_init(), gibbs_settings$ncores,
-                          gibbs_settings$warm_up,  gibbs_settings$step)
+    res = pv_chain_normal(bmat = b, a = a, A = A, 
+                          first = design$first_c, last = design$last_c, bk_cnit = design$bk_cnit, bk_max_a = design$bk_max_a,
+                          const_scoretab = scoretab, scoretab_bk = scoretab_counts$booklet_c, scoretab_pop = scoretab_counts$pop_c,
+                          scoretab_nscores = scoretab_counts$n_scores, scoretab_np = scoretab_counts$n_persons,
+                          mu_start = start_mu, sigma_start = start_sigma, npv = as.integer(nPV), 
+                          progress_init = pb$cpp_prog_init(), max_cores = gibbs_settings$ncores,
+                          warmup = gibbs_settings$warm_up,  step = gibbs_settings$step)
     
     #dimnames(res$prior_log) = list(var=c('mu','sigma','tau', sprintf("theta_%i",1:(nrow(res$prior_log)-3))),iter=NULL,chain=NULL)
   } else
@@ -146,13 +141,13 @@ pv_chain = function(x, design, b, a, nPV,
     start_mu = matrix(rnorm(2*gibbs_settings$nchains), nrow=2)
     start_sigma = matrix(runif(2*gibbs_settings$nchains,1,2), nrow=2)
 
-    res = pv_chain_mix(b,a,A, 
-                       design$first_c, design$last_c, design$bk_cnit, design$bk_max_a,
-                       scoretab, scoretab_counts$booklet_c, 
-                       scoretab_counts$n_scores, scoretab_counts$n_persons,
-                       start_mu, start_sigma, start_p, as.integer(nPV), 
-                       pb$cpp_prog_init(), gibbs_settings$ncores,
-                       gibbs_settings$warm_up,  gibbs_settings$step)
+    res = pv_chain_mix(bmat = b, a = a, A = A, 
+                       first = design$first_c, last = design$last_c, bk_cnit = design$bk_cnit, bk_max_a = design$bk_max_a,
+                       gscoretab = scoretab, gscoretab_bk = scoretab_counts$booklet_c, 
+                       gscoretab_nscores = scoretab_counts$n_scores, gscoretab_np = scoretab_counts$n_persons,
+                       mu_start = start_mu, sigma_start = start_sigma, p_start = start_p, npv = as.integer(nPV), 
+                       progress_init = pb$cpp_prog_init(), max_cores = gibbs_settings$ncores,
+                       warmup = gibbs_settings$warm_up,  step = gibbs_settings$step)
     
     #dimnames(res$prior_log) = list(var=c('p','mu_1','mu_2','sigma_1','sigma_2'),iter=NULL,chain=NULL)
   }
@@ -277,7 +272,7 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
                     retrieve_data = is_db(dataSrc))
   on.exit({pb$close()})
   
-  if(is.null(parms)) # to do: test if omitting parms works
+  if(is.null(parms)) 
   {
     nrm_draws = 1000L
     if(is.numeric(parms_draw)) nrm_draws =  parms_draw

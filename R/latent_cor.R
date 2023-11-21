@@ -42,8 +42,6 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   
   if(is.matrix(dataSrc))
   {
-    # to do: we can take a char vector of length ncol, but that goes for all
-    # analyses functions with item_properties, ip's can be made more flexible for df as well
     stop("a matrix datasrc is not yet implemented for this function")
   }
   # to do: this is a bit tricky, we will often need to merge over persons, e.g. if booklets are administered
