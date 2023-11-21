@@ -540,7 +540,7 @@ calibrate_Bayes = function(scoretab, design, sufI, a, first, last,  nIter, fixed
     fixed_b_vec = rep(NA_real_, length(b))
   
   
-  nchains = ncores = get_ncores(desired = min(ceiling(nIter/4),256L), maintain_free = 1L)
+  nchains = ncores = get_ncores(desired = min(ceiling(nIter/4),128L), maintain_free = 1L)
   b = matrix(rep(b,nchains), ncol=nchains)
   
   #end bookkeeping

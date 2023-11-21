@@ -135,7 +135,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   store = matrix(0, length(which.keep), length(as.vector(prior$Sigma)))
   tel = 1
   
-  max_cores = get_ncores(desired = 256, maintain_free = 1L)
+  max_cores = get_ncores(desired = 128L, maintain_free = 1L)
   for (i in 1:nIter)
   {
     for (d in 1:nd)

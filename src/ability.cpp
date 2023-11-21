@@ -114,6 +114,7 @@ arma::vec theta_mle_sec(const arma::vec& b, const arma::ivec& a,
 			xl = rts;
 			fl = f;
 			rts += std::copysign(std::min(std::abs(dx),0.5), dx); // steps larger than 0.5 on the theta scale are useless and can cause overflow in escore
+			// to do: this limit could cause a pingpong effect, although it is unlikely
 			f = Escore_single(rts, b, a, first, last, n, maxA);
 			
 			if(std::abs(dx) < acc)

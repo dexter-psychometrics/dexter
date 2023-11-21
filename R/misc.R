@@ -16,6 +16,14 @@ get_ncores = function(desired=256L, maintain_free=0L)
 {
   # relevant discussion: https://github.com/Rdatatable/data.table/issues/5658
   
+  min_not_NA = function(...)
+  {
+    x = c(...)
+    x = x[!is.na(x)]
+    if(length(x)==0) NA_integer_
+    else min(x)
+  }
+  
   if(Sys.getenv("_R_CHECK_LIMIT_CORES_") != "" || 
      Sys.getenv("_R_CHECK_EXAMPLE_TIMING_CPU_TO_ELAPSED_THRESHOLD_") != "")
   {
@@ -23,12 +31,22 @@ get_ncores = function(desired=256L, maintain_free=0L)
     as.integer(min(desired, 2L))
   } else
   {
-    available = min(c(omp_ncores(), 
-                      as.integer(Sys.getenv("OMP_THREAD_LIMIT")),
-                      getOption("Ncpus",NA_integer_)),
+    n_cores = omp_ncores()
+    
+    user_maximum = if(!is.null(getOption('dexter.max_cores'))){
+      getOption('dexter.max_cores')
+    } else
+    {
+      min_not_NA(as.integer(Sys.getenv("OMP_THREAD_LIMIT")), getOption("Ncpus"))
+    }
+    
+    if(is.na(user_maximum))
+      user_maximum = n_cores - maintain_free
+    
+    available = min(c(n_cores, user_maximum), 
                     na.rm=TRUE)
     
-    as.integer(min(desired, max(1L, as.integer(available - maintain_free))))
+    as.integer(min(desired, max(1L, available )))
   }
 }
 

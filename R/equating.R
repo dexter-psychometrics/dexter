@@ -137,7 +137,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
     cbk = integer(length(scores))
     cmu = rep(new_mu,length(scores))
     
-    max_cores = get_ncores(desired = 256, maintain_free = 1L)
+    max_cores = get_ncores(desired = 128L, maintain_free = 1L)
     
     if (parms$inputs$method == "Bayes")
     {

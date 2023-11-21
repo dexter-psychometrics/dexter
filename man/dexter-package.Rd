@@ -17,7 +17,15 @@ The main features are:
 \item CML calibration of the extended nominal response model and interaction model.
 }
 
-To learn more about dexter, start with the vignettes: `browseVignettes(package="dexter")`
+To learn more about dexter, start with the vignettes: `browseVignettes(package="dexter")`  
+
+Dexter uses the following global options
+\itemize{
+\item `dexter.use_tibble` return tibbles instead of data.frames, defaults to FALSE
+\item `dexter.progress` show progress bars, defaults to TRUE in interactive sessions
+\item `dexter.max_cores` set a maximum number of cores that dexter will use, defaults to the minimum of `Sys.getenv("OMP_THREAD_LIMIT")` and
+`getOption("Ncpus")`, otherwise unlimited.
+}
 }
 \seealso{
 Useful links:

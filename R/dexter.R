@@ -1,7 +1,7 @@
 utils::globalVariables(".")
 
 
-#to do: save pascal.c more size prudent so it does not have to be compiled 
+
 
 #' Dexter: data analyses for educational and psychological tests.
 #' 
@@ -16,6 +16,14 @@ utils::globalVariables(".")
 #' }
 #' 
 #' To learn more about dexter, start with the vignettes: `browseVignettes(package="dexter")`  
+#' 
+#' Dexter uses the following global options
+#' \itemize{
+#' \item `dexter.use_tibble` return tibbles instead of data.frames, defaults to FALSE
+#' \item `dexter.progress` show progress bars, defaults to TRUE in interactive sessions
+#' \item `dexter.max_cores` set a maximum number of cores that dexter will use, defaults to the minimum of `Sys.getenv("OMP_THREAD_LIMIT")` and
+#' `getOption("Ncpus")`, otherwise unlimited.
+#' }
 #' 
 "_PACKAGE"
 
@@ -1213,7 +1221,8 @@ design_info = function(dataSrc, predicate = NULL)
 #' Verbal aggression data
 #' 
 #' A data set of self-reported verbal behaviour in different frustrating
-#' situations (Vansteelandt, 2000)
+#' situations (Vansteelandt, 2000). The dataset also contains participants reported gender and scores on the 'anger' questionnaire.
+#' 
 #' 
 #' 
 #' @name verbAggrData
