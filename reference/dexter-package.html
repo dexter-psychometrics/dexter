@@ -94,7 +94,11 @@
 <li><p>methods to assess data quality using Classical test theory and plots.</p></li>
 <li><p>CML calibration of the extended nominal response model and interaction model.</p></li>
 </ul><p>To learn more about dexter, start with the vignettes: `browseVignettes(package="dexter")`</p>
-    </div>
+<p>Dexter uses the following global options</p><ul><li><p>`dexter.use_tibble` return tibbles instead of data.frames, defaults to FALSE</p></li>
+<li><p>`dexter.progress` show progress bars, defaults to TRUE in interactive sessions</p></li>
+<li><p>`dexter.max_cores` set a maximum number of cores that dexter will use, defaults to the minimum of `Sys.getenv("OMP_THREAD_LIMIT")` and
+`getOption("Ncpus")`, otherwise unlimited.</p></li>
+</ul></div>
     <div id="see-also">
     <h2>See also</h2>
     <div class="dont-index"><p>Useful links:</p><ul><li><p><a href="https://dexter-psychometrics.github.io/dexter/" class="external-link">https://dexter-psychometrics.github.io/dexter/</a></p></li>
