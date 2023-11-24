@@ -372,7 +372,7 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 
 	
 // this seems to be seed safe, but might not be depending on what else is going on on the computer
-#pragma omp parallel
+#pragma omp parallel num_threads(max_cores)	
 	{	
 		const int thread = omp_get_thread_num();
 		dqrng::xoshiro256plus lrng(rng);      		
