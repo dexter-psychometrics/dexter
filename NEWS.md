@@ -2,22 +2,13 @@
 
 ## breaking changes
 
-* A minor change in the interface for the plausible_values and plausible_scores functions, the slightly different argument parms_draw replaces use_draw.
+* A small change in the interface for the plausible_values and plausible_scores functions, the slightly different argument `parms_draw` replaces `use_draw`.
 
-* argument `standard_errors` in functions `ability` and `ability_tables` has been removed. Standard errors are now always returned.
+* The argument `standard_errors` in functions `ability` and `ability_tables` has been removed. Standard errors are now always returned.
 
-## other changes
+* argument `prior.dist` in plausible values has become `prior_dist` to obtain a consistent naming scheme in dexter.
 
-* plausible_scores gains an argument prior_dist to bring it in line with plausible_values
-
-* internal changes in the plausible values function will cause a slight increase in confidence intervals of ensuing population estimates. We think this is more realistic. On the other hand, population estimates based on plausible values are more stable with different seeds or consecutive calls of `plausible_values`.
-
-
-## other changes
-
-* argument prior.dist in plausible values has become prior_dist to obtain a consistent naming scheme in dexter
-* The implementation of the algorithm for plausible values was changed slightly. This means that the use of a consistent seed will no longer give the same exact plausible values or scores  as were obtained in previous versions of dexter.
-* Multiple draws of  plausible values/scores with CML estimated item parameters will vary slightly more between draws. This will probably only be noticeable for small sample sizes.
+* Internal changes in the plausible values function will cause a slight increase in confidence intervals for population estimates. We think this is more realistic. On the other hand, population estimates based on plausible values will be more stable with different seeds or consecutive calls of `plausible_values`. Use of the same seed no longer guarantees the exact same outcomes across different computers.
 
 
 # dexter 1.2.2

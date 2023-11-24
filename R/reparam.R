@@ -7,11 +7,9 @@
 # draw can be a number
 # the default 'sample' returns the complete matrix, i.e. the sample is the census in the original order
 # any subsequent 'sampling' must be done in the caller function itself
-# zero indexed refers to c-style indexes. (the 0 score parameter is always included either way)
 
-simplify_parms = function(parms, design=NULL, 
-                           draw = c('sample','average'),
-                           zero_indexed=FALSE)
+
+simplify_parms = function(parms, design=NULL, draw = c('sample','average'))
 {
   check_df(design, 'item_id', nullable=TRUE)
   if(!is.numeric(draw))
@@ -107,13 +105,11 @@ simplify_parms = function(parms, design=NULL,
       design = inner_join(design, fl, by='item_id')
     }
   }
-  if(zero_indexed)
-  {
-    fl$first = fl$first - 1L
-    fl$last = fl$last - 1L
-    design$first = design$first - 1L
-    design$last = design$last - 1L
-  }
+  
+  fl$first0 = fl$first - 1L
+  fl$last0 = fl$last - 1L
+  design$first0 = design$first - 1L
+  design$last0 = design$last - 1L
   
   list(a=a, b=b, design=design, items = fl, method=method)
 }

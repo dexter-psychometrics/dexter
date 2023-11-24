@@ -120,7 +120,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   
   # make everything simple and zero indexed
   # parms = cml
-  models = lapply(models, simplify_parms, zero_indexed=TRUE)
+  models = lapply(models, simplify_parms)
   respData = lapply(respData, get_resp_data, summarised=TRUE)
   for(d in 1:nd)
   {
@@ -140,7 +140,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
     {
       cons = condMoments(prior$mu, prior$Sigma, d, x.value=pv[,-d]) 
       
-      PV_sve(models[[d]]$b, models[[d]]$a, models[[d]]$design$first, models[[d]]$design$last, 					
+      PV_sve(models[[d]]$b, models[[d]]$a, models[[d]]$design$first0, models[[d]]$design$last0, 					
              models[[d]]$bcni,
              respData[[d]]$x$booklet_id, respData[[d]]$x$booklet_score, cons$mu, sqrt(cons$sigma),
              max_cores,
