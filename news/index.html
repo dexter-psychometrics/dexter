@@ -85,19 +85,10 @@
 <h2 class="page-header" data-toc-text="1.3.0" id="dexter-130">dexter 1.3.0<a class="anchor" aria-label="anchor" href="#dexter-130"></a></h2>
 <div class="section level3">
 <h3 id="breaking-changes-1-3-0">breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-3-0"></a></h3>
-<ul><li><p>A minor change in the interface for the plausible_values and plausible_scores functions, the slightly different argument parms_draw replaces use_draw.</p></li>
-<li><p>argument <code>standard_errors</code> in functions <code>ability</code> and <code>ability_tables</code> has been removed. Standard errors are now always returned.</p></li>
-</ul></div>
-<div class="section level3">
-<h3 id="other-changes-1-3-0">other changes<a class="anchor" aria-label="anchor" href="#other-changes-1-3-0"></a></h3>
-<ul><li><p>plausible_scores gains an argument prior_dist to bring it in line with plausible_values</p></li>
-<li><p>internal changes in the plausible values function will cause a slight increase in confidence intervals of ensuing population estimates. We think this is more realistic. On the other hand, population estimates based on plausible values are more stable with different seeds or consecutive calls of <code>plausible_values</code>.</p></li>
-</ul></div>
-<div class="section level3">
-<h3 id="other-changes-1-3-0-1">other changes<a class="anchor" aria-label="anchor" href="#other-changes-1-3-0-1"></a></h3>
-<ul><li>argument prior.dist in plausible values has become prior_dist to obtain a consistent naming scheme in dexter</li>
-<li>The implementation of the algorithm for plausible values was changed slightly. This means that the use of a consistent seed will no longer give the same exact plausible values or scores as were obtained in previous versions of dexter.</li>
-<li>Multiple draws of plausible values/scores with CML estimated item parameters will vary slightly more between draws. This will probably only be noticeable for small sample sizes.</li>
+<ul><li><p>A small change in the interface for the plausible_values and plausible_scores functions, the slightly different argument <code>parms_draw</code> replaces <code>use_draw</code>.</p></li>
+<li><p>The argument <code>standard_errors</code> in functions <code>ability</code> and <code>ability_tables</code> has been removed. Standard errors are now always returned.</p></li>
+<li><p>argument <code>prior.dist</code> in plausible values has become <code>prior_dist</code> to obtain a consistent naming scheme in dexter.</p></li>
+<li><p>Internal changes in the plausible values function will cause a slight increase in confidence intervals for population estimates. We think this is more realistic. On the other hand, population estimates based on plausible values will be more stable with different seeds or consecutive calls of <code>plausible_values</code>. Use of the same seed no longer guarantees the exact same outcomes across different computers.</p></li>
 </ul></div>
 </div>
     <div class="section level2">
