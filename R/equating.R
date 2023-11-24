@@ -93,6 +93,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
   
   max_ref_score = sum(ref_parms$a[ref_parms$design$last])
   ref_range = (pass_fail:max_ref_score) + 1L
+  pb$close_area()
   
   # some common summary statistics for the reference items
   if (ref_parms$method == "Bayes")
@@ -192,7 +193,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
   
   
   out = list(est = bk_results, 
-             inputs = list(method = parms$inputs$method, 
+             inputs = list(method = ref_parms$method, 
                            ref_items = ref_items, pass_fail = pass_fail,
                            design = design)) 
   class(out) = append('p2pass', class(out))
