@@ -875,11 +875,6 @@ List polytomize_C(IntegerVector& booklet_id, IntegerVector& person_id, IntegerVe
 
 
 
-
-
-// http://gallery.rcpp.org/articles/hierarchical-risk-parity/
-// https://computing.llnl.gov/tutorials/openMP/
-
 // utility function to check if data is safe to use with above functions
 
 // [[Rcpp::export]]
@@ -897,6 +892,8 @@ bool is_person_booklet_sorted(const IntegerVector& booklet_id, const IntegerVect
 	}
 	return sorted;
 }
+
+
 
 
 // 0.52 for size 1e6 * 100 (if loop is necessary)

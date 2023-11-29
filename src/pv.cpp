@@ -2,7 +2,7 @@
 #include <RcppArmadillo.h>
 #include <xoshiro.h>
 #include <dqrng_distribution.h>
-#include <omp.h>
+#include "myomp.h"
 #include "priors.h"
 #include "progress.h"
 

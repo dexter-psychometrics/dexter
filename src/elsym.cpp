@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
 #include <xoshiro.h>
-#include <omp.h>
+#include "myomp.h"
 #include "progress.h"
 #include "priors.h"
 
