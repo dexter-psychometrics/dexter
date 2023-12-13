@@ -96,8 +96,7 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
   env = caller_env()
   item_id = as.character(item_id)
   check_string(item_id)
-  item = item_id
-  
+
   user.args = list(...); leg.args = list()
   if(length(names(user.args))>0)
   {
@@ -108,50 +107,50 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
   
   iprop = list()
   if(is_db(dataSrc))
-    iprop = as.list(dbGetQuery_param(dataSrc,'SELECT * FROM dxItems WHERE item_id= :item;', 
-                                     tibble(item=item)))
+    iprop = as.list(dbGetQuery_param(dataSrc,'SELECT * FROM dxItems WHERE item_id= :item_id;', 
+                                     tibble(item_id=item_id)))
   
   
   if(is.null(qtpredicate) && is_db(dataSrc))
   {
     # pre process a little to make things faster
   	booklets = dbGetQuery_param(dataSrc,
-  	     'SELECT booklet_id FROM dxbooklet_design WHERE item_id=:item;', tibble(item=item)) %>%
+  	     'SELECT booklet_id FROM dxbooklet_design WHERE item_id=:item_id;', tibble(item_id=item_id)) %>%
   		pull('booklet_id') %>%
   	  sql_quote("'") %>%
   		paste(collapse=',')
   	
     qtpredicate = sql(paste0("booklet_id IN(",booklets,")"), 'booklet_id')
   } 
-  
+  item = item_id
   respData = get_resp_data(dataSrc, qtpredicate = qtpredicate, extra_columns='response', env=env, summarised=FALSE) %>%
     filter(.data$item_id == item, .recompute_sumscores = FALSE )
   
 
   if (nrow(respData$design) == 0) 
-    stop(paste("Item", item, "not found in dataSrc."))
+    stop(paste("Item", item_id, "not found in dataSrc."))
   
 
   if('item_position' %in% colnames(respData$design))
   {
-    ipos = filter(respData$design, .data$item_id==item)
+    ipos = filter(respData$design, .data$item_id==!!item_id)
   } else if(is_bkl_safe(dataSrc, qtpredicate, env) && is_db(dataSrc))
   {
     ipos = dbGetQuery(dataSrc, paste("SELECT booklet_id, item_position FROM dxbooklet_design WHERE item_id=", 
-                                     sql_quote(item,"'")))
+                                     sql_quote(item_id,"'")))
   } else if(inherits(dataSrc,'data.frame') && 'item_position' %in% colnames(dataSrc))
   {
     ipos = dataSrc %>%
-      filter(.data$item_id==item) %>%
+      filter(.data$item_id==!!item_id) %>%
       distinct(.data$booklet_id,.keep_all=TRUE)
   } else
   {
-    ipos = filter(respData$design, .data$item_id==item)
+    ipos = filter(respData$design, .data$item_id==!!item_id)
   }
   ipos=select(ipos,any_of(c('booklet_id','item_position')))
   
   if(inherits(dataSrc,'data.frame'))
-     respData$x = mutate(respData$x,response=coalesce(.data$response,'<NA>'))
+     respData$x = mutate(respData$x,response=coalesce(as.character(.data$response),'<NA>'))
 
   default.args = list(sub = "Pval: $pvalue:.2f, Rit: $rit:.3f, Rir: $rir:.3f", 
                       xlab = "Sum score", ylab = "Proportion", cex.sub = 0.8, xaxs="i", bty="l")
@@ -205,7 +204,7 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
                   n = N,
                   item_position = filter(ipos, .data$booklet_id==booklet)$item_position,
                   booklet_id=booklet,
-                  item_id=item))
+                  item_id=item_id))
       
       plot.args = merge_arglists(user.args, 
                                  default=default.args,

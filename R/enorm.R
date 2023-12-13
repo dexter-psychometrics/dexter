@@ -186,6 +186,9 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
   check_num(nbins,'integer',.length=1, .min=2)
   dots = list(...)
   
+  add = coalesce(dots$add,FALSE)
+  dots$add = NULL
+  
 
   if(is.null(item_id))
   {
@@ -201,7 +204,7 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
   }
   if(length(setdiff(item_id,x$inputs$ssI$item_id))>0)
   {
-    message('The following items were not found in yourfit object')
+    message('The following items were not found in your fit object')
     print(setdiff(item_id,x$inputs$ssI$item_id))
     stop('unknown item',call.=FALSE)
   }
@@ -274,8 +277,13 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
   plot.args$main = fstr(plot.args$main, list(item_id=item_id))
   plot.args$sub = fstr(plot.args$sub, list(item_id=item_id))
   
-  do.call(plot, plot.args)
-  lines(plt$gr_theta,plt$expected_score, col='grey80') 
+  if(!add)
+  {
+    do.call(plot, plot.args)
+  }
+  # maybe this shoudl be the real ICC, otherwise add does not work
+  #lines(plt$gr_theta,plt$expected_score, col='grey80') 
+  plot(expf,from = rng[1], to=rng[2], col='grey80', add=TRUE)
   
   plt$outlier = FALSE
   
@@ -302,8 +310,8 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
              length=0.05, angle=90, code=3, col='grey80')})
   } 
   
-  lines(plt$gr_theta,plt$avg_score)  
-  points(plt$gr_theta, plt$avg_score, bg = if_else(plt$outlier, qcolors(1), 'transparent'), pch=21)
+  lines(plt$gr_theta,plt$avg_score,col=coalesce(dots$col,'black'))  
+  points(plt$gr_theta, plt$avg_score, bg = if_else(plt$outlier, qcolors(1), 'transparent'), pch=21,col=coalesce(dots$col,'black'))
   invisible(df_format(plt))
 }
 
