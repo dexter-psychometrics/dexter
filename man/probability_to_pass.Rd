@@ -17,8 +17,9 @@ probability_to_pass(
 \arguments{
 \item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}
 
-\item{parms}{parameters returned from fit_enorm. If uncertainty about parameter estimation should be included
-in the computations, use `method='Bayes'` and nDraws equal or larger than nDraws in probability_to_pass}
+\item{parms}{object produced by \code{\link{fit_enorm}} or a data.frame with columns item_id, item_score and  beta. 
+If uncertainty about parameter estimation should be included
+in the computations, use a `parms` object computed with `method='Bayes'` and nDraws equal or larger than nDraws in probability_to_pass}
 
 \item{ref_items}{vector with id's of items in the reference set, they must all occur in dataSrc}
 

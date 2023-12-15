@@ -11,6 +11,9 @@
   predicate = NULL,
   nbins = 5,
   ci = 0.95,
+  add = FALSE,
+  col = "black",
+  col.model = "grey80",
   ...
 )
 }
@@ -27,6 +30,12 @@
 
 \item{ci}{confidence interval for the error bars, between 0 and 1. Use 0 to suppress the error bars.
 Default = 0.95 for a 95\% confidence interval}
+
+\item{add}{logical; if TRUE add to an already existing plot}
+
+\item{col}{color for the observed score average}
+
+\item{col.model}{color for the expected score based on the model}
 
 \item{...}{further arguments to plot}
 }

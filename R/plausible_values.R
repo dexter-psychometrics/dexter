@@ -19,8 +19,10 @@ pv_gibbs_settings = function(nPV,
   
   step = coalesce(step, if.else(parms_sample, 5L, 1L)) 
   
-  # for now nchains = ncores
-  nchains = ncores = get_ncores(desired = min(10,nPV), maintain_free = 1L)
+  ncores = get_ncores(desired = min(32,nPV), maintain_free = 1L)
+  
+  # at least 2 chains, regardless of available cores, sorry mac users
+  nchains = as.integer(max(min(nPV,2L), ncores))
   
   min_b_samples = 1L
   if(parms_sample)

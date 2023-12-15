@@ -40,11 +40,14 @@ test_that('plausible scores works',{
   # keep.observed should work
   ps = plausible_scores(responses) %>% 
     rename(PS_keep_true = 'PS1') %>%
-    inner_join(plausible_scores(responses, keep.observed = FALSE), by= 'person_id') %>%
-    inner_join(responses %>% group_by(person_id, booklet_id) %>% summarise(booklet_score = sum(item_score)), by='person_id')
+    inner_join(plausible_scores(responses, keep.observed = FALSE), by= c('person_id','booklet_id')) %>%
+    inner_join(responses %>% group_by(person_id, booklet_id) %>% summarise(booklet_score = sum(item_score)), 
+               by=c('person_id','booklet_id'))
   
   expect_gt(cor(ps$PS_keep_true, ps$booklet_score), cor(ps$PS1, ps$booklet_score)+.05)
   
-  # to do: test more cases
+  expect_false(any(ps$PS_keep_true<ps$booklet_score))
+  
+  expect_lt(abs(mean(ps$PS1)-mean(ps$PS_keep_true)),0.15)
   
 })

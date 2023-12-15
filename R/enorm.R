@@ -169,6 +169,9 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
 #' @param nbins number of ability groups
 #' @param ci confidence interval for the error bars, between 0 and 1. Use 0 to suppress the error bars.
 #' Default = 0.95 for a 95\% confidence interval
+#' @param add logical; if TRUE add to an already existing plot
+#' @param col color for the observed score average
+#' @param col.model color for the expected score based on the model
 #' @param ... further arguments to plot
 #' @return 
 #' Silently, a data.frame with observed and expected values possibly useful to create a numerical fit measure.
@@ -181,15 +184,12 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
 #' 
 #' @method plot prms
 #' 
-plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci = .95, ...)
+plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci = .95, 
+                     add=FALSE, col = 'black', col.model='grey80', ...)
 {
   check_num(nbins,'integer',.length=1, .min=2)
   dots = list(...)
   
-  add = coalesce(dots$add,FALSE)
-  dots$add = NULL
-  
-
   if(is.null(item_id))
   {
     if('items' %in% names(dots))
@@ -271,19 +271,16 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
           max(plt$gr_theta)+.5*rng/nbins)
   
   plot.args = merge_arglists(dots,
-                             default=list(bty='l',xlab = expression(theta), ylab='score',main=item_id),
+                             default=list(bty='l',xlab = expression(theta), ylab='score',main=item_id,
+                                          lwd=par('lwd')),
                              override=list(x = rng,y = c(0,max_score), type="n"))
   
   plot.args$main = fstr(plot.args$main, list(item_id=item_id))
   plot.args$sub = fstr(plot.args$sub, list(item_id=item_id))
   
-  if(!add)
-  {
-    do.call(plot, plot.args)
-  }
-  # maybe this shoudl be the real ICC, otherwise add does not work
-  #lines(plt$gr_theta,plt$expected_score, col='grey80') 
-  plot(expf,from = rng[1], to=rng[2], col='grey80', add=TRUE)
+  if(!add) do.call(plot, plot.args)
+
+  plot(expf,from = rng[1], to=rng[2], col=col.model, add=TRUE,lwd=plot.args$lwd)
   
   plt$outlier = FALSE
   
@@ -307,11 +304,14 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
     suppressWarnings({
       arrows(plt$gr_theta, plt$conf_min, 
              plt$gr_theta, plt$conf_max, 
-             length=0.05, angle=90, code=3, col='grey80')})
+             lwd=plot.args$lwd,
+             length=0.05, angle=90, code=3, col=col.model)})
   } 
   
-  lines(plt$gr_theta,plt$avg_score,col=coalesce(dots$col,'black'))  
-  points(plt$gr_theta, plt$avg_score, bg = if_else(plt$outlier, qcolors(1), 'transparent'), pch=21,col=coalesce(dots$col,'black'))
+  lines(plt$gr_theta,plt$avg_score,col=col,lwd=plot.args$lwd)  
+  points(plt$gr_theta, plt$avg_score, 
+         bg = if_else(plt$outlier, qcolors(1), coalesce(plot.args$bg,'transparent')), 
+         pch = coalesce(dots$pch,21), col=col)
   invisible(df_format(plt))
 }
 

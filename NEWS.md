@@ -6,10 +6,13 @@
 
 * The argument `standard_errors` in functions `ability` and `ability_tables` has been removed. Standard errors are now always returned.
 
-* argument `prior.dist` in plausible values has become `prior_dist` to obtain a consistent naming scheme in dexter.
+* argument `prior.dist` in plausible values has become `prior_dist` to maintain a consistent naming scheme in dexter.
 
-* Internal changes in the plausible values function will cause a slight increase in confidence intervals for population estimates. We think this is more realistic. On the other hand, population estimates based on plausible values will be more stable with different seeds or consecutive calls of `plausible_values`. Use of the same seed no longer guarantees the exact same outcomes across different computers.
+* Internal changes in the plausible values function will cause a slight increase in confidence intervals for population estimates when using multiple draws. We think this is more realistic. On the other hand, population estimates based on plausible values will now be more stable over different seeds or consecutive calls of `plausible_values`. Use of the same seed no longer guarantees the exact same outcomes across different computers.
 
+## other changes
+
+* more graphical options in `plot.prms`
 
 # dexter 1.2.2
 

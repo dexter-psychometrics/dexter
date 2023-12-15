@@ -229,7 +229,7 @@ plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
       lines(scores,z[i,]) # the actual lines
     lx = sample(scores, npic, replace = FALSE) # label the lines
     for (i in 1:npic) {
-      points(lx[i], z[i,lx[i]+1], co="white", cex=1.6, pch=19)
+      points(lx[i], z[i,lx[i]+1], col="white", cex=1.6, pch=19)
       text(lx[i], z[i,lx[i]+1], items[i], co=1, cex=.6)
     }
     # do the Interaction model
