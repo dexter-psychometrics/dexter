@@ -107,8 +107,9 @@ compute the probability to pass on the reference set conditional on each score o
 
 
 <dt>parms</dt>
-<dd><p>parameters returned from fit_enorm. If uncertainty about parameter estimation should be included
-in the computations, use `method='Bayes'` and nDraws equal or larger than nDraws in probability_to_pass</p></dd>
+<dd><p>object produced by <code><a href="fit_enorm.html">fit_enorm</a></code> or a data.frame with columns item_id, item_score and  beta. 
+If uncertainty about parameter estimation should be included
+in the computations, use a `parms` object computed with `method='Bayes'` and nDraws equal or larger than nDraws in probability_to_pass</p></dd>
 
 
 <dt>ref_items</dt>

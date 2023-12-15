@@ -87,8 +87,13 @@
 <h3 id="breaking-changes-1-3-0">breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-3-0"></a></h3>
 <ul><li><p>A small change in the interface for the plausible_values and plausible_scores functions, the slightly different argument <code>parms_draw</code> replaces <code>use_draw</code>.</p></li>
 <li><p>The argument <code>standard_errors</code> in functions <code>ability</code> and <code>ability_tables</code> has been removed. Standard errors are now always returned.</p></li>
-<li><p>argument <code>prior.dist</code> in plausible values has become <code>prior_dist</code> to obtain a consistent naming scheme in dexter.</p></li>
-<li><p>Internal changes in the plausible values function will cause a slight increase in confidence intervals for population estimates. We think this is more realistic. On the other hand, population estimates based on plausible values will be more stable with different seeds or consecutive calls of <code>plausible_values</code>. Use of the same seed no longer guarantees the exact same outcomes across different computers.</p></li>
+<li><p>argument <code>prior.dist</code> in plausible values has become <code>prior_dist</code> to maintain a consistent naming scheme in dexter.</p></li>
+<li><p>Internal changes in the plausible values function will cause a slight increase in confidence intervals for population estimates when using multiple draws. We think this is more realistic. On the other hand, population estimates based on plausible values will now be more stable over different seeds or consecutive calls of <code>plausible_values</code>. Use of the same seed no longer guarantees the exact same outcomes across different computers.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="other-changes-1-3-0">other changes<a class="anchor" aria-label="anchor" href="#other-changes-1-3-0"></a></h3>
+<ul><li>more graphical options in <code>plot.prms</code>
+</li>
 </ul></div>
 </div>
     <div class="section level2">
