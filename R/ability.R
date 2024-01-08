@@ -35,7 +35,9 @@
 #' as the Warm estimator.
 #'
 #' @examples
-
+#' 
+#' \dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+#' 
 #' db = start_new_project(verbAggrRules, ":memory:")
 #' add_booklet(db, verbAggrData, "agg")
 #' 
@@ -52,6 +54,8 @@
 #'         col = c("black", "red", "blue"), bty = "n",pch = 19)
 #' 
 #' close_project(db)
+#' 
+#' \dontshow{ RcppArmadillo::armadillo_reset_cores()}
 #' 
 #' @references
 #' Warm, T. A. (1989). Weighted likelihood estimation of ability in item response theory. 

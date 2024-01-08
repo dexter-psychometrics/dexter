@@ -427,6 +427,8 @@ coef.prms = function(object, hpd = 0.95, what=c('items','var','posterior'), ...)
 #' 
 #' @examples
 #' 
+#' \dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+#' 
 #' db = start_new_project(verbAggrRules,':memory:')
 #' add_booklet(db,verbAggrData, "agg")
 #' p = fit_enorm(db)
@@ -456,6 +458,8 @@ coef.prms = function(object, hpd = 0.95, what=c('items','var','posterior'), ...)
 #' 
 #' par(op)
 #' close_project(db)
+#' 
+#' \dontshow{ RcppArmadillo::armadillo_reset_cores()}
 #' 
 information = function(parms, items=NULL, booklet_id=NULL, which.draw=NULL)
 {

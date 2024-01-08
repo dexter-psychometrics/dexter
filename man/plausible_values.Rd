@@ -56,6 +56,9 @@ one group this becomes a regular normal distribution. When there are no covariat
 distribution of two normal distributions which gives a little more flexibility than a normal prior.
 }
 \examples{
+
+\dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+
 db = start_new_project(verbAggrRules, ":memory:", 
    person_properties=list(gender="<unknown>"))
 add_booklet(db, verbAggrData, "agg")
@@ -82,7 +85,10 @@ lines(ecdf(pv_F$PV1),col="green")
 legend(-2.2,0.9, c("female", "male") , 
    lty=1, col=c('green', 'red'), bty='n', cex=.75)
    
+   
 close_project(db)    
+
+\dontshow{ RcppArmadillo::armadillo_reset_cores()}
 
 }
 \references{

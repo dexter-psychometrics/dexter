@@ -1,4 +1,4 @@
-# dexter 1.3.0
+# dexter 1.3.2
 
 ## breaking changes
 

@@ -289,20 +289,21 @@ BEGIN_RCPP
 END_RCPP
 }
 // is_person_booklet_sorted
-bool is_person_booklet_sorted(const IntegerVector& booklet_id, const IntegerVector& person_id);
-RcppExport SEXP _dexter_is_person_booklet_sorted(SEXP booklet_idSEXP, SEXP person_idSEXP) {
+bool is_person_booklet_sorted(const IntegerVector& booklet_id, const IntegerVector& person_id, const int ncores);
+RcppExport SEXP _dexter_is_person_booklet_sorted(SEXP booklet_idSEXP, SEXP person_idSEXP, SEXP ncoresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const IntegerVector& >::type booklet_id(booklet_idSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type person_id(person_idSEXP);
-    rcpp_result_gen = Rcpp::wrap(is_person_booklet_sorted(booklet_id, person_id));
+    Rcpp::traits::input_parameter< const int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(is_person_booklet_sorted(booklet_id, person_id, ncores));
     return rcpp_result_gen;
 END_RCPP
 }
 // parms_is_superset_matrix
-bool parms_is_superset_matrix(const IntegerMatrix& x, const IntegerVector& item_id, const IntegerVector& item_score, const int maxs);
-RcppExport SEXP _dexter_parms_is_superset_matrix(SEXP xSEXP, SEXP item_idSEXP, SEXP item_scoreSEXP, SEXP maxsSEXP) {
+bool parms_is_superset_matrix(const IntegerMatrix& x, const IntegerVector& item_id, const IntegerVector& item_score, const int maxs, const int ncores);
+RcppExport SEXP _dexter_parms_is_superset_matrix(SEXP xSEXP, SEXP item_idSEXP, SEXP item_scoreSEXP, SEXP maxsSEXP, SEXP ncoresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -310,7 +311,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const IntegerVector& >::type item_id(item_idSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type item_score(item_scoreSEXP);
     Rcpp::traits::input_parameter< const int >::type maxs(maxsSEXP);
-    rcpp_result_gen = Rcpp::wrap(parms_is_superset_matrix(x, item_id, item_score, maxs));
+    Rcpp::traits::input_parameter< const int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(parms_is_superset_matrix(x, item_id, item_score, maxs, ncores));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -787,8 +789,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dexter_merge_booklets", (DL_FUNC) &_dexter_merge_booklets, 4},
     {"_dexter_get_design_C", (DL_FUNC) &_dexter_get_design_C, 2},
     {"_dexter_polytomize_C", (DL_FUNC) &_dexter_polytomize_C, 7},
-    {"_dexter_is_person_booklet_sorted", (DL_FUNC) &_dexter_is_person_booklet_sorted, 2},
-    {"_dexter_parms_is_superset_matrix", (DL_FUNC) &_dexter_parms_is_superset_matrix, 4},
+    {"_dexter_is_person_booklet_sorted", (DL_FUNC) &_dexter_is_person_booklet_sorted, 3},
+    {"_dexter_parms_is_superset_matrix", (DL_FUNC) &_dexter_parms_is_superset_matrix, 5},
     {"_dexter_suf_stats_nrm", (DL_FUNC) &_dexter_suf_stats_nrm, 6},
     {"_dexter_suf_stats_im", (DL_FUNC) &_dexter_suf_stats_im, 5},
     {"_dexter_score_tab_single", (DL_FUNC) &_dexter_score_tab_single, 2},

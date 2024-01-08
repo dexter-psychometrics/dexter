@@ -204,6 +204,9 @@ pv_chain = function(x, design, b, a, nPV,
 #' Psychometrika. 2016; 81: 274-289. See also the vignette.
 #' 
 #' @examples
+#' 
+#' \dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+#' 
 #' db = start_new_project(verbAggrRules, ":memory:", 
 #'    person_properties=list(gender="<unknown>"))
 #' add_booklet(db, verbAggrData, "agg")
@@ -230,7 +233,10 @@ pv_chain = function(x, design, b, a, nPV,
 #' legend(-2.2,0.9, c("female", "male") , 
 #'    lty=1, col=c('green', 'red'), bty='n', cex=.75)
 #'    
+#'    
 #' close_project(db)    
+#' 
+#' \dontshow{ RcppArmadillo::armadillo_reset_cores()}
 #' 
 plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL, 
                              nPV=1, 

@@ -71,6 +71,9 @@ we advise to use WLE. The WLE was proposed by Warm (1989) to reduce bias in the 
 as the Warm estimator.
 }
 \examples{
+
+\dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+
 db = start_new_project(verbAggrRules, ":memory:")
 add_booklet(db, verbAggrData, "agg")
 
@@ -87,6 +90,8 @@ legend("topleft", legend = c("WLE", "MLE", "EAP N(0,1)"),
         col = c("black", "red", "blue"), bty = "n",pch = 19)
 
 close_project(db)
+
+\dontshow{ RcppArmadillo::armadillo_reset_cores()}
 
 }
 \references{

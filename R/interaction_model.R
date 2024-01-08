@@ -18,6 +18,9 @@
 #' @seealso \code{\link{plot.rim}}, \code{\link{fit_domains}}
 #'
 #' @examples
+#' 
+#' \dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+#' 
 #' db = start_new_project(verbAggrRules, ":memory:")
 #' add_booklet(db, verbAggrData, "agg")
 #'
@@ -25,7 +28,8 @@
 #' plot(m, "S1DoScold", show.observed=TRUE)
 #'
 #' close_project(db)
-#'
+#' 
+#' \dontshow{ RcppArmadillo::armadillo_reset_cores()}
 #'
 fit_inter = function(dataSrc, predicate = NULL)
 {
@@ -39,7 +43,7 @@ fit_inter_ = function(dataSrc, qtpredicate = NULL, env=NULL, regs=TRUE)
 {
   
   respData = get_resp_data(dataSrc, qtpredicate, env = env, retain_person_id=FALSE) %>%
-	  intersection()
+	  intersection_rd()
 
   if(nrow(respData$x)==0) 
     stop('no responses to analyse')
@@ -129,6 +133,8 @@ fit_inter_ = function(dataSrc, qtpredicate = NULL, env=NULL, regs=TRUE)
 #'
 #' @examples
 #' 
+#' \dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+#' 
 #' db = start_new_project(verbAggrRules, ":memory:")
 #' add_booklet(db, verbAggrData, "agg")
 #' add_item_properties(db, verbAggrProperties)
@@ -137,6 +143,7 @@ fit_inter_ = function(dataSrc, qtpredicate = NULL, env=NULL, regs=TRUE)
 #'
 #' close_project(db)
 #' 
+#' \dontshow{ RcppArmadillo::armadillo_reset_cores()}
 #'
 fit_domains = function(dataSrc, item_property, predicate = NULL)
 {
@@ -144,8 +151,8 @@ fit_domains = function(dataSrc, item_property, predicate = NULL)
   env = caller_env()
 
   get_resp_data(dataSrc, qtpredicate, extra_columns = item_property, env = env, retain_person_id=FALSE) %>%
-	  intersection() %>%
-    polytomize(item_property, protect_x = !is_db(dataSrc)) %>%
+	  intersection_rd() %>%
+    polytomize_rd(item_property, protect_x = !is_db(dataSrc)) %>%
     fit_inter_()
 
 }

@@ -81,12 +81,12 @@ polytomize_C <- function(booklet_id, person_id, item_prop, item_score, booklet_s
     .Call(`_dexter_polytomize_C`, booklet_id, person_id, item_prop, item_score, booklet_score, nlev, nb)
 }
 
-is_person_booklet_sorted <- function(booklet_id, person_id) {
-    .Call(`_dexter_is_person_booklet_sorted`, booklet_id, person_id)
+is_person_booklet_sorted <- function(booklet_id, person_id, ncores) {
+    .Call(`_dexter_is_person_booklet_sorted`, booklet_id, person_id, ncores)
 }
 
-parms_is_superset_matrix <- function(x, item_id, item_score, maxs) {
-    .Call(`_dexter_parms_is_superset_matrix`, x, item_id, item_score, maxs)
+parms_is_superset_matrix <- function(x, item_id, item_score, maxs, ncores) {
+    .Call(`_dexter_parms_is_superset_matrix`, x, item_id, item_score, maxs, ncores)
 }
 
 suf_stats_nrm <- function(booklet_id, booklet_score, item_id, item_score, nit, max_score) {

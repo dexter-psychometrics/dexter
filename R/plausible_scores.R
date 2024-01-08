@@ -102,7 +102,7 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
   {
     # keep track of sumscore on selected items
     
-    respData = semi_join(respData, tibble(item_id=items), by='item_id', .recompute_sumscores = TRUE)
+    respData = semi_join_rd(respData, tibble(item_id=items), by='item_id', .recompute_sumscores = TRUE)
     respData = get_resp_data(respData, summarised = TRUE, protect_x = !is_db(dataSrc))
     
     pv = pv %>% 

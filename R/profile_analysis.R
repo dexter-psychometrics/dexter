@@ -148,7 +148,7 @@ profiles = function(dataSrc, parms, item_property, predicate=NULL, merge_within_
   }
   
   respData = respData %>%
-    polytomize(item_property, protect_x=!is_db(dataSrc)) 
+    polytomize_rd(item_property, protect_x=!is_db(dataSrc)) 
   
   out = respData$x %>%
     inner_join(

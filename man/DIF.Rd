@@ -28,6 +28,9 @@ Tests for equality of relative item/category difficulties across groups.
 Supplements the confirmatory approach of the profile plot.
 }
 \examples{
+
+\dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+
 db = start_new_project(verbAggrRules, ":memory:", person_properties=list(gender='unknown'))
 add_booklet(db, verbAggrData, "agg")
 dd = DIF(db,person_property="gender")
@@ -36,6 +39,8 @@ plot(dd)
 str(dd)
 
 close_project(db)
+
+\dontshow{ RcppArmadillo::armadillo_reset_cores()}
 
 }
 \references{

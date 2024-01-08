@@ -28,6 +28,8 @@ super-items and analyses these as normal items.
 }
 \examples{
 
+\dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+
 db = start_new_project(verbAggrRules, ":memory:")
 add_booklet(db, verbAggrData, "agg")
 add_item_properties(db, verbAggrProperties)
@@ -36,6 +38,7 @@ plot(mSit)
 
 close_project(db)
 
+\dontshow{ RcppArmadillo::armadillo_reset_cores()}
 
 }
 \seealso{

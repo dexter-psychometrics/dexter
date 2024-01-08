@@ -878,12 +878,12 @@ List polytomize_C(IntegerVector& booklet_id, IntegerVector& person_id, IntegerVe
 // utility function to check if data is safe to use with above functions
 
 // [[Rcpp::export]]
-bool is_person_booklet_sorted(const IntegerVector& booklet_id, const IntegerVector& person_id)
+bool is_person_booklet_sorted(const IntegerVector& booklet_id, const IntegerVector& person_id, const int ncores)
 {
 	const int n = booklet_id.length();
 	std::atomic<bool> sorted(true);
-	// prefer parallel time worst case over fast return if not sorted
-#pragma omp parallel for
+
+#pragma omp parallel for num_threads(ncores)
 	for(int i=1; i<n; i++)
 	{
 		if((booklet_id[i] < booklet_id[i-1] && person_id[i] == person_id[i-1]) ||
@@ -896,11 +896,12 @@ bool is_person_booklet_sorted(const IntegerVector& booklet_id, const IntegerVect
 
 
 
+
 // 0.52 for size 1e6 * 100 (if loop is necessary)
 // item_id must be shrunk to relevant items
 // item_id must be ordered
 // [[Rcpp::export]]
-bool parms_is_superset_matrix(const IntegerMatrix& x, const IntegerVector& item_id, const IntegerVector& item_score, const int maxs)
+bool parms_is_superset_matrix(const IntegerMatrix& x, const IntegerVector& item_id, const IntegerVector& item_score, const int maxs, const int ncores)
 {
 	const int nit = x.ncol();
 	const int np = x.nrow();
@@ -918,7 +919,7 @@ bool parms_is_superset_matrix(const IntegerMatrix& x, const IntegerVector& item_
 	
 	std::atomic<bool> is_super(true);
 	
-#pragma omp parallel for
+#pragma omp parallel for num_threads(ncores)
 	for(int i=0; i< nit; i++)
 	{
 		for(int j=0; j<np; j++)

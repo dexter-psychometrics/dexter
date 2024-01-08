@@ -124,7 +124,7 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
   } 
   item = item_id
   respData = get_resp_data(dataSrc, qtpredicate = qtpredicate, extra_columns='response', env=env, summarised=FALSE) %>%
-    filter(.data$item_id == item, .recompute_sumscores = FALSE )
+    filter_rd(.data$item_id == item, .recompute_sumscores = FALSE )
   
 
   if (nrow(respData$design) == 0) 
@@ -316,7 +316,7 @@ pp_segments = function(maxA, maxB, psbl, col='lightgray',cex=0.6)
 #' @param x Which value of the item_property to draw on the x axis, if NULL, one is chosen automatically
 #' @param col vector of colors to use for plotting
 #' @param col.diagonal color of the diagonal lines representing the testscores
-#' @param ... further arguments to plot
+#' @param ... further graphical arguments to plot. Graphical parameters for the legend can be postfixed with `.legend`
 #' @details 
 #' Profile plots can be used to investigate whether two (or more) groups of respondents 
 #' attain the same test score in the same way. The user must provide a  
@@ -332,7 +332,9 @@ pp_segments = function(maxA, maxB, psbl, col='lightgray',cex=0.6)
 #' investigate differential item functioning. 
 #'
 #' @examples
-
+#' 
+#' \dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+#' 
 #' db = start_new_project(verbAggrRules, ":memory:", 
 #'                          person_properties=list(gender="unknown"))
 #' add_booklet(db, verbAggrData, "agg")
@@ -341,6 +343,7 @@ pp_segments = function(maxA, maxB, psbl, col='lightgray',cex=0.6)
 #' 
 #' close_project(db)
 #' 
+#' \dontshow{ RcppArmadillo::armadillo_reset_cores()}
 #' 
 profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, model = c("IM","RM"), x = NULL, 
                         col = NULL, col.diagonal='lightgray',...) 
@@ -372,7 +375,7 @@ profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, mod
 	stop('profile_plot does not accept a matrix dataSrc')
   
   respData = get_resp_data(dataSrc, qtpredicate, extra_columns = covariate, env = env)  %>%
-	  intersection()
+	  intersection_rd()
   
   respData$x[[covariate]] = ffactor(respData$x[[covariate]])
   
@@ -407,7 +410,7 @@ profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, mod
             B = which(domains[[item_property]] == props[2]))
   
   # fit interaction model and compute ssTable
-  models = by(respData, covariate, fit_inter_, regs=FALSE) 
+  models = by_rd(respData, covariate, fit_inter_, regs=FALSE) 
   
   tt = lapply(models, function(m)
   {

@@ -43,6 +43,8 @@ for a single item, an arbitrary group of items or all items
 }
 \examples{
 
+\dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+
 db = start_new_project(verbAggrRules,':memory:')
 add_booklet(db,verbAggrData, "agg")
 p = fit_enorm(db)
@@ -72,5 +74,7 @@ mtext(side = 4, line = 2.5, 'population density (green)')
 
 par(op)
 close_project(db)
+
+\dontshow{ RcppArmadillo::armadillo_reset_cores()}
 
 }

@@ -28,6 +28,8 @@ the intersection (i.e., the common items) of two or more booklets. If the inters
 (i.e., no common items for all persons), the function will exit with an error message.
 }
 \examples{
+\dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+
 db = start_new_project(verbAggrRules, ":memory:")
 add_booklet(db, verbAggrData, "agg")
 
@@ -36,5 +38,7 @@ print(dd)
 plot(dd)
 
 close_project(db)
+
+\dontshow{ RcppArmadillo::armadillo_reset_cores()}
 
 }

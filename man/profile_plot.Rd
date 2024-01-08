@@ -38,7 +38,7 @@ the data better or at least as good as the Rasch model.}
 
 \item{col.diagonal}{color of the diagonal lines representing the testscores}
 
-\item{...}{further arguments to plot}
+\item{...}{further graphical arguments to plot. Graphical parameters for the legend can be postfixed with `.legend`}
 }
 \description{
 Profile plot
@@ -58,6 +58,9 @@ groups and are matched on the test score. This provides a content-driven way to
 investigate differential item functioning.
 }
 \examples{
+
+\dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+
 db = start_new_project(verbAggrRules, ":memory:", 
                          person_properties=list(gender="unknown"))
 add_booklet(db, verbAggrData, "agg")
@@ -66,5 +69,6 @@ profile_plot(db, item_property='mode', covariate='gender')
 
 close_project(db)
 
+\dontshow{ RcppArmadillo::armadillo_reset_cores()}
 
 }

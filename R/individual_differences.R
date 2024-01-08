@@ -14,6 +14,8 @@
 #' The former under the hypothesis that there are no individual differences.
 #'
 #'@examples
+#' \dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+#' 
 #' db = start_new_project(verbAggrRules, ":memory:")
 #' add_booklet(db, verbAggrData, "agg")
 #' 
@@ -23,6 +25,8 @@
 #' 
 #' close_project(db)
 #' 
+#' \dontshow{ RcppArmadillo::armadillo_reset_cores()}
+#' 
 individual_differences = function(dataSrc, predicate = NULL)
 {
   qtpredicate = eval(substitute(quote(predicate)))
@@ -30,7 +34,7 @@ individual_differences = function(dataSrc, predicate = NULL)
   check_dataSrc(dataSrc)
   
   respData = get_resp_data(dataSrc, qtpredicate, env = env) %>%
-	  intersection()
+	  intersection_rd()
   
   parms = fit_enorm(respData)
   b = parms$est$b

@@ -27,6 +27,9 @@ the intersection (common items) in two or more booklets. If the intersection is 
 (no common items for all persons), the function will exit with an error message.
 }
 \examples{
+
+\dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+
 db = start_new_project(verbAggrRules, ":memory:")
 add_booklet(db, verbAggrData, "agg")
 
@@ -35,6 +38,7 @@ plot(m, "S1DoScold", show.observed=TRUE)
 
 close_project(db)
 
+\dontshow{ RcppArmadillo::armadillo_reset_cores()}
 
 }
 \seealso{

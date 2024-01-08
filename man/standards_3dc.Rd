@@ -46,6 +46,8 @@ maximum likelihood scaling from an IRT model, described in Moe and Verhelst (201
 }
 \examples{
 
+\dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+
 library(dplyr)
 db = start_new_project(verbAggrRules, ":memory:")
             
@@ -63,6 +65,9 @@ plot(sts_par)
 
 
 # db_sts = standards_db(sts_par,'test.db',c('mildly aggressive','dangerously aggressive'))
+
+\dontshow{ RcppArmadillo::armadillo_reset_cores()}
+
 }
 \references{
 Keuning J., Straat J.H., Feskens R.C.W. (2017) The Data-Driven Direct Consensus (3DC) Procedure: A New Approach to Standard Setting. 

@@ -37,6 +37,8 @@
 #' 
 #' @examples
 #' 
+#' \dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+#' 
 #' library(dplyr)
 #' db = start_new_project(verbAggrRules, ":memory:")
 #'             
@@ -54,6 +56,9 @@
 #' 
 #' 
 #' # db_sts = standards_db(sts_par,'test.db',c('mildly aggressive','dangerously aggressive'))
+#' 
+#' \dontshow{ RcppArmadillo::armadillo_reset_cores()}
+#' 
 standards_3dc = function(parms, design)
 {
   
