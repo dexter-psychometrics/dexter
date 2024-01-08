@@ -10,7 +10,7 @@ vignette: >
 ---
 
 <style>
-img{ border:none;}
+img, #nature, #nature td{  border:none;}
 </style>
 
 ```{r setup, include=FALSE}
@@ -30,22 +30,22 @@ Educational tests are often equipped with a threshold to turn the test score int
 
 Consider a test for pregnancy. The state of nature is a binary variable (positive / negative). So is the outcome of the test, although the decision is possibly produced by dichotomizing the quantitative measurement of some hormone or other substance, just like we want to do with our educational test scores. There are four possible outcomes in all, which can be represented in a two-by-two table
 
-<table>
+<table id="nature">
 <tbody>
 <tr>
-  <td rowspan="2" colspan="2"></td>
-  <td colspan="2">State of nature</td>
+  <td rowspan="2" colspan="2" style="border-right:1px solid black;"></td>
+  <td colspan="2" style="text-align:center">State of nature</td>
+</tr>
+<tr style="border-bottom: 1px solid black;">
+  <td style="text-align:center">Positive</td>
+  <td style="text-align:center">Negative</td>
 </tr>
 <tr>
-  <td>Positive</td>
-  <td>Negative</td>
+<td rowspan="2" style="vertical-align:middle;">Prediction</td> 
+<td style="border-right:1px solid black;">Positive</td><td>True positive (TP)</td><td>False positive (FP)</td>
 </tr>
 <tr>
-<td rowspan="2">Prediction</td> 
-<td>Positive</td><td>True positive (TP)</td><td>False positive (FP)</td>
-</tr>
-<tr>
-<td>Negative</td><td>False negative (FN)</td><td>True negative (TN)</td>
+<td style="border-right:1px solid black;">Negative</td><td>False negative (FN)</td><td>True negative (TN)</td>
 </tr>
 </tbody>
 </table>

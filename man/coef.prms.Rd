@@ -12,8 +12,8 @@
 \item{hpd}{width of Bayesian highest posterior density interval around mean_beta, 
 value must be between 0 and 1, default is 0.95}
 
-\item{what}{which coefficients to return. Defaults to `items` (the item parameters). Can also be `var` for the 
-variance-covariance matrix (CML only) or `posterior` for all draws of the item parameters (Bayes only)}
+\item{what}{which coefficients to return. Defaults to \code{items} (the item parameters). Can also be \code{var} for the 
+variance-covariance matrix (CML only) or \code{posterior} for all draws of the item parameters (Bayes only)}
 
 \item{...}{further arguments to coef are ignored}
 }

@@ -313,10 +313,10 @@ pp_segments = function(maxA, maxB, psbl, col='lightgray',cex=0.6)
 #' @param model "IM" (default) or "RM" where "IM" is the interaction model and 
 #' "RM" the Rasch model. The interaction model is the default as it fits 
 #' the data better or at least as good as the Rasch model.
-#' @param x Which value of the item_property to draw on the x axis, if NULL, one is chosen automatically
+#' @param x Which category of the item_property to draw on the x axis, if NULL, one is chosen automatically
 #' @param col vector of colors to use for plotting
 #' @param col.diagonal color of the diagonal lines representing the testscores
-#' @param ... further graphical arguments to plot. Graphical parameters for the legend can be postfixed with `.legend`
+#' @param ... further graphical arguments to plot. Graphical parameters for the legend can be postfixed with \code{.legend}
 #' @details 
 #' Profile plots can be used to investigate whether two (or more) groups of respondents 
 #' attain the same test score in the same way. The user must provide a  

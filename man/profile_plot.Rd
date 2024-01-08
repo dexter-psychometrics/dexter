@@ -32,13 +32,13 @@ There will be one line for each distinct value.}
 "RM" the Rasch model. The interaction model is the default as it fits 
 the data better or at least as good as the Rasch model.}
 
-\item{x}{Which value of the item_property to draw on the x axis, if NULL, one is chosen automatically}
+\item{x}{Which category of the item_property to draw on the x axis, if NULL, one is chosen automatically}
 
 \item{col}{vector of colors to use for plotting}
 
 \item{col.diagonal}{color of the diagonal lines representing the testscores}
 
-\item{...}{further graphical arguments to plot. Graphical parameters for the legend can be postfixed with `.legend`}
+\item{...}{further graphical arguments to plot. Graphical parameters for the legend can be postfixed with \code{.legend}}
 }
 \description{
 Profile plot

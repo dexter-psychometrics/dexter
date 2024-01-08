@@ -30,14 +30,14 @@ otherwise, a Gibbs sampler will be used to produce a sample from the posterior}
 }
 \value{
 An object of type \code{prms}. The prms object can be cast to a data.frame of item parameters 
-using function `coef` or used directly as input for other Dexter functions.
+using function \code{coef} or used directly as input for other Dexter functions.
 }
 \description{
 Fits an Extended NOminal Response Model (ENORM) using conditional maximum likelihood (CML)
 or a Gibbs sampler for Bayesian estimation.
 }
 \details{
-To support some flexibility in fixing parameters, fixed_params can be a dexter prms object of a data.frame.
+To support some flexibility in fixing parameters, fixed_params can be a dexter prms object or a data.frame.
 If a data.frame, it should contain the columns item_id, item_score and a difficulty parameter. Three types of parameters are supported:
 \describe{
 \item{delta/beta}{ thresholds between subsequent item categories }
