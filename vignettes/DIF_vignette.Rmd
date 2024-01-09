@@ -16,18 +16,20 @@ img{ border:none;}
 
 ```{r setup, include=FALSE}
 library(knitr)
-opts_chunk$set(echo = TRUE, fig.width=6, fig.height=5)
+opts_chunk$set(echo = TRUE, fig.width=6, fig.height=5, message=FALSE)
 
 if (requireNamespace("Cairo", quietly = TRUE)) 
 {
    opts_chunk$set(dev='CairoPNG')
 }
+
+RcppArmadillo::armadillo_throttle_cores(1)
 ```
 
 ## Test Differential Items Functioning
 Based on the theory given in @BechgerMarisDIF, the function `DIF()` tests for differential items function (DIF) under an extended nominal response model. We illustrate how it works using the verbal aggression data.
 
-```{r get_data, results='hide', message=FALSE}
+```{r get_data, results='hide'}
 library(dexter)
 library(dplyr)
 
@@ -85,8 +87,10 @@ items = get_items(db) %>%
 plot(dif_gender, items=items$item_id)
 ```
 
-```{r, echo=FALSE, results='hide'}
+```{r, include=FALSE}
 close_project(db)
+
+RcppArmadillo::armadillo_reset_cores()
 ```
 Now, we see that the DO-items among themselves keep their relative positions in the two groups.
 

@@ -2,6 +2,7 @@ context('check ability')
 
 library(dplyr)
 
+RcppArmadillo::armadillo_throttle_cores(1)
 
 test_that('inconsistencies between data and parms are handled correctly',{
 
@@ -67,7 +68,7 @@ test_that('verbAgg abilities', {
 })
 
 
-
+RcppArmadillo::armadillo_reset_cores()
 
 
 

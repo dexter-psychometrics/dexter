@@ -2,6 +2,8 @@ context('check interaction model')
 
 library(dplyr)
 
+RcppArmadillo::armadillo_throttle_cores(1)
+
 
 test_that('interaction model parameters are stable over simulation',{
   
@@ -25,3 +27,6 @@ test_that('interaction model parameters are stable over simulation',{
   expect_gt(cor(f$sigma[i],g$sigma[i]), 0.9, label='IM sim sigma correlates >.9 true sigma')
     
 })
+
+
+RcppArmadillo::armadillo_reset_cores()

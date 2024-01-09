@@ -18,7 +18,7 @@ img{ border:none;}
 
 ```{r setup, include=FALSE}
 library(knitr)
-opts_chunk$set(echo = TRUE,fig.align='center', fig.width=6, fig.height=5)
+opts_chunk$set(echo = TRUE,fig.align='center', fig.width=6, fig.height=5, message = FALSE)
 
 if (requireNamespace("Cairo", quietly = TRUE)) 
 {
@@ -34,6 +34,7 @@ par_hook = function(before, options, envir)
 }
 knit_hooks$set(par = par_hook)
 
+RcppArmadillo::armadillo_throttle_cores(1)
 ```
 
 **Dexter** is an R [@R] package intended as a robust and fairly comprehensive system for managing and analyzing test data organized in booklets. It includes facilities for importing and managing test data, assessing and improving the quality of data through basic test-and-item analysis, fitting an IRT model, and computing various estimates of ability.
@@ -42,7 +43,7 @@ knit_hooks$set(par = par_hook)
 
 We believe that, at least in high-stakes tests, the scoring rules should be explicit, and that the psychometric model should be developed from the scoring rules, not vice versa. Correspondingly, a **dexter** project starts with the user supplying the scoring rules for all items in the test. These must be given as a data frame containing, in any order, three columns named _exactly_ `item_id`, `response`, and `item_score`. An example is provided with the package:
 
-```{r, message=FALSE}
+```{r}
 library(dplyr)
 library(dexter)
 head(verbAggrRules, 10)
@@ -178,7 +179,7 @@ head(coef(parms_gibbs))
 ```
 
 
-```{r, echo=F}
+```{r, echo=FALSE}
 kable(head(coef(parms_gibbs)), digits=3)
 ```
 
@@ -213,6 +214,8 @@ The results are striking: at any level of overall aggression, women want more th
 
 ```{r}
 close_project(db)
+
+RcppArmadillo::armadillo_reset_cores()
 ```
 
 

@@ -3,7 +3,7 @@ context('test plausible_scores')
 library(dplyr)
 
 
-
+RcppArmadillo::armadillo_throttle_cores(1)
 
 test_that('plausible scores works',{
   skip_on_cran()
@@ -41,7 +41,9 @@ test_that('plausible scores works',{
   ps = plausible_scores(responses) %>% 
     rename(PS_keep_true = 'PS1') %>%
     inner_join(plausible_scores(responses, keep.observed = FALSE), by= c('person_id','booklet_id')) %>%
-    inner_join(responses %>% group_by(person_id, booklet_id) %>% summarise(booklet_score = sum(item_score)), 
+    inner_join(responses %>% 
+                 group_by(person_id, booklet_id) %>% 
+                 summarise(booklet_score = sum(item_score)), 
                by=c('person_id','booklet_id'))
   
   expect_gt(cor(ps$PS_keep_true, ps$booklet_score), cor(ps$PS1, ps$booklet_score)+.05)
@@ -51,3 +53,5 @@ test_that('plausible scores works',{
   expect_lt(abs(mean(ps$PS1)-mean(ps$PS_keep_true)),0.15)
   
 })
+
+RcppArmadillo::armadillo_reset_cores()

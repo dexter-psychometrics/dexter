@@ -90,8 +90,7 @@ standards_3dc = function(parms, design)
   {
       es = expected_score(parms, items=tds$item_id)
       
-      select(tds, booklet_id='cluster_id', 'item_id') %>%
-        ability_tables(parms, design = .) %>%
+      ability_tables(parms, design = select(tds, booklet_id='cluster_id', 'item_id')) %>%
         rename(cluster_id='booklet_id', cluster_score='booklet_score') %>%
         mutate(booklet_score = es(.data$theta)) %>%
         inner_join(distinct(tds, .data$cluster_nbr, .data$cluster_id), by='cluster_id')

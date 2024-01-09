@@ -2,6 +2,9 @@ context('test plausible_values')
 
 library(dplyr)
 
+
+RcppArmadillo::armadillo_throttle_cores(1)
+
 test_that('populations work',{
   db = open_project('../verbAggression.db')
   
@@ -27,3 +30,4 @@ test_that('populations work',{
   dbDisconnect(db)
 })
   
+RcppArmadillo::armadillo_reset_cores()

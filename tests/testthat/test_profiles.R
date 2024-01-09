@@ -4,6 +4,8 @@ library(dplyr)
 library(DBI)
 library(RSQLite)
 
+RcppArmadillo::armadillo_throttle_cores(1)
+
 verbAggCopy = function(pth = '../verbAggression.db')
 {
   con = dbConnect(SQLite(), ":memory:")
@@ -63,4 +65,5 @@ test_that('profile analysis verb agg',{
 })
 
 
+RcppArmadillo::armadillo_reset_cores()
 

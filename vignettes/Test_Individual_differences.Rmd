@@ -16,7 +16,7 @@ img{ border:none;}
 
 ```{r setup, include=FALSE}
 library(knitr)
-opts_chunk$set(echo = TRUE)
+opts_chunk$set(echo = TRUE, message = FALSE)
 
 if (requireNamespace("Cairo", quietly = TRUE)) 
 {
@@ -30,6 +30,8 @@ par_hook = function(before, options, envir)
   }
 }
 knit_hooks$set(par = par_hook)
+
+RcppArmadillo::armadillo_throttle_cores(1)
 
 library(dexter)
 library(dplyr)
@@ -84,7 +86,7 @@ Thus, we find a p-value of `r round(dd$est$test$p.value,digits=2)` for the hypot
 
 What about real data?  **Dexter** comes with a well-known example preinstalled, the verbal aggression data [@VanData] analysed in great detail in [@boeck] and many others. 243 females and 73 males have answered on a 3-point scale ('yes', 'perhaps', or 'no') how likely they are to become verbally aggressive in four different frustrating situations
 
-```{r, fig.align='center', fig.height=4, fig.width=4,results='hide',message=FALSE}
+```{r, fig.align='center', fig.height=4, fig.width=4,results='hide'}
 db = start_new_project(verbAggrRules, ":memory:")
 add_booklet(db, verbAggrData, "data")
 
@@ -101,6 +103,7 @@ dd
 
 ```{r, include=FALSE}
 close_project(db)
+RcppArmadillo::armadillo_reset_cores()
 ```
 
 ## References

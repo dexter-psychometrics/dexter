@@ -2,6 +2,8 @@ context('check tia')
 
 library(dplyr)
 
+RcppArmadillo::armadillo_throttle_cores(1)
+
 tia_equal = function(tia1,tia2, tolerance = 1e-8)
 {
   if(!setequal(colnames(tia1),colnames(tia2)))
@@ -122,3 +124,6 @@ test_that('tia computations are correct',{
   
   expect_true(all(filter(tia_dx$items,item_id==item1)$sd_score == 0))
 })
+
+RcppArmadillo::armadillo_reset_cores()
+

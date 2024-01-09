@@ -28,12 +28,14 @@ div.crop img{
 
 ```{r setup, include=FALSE}
 library(knitr)
-opts_chunk$set(echo = FALSE)
+opts_chunk$set(echo = FALSE, message=FALSE)
 
 if (requireNamespace("Cairo", quietly = TRUE)) 
 {
    opts_chunk$set(dev='CairoPNG')
 }
+RcppArmadillo::armadillo_throttle_cores(1)
+
 library(dexter)
 library(latticeExtra)
 fq = c(10,12,30,20,40,24,15,18,14)
@@ -48,7 +50,7 @@ reds = c("#972B2F","#A94C4F","#BD6F71","#D39A9B","#F7EFEF")
 
 The function `profile_plot` in package dexter produces plots like the following one based on the verbal aggression dataset:
 
-```{r, figProf, echo=FALSE, results="hide",fig.height=4,fig.width=4,fig.align='center',message=FALSE}
+```{r, figProf,  results="hide",fig.height=4,fig.width=4,fig.align='center'}
 # fig.align='center' does not work anymore when you specify any css styles
 # therefore the: display:block;margin: 0 auto;
 db = start_new_project(verbAggrRules, ":memory:", person_properties=list(gender="unknown"))
@@ -62,7 +64,7 @@ The plot is, as we will try to show, quite informative. However, it is not very 
 
 Let us assume a test of four dichotomous items. The possible sum scores are then 0 through 4. Let the four items be classified into two non-overlapping domains, A and B, with two items each. The following table could be the frequency distribution of a sample of students by their scores on the two domains:
 
-```{r frq, echo=FALSE}
+```{r frq}
 rownames(fq) = c(0,1,2)
 colnames(fq) = c(0,1,2)
 knitr::kable(fq)
@@ -73,7 +75,7 @@ knitr::kable(fq)
 We never expected to use a 3-dimensional bar plot, ever, but we will make a once-in-a-lifetime exception:
 
 <div class='crop' style='margin:auto'>
-```{r, fig1, echo=FALSE,fig.align='center', out.extra='style="margin-left: -30px; margin-top: -45px;"'}
+```{r, fig1, fig.align='center', out.extra='style="margin-left: -30px; margin-top: -45px;"'}
 cloud(fq, panel.3d.cloud = panel.3dbars,
       xbase = 0.4, ybase = 0.4, zlim = c(0, max(fq)),
       scales = list(arrows = FALSE, just = "right"), xlab = "A", ylab = "B",
@@ -97,7 +99,7 @@ The first and the third of these possibilities are illustrated below:
 <div style='display:inline-block;text-align: center;'>
 Joint
 <div class='crop'>
-```{r, fig21, echo=FALSE, out.extra='style="margin-left: -30px; margin-top: -50px;"'}
+```{r, fig21,  out.extra='style="margin-left: -30px; margin-top: -50px;"'}
 joint = prop.table(fq)
 
 cloud(joint, panel.3d.cloud = panel.3dbars,
@@ -113,7 +115,7 @@ cloud(joint, panel.3d.cloud = panel.3dbars,
 <div style='display:inline-block;text-align: center;margin-left:3em;'>
 Conditional
 <div class='crop'>
-```{r, fig22, echo=FALSE, out.extra='style="margin-left: -30px; margin-top: -50px;"'}
+```{r, fig22,  out.extra='style="margin-left: -30px; margin-top: -50px;"'}
 
 conditional = prop.table(fq,1)
 co = rep(c('skyblue1','pink1','springgreen1'),3)
@@ -134,7 +136,7 @@ The profile plot does not use any of these three kinds of probabilities. Instead
 <div style='text-align: center;margin:auto;'>
 Special
 <div class='crop' style='margin:auto;'>
-```{r, fig3, echo=FALSE,out.extra='style="margin-left: -30px; margin-top: -50px;"'}
+```{r, fig3, out.extra='style="margin-left: -30px; margin-top: -50px;"'}
 special = fq / den
 j = 6-c(1,2,3,2,3,4,3,4,5)
 sp=blues[j]
@@ -154,7 +156,7 @@ What we do now is identify the pattern with the largest probability given a tota
 
 <div style='text-align:center;'>
 <div class='crop' style='display:inline-block;'>
-```{r, fig41, echo=FALSE,out.extra='style="margin-left: -30px; margin-top: -50px;"'}
+```{r, fig41, out.extra='style="margin-left: -30px; margin-top: -50px;"'}
 hi = c(1,4,5,6,9)
 sp[hi] = reds[j[hi]]
 
@@ -169,7 +171,7 @@ cloud(special, panel.3d.cloud = panel.3dbars,
 </div>
 <div style='display:inline-block;'margin-left:3em;'>
 <div class='crop'>
-```{r, fig42, echo=FALSE,out.extra='style="margin-top: -30px;margin-left:0px;"'}
+```{r, fig42, out.extra='style="margin-top: -30px;margin-left:0px;"'}
 d = expand.grid(0:2,0:2)
 plot(d, xlab = "A", ylab = "B", xlim=c(0.5,4), ylim=c(-0.3,2.7), asp=1, pch=15,
      cex=2.5, col=sp, axes=FALSE)
@@ -195,7 +197,7 @@ The thin gray lines connect all patterns that yield the same total score on the 
 Back to the original profile plot: what does it mean? There are two paths, one for female respondents, the other one for males. The diagonal lines pass through all pairs of scores on "Want to curse, shout, "  and "Actually curse, shout" that result in the same overall score on verbally aggressive behavior. The fact that the curve for the females lies consistently to the left and above the curve for males means that, at each level of verbal aggressiveness, they tend to want more but do less.
 
 
-```{r, prof_plot2, echo=FALSE, fig.height=5, fig.width=5, fig.align='center'}
+```{r, prof_plot2,  fig.height=5, fig.width=5, fig.align='center'}
 profile_plot(db, item_property='mode', covariate='gender', booklet_id=='agg', main='Gender')
 mtext('Do versus Want')
 ```
@@ -207,6 +209,7 @@ Note that the profile plots got their name from their similarity to *profile ana
 
 ```{r, include=FALSE}
 close_project(db)
+RcppArmadillo::armadillo_reset_cores()
 ```
 
 

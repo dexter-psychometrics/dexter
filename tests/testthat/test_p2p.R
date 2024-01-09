@@ -3,13 +3,15 @@ context('check equating')
 library(dplyr)
 library(tidyr)
 
-
+RcppArmadillo::armadillo_throttle_cores(1)
 
 test_that('complete case works',{
   
   db = open_project('../verbAggression.db')
 
-  ref_items = get_items(db) %>% filter(behavior == 'Scold') %>% pull(item_id)
+  ref_items = get_items(db) %>% 
+    filter(behavior == 'Scold') %>% 
+    pull(item_id)
   
   f = fit_enorm(db,method='Bayes')
   
@@ -32,4 +34,5 @@ test_that('complete case works',{
   
 
 })
-  
+
+RcppArmadillo::armadillo_reset_cores()

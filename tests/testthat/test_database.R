@@ -4,6 +4,7 @@ library(dplyr)
 library(DBI)
 library(RSQLite)
 
+RcppArmadillo::armadillo_throttle_cores(1)
 
 verbAggCopy = function(pth = '../verbAggression.db')
 {
@@ -112,7 +113,10 @@ test_that('adding person and item properties',
 
   items = get_items(db)
   
-  expect_true(all(items %>% filter(item_id=='S4DoCurse') %>% select(blame,news) %>% unlist() == c("society", "olds" )))
+  expect_true(all(items %>% 
+                    filter(item_id=='S4DoCurse') %>% 
+                    select(blame,news) %>% 
+                    unlist() == c("society", "olds" )))
   
   expect_output({add_item_properties(db, default_values = list(a=4L))},
                 '1 new item_properties defined')
@@ -139,7 +143,10 @@ test_that('adding person and item properties',
   
   persons = get_persons(db)
   
-  expect_true(all(persons %>% filter(person_id=='dxP1') %>% select(gender,news) %>% unlist() == c("unchecked", "olds" )))
+  expect_true(all(persons %>% 
+                    filter(person_id=='dxP1') %>% 
+                    select(gender,news) %>% 
+                    unlist() == c("unchecked", "olds" )))
   
   expect_output({add_person_properties(db, default_values = list(x=4L))},
                 '1 new person_properties defined')
@@ -191,3 +198,4 @@ test_that('add_booklet',{
   dbDisconnect(db)
 })
 
+RcppArmadillo::armadillo_reset_cores()

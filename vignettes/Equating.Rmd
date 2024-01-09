@@ -15,7 +15,7 @@ img, #nature, #nature td{  border:none;}
 
 ```{r setup, include=FALSE}
 library(knitr)
-opts_chunk$set(echo = TRUE)
+opts_chunk$set(echo = TRUE, message=FALSE)
 
 if (requireNamespace("Cairo", quietly = TRUE)) 
 {
@@ -23,6 +23,8 @@ if (requireNamespace("Cairo", quietly = TRUE))
 }
 library(dplyr)
 library(ggplot2)
+
+RcppArmadillo::armadillo_throttle_cores(1)
 ```
 
 
@@ -260,9 +262,10 @@ plot(ou_e, what='sens/spec')
 
 If sensitivity and specificity are equally important, the plot suggests `r which.min((1-ou_e$est$bk2$prob_to_pass$sensitivity)^2+ (1-ou_e$est$bk2$prob_to_pass$specificity)^2)-1` as a pass-fail score on the new test.
 
-```{r, echo=FALSE, message=FALSE}
+```{r, include=FALSE}
 close_project(db_sm)
 
+RcppArmadillo::armadillo_reset_cores()
 ```
 
 ## Conclusion

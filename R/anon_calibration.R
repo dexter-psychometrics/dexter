@@ -513,8 +513,15 @@ calibrate_Bayes = function(scoretab, design, sufI, a, first, last,  nIter, fixed
   bi = design$inr
   ib = design$bn
   
-  nbi = design %>% count(.data$first) %>% arrange(.data$first) %>% pull(.data$n)
-  nib = design %>% count(.data$bn) %>% arrange(.data$bn) %>% pull(.data$n)
+  nbi = design %>% 
+    count(.data$first) %>% 
+    arrange(.data$first) %>% 
+    pull(.data$n)
+  
+  nib = design %>% 
+    count(.data$bn) %>% 
+    arrange(.data$bn) %>% 
+    pull(.data$n)
   
   design = arrange(design,.data$bn)
   

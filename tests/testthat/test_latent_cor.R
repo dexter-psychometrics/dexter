@@ -3,7 +3,7 @@ context('check latent correlations')
 library(dplyr)
 library(tidyr)
 
-
+RcppArmadillo::armadillo_throttle_cores(1)
 
 test_that('latent correlations work',{
   
@@ -29,3 +29,6 @@ test_that('latent correlations work',{
   
   #to do: incomplete designs
 })
+
+RcppArmadillo::armadillo_reset_cores()
+

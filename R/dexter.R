@@ -699,7 +699,9 @@ add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_a
     if(nrow(existing_admin) > 0)
     {
       message('The following person-booklet combination have already been entered into the project (showing first 20)')
-      head(existing_admin, 20) %>% as.data.frame() %>% print(row.names=FALSE)
+      head(existing_admin, 20) %>% 
+        as.data.frame() %>% 
+        print(row.names=FALSE)
       stop('double administrations')
     }
     

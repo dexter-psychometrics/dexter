@@ -2,6 +2,7 @@ context('Check fit_enorm')
 
 library(dplyr)
 
+RcppArmadillo::armadillo_throttle_cores(1)
 
 
 test_that('calibration of verbal aggression dataset matches oplm results, with fixed and unfixed',{
@@ -89,4 +90,4 @@ test_that('calibration of verbal aggression dataset matches oplm results, with f
   dbDisconnect(db)
 })
 
-
+RcppArmadillo::armadillo_reset_cores()

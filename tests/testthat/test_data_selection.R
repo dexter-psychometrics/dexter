@@ -4,7 +4,7 @@ library(dplyr)
 library(DBI)
 
 # to do: test what happens if integers or factors are used as booklet/person/item id's
-
+RcppArmadillo::armadillo_throttle_cores(1)
 
 
 # equivalent
@@ -352,3 +352,6 @@ test_that('variable names cross sql',
   close_project(db)
 
 })
+
+RcppArmadillo::armadillo_reset_cores()
+
