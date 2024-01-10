@@ -117,8 +117,8 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
     design = tibble(booklet_id = as.character(unlist(lapply(1:scr$nBook, function(x) rep(x,scr$nitBook[x])))),
                     item_nbr = unlist(scr$itemsBook),
                     item_position = unlist(lapply(scr$itemsBook, function(x) 1:length(x))),
-                    onoff = unlist(scr$itemsOn)) %>%
-              inner_join(tibble(item_nbr = 1:scr$nit, item_id = scr$itemLabels), by='item_nbr') %>%
+                    onoff = unlist(scr$itemsOn)) |>
+              inner_join(tibble(item_nbr = 1:scr$nit, item_id = scr$itemLabels), by='item_nbr') |>
               arrange(.data$booklet_id, .data$item_position) 
             
     dbExecute_param(db,'INSERT INTO dxbooklets(booklet_id, booklet_on_off) VALUES(:b,:onoff);',
@@ -189,8 +189,8 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
       data = tibble(booklet_id = rep(bkl, sapply(rsp,length)), 
                     person_id = rep(prs, sapply(rsp,length)),
                     response=trimws(unlist(rsp)), 
-                    item_position = unlist(sapply(rsp, function(n) 1:length(n),simplify=FALSE))) %>%
-        inner_join(design, by=c('booklet_id','item_position')) %>%
+                    item_position = unlist(sapply(rsp, function(n) 1:length(n),simplify=FALSE))) |>
+        inner_join(design, by=c('booklet_id','item_position')) |>
         select('person_id', 'booklet_id', 'item_id', 'response')
       
       dbExecute_param(db,'INSERT INTO dxpersons(person_id) VALUES(:person_id);',tibble(person_id=prs) )
@@ -231,7 +231,7 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
           cat('\nThe following responses were found in the data but they are not defined in the .scr file or coded as missing responses.')
           cat('Possible causes are that not all missing characters are correctly specified, your screen and dat files do not match ')
           cat('or responses_start is incorrect.\n')
-          unknown_responses = dbGetQuery(db, 'SELECT item_id, response, COUNT(*) AS tally FROM dxresponses GROUP BY item_id, response;') %>%
+          unknown_responses = dbGetQuery(db, 'SELECT item_id, response, COUNT(*) AS tally FROM dxresponses GROUP BY item_id, response;') |>
             semi_join(unknown_responses, by=c('item_id','response'))
                   
           print(unknown_responses)
@@ -280,9 +280,9 @@ read_oplm_par = function(par_path){
                item_score=c(1:p$ncat)*p$discr,
                beta=p$delta,
                nbr=p$ilabel)
-      }) %>% 
-        bind_rows() %>%
-        arrange(.data$item_id, .data$item_score) %>%
+      }) |> 
+        bind_rows() |>
+        arrange(.data$item_id, .data$item_score) |>
         df_format()
     )
   } else
@@ -315,7 +315,7 @@ readCML = function(cml_path)
                           x[x=='---'] = NA
                           x
                         })
-                 ) %>%
+                 ) |>
           as.data.frame(stringsAsFactors = FALSE) 
   
   pars[,c(1,3:ncol(pars))] = lapply(pars[,c(1,3:ncol(pars))],as.numeric)
@@ -323,9 +323,9 @@ readCML = function(cml_path)
   colnames(pars)[2:4] = c('item_id','item_score','beta') 
   
   # fill out the NA's in the first two columns
-  pars %>% 
-    fill('nr', 'item_id') %>% 
-    rename(nbr = 'nr') %>%
+  pars |> 
+    fill('nr', 'item_id') |> 
+    rename(nbr = 'nr') |>
 	df_format()
 }
 
@@ -440,4 +440,3 @@ readPAR = function(parfile)
   close(z)
   pars
 }
-

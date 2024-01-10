@@ -32,7 +32,7 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'))
   if(inherits(parms, 'mst_enorm') && !'design' %in% names(parms$inputs))
   {
     if(is.null(design))
-      design = lapply(parms$inputs$bkList,function(bk) tibble(item_id=bk$items)) %>%
+      design = lapply(parms$inputs$bkList,function(bk) tibble(item_id=bk$items)) |>
         bind_rows(.id='booklet_id')
     
     parms = coef(parms)
@@ -82,11 +82,11 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'))
     a = parms$item_score
     b = parms$b
     
-    fl = parms %>%
-      arrange(.data$item_id) %>%
-      mutate(rn=row_number()) %>%
-      group_by(.data$item_id) %>%
-      summarise(first=as.integer(min(.data$rn)), last=as.integer(max(.data$rn))) %>%
+    fl = parms |>
+      arrange(.data$item_id) |>
+      mutate(rn=row_number()) |>
+      group_by(.data$item_id) |>
+      summarise(first=as.integer(min(.data$rn)), last=as.integer(max(.data$rn))) |>
       ungroup() 
     
     if(is.null(design))
@@ -152,14 +152,14 @@ transform.df.parms = function(parms.df, out.format = c('b','beta','eta'), includ
   if(n_distinct(parms.df$item_id, parms.df$item_score) < nrow(parms.df))
     stop('multiple parameters supplied for the same item and score')
   
-  parms.df = parms.df %>% 
-    mutate(item_id = as.character(.data$item_id), item_score = as.integer(.data$item_score)) %>%
+  parms.df = parms.df |> 
+    mutate(item_id = as.character(.data$item_id), item_score = as.integer(.data$item_score)) |>
     arrange(.data$item_id, .data$item_score)
   
   
-  mm = parms.df %>% 
-    group_by(.data$item_id) %>% 
-    summarise(min_score = min(.data$item_score), max_score = max(.data$item_score)) %>%
+  mm = parms.df |> 
+    group_by(.data$item_id) |> 
+    summarise(min_score = min(.data$item_score), max_score = max(.data$item_score)) |>
     ungroup()
   
   in.zero = any(mm$min_score == 0)
@@ -176,16 +176,16 @@ transform.df.parms = function(parms.df, out.format = c('b','beta','eta'), includ
   if(in.format == 'b' && any(parms.df$b < 0))
     stop("A 'b' parameter cannot be negative, perhaps you meant to include a 'beta' parameter?")
   
-  fl = parms.df %>%
-    mutate(rn = row_number()) %>%
-    group_by(.data$item_id) %>% 
-    summarize(first = as.integer(min(.data$rn)), last = as.integer(max(.data$rn))) %>%
-    ungroup() %>%
+  fl = parms.df |>
+    mutate(rn = row_number()) |>
+    group_by(.data$item_id) |> 
+    summarize(first = as.integer(min(.data$rn)), last = as.integer(max(.data$rn))) |>
+    ungroup() |>
     arrange(.data$item_id)
   
   args = list(first = fl$first, last = fl$last, parms.df = parms.df, 
               out.zero = include.zero, in.zero = in.zero)
-  do.call(get(paste0(in.format,'2',out.format)), args)[,c('item_id','item_score',out.format)] %>%
+  do.call(get(paste0(in.format,'2',out.format)), args)[,c('item_id','item_score',out.format)] |>
     arrange(.data$item_id)
 }
 
@@ -511,4 +511,3 @@ b2b <-function(first, last, parms.df, out.zero=TRUE, in.zero=TRUE)
   }
   return(df.new)
 }
-

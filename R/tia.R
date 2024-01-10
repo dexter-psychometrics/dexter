@@ -53,18 +53,18 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
   if(anyNA(items$rit))
     warning("Items without score variation have been removed from the test statistics")
   
-  out$booklets = items %>%
-    filter(complete.cases(.data$rit)) %>%
-    group_by(.data$booklet_id) %>% 
+  out$booklets = items |>
+    filter(complete.cases(.data$rit)) |>
+    group_by(.data$booklet_id) |> 
     summarise(n_items=n(),
               alpha=.data$n_items/(.data$n_items-1)*(1-sum(.data$sd_score^2) / sum(.data$rit * .data$sd_score)^2 ),
               mean_pvalue = mean(.data$pvalue),
               mean_rit = mean(.data$rit),
               mean_rir = mean(.data$rir),
               max_booklet_score = sum(.data$max_score),
-              n_persons = max(.data$n_persons)) %>%
-    ungroup() %>%
-    mutate_if(is.factor, as.character) %>%
+              n_persons = max(.data$n_persons)) |>
+    ungroup() |>
+    mutate_if(is.factor, as.character) |>
     df_format()
   
   
@@ -78,14 +78,14 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
   if(type=='raw')
   {
     out$items = select(items, 'booklet_id', 'item_id', 'mean_score', 'sd_score', 
-                           'max_score', 'pvalue', 'rit', 'rir', 'n_persons') %>%
-      mutate_if(is.factor, as.character) %>%
+                           'max_score', 'pvalue', 'rit', 'rir', 'n_persons') |>
+      mutate_if(is.factor, as.character) |>
       df_format()
     
   } else if(type=='averaged')
   {
-    out$items = items %>% 
-      group_by(.data$item_id) %>%
+    out$items = items |> 
+      group_by(.data$item_id) |>
       summarise( n_booklets = n(),
                  w_mean_score=weighted.mean(.data$mean_score, w = .data$n_persons),
                  sd_score = sqrt(combined_var(.data$mean_score, .data$sd_score^2, .data$n_persons)),
@@ -93,62 +93,61 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
                  pvalue = weighted.mean(.data$pvalue, w=.data$n_persons),
                  rit = weighted.mean(.data$rit, w=.data$n_persons, na.rm=TRUE),
                  rir = weighted.mean(.data$rir, w=.data$n_persons, na.rm=TRUE),
-                 n_persons = sum(.data$n_persons)) %>%
-      ungroup() %>%
-      mutate_if(is.factor, as.character) %>%
-      rename(mean_score = 'w_mean_score') %>%
+                 n_persons = sum(.data$n_persons)) |>
+      ungroup() |>
+      mutate_if(is.factor, as.character) |>
+      rename(mean_score = 'w_mean_score') |>
       df_format()
   } else
   {
     items = mutate_if(items, is.factor, as.character)
     
     out$items = list(
-      pvalue = items %>% 
-        select('booklet_id', 'item_id', 'pvalue') %>% 
+      pvalue = items |> 
+        select('booklet_id', 'item_id', 'pvalue') |> 
         pivot_wider(names_from='booklet_id', values_from='pvalue', names_sort=TRUE),
       
-      rit = items %>% 
-        select('booklet_id', 'item_id', 'rit') %>% 
+      rit = items |> 
+        select('booklet_id', 'item_id', 'rit') |> 
         pivot_wider(names_from='booklet_id', values_from='rit', names_sort=TRUE),
       
-      rir = items %>% 
-        select('booklet_id', 'item_id', 'rir') %>% 
+      rir = items |> 
+        select('booklet_id', 'item_id', 'rir') |> 
         pivot_wider(names_from='booklet_id', values_from='rir', names_sort=TRUE)
     )
   }
   
   if(distractor)
   {
-    d = respData$x %>%
-      mutate(bs=.data$booklet_score-.data$item_score) %>%
-      group_by(.data$booklet_id, .data$item_id, .data$response) %>%
-      summarise(item_score=first(.data$item_score), n=n(), rbsum=sum(.data$bs), rb2sum=sum(.data$bs^2), .groups='drop_last') %>%
+    d = respData$x |>
+      mutate(bs=.data$booklet_score-.data$item_score) |>
+      group_by(.data$booklet_id, .data$item_id, .data$response) |>
+      summarise(item_score=first(.data$item_score), n=n(), rbsum=sum(.data$bs), rb2sum=sum(.data$bs^2), .groups='drop_last') |>
       mutate(N = sum(.data$n), 
              bmean = sum(.data$rbsum)/.data$N, 
              b2mean = sum(.data$rb2sum)/.data$N,
              rvalue = .data$n/.data$N,
              rar = (.data$rbsum/.data$N - .data$rvalue*.data$bmean)/
-                   sqrt(.data$rvalue*(1-.data$rvalue)*(.data$b2mean - .data$bmean^2)) ) %>%
+                   sqrt(.data$rvalue*(1-.data$rvalue)*(.data$b2mean - .data$bmean^2)) ) |>
       ungroup() 
     
     # type==compared makes little sense to me for distractors, so treated same as raw
     if(type=='averaged')
     {
-      d = d %>%
-        group_by(.data$item_id, .data$response, .data$item_score) %>%
+      d = d |>
+        group_by(.data$item_id, .data$response, .data$item_score) |>
         summarise(n=sum(.data$n),
                   rvalue = weighted.mean(.data$rvalue,.data$N),
-                  rar = weighted.mean(.data$rar,.data$N, na.rm=TRUE)) %>%
+                  rar = weighted.mean(.data$rar,.data$N, na.rm=TRUE)) |>
         ungroup()
     } else
     {
       d = select(d, 'booklet_id', 'item_id', 'response', 'item_score', 'n', 'rvalue', 'rar')
     }
     
-    out$distractors = d %>%
-      mutate_if(is.factor, as.character) %>%
+    out$distractors = d |>
+      mutate_if(is.factor, as.character) |>
       df_format()
   }
   out
 }
-

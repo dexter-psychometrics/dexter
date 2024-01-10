@@ -33,11 +33,11 @@ get_sufStats_nrm = function(respData, check_sanity=TRUE)
   ssIS = sufs$ssIS
   
   # bug in dplyr, min/max of integer in group_by becomes double
-  ssI  = ssIS %>% 
-    mutate(rn = row_number()) %>%
-    group_by(.data$item_id) %>%
-    summarise(first = as.integer(min(.data$rn)),last = as.integer(max(.data$rn))) %>%
-    ungroup() %>%
+  ssI  = ssIS |> 
+    mutate(rn = row_number()) |>
+    group_by(.data$item_id) |>
+    summarise(first = as.integer(min(.data$rn)),last = as.integer(max(.data$rn))) |>
+    ungroup() |>
     arrange(.data$item_id)
   
   
@@ -62,31 +62,31 @@ get_sufStats_nrm = function(respData, check_sanity=TRUE)
   }
   sufs$ssI = ssI
   
-  sufs$design = design %>%
-    inner_join(ssI,by='item_id') %>%
+  sufs$design = design |>
+    inner_join(ssI,by='item_id') |>
     arrange(.data$booklet_id, .data$first)
   
-  itm_max = sufs$ssIS %>% 
-    group_by(.data$item_id) %>% 
-    summarise(maxScore = as.integer(max(.data$item_score))) %>% 
+  itm_max = sufs$ssIS |> 
+    group_by(.data$item_id) |> 
+    summarise(maxScore = as.integer(max(.data$item_score))) |> 
     ungroup()
   
   # max booklet scores
-  maxScores = itm_max %>%
-    inner_join(sufs$design, by='item_id') %>%
-    group_by(.data$booklet_id) %>%
+  maxScores = itm_max |>
+    inner_join(sufs$design, by='item_id') |>
+    group_by(.data$booklet_id) |>
     summarise(maxTotScore = sum(.data$maxScore))
   
   # booklets 0:maxscore
-  all_scores = maxScores %>% 
-    group_by(.data$booklet_id) %>%
-    do({tibble(booklet_score=0:.$maxTotScore)}) %>%
+  all_scores = maxScores |> 
+    group_by(.data$booklet_id) |>
+    do({tibble(booklet_score=0:.$maxTotScore)}) |>
     ungroup()
   
-  sufs$scoretab = sufs$plt %>%
-    distinct(.data$booklet_id, .data$booklet_score,.data$N) %>%
-    right_join(all_scores, by=c('booklet_id','booklet_score')) %>%
-    mutate(N=coalesce(.data$N, 0L)) %>%
+  sufs$scoretab = sufs$plt |>
+    distinct(.data$booklet_id, .data$booklet_score,.data$N) |>
+    right_join(all_scores, by=c('booklet_id','booklet_score')) |>
+    mutate(N=coalesce(.data$N, 0L)) |>
     arrange(.data$booklet_id, .data$booklet_score)
   
 
@@ -96,17 +96,17 @@ get_sufStats_nrm = function(respData, check_sanity=TRUE)
 
 
 # 
-# ssIS = respData$x %>%
-#   group_by(.data$item_id, .data$item_score) %>%
-#   summarise(sufI=n(), sufC_ = sum(.data$item_score * .data$booklet_score)) %>%
-#   ungroup() %>%
-#   full_join(tibble(item_id=respData$design$item_id, item_score=0L), by = c("item_id","item_score")) %>%
-#   mutate(sufI = coalesce(.data$sufI, 0L), sufC_ = coalesce(.data$sufC_,0L)) %>%
+# ssIS = respData$x |>
+#   group_by(.data$item_id, .data$item_score) |>
+#   summarise(sufI=n(), sufC_ = sum(.data$item_score * .data$booklet_score)) |>
+#   ungroup() |>
+#   full_join(tibble(item_id=respData$design$item_id, item_score=0L), by = c("item_id","item_score")) |>
+#   mutate(sufI = coalesce(.data$sufI, 0L), sufC_ = coalesce(.data$sufC_,0L)) |>
 #   arrange(.data$item_id, .data$item_score)
 # 
-# plt = respData$x %>%
-#   group_by(.data$item_id, .data$booklet_score) %>%
-#   summarise(meanScore = mean(.data$item_score), N = n()) %>%
+# plt = respData$x |>
+#   group_by(.data$item_id, .data$booklet_score) |>
+#   summarise(meanScore = mean(.data$item_score), N = n()) |>
 #   ungroup()
 
 # change in regard to above implementation is that zero scores are no longer added.
@@ -135,17 +135,17 @@ get_sufStats_im = function(respData)
 }
 
 
-# ti = respData$x %>%
-#   group_by(.data$booklet_id, .data$item_id) %>%
+# ti = respData$x |>
+#   group_by(.data$booklet_id, .data$item_id) |>
 #   summarise(meanScore = mean(.data$item_score),
 #             maxScore = max(.data$item_score),
 #             sdScore = sd(.data$item_score),
 #             rit = suppressWarnings(cor(.data$item_score, .data$booklet_score)),
 #             rir = suppressWarnings(cor(.data$item_score, .data$booklet_score - .data$item_score)),
-#             n=n()) %>%
-#   ungroup() %>%
-#   group_by(.data$item_id) %>%
-#   mutate(maxScore = max(.data$maxScore)) %>%
+#             n=n()) |>
+#   ungroup() |>
+#   group_by(.data$item_id) |>
+#   mutate(maxScore = max(.data$maxScore)) |>
 #   ungroup() 
 
 
@@ -155,10 +155,10 @@ get_sufStats_tia = function(respData)
   nb = length(levels(respData$design$booklet_id))
   nit = length(levels(respData$design$item_id))
   
-  frst_item = respData$design %>%
-    distinct(.data$booklet_id, .keep_all=TRUE) %>%
-    arrange(.data$booklet_id) %>%
-    pull(.data$item_id) %>%
+  frst_item = respData$design |>
+    distinct(.data$booklet_id, .keep_all=TRUE) |>
+    arrange(.data$booklet_id) |>
+    pull(.data$item_id) |>
     as.integer()
   
   # indexing in c, make first element empty
@@ -169,4 +169,3 @@ get_sufStats_tia = function(respData)
         frst_item, respData$design$booklet_id, respData$design$item_id ) 
 
 }
-

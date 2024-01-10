@@ -61,7 +61,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
     design = respData$design
   } else
   {
-    design = target_booklets %>%
+    design = target_booklets |>
       mutate(item_id = factor(as.character(.data$item_id), levels = levels(respData$design$item_id)))
         
     if(anyNA(design$item_id))
@@ -124,11 +124,11 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
     pb$new_area(10)
     max_score = sum(target_parms$a[dsg$last])
     scores = 0:max_score
-    ps_new = plausible_scores(respData, parms=parms, items = dsg$item_id) %>%
-      count(.data$PS1) %>%
-      right_join(tibble(PS1 = scores), by='PS1') %>%
-      mutate(n = coalesce(.data$n,0L)) %>%
-      arrange(.data$PS1) %>%
+    ps_new = plausible_scores(respData, parms=parms, items = dsg$item_id) |>
+      count(.data$PS1) |>
+      right_join(tibble(PS1 = scores), by='PS1') |>
+      mutate(n = coalesce(.data$n,0L)) |>
+      arrange(.data$PS1) |>
       pull(.data$n)
     
     pb$close_area()
@@ -232,8 +232,8 @@ coef.p2pass = function(object, ...)
     {
       select(bk$prob_to_pass,!ends_with('rate'))
     }
-  ) %>%
-    bind_rows(.id = 'booklet_id') %>%
+  ) |>
+    bind_rows(.id = 'booklet_id') |>
     df_format()
 }
 
@@ -318,4 +318,3 @@ plot.p2pass = function(x, what = c('all','equating','sens/spec', 'roc'), booklet
   
   invisible(NULL)
 }
-

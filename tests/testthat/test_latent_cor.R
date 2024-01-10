@@ -10,10 +10,10 @@ test_that('latent correlations work',{
   db = open_project('../verbAggression.db')
 
   lt = latent_cor(db,'behavior')
-  x = get_responses(db, columns=c('person_id','item_id','item_score','behavior')) %>%
-    group_by(person_id,behavior) %>%
-    summarise(score=sum(item_score)) %>%
-    ungroup() %>%
+  x = get_responses(db, columns=c('person_id','item_id','item_score','behavior')) |>
+    group_by(person_id,behavior) |>
+    summarise(score=sum(item_score)) |>
+    ungroup() |>
     pivot_wider(names_from=behavior, values_from=score)
     
   xcor = cor(select(x,-person_id))
@@ -31,4 +31,3 @@ test_that('latent correlations work',{
 })
 
 RcppArmadillo::armadillo_reset_cores()
-

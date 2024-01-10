@@ -82,7 +82,7 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
       if (fixed_params$inputs$method!="CML")
         message("Posterior means are taken as values for fixed parameters")
       
-      fixed_params = fixed_params$inputs$ssIS %>%
+      fixed_params = fixed_params$inputs$ssIS |>
         add_column(b = if.else(fixed_params$inputs$method=="CML", fixed_params$est$b, colMeans(fixed_params$est$b)))
       
     } else
@@ -95,26 +95,26 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
     fixed_params = filter(fixed_params,!is.na(.data$item_id)) 
     
     # check for missing categories in fixed_params, necessary?
-    missing_cat = ssIS %>% 
-      semi_join(fixed_params, by='item_id') %>%
-      left_join(fixed_params, by=c('item_id','item_score')) %>%
+    missing_cat = ssIS |> 
+      semi_join(fixed_params, by='item_id') |>
+      left_join(fixed_params, by=c('item_id','item_score')) |>
       filter(is.na(.data$b) & .data$item_score != 0) 
       
     if(nrow(missing_cat) > 0)
     {
       cat(paste('Some score categories are fixed while some are not, for the same item.',
                 'Dexter does not know how to deal with that.\nThe following score categories are missing:\n'))
-      missing_cat %>% 
-        select('item_id', 'item_score') %>%
-        arrange(.data$item_id, .data$item_score) %>%
-        as.data.frame() %>%
+      missing_cat |> 
+        select('item_id', 'item_score') |>
+        arrange(.data$item_id, .data$item_score) |>
+        as.data.frame() |>
         print()
       stop('missing score categories for fixed items, see output')
     }
       
-    fixed_b = fixed_params %>%
-      right_join(ssIS, by=c('item_id','item_score')) %>%
-      arrange(.data$item_id,.data$item_score) %>%
+    fixed_b = fixed_params |>
+      right_join(ssIS, by=c('item_id','item_score')) |>
+      arrange(.data$item_id,.data$item_score) |>
       pull(.data$b)
     
     if(!anyNA(fixed_b)) stop('nothing to calibrate, all parameters are fixed')
@@ -133,14 +133,14 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
     
   }
 
-  mle = design %>% 
-    group_by(.data$booklet_id) %>%
+  mle = design |> 
+    group_by(.data$booklet_id) |>
     do({
       est = theta_MLE(if.else(is.matrix(result$b),colMeans(result$b), result$b), 
                       a=ssIS$item_score, .$first, .$last, se=FALSE)
       theta = est$theta[2:(length(est$theta)-1)]
       tibble(booklet_score=1:length(theta), theta = theta)
-    }) %>%
+    }) |>
     ungroup() 
   
   outpt = list(est=result, 
@@ -226,13 +226,13 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
     
     x$abl_tables = list()
     
-	  x$abl_tables$mle =  suppressWarnings({inner_join(respData$design, x$inputs$ssI,by='item_id')}) %>%
-      group_by(.data$booklet_id) %>%
+	  x$abl_tables$mle =  suppressWarnings({inner_join(respData$design, x$inputs$ssI,by='item_id')}) |>
+      group_by(.data$booklet_id) |>
       do({
         est = theta_MLE(b=x$est$b, a=x$inputs$ssIS$item_score, first=.$first, last=.$last, se=FALSE)
         theta = est$theta[2:(length(est$theta)-1)]
         tibble(booklet_score=1:length(theta), theta = theta)
-      }) %>%
+      }) |>
       ungroup() 
     
     x$inputs$plt = get_sufStats_nrm(respData, check_sanity=FALSE)$plt
@@ -252,18 +252,18 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
   
   expf = expected_score(x, items = item_id)
 
-  max_score = x$inputs$ssIS %>%
-    filter(.data$item_id == item_id_) %>%
-    pull(.data$item_score) %>%
+  max_score = x$inputs$ssIS |>
+    filter(.data$item_id == item_id_) |>
+    pull(.data$item_score) |>
     max()
   
-  plt = x$inputs$plt %>%
-    filter(.data$item_id==item_id_) %>%
-    inner_join(x$abl_tables$mle, by=c('booklet_id','booklet_score')) %>%
-    mutate(abgroup = weighted_ntile(.data$theta, .data$N, n = nbins)) %>%
-    group_by(.data$abgroup) %>%
-    summarize(gr_theta = weighted.mean(.data$theta,.data$N), avg_score = weighted.mean(.data$meanScore,.data$N), n=sum(.data$N)) %>%
-    ungroup() %>%
+  plt = x$inputs$plt |>
+    filter(.data$item_id==item_id_) |>
+    inner_join(x$abl_tables$mle, by=c('booklet_id','booklet_score')) |>
+    mutate(abgroup = weighted_ntile(.data$theta, .data$N, n = nbins)) |>
+    group_by(.data$abgroup) |>
+    summarize(gr_theta = weighted.mean(.data$theta,.data$N), avg_score = weighted.mean(.data$meanScore,.data$N), n=sum(.data$N)) |>
+    ungroup() |>
     mutate(expected_score = expf(.data$gr_theta))
   
   rng = max(plt$gr_theta) - min(plt$gr_theta)
@@ -295,10 +295,10 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
     qnt = abs(qnorm((1-ci)/2))
     
     I=information(x, items = item_id)
-    plt = plt %>%
+    plt = plt |>
       mutate(se = sqrt(I(.data$gr_theta)/.data$n),
              conf_min = pmax(.data$expected_score - qnt*.data$se,0),
-             conf_max = pmin(.data$expected_score + qnt*.data$se,max_score)) %>%
+             conf_max = pmin(.data$expected_score + qnt*.data$se,max_score)) |>
       mutate(outlier = .data$avg_score < .data$conf_min | .data$avg_score > .data$conf_max)
     
     suppressWarnings({
@@ -503,10 +503,10 @@ theta_function = function(parms, items=NULL, booklet=NULL, which.draw=NULL,
     a = out$item_score
     b = out$b
     
-    fl = out %>%
-      mutate(rn=row_number()) %>%
-      group_by(.data$item_id) %>%
-      summarize(first=as.integer(min(.data$rn)), last=as.integer(max(.data$rn))) %>%
+    fl = out |>
+      mutate(rn=row_number()) |>
+      group_by(.data$item_id) |>
+      summarize(first=as.integer(min(.data$rn)), last=as.integer(max(.data$rn))) |>
       ungroup()
     
     if(!is.null(items))
@@ -551,8 +551,8 @@ theta_function = function(parms, items=NULL, booklet=NULL, which.draw=NULL,
         stop('unknown booklet')
       }
       
-      fl = design %>%
-        filter(.data$booklet_id %in% booklet) %>%
+      fl = design |>
+        filter(.data$booklet_id %in% booklet) |>
         distinct(.data$item_id, .keep_all=TRUE)
     }  
     fl = arrange(fl,.data$first)
@@ -624,5 +624,4 @@ print.inf_func = function(x,...) cat('Information function: I(theta)\n')
 print.exp_func = function(x,...) cat('Conditional expected score function: E(X_i|theta)\n')
 print.sim_func = function(x,...) cat('function to simulate item scores: (x_i1, ..., x_ip) ~ ENORM(theta)\n')
 print.pmf_func = function(x,...) cat('Conditional score distribution function: P(x_+|theta)\n')
-
 

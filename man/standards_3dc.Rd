@@ -54,7 +54,7 @@ db = start_new_project(verbAggrRules, ":memory:")
 add_booklet(db, verbAggrData, "agg")
 add_item_properties(db, verbAggrProperties)
 
-design = get_items(db) \%>\%
+design = get_items(db) |>
   rename(cluster_id='behavior')
 
 f = fit_enorm(db)

@@ -83,8 +83,8 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
   
   items = factor(items,levels=levels(parms$items$item_id))
   
-  fl = parms$items %>%
-    filter(.data$item_id %in% items) %>%
+  fl = parms$items |>
+    filter(.data$item_id %in% items) |>
     mutate(first = .data$first-1L, last = .data$last-1L)
   
   a = parms$a
@@ -105,16 +105,16 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
     respData = semi_join_rd(respData, tibble(item_id=items), by='item_id', .recompute_sumscores = TRUE)
     respData = get_resp_data(respData, summarised = TRUE, protect_x = !is_db(dataSrc))
     
-    pv = pv %>% 
-      select(-'booklet_score') %>%
-      left_join(respData$x,  by=c("person_id", "booklet_id")) %>%
+    pv = pv |> 
+      select(-'booklet_score') |>
+      left_join(respData$x,  by=c("person_id", "booklet_id")) |>
       mutate(booklet_score = coalesce(.data$booklet_score, 0L))
     
     pv = lapply(split(pv, pv$booklet_id), function(pvbk)
     {
       bk = pvbk$booklet_id[1]
       
-      fl_bk = fl %>%
+      fl_bk = fl |>
         anti_join(filter(respData$design, .data$booklet_id == bk), by='item_id')
       
       #nothing to augment case
@@ -131,7 +131,7 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
         }    
       }
       pvbk
-    }) %>%
+    }) |>
       bind_rows()
     
   } else
@@ -145,11 +145,10 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
     }
   }
   
-  pv %>%
-    select(-'booklet_score') %>%
-    rename_with(gsub, pattern='^PV(?=\\d+$)',replacement='PS', perl=TRUE)  %>%
-    mutate_if(is.factor, as.character) %>%
+  pv |>
+    select(-'booklet_score') |>
+    rename_with(gsub, pattern='^PV(?=\\d+$)',replacement='PS', perl=TRUE)  |>
+    mutate_if(is.factor, as.character) |>
     df_format()
 }
-
 

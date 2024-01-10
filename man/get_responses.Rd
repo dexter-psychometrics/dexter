@@ -46,9 +46,9 @@ wrong = fit_enorm(db, response != 'NA')
 # to select on an aggregate level, we need to gather the data and 
 # manipulate it ourselves
 data = get_responses(db, 
-   columns=c('person_id','item_id','item_score','response')) \%>\%
-   group_by(person_id) \%>\%
-   mutate(any_missing = any(response=='NA')) \%>\%
+   columns=c('person_id','item_id','item_score','response')) |>
+   group_by(person_id) |>
+   mutate(any_missing = any(response=='NA')) |>
    filter(!any_missing)
 
 correct = fit_enorm(data)

@@ -634,4 +634,3 @@ correct_symbol_case = function (e, vars = character(), env)
   e
 }
 
-

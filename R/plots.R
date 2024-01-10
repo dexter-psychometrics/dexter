@@ -115,15 +115,15 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
   {
     # pre process a little to make things faster
   	booklets = dbGetQuery_param(dataSrc,
-  	     'SELECT booklet_id FROM dxbooklet_design WHERE item_id=:item_id;', tibble(item_id=item_id)) %>%
-  		pull('booklet_id') %>%
-  	  sql_quote("'") %>%
+  	     'SELECT booklet_id FROM dxbooklet_design WHERE item_id=:item_id;', tibble(item_id=item_id)) |>
+  		pull('booklet_id') |>
+  	  sql_quote("'") |>
   		paste(collapse=',')
   	
     qtpredicate = sql(paste0("booklet_id IN(",booklets,")"), 'booklet_id')
   } 
   item = item_id
-  respData = get_resp_data(dataSrc, qtpredicate = qtpredicate, extra_columns='response', env=env, summarised=FALSE) %>%
+  respData = get_resp_data(dataSrc, qtpredicate = qtpredicate, extra_columns='response', env=env, summarised=FALSE) |>
     filter_rd(.data$item_id == item, .recompute_sumscores = FALSE )
   
 
@@ -140,8 +140,8 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
                                      sql_quote(item_id,"'")))
   } else if(inherits(dataSrc,'data.frame') && 'item_position' %in% colnames(dataSrc))
   {
-    ipos = dataSrc %>%
-      filter(.data$item_id==!!item_id) %>%
+    ipos = dataSrc |>
+      filter(.data$item_id==!!item_id) |>
       distinct(.data$booklet_id,.keep_all=TRUE)
   } else
   {
@@ -160,15 +160,15 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
                              '$item_id in booklet $booklet_id')
   
 
-  rsp_counts = respData$x %>%
+  rsp_counts = respData$x |>
     count(.data$booklet_id, .data$response, .data$item_score, .data$booklet_score)
 
   max_score = max(rsp_counts$item_score)
 
-  rsp_colors = rsp_counts %>%
-    group_by(.data$response) %>%
-    summarise(n = sum(.data$n)) %>%
-    ungroup() %>%
+  rsp_colors = rsp_counts |>
+    group_by(.data$response) |>
+    summarise(n = sum(.data$n)) |>
+    ungroup() |>
     arrange(desc(.data$n), .data$response) 
   
   # cannot make this a list since a response can be an empty string
@@ -187,10 +187,10 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
   {
     booklet = y$booklet_id[1]
     
-    bkl_scores = y %>% 
-      group_by(.data$booklet_score) %>% 
-      summarise(n = sum(.data$n)) %>%
-      ungroup() %>%
+    bkl_scores = y |> 
+      group_by(.data$booklet_score) |> 
+      summarise(n = sum(.data$n)) |>
+      ungroup() |>
       arrange(.data$booklet_score)
     
     if(nrow(bkl_scores)>1)
@@ -226,8 +226,8 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
       dAll = density(bkl_scores$booklet_score, n = 512, weights = bkl_scores$n/N, adjust=adjust,
                      from=0,to=max(bkl_scores$booklet_score),warnWbw=FALSE)
       
-      lgnd = y %>% 
-        group_by(.data$response)  %>% 
+      lgnd = y |> 
+        group_by(.data$response)  |> 
         do({
           k = rsp_colors[rsp_colors$response == .$response[1],]$color
           
@@ -374,7 +374,7 @@ profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, mod
   if(inherits(dataSrc,'matrix'))
 	stop('profile_plot does not accept a matrix dataSrc')
   
-  respData = get_resp_data(dataSrc, qtpredicate, extra_columns = covariate, env = env)  %>%
+  respData = get_resp_data(dataSrc, qtpredicate, extra_columns = covariate, env = env)  |>
 	  intersection_rd()
   
   respData$x[[covariate]] = ffactor(respData$x[[covariate]])
@@ -382,7 +382,7 @@ profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, mod
     
   if(is_db(dataSrc) && item_property %in% dbListFields(dataSrc,'dxitems'))
   {
-    domains = dbGetQuery(dataSrc, paste("SELECT item_id,", item_property, "FROM dxitems;")) %>%
+    domains = dbGetQuery(dataSrc, paste("SELECT item_id,", item_property, "FROM dxitems;")) |>
       semi_join(tibble(item_id = levels(respData$x$item_id)), by='item_id')
     
     domains$item_id = ffactor(domains$item_id, levels = levels(respData$x$item_id))
@@ -451,8 +451,8 @@ profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, mod
         if(nrow(indx) > 0 && tt[[i]][indx] > 0)
           return(indx)
         rep(NA_integer_, 2)
-      }) %>%
-      t() %>%
+      }) |>
+      t() |>
       apply(2, '-', 1) 
     
     lns = lns[!(is.na(lns[,1]) | is.na(lns[,2])),]
@@ -466,5 +466,4 @@ profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, mod
 
   invisible(NULL)
 }
-
 

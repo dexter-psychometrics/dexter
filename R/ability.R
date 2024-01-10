@@ -89,10 +89,10 @@ ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), 
   
   abl$booklet_id = ffactor(abl$booklet_id, levels = levels(respData$design$booklet_id))
   
-  respData$x %>% 
-    inner_join(abl, by = c("booklet_id", "booklet_score")) %>% 
-    select(any_of(c('booklet_id', 'person_id', 'booklet_score', 'theta', 'se'))) %>%
-    mutate_if(is.factor, as.character) %>%
+  respData$x |> 
+    inner_join(abl, by = c("booklet_id", "booklet_score")) |> 
+    select(any_of(c('booklet_id', 'person_id', 'booklet_score', 'theta', 'se'))) |>
+    mutate_if(is.factor, as.character) |>
     df_format()
 }
 
@@ -128,16 +128,16 @@ ability_tables = function(parms, design = NULL, method = c("MLE","EAP","WLE"), p
   
   
   # under the assumption that we always get theta's for the vector 0:max_test_score 
-  simple_parms$design %>% 
-    group_by(.data$booklet_id) %>%
+  simple_parms$design |> 
+    group_by(.data$booklet_id) |>
     do({
       est = estimate(.)
       out = tibble(booklet_score=0:(length(est$theta)-1), theta = est$theta)
       if(standard_errors)
         out$se = est$se
       out
-    }) %>%
-    ungroup() %>%
-    mutate_if(is.factor, as.character) %>%
+    }) |>
+    ungroup() |>
+    mutate_if(is.factor, as.character) |>
     df_format()
 }

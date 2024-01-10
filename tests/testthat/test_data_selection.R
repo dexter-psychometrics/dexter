@@ -20,9 +20,9 @@ expect_equal_respData = function(a,b, info='equal respData', ignore_booklet_leve
     }
     rd$x$person_id = as.character(rd$x$person_id)
     rd$design = as.data.frame(mutate_if(rd$design, is.factor,as.character))
-    rd$x = rd$x %>%
-      mutate_if(is.factor,as.character) %>%
-      arrange(person_id, booklet_id, item_id) %>%
+    rd$x = rd$x |>
+      mutate_if(is.factor,as.character) |>
+      arrange(person_id, booklet_id, item_id) |>
       as.data.frame()
 
     rd
@@ -32,8 +32,8 @@ expect_equal_respData = function(a,b, info='equal respData', ignore_booklet_leve
 
   expect_equal(a$summarised, b$summarised, info=info)
   
-  expect_equal(a$design %>% arrange(booklet_id,item_id), 
-               a$design %>% arrange(booklet_id,item_id), 
+  expect_equal(a$design |> arrange(booklet_id,item_id), 
+               a$design |> arrange(booklet_id,item_id), 
                info=info)
   
   expect_true(setequal(colnames(a$x), colnames(b$x)), info=info)
@@ -85,18 +85,18 @@ expect_valid_respData = function(respData, msg='respData')
     
     expect_false(is.unsorted(as.integer(respData$person_id)), info=sprintf("%s - person_id is unsorted", msg))
     
-    split(as.integer(respData$x$booklet_id), respData$x$person_id) %>%
-      lapply(is.unsorted) %>%
-      unlist() %>%
-      any() %>%
+    split(as.integer(respData$x$booklet_id), respData$x$person_id) |>
+      lapply(is.unsorted) |>
+      unlist() |>
+      any() |>
       expect_false(info=sprintf("%s - (person_id, booklet_id) is unsorted", msg))
     
-    respData$x %>%
-      group_by(person_id, booklet_id) %>%
-      mutate(booklet_score2 = sum(item_score)) %>%
-      ungroup() %>%
-      summarise(res = all(booklet_score == booklet_score2)) %>%
-      pull(res) %>%
+    respData$x |>
+      group_by(person_id, booklet_id) |>
+      mutate(booklet_score2 = sum(item_score)) |>
+      ungroup() |>
+      summarise(res = all(booklet_score == booklet_score2)) |>
+      pull(res) |>
       expect_true(info=sprintf("%s - booklet_score incorrect", msg))
     
   }
@@ -118,15 +118,15 @@ test_that('merging works',
                item_score=sample(0:3,2000,replace=TRUE))
   
   # also make a database
-  rules = distinct(rsp, item_id, item_score) %>%
+  rules = distinct(rsp, item_id, item_score) |>
     mutate(response=item_score)
   
   db = start_new_project(rules, ':memory:')
   add_response_data(db, data = rename(rsp, response=item_score), design=distinct(rsp,booklet_id,item_id))
   
   
-  get_resp_data(db) %>% 
-    expect_valid_respData() %>%
+  get_resp_data(db) |> 
+    expect_valid_respData() |>
     expect_equal_respData(
       expect_valid_respData(get_resp_data(rsp)))
 
@@ -140,8 +140,8 @@ test_that('merging works',
   
   # merge over booklets (not fit because data is random)
   
-  a = get_resp_data(db,merge_within_person=TRUE) %>% 
-    expect_valid_respData() %>%
+  a = get_resp_data(db,merge_within_person=TRUE) |> 
+    expect_valid_respData() |>
     expect_equal_respData(
       expect_valid_respData(get_resp_data(rsp, merge_within_person=TRUE)))
   
@@ -149,11 +149,11 @@ test_that('merging works',
   expect_length(levels(a$design$booklet_id),1)
   
   expect_equal(
-    rsp %>%
-      group_by(person_id) %>%
-      summarise(booklet_score=sum(item_score)) %>%
-      ungroup() %>%
-      inner_join(get_resp_data(rsp,merge_within_person=TRUE,summarised=TRUE)$x, by=c('person_id','booklet_score')) %>%
+    rsp |>
+      group_by(person_id) |>
+      summarise(booklet_score=sum(item_score)) |>
+      ungroup() |>
+      inner_join(get_resp_data(rsp,merge_within_person=TRUE,summarised=TRUE)$x, by=c('person_id','booklet_score')) |>
       NROW(),
     50)
     
@@ -168,7 +168,7 @@ test_that('merging works',
                item_score=sample(0:3,2000,replace=TRUE))
   
   # also make a database
-  rules = distinct(rsp, item_id, item_score) %>%
+  rules = distinct(rsp, item_id, item_score) |>
     mutate(response=item_score)
   
   db = start_new_project(rules, ':memory:')
@@ -354,4 +354,3 @@ test_that('variable names cross sql',
 })
 
 RcppArmadillo::armadillo_reset_cores()
-

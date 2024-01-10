@@ -79,7 +79,7 @@ sim_PV = function(theta, delta) {
        main = paste(nit, "items"), type='n',
        xlab=expression(theta), ylab = expression(Fn(theta)))
   
-  select(pv, starts_with('PV')) %>%
+  select(pv, starts_with('PV')) |>
     lapply(function(x) lines(ecdf(x-mean(x)), col=rgb(.7,.7,.7,.5)))
 
   lines(ecdf(theta-mean(theta)))
@@ -159,7 +159,7 @@ sim_PV3 = function(theta, delta) {
        main=paste(nit, "items"), type='n',
        xlab=expression(theta), ylab = expression(Fn(theta)))
   
-  select(pv, starts_with('PV')) %>%
+  select(pv, starts_with('PV')) |>
     lapply(function(x) lines(ecdf(x-mean(x)), col=rgb(.7,.7,.7,.5)))
 
   lines(ecdf(theta-mean(theta)))
@@ -180,8 +180,8 @@ sim_PV4 = function(theta, delta, group) {
   sim_func = r_score( tibble(item_id=1:nit, item_score=1, delta=delta))
   
   # turn simulated data into long format
-  simulated_data = sim_func(theta) %>%
-    get_responses() %>%
+  simulated_data = sim_func(theta) |>
+    get_responses() |>
     inner_join(tibble(person_id=1:length(group), group = group), 
                by='person_id')
   
@@ -191,7 +191,7 @@ sim_PV4 = function(theta, delta, group) {
   
   plot(x=c(min(theta)-.5, max(theta)+.5), y=0:1, main=paste(nit, "items"), type='n',
        xlab=expression(theta), ylab = expression(Fn(theta)))
-  select(pv, starts_with('PV')) %>%
+  select(pv, starts_with('PV')) |>
     lapply(function(x) lines(ecdf(x-mean(x)), col=rgb(.7,.7,.7,.5)))
   lines(ecdf(theta-mean(theta)))
 }
@@ -210,7 +210,6 @@ RcppArmadillo::armadillo_reset_cores()
 ```
 
 ### References
-
 
 
 

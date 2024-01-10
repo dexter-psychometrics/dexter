@@ -32,9 +32,9 @@
 #' # to select on an aggregate level, we need to gather the data and 
 #' # manipulate it ourselves
 #' data = get_responses(db, 
-#'    columns=c('person_id','item_id','item_score','response')) %>%
-#'    group_by(person_id) %>%
-#'    mutate(any_missing = any(response=='NA')) %>%
+#'    columns=c('person_id','item_id','item_score','response')) |>
+#'    group_by(person_id) |>
+#'    mutate(any_missing = any(response=='NA')) |>
 #'    filter(!any_missing)
 #'
 #' correct = fit_enorm(data)
@@ -70,7 +70,7 @@ get_responses_ = function(dataSrc, qtpredicate=NULL, env=NULL, columns=c('person
     
     tibble(person_id=rep(persons, ncol(dataSrc)), 
                   item_id=rep(items, each=nrow(dataSrc)),
-                  item_score=as.integer(dataSrc)) %>%
+                  item_score=as.integer(dataSrc)) |>
       filter(!is.na(.data$item_score))
     
   } else
@@ -182,9 +182,9 @@ db_get_testscores = function(db, qtpredicate=NULL, columns=c('booklet_id','perso
   qtpredicate = correct_symbol_case(qtpredicate, used_columns,env=env)
   
   # worst case scenario
-  respData[eval_tidy(qtpredicate, data=respData, env=env), union(columns,'item_score')] %>%
-      group_by_at(columns) %>%
-      summarise(booklet_score = sum(.data$item_score)) %>%
+  respData[eval_tidy(qtpredicate, data=respData, env=env), union(columns,'item_score')] |>
+      group_by_at(columns) |>
+      summarise(booklet_score = sum(.data$item_score)) |>
       ungroup()
 }
 
@@ -253,8 +253,7 @@ db_get_design = function(db, qtpredicate=NULL, env=NULL)
   }
   
   # fail safe + case when !booklet_safe, will be slower  
-  get_resp_data(db, qtpredicate, env=env, extra_columns = 'item_position')$x %>%
+  get_resp_data(db, qtpredicate, env=env, extra_columns = 'item_position')$x |>
     count(.data$booklet_id, .data$item_id, .data$item_position, name='n_persons')
 
 }
-

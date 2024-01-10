@@ -29,8 +29,8 @@ profile_tables = function(parms, domains, item_property, design = NULL)
   }
   
   
-  profile_tables_(parms$items, parms$a,parms$b, parms$design, domains, item_property) %>%
-    mutate_if(is.factor, as.character) %>%
+  profile_tables_(parms$items, parms$a,parms$b, parms$design, domains, item_property) |>
+    mutate_if(is.factor, as.character) |>
     df_format()
 }
 
@@ -41,27 +41,27 @@ profile_tables = function(parms, domains, item_property, design = NULL)
 # item_property: string
 profile_tables_ = function(items, a, b, design, domains, item_property)
 {
-  design = design %>% 
-    inner_join(domains[,c('item_id',item_property)], by='item_id') %>%
+  design = design |> 
+    inner_join(domains[,c('item_id',item_property)], by='item_id') |>
     mutate(dcat = dense_rank(.data[[item_property]]))
   
   dcat = distinct(design, .data[[item_property]], dcat )
   
-  design %>%
-    group_by(.data$booklet_id) %>%
+  design |>
+    group_by(.data$booklet_id) |>
     do({
       prof_lmx = E_profile(b,a,.$first,.$last, split(1:nrow(.), .$dcat))
       
       lapply(prof_lmx, function(mtx)
       {
         tibble(dcat=1:ncol(mtx), expected_domain_score = mtx[1,] )}
-      ) %>%
-        bind_rows(.id='booklet_score') %>%
-        mutate(booklet_score = as.integer(.data$booklet_score)-1L) %>%
+      ) |>
+        bind_rows(.id='booklet_score') |>
+        mutate(booklet_score = as.integer(.data$booklet_score)-1L) |>
         inner_join(dcat, by='dcat')
       
-    }) %>%
-    ungroup() %>%
+    }) |>
+    ungroup() |>
     select(-dcat)
 }
 
@@ -147,17 +147,17 @@ profiles = function(dataSrc, parms, item_property, predicate=NULL, merge_within_
       stop("some items belong to multiple domains, this is not allowed")
   }
   
-  respData = respData %>%
+  respData = respData |>
     polytomize_rd(item_property, protect_x=!is_db(dataSrc)) 
   
-  out = respData$x %>%
+  out = respData$x |>
     inner_join(
       profile_tables_(items = parms$items, a=parms$a,b=parms$b,
                       design = parms$design,
                       domains = domains,
                       item_property = item_property),
-      by = c('booklet_id','booklet_score',item_id = item_property)) %>%
-    mutate_if(is.factor, as.character) %>%
+      by = c('booklet_id','booklet_score',item_id = item_property)) |>
+    mutate_if(is.factor, as.character) |>
     df_format()
   
   colnames(out)[colnames(out)=='item_id'] = item_property

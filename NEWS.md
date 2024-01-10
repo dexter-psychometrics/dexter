@@ -1,3 +1,10 @@
+# dexter 1.4.0
+
+## breaking change
+
+* requires R >= 4.1
+
+
 # dexter 1.3.2
 
 ## breaking changes

@@ -58,9 +58,9 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   
   pb$set_nsteps(nIter + 4*nd)
   
-  respData$x = respData$x %>%
-    group_by(.data$person_id) %>%
-    filter(nd == n_distinct(.data[[item_property]])) %>%
+  respData$x = respData$x |>
+    group_by(.data$person_id) |>
+    filter(nd == n_distinct(.data[[item_property]])) |>
     ungroup()
   
   respData$x$person_id = ffactor(respData$x$person_id,as_int=TRUE)
@@ -220,4 +220,3 @@ rmvnorm = function(n,mean,sigma)
   colnames(retval) = names(mean)
   retval
 }
-

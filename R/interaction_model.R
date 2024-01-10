@@ -42,7 +42,7 @@ fit_inter = function(dataSrc, predicate = NULL)
 fit_inter_ = function(dataSrc, qtpredicate = NULL, env=NULL, regs=TRUE)
 {
   
-  respData = get_resp_data(dataSrc, qtpredicate, env = env, retain_person_id=FALSE) %>%
+  respData = get_resp_data(dataSrc, qtpredicate, env = env, retain_person_id=FALSE) |>
 	  intersection_rd()
 
   if(nrow(respData$x)==0) 
@@ -52,21 +52,21 @@ fit_inter_ = function(dataSrc, qtpredicate = NULL, env=NULL, regs=TRUE)
   ssIS = ss$ssIS
   plt = ss$plt
   
-  ssI = ssIS %>%
-    group_by(.data$item_id) %>%
+  ssI = ssIS |>
+    group_by(.data$item_id) |>
     summarise(nCat = n(), sufC = sum(.data$sufC_), item_maxscore = max(.data$item_score), 
-              item_minscore = min(.data$item_score)) %>%
-    ungroup() %>%
-    mutate(first = cumsum(.data$nCat) - .data$nCat + 1L, last = cumsum(.data$nCat))  %>%
+              item_minscore = min(.data$item_score)) |>
+    ungroup() |>
+    mutate(first = cumsum(.data$nCat) - .data$nCat + 1L, last = cumsum(.data$nCat))  |>
     arrange(.data$item_id)
   
   if(any(ssI$nCat<2))
   {
     message('The following items have no score variation:')
-    ssI %>%
-      filter(.data$nCat<2) %>%
-      pull(.data$item_id) %>%
-      as.character() %>%
+    ssI |>
+      filter(.data$nCat<2) |>
+      pull(.data$item_id) |>
+      as.character() |>
       print()
     stop("data contains items without score variation")
   }
@@ -74,10 +74,10 @@ fit_inter_ = function(dataSrc, qtpredicate = NULL, env=NULL, regs=TRUE)
   if(any(ssI$item_minscore>0))
   {
     message('The following items have no zero score category:')
-    ssI %>%
-      filter(.data$item_minscore>0) %>%
-      pull(.data$item_id) %>%
-      as.character() %>%
+    ssI |>
+      filter(.data$item_minscore>0) |>
+      pull(.data$item_id) |>
+      as.character() |>
       print()
     stop("data contains items without zero score category")
   }
@@ -86,11 +86,11 @@ fit_inter_ = function(dataSrc, qtpredicate = NULL, env=NULL, regs=TRUE)
   maxTestScore = sum(ssI$item_maxscore)
 
   # scoretab, include unachieved and impossible scores
-  scoretab = plt %>%
-    select('booklet_score', 'N') %>%
-    distinct(.data$booklet_score, .keep_all=TRUE) %>%
-    right_join(tibble(booklet_score=0L:maxTestScore), by="booklet_score") %>%
-    mutate(N=coalesce(.data$N, 0L)) %>%
+  scoretab = plt |>
+    select('booklet_score', 'N') |>
+    distinct(.data$booklet_score, .keep_all=TRUE) |>
+    right_join(tibble(booklet_score=0L:maxTestScore), by="booklet_score") |>
+    mutate(N=coalesce(.data$N, 0L)) |>
     arrange(.data$booklet_score)
   
   if(all_trivial_scores(ssIS))
@@ -150,9 +150,9 @@ fit_domains = function(dataSrc, item_property, predicate = NULL)
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
 
-  get_resp_data(dataSrc, qtpredicate, extra_columns = item_property, env = env, retain_person_id=FALSE) %>%
-	  intersection_rd() %>%
-    polytomize_rd(item_property, protect_x = !is_db(dataSrc)) %>%
+  get_resp_data(dataSrc, qtpredicate, extra_columns = item_property, env = env, retain_person_id=FALSE) |>
+	  intersection_rd() |>
+    polytomize_rd(item_property, protect_x = !is_db(dataSrc)) |>
     fit_inter_()
 
 }
@@ -349,9 +349,9 @@ coef.rim = function(object, ...)
               beta_rasch = as.vector(report_RM$beta), beta_IM = as.vector(report_IM$beta))
   I = tibble(item_id = x$inputs$ssI$item_id, sigma = log(x$est$cIM), SE_sigma= x$est$se.sigma, fit_IM=x$est$fit.stats)
   
-  inner_join(IS,I,by='item_id') %>% 
-	  arrange(.data$item_id, .data$item_score) %>% 
-    mutate(item_id=as.character(.data$item_id)) %>%
+  inner_join(IS,I,by='item_id') |> 
+	  arrange(.data$item_id, .data$item_score) |> 
+    mutate(item_id=as.character(.data$item_id)) |>
 	  df_format()
 }
 

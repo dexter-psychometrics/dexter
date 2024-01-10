@@ -62,23 +62,23 @@ test_that('tia computations are correct',{
   nit = ncol(dat)
   
   # to lf data.frame for dplyr
-  rsp = get_responses(dat, columns = c("person_id", "item_id", "item_score")) %>%
+  rsp = get_responses(dat, columns = c("person_id", "item_id", "item_score")) |>
     mutate(booklet_id = as.character(1L+(as.integer(person_id) %% 2L == 0)))
 
   #--- test
   # manual tia separate per booklet
-  tia_dpl = rsp %>%
-    group_by(person_id, booklet_id) %>%
-    mutate(booklet_score = sum(item_score)) %>%
-    ungroup() %>%
-    group_by(booklet_id,item_id) %>%
+  tia_dpl = rsp |>
+    group_by(person_id, booklet_id) |>
+    mutate(booklet_score = sum(item_score)) |>
+    ungroup() |>
+    group_by(booklet_id,item_id) |>
     summarise(mean_score=mean(item_score),
               sd_score=sd(item_score),
               max_score=max(item_score),
               rit = cor(item_score,booklet_score),
               rir = cor(item_score,booklet_score-item_score),
-              n_persons=n()) %>%
-    group_by(item_id) %>%
+              n_persons=n()) |>
+    group_by(item_id) |>
     mutate(pvalue = mean_score/max(max_score))
   
   tia_dx = tia_tables(rsp)
@@ -91,20 +91,20 @@ test_that('tia computations are correct',{
   
   tia_dx = tia_tables(rsp,type='averaged')
   
-  sd_item = rsp %>%
-    group_by(item_id) %>%
+  sd_item = rsp |>
+    group_by(item_id) |>
     summarise(sd_score=sd(item_score))
   
-  tia_dpl = tia_dpl %>%
-    group_by(item_id, max_score) %>%
+  tia_dpl = tia_dpl |>
+    group_by(item_id, max_score) |>
     summarise(n_booklets = n(),
               mean_score = weighted.mean(mean_score, n_persons),
               rit = weighted.mean(rit, n_persons),
               rir = weighted.mean(rir, n_persons),
               pvalue = weighted.mean(pvalue, n_persons),
-              nps = sum(n_persons)) %>%
-    ungroup() %>%
-    rename(n_persons='nps') %>%
+              nps = sum(n_persons)) |>
+    ungroup() |>
+    rename(n_persons='nps') |>
     inner_join(sd_item,by='item_id')
   
   
@@ -126,4 +126,3 @@ test_that('tia computations are correct',{
 })
 
 RcppArmadillo::armadillo_reset_cores()
-

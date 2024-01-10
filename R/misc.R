@@ -199,9 +199,9 @@ fstr = function(txt, arglist)
 weighted_ntile = function(x, weights, n)
 {
   
-  dat = tibble(x=x, w=weights, ord=1:length(x)) %>%
-    arrange(.data$x) %>%
-    mutate(rn=cumsum(.data$w)-.data$w) %>%
+  dat = tibble(x=x, w=weights, ord=1:length(x)) |>
+    arrange(.data$x) |>
+    mutate(rn=cumsum(.data$w)-.data$w) |>
     arrange(.data$ord) 
   
   as.integer(floor(n * dat$rn/sum(dat$w) + 1))
@@ -472,8 +472,8 @@ df_identical = function(a, b)
   if(!all(dim(a)==dim(b))) return(FALSE)
   if(!length(intersect(colnames(a),colnames(b))) == ncol(a)) return(FALSE)
   
-  a = a %>% mutate_if(is.factor, as.character) 
-  b = b %>% mutate_if(is.factor, as.character)
+  a = a |> mutate_if(is.factor, as.character) 
+  b = b |> mutate_if(is.factor, as.character)
   
   return(all(a == b[,colnames(a)]))
 }
@@ -691,4 +691,3 @@ logsumexp = function(x)
 #   arrange(weights) |>
 #   as.list()
 # usethis::use_data(quadpoints, internal = TRUE)
-

@@ -96,11 +96,11 @@ DIF = function(dataSrc, person_property, predicate=NULL)
   models = by_rd(respData, person_property, fit_enorm)
   
   ## 3. get the intersection
-  common_items = models[[1]]$inputs$ssIS %>%
-    full_join(models[[2]]$inputs$ssIS, by=c('item_id','item_score') ,suffix=c('_1','_2')) %>%
-    group_by(.data$item_id) %>%
-    filter(!(anyNA(.data$sufI_1) | anyNA(.data$sufI_2))) %>%
-    ungroup() %>%
+  common_items = models[[1]]$inputs$ssIS |>
+    full_join(models[[2]]$inputs$ssIS, by=c('item_id','item_score') ,suffix=c('_1','_2')) |>
+    group_by(.data$item_id) |>
+    filter(!(anyNA(.data$sufI_1) | anyNA(.data$sufI_2))) |>
+    ungroup() |>
     distinct(.data$item_id)
   
   if(nrow(common_items) != nrow(models[[1]]$inputs$ssI) || nrow(common_items) != nrow(models[[2]]$inputs$ssI))
@@ -108,10 +108,10 @@ DIF = function(dataSrc, person_property, predicate=NULL)
     cat('\n')
     message('Some items were excluded because they do not appear in both datasets and/or do not have the same score categories in both datasets.')
     models = lapply(models, function(m){
-      ii = m$inputs$ssIS %>%
-        filter(.data$item_score > 0L) %>%
-        mutate(i = row_number()) %>%
-        semi_join(common_items, by='item_id') %>%
+      ii = m$inputs$ssIS |>
+        filter(.data$item_score > 0L) |>
+        mutate(i = row_number()) |>
+        semi_join(common_items, by='item_id') |>
         pull(.data$i)
         
       m$est$beta = drop(m$est$beta)[ii]
@@ -128,11 +128,11 @@ DIF = function(dataSrc, person_property, predicate=NULL)
   DIF_mats = PairDIF_(models[[1]]$est$beta, models[[2]]$est$beta, 
                       models[[1]]$est$acov.beta, models[[2]]$est$acov.beta)
   
-  items = models[[1]]$inputs$ssIS %>%
-    semi_join(common_items,by='item_id') %>%
-    filter(.data$item_score > 0) %>%
-    select('item_id', 'item_score') %>%
-    arrange(.data$item_id, .data$item_score) %>%
+  items = models[[1]]$inputs$ssIS |>
+    semi_join(common_items,by='item_id') |>
+    filter(.data$item_score > 0) |>
+    select('item_id', 'item_score') |>
+    arrange(.data$item_id, .data$item_score) |>
     mutate(item_id=as.character(.data$item_id))
   
   
@@ -189,15 +189,15 @@ plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, alpha
     stop('some of the item_ids you specified are not present in the DIF object')
   }
   
-  x$items = x$items %>%
+  x$items = x$items |>
     mutate(rn = row_number())
   
-  itemsX = x$items %>%
-    inner_join(tibble(item_id = itemsX, ord = 1:length(itemsX)), by='item_id') %>%
+  itemsX = x$items |>
+    inner_join(tibble(item_id = itemsX, ord = 1:length(itemsX)), by='item_id') |>
     arrange(.data$ord)
   
-  itemsY = x$items %>%
-    inner_join(tibble(item_id = itemsY, ord = 1:length(itemsY)), by='item_id') %>%
+  itemsY = x$items |>
+    inner_join(tibble(item_id = itemsY, ord = 1:length(itemsY)), by='item_id') |>
     arrange(.data$ord)
   
   DIF_pair = abs(x$DIF_pair[itemsX$rn, itemsY$rn])
@@ -270,4 +270,3 @@ plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, alpha
   graphics::layout(1)
   invisible(NULL)
 }
-

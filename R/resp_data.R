@@ -174,7 +174,7 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
       # parms can be generated in weird unkown ways
       # we know scoring rules is always a superset of responses in the db, so if parms => rules, we're ok
       
-      scores = dbGetQuery(dataSrc, "SELECT DISTINCT item_id, item_score FROM dxScoring_rules WHERE item_score>0;") %>%
+      scores = dbGetQuery(dataSrc, "SELECT DISTINCT item_id, item_score FROM dxScoring_rules WHERE item_score>0;") |>
         semi_join(tibble(item_id = levels(design$item_id)), by='item_id')
       
       # suppress factor warnings, is scores covered by parms (parms is superset)
@@ -272,14 +272,14 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
     if(!is.null(parms_check))
     {
       suppressWarnings({
-        itm_scr = dbGetQuery(dataSrc,"SELECT DISTINCT item_id, item_score FROM dxscoring_rules WHERE item_score > 0;") %>%
-          semi_join(tibble(item_id=levels(design$item_id)), by='item_id') %>%
+        itm_scr = dbGetQuery(dataSrc,"SELECT DISTINCT item_id, item_score FROM dxscoring_rules WHERE item_score > 0;") |>
+          semi_join(tibble(item_id=levels(design$item_id)), by='item_id') |>
           anti_join(parms_check, by=c('item_id','item_score'))
       })
       if(NROW(itm_scr)>0)
       {
         itm_scr$item_id = ffactor(itm_scr$item_id, levels=design$item_id)
-        itm_scr = itm_scr %>%
+        itm_scr = itm_scr |>
           semi_join(x, by=c('item_id','item_score'))
         # bugfix: anti => semi keeping socres found in data
       }
@@ -300,23 +300,23 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
       bmap = merge_booklets(x$booklet_id, x$person_id, 
                               design$booklet_id, nlevels(x$booklet_id))
       
-      design = design %>%
-        rename(old_booklet_id = "booklet_id") %>%
+      design = design |>
+        rename(old_booklet_id = "booklet_id") |>
         inner_join(bmap, by='old_booklet_id')
       
       nr = nrow(design)
       
-      design = design %>%
+      design = design |>
         distinct(.data$booklet_id, .data$item_id)
       
       if(nr > nrow(design))
         stop("at least one person has answered at least one item more than once, this is not allowed")
       
-      lvls = bmap %>%
-        group_by(.data$booklet_id) %>%
-        summarise(lev = paste0('(',paste0(.data$old_booklet_id, collapse=', '),')')) %>%
-        ungroup() %>%
-        arrange(.data$booklet_id) %>%
+      lvls = bmap |>
+        group_by(.data$booklet_id) |>
+        summarise(lev = paste0('(',paste0(.data$old_booklet_id, collapse=', '),')')) |>
+        ungroup() |>
+        arrange(.data$booklet_id) |>
         pull('lev')
       
       attr(x$booklet_id,'levels') = lvls
@@ -385,7 +385,7 @@ resp_data.from_resp_data = function(rsp, extra_columns=NULL, summarised=FALSE, p
     indx = head(rsp$x$item_id, np)
     rsp$x[1:np, extra_columns] = rsp$x[indx, extra_columns]
   }
-  rsp$x = head(rsp$x[,union(c('booklet_id','person_id','item_score'), extra_columns)],np) %>%
+  rsp$x = head(rsp$x[,union(c('booklet_id','person_id','item_score'), extra_columns)],np) |>
     rename(booklet_score='item_score')
   
   
@@ -525,9 +525,9 @@ resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
     design = res$design
     if('booklet_id' %in% all_columns && !merge_within_persons)
     {
-      lvls = res$map_booklet %>%
-        arrange( .data$booklet_id) %>%
-        pull(.data$org_booklet_id) %>%
+      lvls = res$map_booklet |>
+        arrange( .data$booklet_id) |>
+        pull(.data$org_booklet_id) |>
         as.character()
 
       if(anyDuplicated(lvls))
@@ -584,9 +584,9 @@ resp_data.from_matrix = function(X, summarised = FALSE, retain_person_id = TRUE,
   {
     maxs = max(X, na.rm=TRUE) 
     # item_score <= maxs is necessary to prevent out of bounds in C
-    parms_check = parms_check %>%
-      mutate(item_id = ffactor(as.character(.data$item_id), levels = sort(colnames(X)),as_int=TRUE)) %>%
-      filter(!is.na(.data$item_id) & .data$item_id <= ncol(X) & .data$item_score <= maxs) %>%
+    parms_check = parms_check |>
+      mutate(item_id = ffactor(as.character(.data$item_id), levels = sort(colnames(X)),as_int=TRUE)) |>
+      filter(!is.na(.data$item_id) & .data$item_id <= ncol(X) & .data$item_score <= maxs) |>
       arrange(.data$item_id)
     
     if(n_distinct(parms_check$item_id) < ncol(X))
@@ -660,8 +660,8 @@ intersection_rd = function(respData)
   nb = n_distinct(respData$design$booklet_id)
   if(nb>1)
   {
-    items = respData$design %>%
-      count(.data$item_id) %>%
+    items = respData$design |>
+      count(.data$item_id) |>
       filter(.data$n == nb)
     
     if(nrow(items) == 0)
@@ -879,7 +879,6 @@ get_resp_matrix = function(dataSrc, qtpredicate=NULL, env=NULL)
   colnames(out) = levels(x$item_id)
   out
 }
-
 
 
 

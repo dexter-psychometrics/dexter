@@ -195,4 +195,3 @@ progress_bar = setRefClass('prog_bar',
     }
   ))
 
-

@@ -33,7 +33,7 @@ individual_differences = function(dataSrc, predicate = NULL)
   env = caller_env()
   check_dataSrc(dataSrc)
   
-  respData = get_resp_data(dataSrc, qtpredicate, env = env) %>%
+  respData = get_resp_data(dataSrc, qtpredicate, env = env) |>
 	  intersection_rd()
   
   parms = fit_enorm(respData)

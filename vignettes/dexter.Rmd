@@ -92,7 +92,7 @@ Of course, the `item_id` must be exactly as specified in the scoring rules. Func
 ```{r}
 get_booklets(db)
 head(get_items(db))
-get_persons(db) %>% 
+get_persons(db) |> 
   glimpse()
 ```
 
@@ -220,4 +220,3 @@ RcppArmadillo::armadillo_reset_cores()
 
 
 ## References
-

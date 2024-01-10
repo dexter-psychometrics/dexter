@@ -33,8 +33,8 @@ logL = function(parms, mean_gibbs=FALSE)
            {
              d = design[[stb$booklet_id[1]]]
              log(elsym(b, a, d$first, d$last)) * stb$N
-           }) %>%
-      unlist() %>%
+           }) |>
+      unlist() |>
       sum()
   
     ll_rm-lgRM
@@ -262,15 +262,15 @@ calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fix
 
   # bookkeeping, make counts for C functions
   # items per booklet
-  nib = design %>%
-    count(.data$booklet_id) %>%
-    arrange(.data$booklet_id) %>%
+  nib = design |>
+    count(.data$booklet_id) |>
+    arrange(.data$booklet_id) |>
     pull(.data$n)
   
   # number of score per booklet (max_score + 1)
-  nscore = scoretab %>%
-    count(.data$booklet_id) %>%
-    arrange(.data$booklet_id) %>%
+  nscore = scoretab |>
+    count(.data$booklet_id) |>
+    arrange(.data$booklet_id) |>
     pull(.data$n)
   
   # THESE ARE C INDEXED!
@@ -283,11 +283,11 @@ calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fix
   ni = length(first)
   max_nr_iter = 30
   
-  max_par_bk = design %>% 
-    group_by(.data$booklet_id) %>%
-    summarise(npar=sum(.data$last - .data$first+1L)) %>%
-    pull(.data$npar) %>%
-    max() %>%
+  max_par_bk = design |> 
+    group_by(.data$booklet_id) |>
+    summarise(npar=sum(.data$last - .data$first+1L)) |>
+    pull(.data$npar) |>
+    max() |>
     as.integer()
   
   # end bookkeeping
@@ -470,7 +470,7 @@ calibrate_CML = function(scoretab, design, sufI, a, first, last, nIter=1000, fix
       },
       split(design, design$booklet_id),
       split(scoretab, scoretab$booklet_id), 
-      SIMPLIFY=FALSE, USE.NAMES=FALSE) %>%
+      SIMPLIFY=FALSE, USE.NAMES=FALSE) |>
     bind_rows()
   
   return(list(b=b, H=H, beta=report$beta, acov.beta=report$cov.beta, 
@@ -503,24 +503,24 @@ calibrate_Bayes = function(scoretab, design, sufI, a, first, last,  nIter, fixed
   on.exit({pb$close()})
   
   # bookkeeping: make counts and indexes for C function
-  design = design %>%
-    mutate(bn = dense_rank(.data$booklet_id) - 1L) %>%
-    group_by(.data$bn) %>%
-    mutate(inr = dense_rank(.data$first) - 1L) %>%
-    ungroup() %>%
+  design = design |>
+    mutate(bn = dense_rank(.data$booklet_id) - 1L) |>
+    group_by(.data$bn) |>
+    mutate(inr = dense_rank(.data$first) - 1L) |>
+    ungroup() |>
     arrange(.data$first, .data$bn)
   
   bi = design$inr
   ib = design$bn
   
-  nbi = design %>% 
-    count(.data$first) %>% 
-    arrange(.data$first) %>% 
+  nbi = design |> 
+    count(.data$first) |> 
+    arrange(.data$first) |> 
     pull(.data$n)
   
-  nib = design %>% 
-    count(.data$bn) %>% 
-    arrange(.data$bn) %>% 
+  nib = design |> 
+    count(.data$bn) |> 
+    arrange(.data$bn) |> 
     pull(.data$n)
   
   design = arrange(design,.data$bn)
@@ -528,17 +528,17 @@ calibrate_Bayes = function(scoretab, design, sufI, a, first, last,  nIter, fixed
   bfirst = as.integer(design$first -1L)
   blast = as.integer(design$last -1L)
   
-  bmax = design %>%
-    group_by(.data$bn) %>%
-    summarise(max_score = sum(a[.data$last])) %>%
-    ungroup() %>%
+  bmax = design |>
+    group_by(.data$bn) |>
+    summarise(max_score = sum(a[.data$last])) |>
+    ungroup() |>
     pull(.data$max_score)
 
-  m = scoretab %>%
-    group_by(.data$booklet_id) %>%
-    summarize(m=sum(.data$N)) %>%
-    ungroup() %>%
-    arrange(.data$booklet_id) %>%
+  m = scoretab |>
+    group_by(.data$booklet_id) |>
+    summarize(m=sum(.data$N)) |>
+    ungroup() |>
+    arrange(.data$booklet_id) |>
     pull(.data$m)
   
   
@@ -566,4 +566,3 @@ calibrate_Bayes = function(scoretab, design, sufI, a, first, last,  nIter, fixed
   
   return(list(a=a, b=report$b_renorm, lambda=out$lambda, beta=report$beta)) #use b=out$b for consistency with lambda
 }
-

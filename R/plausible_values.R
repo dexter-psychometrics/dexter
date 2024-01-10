@@ -38,14 +38,14 @@ pv_gibbs_settings = function(nPV,
 
 pv_design = function(design, a)
 {
-  design = arrange(design, .data$booklet_id, .data$first) %>%
+  design = arrange(design, .data$booklet_id, .data$first) |>
     mutate(first_c = as.integer(.data$first-1L),
            last_c = as.integer(.data$last-1L))
   
-  booklets = design %>%
-    group_by(.data$booklet_id) %>%
-    summarise(nit=n(), max_a = max(a[.data$last])) %>%
-    ungroup() %>%
+  booklets = design |>
+    group_by(.data$booklet_id) |>
+    summarise(nit=n(), max_a = max(a[.data$last])) |>
+    ungroup() |>
     arrange(.data$booklet_id)
   
   list(first_c = design$first_c, last_c = design$last_c, 
@@ -252,8 +252,8 @@ plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL
   
   plausible_values_(dataSrc, parms, qtpredicate=qtpredicate, covariates=covariates, nPV=nPV, 
                      parms_draw = parms_draw, env=env,prior_dist = prior_dist ,
-                     merge_within_persons=merge_within_persons)$pv %>%
-    mutate_if(is.factor, as.character) %>%
+                     merge_within_persons=merge_within_persons)$pv |>
+    mutate_if(is.factor, as.character) |>
     df_format()
 }
 
@@ -322,22 +322,22 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
   if(!is.null(covariates))
   {
     group_number = (function(){i = 0L; function() i <<- i+1L })()
-    respData$x = respData$x %>% 
-      group_by_at(covariates) %>%
-      mutate(pop__ = group_number()) %>%
+    respData$x = respData$x |> 
+      group_by_at(covariates) |>
+      mutate(pop__ = group_number()) |>
       ungroup() 
   } 
   
   # join design with the params
   # these can have different levels
-  design = suppressWarnings(respData$design %>%
-                              inner_join(parms$items, by='item_id') %>% 
+  design = suppressWarnings(respData$design |>
+                              inner_join(parms$items, by='item_id') |> 
                               arrange(.data$booklet_id, .data$first))
   
   
   y = pv_chain(select(respData$x, 'booklet_id', 'person_id', 'booklet_score', any_of(c(pop = 'pop__'))),
                design, parms$b, parms$a, nPV=nPV, prior_dist=prior_dist,
-               gibbs_settings=gibbs_settings) %>%
+               gibbs_settings=gibbs_settings) |>
     select(-any_of('pop'))
   
   

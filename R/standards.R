@@ -45,7 +45,7 @@
 #' add_booklet(db, verbAggrData, "agg")
 #' add_item_properties(db, verbAggrProperties)
 #' 
-#' design = get_items(db) %>%
+#' design = get_items(db) |>
 #'   rename(cluster_id='behavior')
 #' 
 #' f = fit_enorm(db)
@@ -69,14 +69,14 @@ standards_3dc = function(parms, design)
     design$booklet_id = '3DC'
 
   if(!'cluster_nbr' %in% colnames(design)) 
-    design = design %>% 
-      group_by(.data$booklet_id) %>%
+    design = design |> 
+      group_by(.data$booklet_id) |>
       mutate(cluster_nbr = dense_rank(.data$cluster_id))
 
   if(!'item_nbr' %in% names(design))
-    design = design %>% 
-      group_by(.data$booklet_id, .data$cluster_nbr) %>%
-      mutate(item_nbr = dense_rank(.data$item_id)) %>%
+    design = design |> 
+      group_by(.data$booklet_id, .data$cluster_nbr) |>
+      mutate(item_nbr = dense_rank(.data$item_id)) |>
       ungroup()
 
 
@@ -90,9 +90,9 @@ standards_3dc = function(parms, design)
   {
       es = expected_score(parms, items=tds$item_id)
       
-      ability_tables(parms, design = select(tds, booklet_id='cluster_id', 'item_id')) %>%
-        rename(cluster_id='booklet_id', cluster_score='booklet_score') %>%
-        mutate(booklet_score = es(.data$theta)) %>%
+      ability_tables(parms, design = select(tds, booklet_id='cluster_id', 'item_id')) |>
+        rename(cluster_id='booklet_id', cluster_score='booklet_score') |>
+        mutate(booklet_score = es(.data$theta)) |>
         inner_join(distinct(tds, .data$cluster_nbr, .data$cluster_id), by='cluster_id')
   })
   
@@ -214,10 +214,10 @@ standards_db = function(par.sts, file_name, standards, population=NULL, group_le
 #'@rdname standards_3dc
 coef.sts_par = function(object, ...)
 {
-  bind_rows(object$est, .id='booklet_id') %>%
+  bind_rows(object$est, .id='booklet_id') |>
     inner_join(distinct(object$design, .data$booklet_id, .data$cluster_nbr, .data$cluster_id), 
-               by=c('booklet_id','cluster_nbr','cluster_id')) %>%
-    arrange(.data$booklet_id, .data$cluster_nbr, .data$cluster_score) %>%
+               by=c('booklet_id','cluster_nbr','cluster_id')) |>
+    arrange(.data$booklet_id, .data$cluster_nbr, .data$cluster_score) |>
     df_format()
 }
 
@@ -249,9 +249,9 @@ plot.sts_par = function(x, booklet_id=NULL, ...)
                            override = list(x = c(0,max_score), y = c(0, n_cluster), type='n'),
                            default = default.args))
     
-    cnames = filter(x$design, .data$booklet_id==tst) %>%
-      distinct(.data$cluster_nbr, .data$cluster_id) %>%
-      arrange(.data$cluster_nbr) %>%
+    cnames = filter(x$design, .data$booklet_id==tst) |>
+      distinct(.data$cluster_nbr, .data$cluster_id) |>
+      arrange(.data$cluster_nbr) |>
       pull('cluster_id')
     
     axis(1,at=0:max_score)
@@ -266,4 +266,3 @@ plot.sts_par = function(x, booklet_id=NULL, ...)
     }
   }
 }
-

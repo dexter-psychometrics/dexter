@@ -87,11 +87,11 @@ start_new_project = function(rules, db_name="dexter.db", person_properties = NUL
   
   if(NROW(rules)>0)
   {
-  	sanity = rules %>%
-  		group_by(.data$item_id) %>%
+  	sanity = rules |>
+  		group_by(.data$item_id) |>
   		summarise(less_than_two_scores = n_distinct(.data$item_score)<2,
   				duplicated_responses = any(duplicated(.data$response)),
-  				min_score_not_zero = min(.data$item_score)>0) %>%
+  				min_score_not_zero = min(.data$item_score)>0) |>
   		filter(.data$less_than_two_scores | .data$duplicated_responses | .data$min_score_not_zero)
 
     if (nrow(sanity)>0)
@@ -210,8 +210,8 @@ keys_to_rules = function(keys, include_NA_rule = FALSE)
   if (ABC) {
     m = match(keys$key, LETTERS)
     if (any(m>keys$noptions)) stop("You have out-of-range keys")
-    r = keys %>% 
-      group_by(.data$item_id) %>% 
+    r = keys |> 
+      group_by(.data$item_id) |> 
       do({
       y = tibble(response=LETTERS[1:.$noptions[1]], item_score=0)
       y$item_score[match(.$key[1],LETTERS)] = 1
@@ -219,8 +219,8 @@ keys_to_rules = function(keys, include_NA_rule = FALSE)
     })
   } else {
     if (any(keys$key>keys$noptions)) stop("You have out-of-range keys")
-    r = keys %>% 
-      group_by(.data$item_id) %>% 
+    r = keys |> 
+      group_by(.data$item_id) |> 
       do({
       y = tibble(response=as.character(1:.$noptions[1]), item_score=0)
       y$item_score[.$key[1]] = 1
@@ -295,21 +295,21 @@ touch_rules = function(db, rules)
   # remove the no-ops
   rules = dplyr::setdiff(rules, existing_rules)
   
-  existing_opts = existing_rules %>% select(-'item_score')
+  existing_opts = existing_rules |> select(-'item_score')
   
   # new items or responses
-  new_rules = rules %>% anti_join(existing_opts, by=c('item_id','response'))
+  new_rules = rules |> anti_join(existing_opts, by=c('item_id','response'))
   
   # existing items or responses but with new scores
-  amended_rules = rules %>% inner_join(existing_opts, by=c('item_id','response'))
+  amended_rules = rules |> inner_join(existing_opts, by=c('item_id','response'))
   
   # to judge the validity of the new rules, we have to look at them in combination
   # with the rules in the db that will not be changed
-  sanity = rules %>% 
-    dplyr::union(existing_rules %>% 
+  sanity = rules |> 
+    dplyr::union(existing_rules |> 
                    anti_join(rules, by=c('item_id','response'))
-                 ) %>%
-    group_by(.data$item_id) %>%
+                 ) |>
+    group_by(.data$item_id) |>
     summarise(less_than_two_scores = length(unique(.data$item_score))<2,
               duplicated_responses = any(duplicated(.data$response)),
               min_score_not_zero = min(.data$item_score)>0) 
@@ -418,9 +418,9 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
   person_properties = intersect(dbListFields(db, 'dxpersons'), tolower(names(x)))
   person_properties = person_properties[person_properties != 'person_id']
   
-  design = tibble(booklet_id = booklet_id, item_id = names(x), col_order=c(1:ncol(x))) %>%
-    inner_join(dbGetQuery(db, "SELECT item_id FROM dxitems;"), by='item_id') %>%
-    mutate(item_position = dense_rank(.data$col_order)) %>%
+  design = tibble(booklet_id = booklet_id, item_id = names(x), col_order=c(1:ncol(x))) |>
+    inner_join(dbGetQuery(db, "SELECT item_id FROM dxitems;"), by='item_id') |>
+    mutate(item_position = dense_rank(.data$col_order)) |>
     select(-'col_order')
 
   if(nrow(design) == 0) stop('None of the column names in x correspond to known items in your project')
@@ -477,8 +477,8 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
     dbExecute_param(db,'INSERT INTO dxadministrations(person_id,booklet_id) VALUES(:person_id,:booklet_id);', 
               select(x, 'person_id', 'booklet_id'))
           
-    responses = x %>%
-      select(all_of(c(design$item_id, "booklet_id", "person_id"))) %>%
+    responses = x |>
+      select(all_of(c(design$item_id, "booklet_id", "person_id"))) |>
       pivot_longer(all_of(design$item_id), values_drop_na = FALSE,
                    names_to='item_id', values_to='response')
     
@@ -487,7 +487,7 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
     responses$response[is.na(responses$response)] = 'NA'
                   
     new_rules = anti_join(responses, dbGetQuery(db, "SELECT item_id, response FROM dxscoring_rules;"), 
-                          by=c('item_id','response')) %>%
+                          by=c('item_id','response')) |>
       distinct(.data$item_id, .data$response)
     
     if (nrow(new_rules)>0 && auto_add_unknown_rules) 
@@ -563,9 +563,9 @@ add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_a
       design$item_position = as.integer(design$item_position)
     } else
     {
-      design = design %>%
-        group_by(.data$booklet_id) %>%
-        mutate(item_position = row_number()) %>%
+      design = design |>
+        group_by(.data$booklet_id) |>
+        mutate(item_position = row_number()) |>
         ungroup()
     }
     design = design[,c('booklet_id','item_id','item_position')]
@@ -586,12 +586,12 @@ add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_a
     
     if(any(design$booklet_id %in% db_booklets))
     {
-      check_dsg_db = get_design(db) %>%
-        semi_join(design,by='booklet_id') %>%
+      check_dsg_db = get_design(db) |>
+        semi_join(design,by='booklet_id') |>
         arrange(.data$booklet_id, .data$item_id)
       
-      check_dsg = design %>%
-        filter(.data$booklet_id %in% db_booklets) %>%
+      check_dsg = design |>
+        filter(.data$booklet_id %in% db_booklets) |>
         arrange(.data$booklet_id, .data$item_id)
       
       
@@ -624,7 +624,7 @@ add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_a
     
     # check data
     data_design = distinct(data, .data$booklet_id, .data$item_id)
-    design = semi_join(get_design(db), data_design, by='booklet_id') %>% 
+    design = semi_join(get_design(db), data_design, by='booklet_id') |> 
       select('booklet_id', 'item_id')
     
     invalid_bk_item = anti_join(data_design, design, by=c('booklet_id','item_id'))
@@ -638,8 +638,8 @@ add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_a
     # fill in the missings
     administrations = distinct(data,.data$booklet_id, .data$person_id)
     
-    data = administrations %>%
-      inner_join(design, by='booklet_id', relationship = "many-to-many") %>%
+    data = administrations |>
+      inner_join(design, by='booklet_id', relationship = "many-to-many") |>
       left_join(data, by=c('person_id','booklet_id','item_id'))
     
     NA_cnt = sum(is.na(data$response))
@@ -650,12 +650,12 @@ add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_a
     }
     
     # check rules
-    new_rules = distinct(data, .data$item_id, .data$response) %>%
+    new_rules = distinct(data, .data$item_id, .data$response) |>
       anti_join(get_rules(db), by=c('item_id','response'))
     
     if(NROW(new_rules)>0)
     {
-      unknown_items = distinct(new_rules, .data$item_id) %>%
+      unknown_items = distinct(new_rules, .data$item_id) |>
         anti_join(dbGetQuery(db, 'SELECT item_id FROM dxitems;'), by='item_id')
       
       if(NROW(unknown_items) > 0)
@@ -699,8 +699,8 @@ add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_a
     if(nrow(existing_admin) > 0)
     {
       message('The following person-booklet combination have already been entered into the project (showing first 20)')
-      head(existing_admin, 20) %>% 
-        as.data.frame() %>% 
+      head(existing_admin, 20) |> 
+        as.data.frame() |> 
         print(row.names=FALSE)
       stop('double administrations')
     }
@@ -784,14 +784,14 @@ add_item_properties = function(db, item_properties=NULL, default_values=NULL) {
     {
       colnames(item_properties) = dbValid_colnames(colnames(item_properties))
       
-      item_properties = item_properties %>%
-        mutate(item_id = as.character(.data$item_id)) %>%
+      item_properties = item_properties |>
+        mutate(item_id = as.character(.data$item_id)) |>
         mutate_if(is.factor, as.character) 
       
       if(inherits(db,'SQLiteConnection'))
       {
-        item_properties = item_properties %>%
-          mutate_if(is.date, format, "%Y-%m-%d") %>%
+        item_properties = item_properties |>
+          mutate_if(is.date, format, "%Y-%m-%d") |>
           mutate_if(is.time, format, "%Y-%m-%d %H:%M:%S")
       }
 
@@ -871,8 +871,8 @@ add_person_properties = function(db, person_properties = NULL, default_values = 
       
       if(inherits(db,'SQLiteConnection'))
       {
-        person_properties = person_properties %>%
-          mutate_if(is.date, format, "%Y-%m-%d") %>%
+        person_properties = person_properties |>
+          mutate_if(is.date, format, "%Y-%m-%d") |>
           mutate_if(is.time, format, "%Y-%m-%d %H:%M:%S")
       }
       
@@ -971,10 +971,10 @@ get_variables = function(db)
            dbClearResult(res)
            r$originates = substring(tbl,3)
            return(r)
-         }) %>% 
-    bind_rows() %>% 
-    distinct(.data$name,.keep_all=TRUE) %>%
-    filter(.data$name != 'testpart_nbr') %>%
+         }) |> 
+    bind_rows() |> 
+    distinct(.data$name,.keep_all=TRUE) |>
+    filter(.data$name != 'testpart_nbr') |>
     arrange(.data$originates)
 }
 
@@ -1029,8 +1029,8 @@ get_testscores = function(dataSrc, predicate=NULL)
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
   
-  get_resp_data(dataSrc, qtpredicate, summarised=TRUE, env=env)$x %>%
-    mutate_if(is.factor, as.character) %>%
+  get_resp_data(dataSrc, qtpredicate, summarised=TRUE, env=env)$x |>
+    mutate_if(is.factor, as.character) |>
     df_format()
 }
 
@@ -1071,13 +1071,13 @@ get_design = function(dataSrc,
     } else if(inherits(dataSrc, 'data.frame'))
     {
       colnames(dataSrc) = tolower(colnames(dataSrc))
-      dataSrc[,intersect(c('booklet_id','item_position','item_id'),colnames(dataSrc))] %>%
-        distinct() %>%
+      dataSrc[,intersect(c('booklet_id','item_position','item_id'),colnames(dataSrc))] |>
+        distinct() |>
         arrange_all()
     } else
     {
-      get_resp_data(dataSrc)$design %>%
-        distinct() %>%
+      get_resp_data(dataSrc)$design |>
+        distinct() |>
         arrange_all()
     }
   
@@ -1094,10 +1094,10 @@ get_design = function(dataSrc,
     if(rows == columns) stop('rows may not be equal to columns')
     val_col = setdiff(c('booklet_id','item_id','item_position'), c(rows, columns))
 
-    design %>%
-      select('item_id','item_position','booklet_id') %>%
-      pivot_wider(names_from=columns, values_from=val_col, values_fill=fill, names_sort=TRUE) %>%
-      arrange(all_of(rows)) %>%
+    design |>
+      select('item_id','item_position','booklet_id') |>
+      pivot_wider(names_from=columns, values_from=val_col, values_fill=fill, names_sort=TRUE) |>
+      arrange(all_of(rows)) |>
       df_format()
         
   } else
@@ -1149,7 +1149,7 @@ design_info = function(dataSrc, predicate = NULL)
   if(inherits(dataSrc, 'data.frame') && !('person_id'%in% colnames(dataSrc)))
   {
     # perhaps a design was supplied
-    out$design = dataSrc %>%
+    out$design = dataSrc |>
       distinct(.data$booklet_id, .data$item_id, .keep_all=TRUE)
     
     out$design = out$design[,intersect(colnames(out$design), c('booklet_id','item_id','item_position'))]
@@ -1162,14 +1162,14 @@ design_info = function(dataSrc, predicate = NULL)
       out$design = db_get_design(dataSrc, qtpredicate=qtpredicate, env=env)
     } else
     {
-      out$design = get_resp_data(dataSrc, qtpredicate, env=env)$x %>%
+      out$design = get_resp_data(dataSrc, qtpredicate, env=env)$x |>
         count(.data$booklet_id, .data$item_id, name='n_persons')
     }
   }
 
-  out$design = out$design %>%
-    arrange(.data$booklet_id, .data$item_id)  %>% 
-    mutate_if(is.factor, as.character) %>%
+  out$design = out$design |>
+    arrange(.data$booklet_id, .data$item_id)  |> 
+    mutate_if(is.factor, as.character) |>
     df_format()
       
     
@@ -1178,13 +1178,13 @@ design_info = function(dataSrc, predicate = NULL)
     
  
   #testlets
-  out$testlets = out$design %>%
-    mutate(bnr = dense_rank(.data$booklet_id)) %>%
-    group_by(.data$item_id) %>%
-    summarize(testlet = paste(sort(.data$bnr), collapse = ' ')) %>%
-    ungroup() %>%
-    mutate(testlet = dense_rank(.data$testlet)) %>%
-    arrange(.data$testlet, .data$item_id) %>%
+  out$testlets = out$design |>
+    mutate(bnr = dense_rank(.data$booklet_id)) |>
+    group_by(.data$item_id) |>
+    summarize(testlet = paste(sort(.data$bnr), collapse = ' ')) |>
+    ungroup() |>
+    mutate(testlet = dense_rank(.data$testlet)) |>
+    arrange(.data$testlet, .data$item_id) |>
     df_format()
   
   
@@ -1198,7 +1198,7 @@ design_info = function(dataSrc, predicate = NULL)
   diag(out$adj_matrix$weighted_by_items) = 0L
   
   
-  b = out$design %>% 
+  b = out$design |> 
     distinct(.data$booklet_id, .keep_all=TRUE)
   ww = outer(b$n_persons, b$n_persons, "+")
   out$adj_matrix$weighted_by_persons = out$adj_matrix$weighted_by_items * ww    
@@ -1206,7 +1206,7 @@ design_info = function(dataSrc, predicate = NULL)
   
   
   out$connected_booklets = tibble(booklet_id = colnames(out$adj_matrix$weighted_by_items), 
-                                  group = ds_connected_groups(out$adj_matrix$weighted_by_items)) %>% 
+                                  group = ds_connected_groups(out$adj_matrix$weighted_by_items)) |> 
     df_format()
   out$connected = (max(out$connected_booklets$group) == 1)
   
@@ -1299,6 +1299,5 @@ NULL
 #' @format A data set with 14 rows and 2 columns: item_id and aspect
 #' @keywords datasets
 NULL
-
 
 

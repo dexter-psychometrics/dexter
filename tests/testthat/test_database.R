@@ -34,7 +34,7 @@ test_that('rule updates and sanity checks',
   
   
   ## test update score
-  expect_output(touch_rules(db, filter(rules, item_id=='S1DoCurse' & response ==1) %>% mutate(item_score=2) ),
+  expect_output(touch_rules(db, filter(rules, item_id=='S1DoCurse' & response ==1) |> mutate(item_score=2) ),
                  '(changed\\D*1\\D*added\\D*0\\D*)|(added\\D*0\\D*changed\\D*1\\D*)$',
                  info = 'expect message saying 1 change and 0 added when modyfying item_score')
   
@@ -46,16 +46,16 @@ test_that('rule updates and sanity checks',
   ## less_than_two_scores
   
   # update set does not have to pass this sanity check on it's own
-  expect_no_error(touch_rules(db, filter(rules, item_id=='S1DoCurse' & response ==1) %>% mutate(item_score=0)),
+  expect_no_error(touch_rules(db, filter(rules, item_id=='S1DoCurse' & response ==1) |> mutate(item_score=0)),
                   message='expect allowed to set an item score to 0')
   
   # but it should shout when every score is set to 0 for an item
   expect_output(
-    expect_error(touch_rules(db, filter(rules, item_id=='S1DoCurse' & response ==2) %>% mutate(item_score=0))),
+    expect_error(touch_rules(db, filter(rules, item_id=='S1DoCurse' & response ==2) |> mutate(item_score=0))),
     regexp='S1DoCurse\\s+TRUE',
     info='should complain about all scores set to 0')
 
-  expect_false(all(filter(get_rules(db), item_id == 'S1DoCurse') %>% pull(item_score) == 0),
+  expect_false(all(filter(get_rules(db), item_id == 'S1DoCurse') |> pull(item_score) == 0),
                info='expect faulty update not to have occurred')
   
   ## duplicated_responses
@@ -113,9 +113,9 @@ test_that('adding person and item properties',
 
   items = get_items(db)
   
-  expect_true(all(items %>% 
-                    filter(item_id=='S4DoCurse') %>% 
-                    select(blame,news) %>% 
+  expect_true(all(items |> 
+                    filter(item_id=='S4DoCurse') |> 
+                    select(blame,news) |> 
                     unlist() == c("society", "olds" )))
   
   expect_output({add_item_properties(db, default_values = list(a=4L))},
@@ -143,9 +143,9 @@ test_that('adding person and item properties',
   
   persons = get_persons(db)
   
-  expect_true(all(persons %>% 
-                    filter(person_id=='dxP1') %>% 
-                    select(gender,news) %>% 
+  expect_true(all(persons |> 
+                    filter(person_id=='dxP1') |> 
+                    select(gender,news) |> 
                     unlist() == c("unchecked", "olds" )))
   
   expect_output({add_person_properties(db, default_values = list(x=4L))},

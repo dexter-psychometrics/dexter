@@ -33,20 +33,20 @@ test_that('verbAgg abilities', {
   # check ability mle is inverse of expected_score
   es = expected_score(f)
   expect_lt(
-    ability_tables(f) %>%
-      filter(is.finite(theta)) %>%
-      mutate(error = abs(booklet_score - es(theta))) %>%
-      pull(error) %>%
+    ability_tables(f) |>
+      filter(is.finite(theta)) |>
+      mutate(error = abs(booklet_score - es(theta))) |>
+      pull(error) |>
       mean(),
     0.00001,
     label = "ability_tables mle on average estimated to within .00001 of test_score")
   
   
-  nscores = get_rules(db) %>%
-    group_by(item_id) %>%
-    summarize(m=max(item_score)) %>%
-    ungroup() %>%
-    pull(m) %>%
+  nscores = get_rules(db) |>
+    group_by(item_id) |>
+    summarize(m=max(item_score)) |>
+    ungroup() |>
+    pull(m) |>
     sum() + 1
   
   test_cases = list(MLE = c('MLE','normal'), WLE = c('WLE','normal'), EAP_normal = c('EAP','normal'), EAP_J = c('EAP','Jeffreys'))
@@ -69,6 +69,5 @@ test_that('verbAgg abilities', {
 
 
 RcppArmadillo::armadillo_reset_cores()
-
 
 

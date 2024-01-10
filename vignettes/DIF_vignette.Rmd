@@ -81,7 +81,7 @@ As usual in DIF testing, the procedure we have described is exploratory and ther
 Finally, note that sorting can help to make the picture more interpretable. For example, we can sort on 'want' versus 'do':
 
 ```{r sorting, fig.align='center'}
-items = get_items(db) %>%
+items = get_items(db) |>
   arrange(mode, item_id)
   
 plot(dif_gender, items=items$item_id)
@@ -96,4 +96,3 @@ Now, we see that the DO-items among themselves keep their relative positions in 
 
 
 ## References
-
