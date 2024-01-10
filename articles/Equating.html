@@ -40,7 +40,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dexter</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.3.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
       </span>
     </div>
 
@@ -113,7 +113,7 @@
                         <h4 data-toc-skip class="author">Timo Bechger,
 Jesse Koops and Ivailo Partchev</h4>
             
-            <h4 data-toc-skip class="date">2024-01-08</h4>
+            <h4 data-toc-skip class="date">2024-01-10</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/vignettes/Equating.Rmd" class="external-link"><code>vignettes/Equating.Rmd</code></a></small>
       <div class="hidden name"><code>Equating.Rmd</code></div>
@@ -123,7 +123,7 @@ Jesse Koops and Ivailo Partchev</h4>
     
     
 <style>
-img{ border:none;}
+img, #nature, #nature td{  border:none;}
 </style>
 <p>Educational tests are often equipped with a threshold to turn the
 test score into a pass-fail decision. When a new test of the same kind
@@ -139,27 +139,27 @@ the decision is possibly produced by dichotomizing the quantitative
 measurement of some hormone or other substance, just like we want to do
 with our educational test scores. There are four possible outcomes in
 all, which can be represented in a two-by-two table</p>
-<table class="table"><tbody>
+<table id="nature" class="table"><tbody>
 <tr>
-<td rowspan="2" colspan="2">
+<td rowspan="2" colspan="2" style="border-right:1px solid black;">
 </td>
-<td colspan="2">
+<td colspan="2" style="text-align:center">
 State of nature
 </td>
 </tr>
-<tr>
-<td>
+<tr style="border-bottom: 1px solid black;">
+<td style="text-align:center">
 Positive
 </td>
-<td>
+<td style="text-align:center">
 Negative
 </td>
 </tr>
 <tr>
-<td rowspan="2">
+<td rowspan="2" style="vertical-align:middle;">
 Prediction
 </td>
-<td>
+<td style="border-right:1px solid black;">
 Positive
 </td>
 <td>
@@ -170,7 +170,7 @@ False positive (FP)
 </td>
 </tr>
 <tr>
-<td>
+<td style="border-right:1px solid black;">
 Negative
 </td>
 <td>
@@ -349,7 +349,7 @@ target test:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ou_e</span>, what<span class="op">=</span><span class="st">'sens/spec'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Equating_files/figure-html/unnamed-chunk-11-1.png" width="384" style="display: block; margin: auto;"></p>
 <p>If sensitivity and specificity are equally important, the plot
-suggests 25 as a pass-fail score on the new test.</p>
+suggests 23 as a pass-fail score on the new test.</p>
 </div>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>

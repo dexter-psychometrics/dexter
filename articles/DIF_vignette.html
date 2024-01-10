@@ -40,7 +40,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dexter</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.3.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.4.0</span>
       </span>
     </div>
 
@@ -114,7 +114,7 @@ Dexter</h1>
                         <h4 data-toc-skip class="author">Timo
 Bechger</h4>
             
-            <h4 data-toc-skip class="date">2024-01-08</h4>
+            <h4 data-toc-skip class="date">2024-01-10</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/vignettes/DIF_vignette.Rmd" class="external-link"><code>vignettes/DIF_vignette.Rmd</code></a></small>
       <div class="hidden name"><code>DIF_vignette.Rmd</code></div>
@@ -190,7 +190,7 @@ many more groups.</p>
 <p>Finally, note that sorting can help to make the picture more
 interpretable. For example, we can sort on ‘want’ versus ‘do’:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">items</span> <span class="op">=</span> <span class="fu"><a href="../reference/get_items.html">get_items</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<code class="sourceCode R"><span><span class="va">items</span> <span class="op">=</span> <span class="fu"><a href="../reference/get_items.html">get_items</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">mode</span>, <span class="va">item_id</span><span class="op">)</span></span>
 <span>  </span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dif_gender</span>, items<span class="op">=</span><span class="va">items</span><span class="op">$</span><span class="va">item_id</span><span class="op">)</span></span></code></pre></div>
