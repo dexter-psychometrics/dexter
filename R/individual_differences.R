@@ -46,7 +46,7 @@ individual_differences = function(dataSrc, predicate = NULL)
   observed = parms$inputs$scoretab$N
   m = sum(observed)
   lambda = parms$est$lambda$lambda
-  observed_smooth = ENORM2ScoreDist(b,a,lambda,first,last)$n.smooth
+  observed_smooth = suppressWarnings({ENORM2ScoreDist(b,a,lambda,first,last)$n.smooth})
 
   theta.est = theta_score_distribution(b,a,first,last,observed)
   expected = pscore(theta.est,b,a,first,last)[,1,drop=TRUE]
@@ -111,7 +111,7 @@ plot.tind=function(x,...)
                            default=list(x="topleft", bty = "n",
                                         lwd = 1, cex = 0.7, col = col, pch = c(19,NA),inset=0.01,
                                         legend=c("observed", "expected")),
-                           override=list(lty = c(NA,1), col=col)))
+                           override=list(lty = 1, col=col)))
 
   
   invisible(NULL)
