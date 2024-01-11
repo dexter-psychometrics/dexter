@@ -148,6 +148,7 @@ hnorm_prior::hnorm_prior(const vec& theta_start, const double sigma_start)
 	sigma = sigma_start;
 	runif = dqrng::uniform_distribution(0, 1);
 	rnorm = dqrng::normal_distribution(0, 1);
+	tau2 = 0;
 }	
 	
 
