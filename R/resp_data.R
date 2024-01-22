@@ -348,10 +348,19 @@ resp_data.from_resp_data = function(rsp, extra_columns=NULL, summarised=FALSE, p
   
   if(!is.null(parms_check))
   {
-    suppressWarnings({no_par = dplyr::setdiff(rsp$x[,c('item_id','item_score')], parms_check)})
+    if(summarised && rsp$summarised)
+    {
+      no_par = tibble(item_id=setdiff(rsp$design$item_id,parms_check$item_id))
+    } else
+    {
+      suppressWarnings({no_par = dplyr::setdiff(rsp$x[,c('item_id','item_score')], parms_check)})
+    }
+    
     if(nrow(no_par) > 0)
       stop_no_param(no_par)
   }
+  
+  
   
   if(merge_within_persons && !rsp$merge_within_persons)
   {

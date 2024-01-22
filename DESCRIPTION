@@ -1,7 +1,7 @@
 Package: dexter
 Type: Package
 Title: Data Management and Analysis of Tests
-Version: 1.4.0
+Version: 1.4.1
 Authors@R: c(
     person("Gunter","Maris", role="aut"),
     person("Timo","Bechger", role="aut"),
@@ -24,7 +24,7 @@ Imports:
     rlang (>= 0.4.1),    
     dplyr (>= 1.1.0),
     Rcpp (>= 1.0.1),
-    RcppArmadillo,
+    RcppArmadillo (>= 0.12.6.6.0),
     graphics,
     grDevices,
     methods,

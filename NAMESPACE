@@ -1,6 +1,6 @@
 useDynLib(dexter, .registration=TRUE)
 importFrom(Rcpp, "evalCpp")
-importFrom(RcppArmadillo, 'armadillo_throttle_cores')
+importFrom(RcppArmadillo, 'armadillo_set_seed')
 import(dplyr, except="sql")
 importFrom(RSQLite, "SQLite")
 importFrom(DBI,"dbExecute", "dbGetQuery","dbDisconnect", "dbConnect", "dbListFields",

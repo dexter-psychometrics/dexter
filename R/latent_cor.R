@@ -58,18 +58,27 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   
   pb$set_nsteps(nIter + 4*nd)
   
-  respData$x = respData$x |>
-    group_by(.data$person_id) |>
-    filter(nd == n_distinct(.data[[item_property]])) |>
-    ungroup()
+  # this assumes merge over booklets
+  persons = respData$x |>
+    distinct(.data$person_id, .data[[item_property]]) |>
+    count(.data$person_id)
   
-  respData$x$person_id = ffactor(respData$x$person_id,as_int=TRUE)
+  np_old = nrow(persons)
   
+  persons = persons |>
+    filter(.data$n==nd) |>
+    mutate(new_person_id = dense_rank(.data$person_id)) |>
+    select('person_id','new_person_id')
   
-  np = max(respData$x$person_id)
+  np = nrow(persons)
+
+  if(np==0) stop_("There are no persons that have scores for every subscale.") 
+  
   respData = lapply(split(respData$x, respData$x[[item_property]]), get_resp_data)
+  
   models = lapply(respData, function(x){try(fit_enorm(x), silent=TRUE)})
-  names(models)=names(respData)
+  names(models) = names(respData)
+  
   if(any(sapply(models,inherits,what='try-error')))
   {
     message('\nThe model could not be estimated for one or more item properties, reasons:')
@@ -78,6 +87,20 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
                      result=gsub('^.+try\\(\\{ *:','',trimws(as.character(models)))))
     stop('Some models could not be estimated')
   }
+  
+  if(np < np_old)
+  {
+    for(i in seq_along(respData))
+    {
+      respData[[i]] = get_resp_data(respData[[i]], summarised=TRUE)
+      
+      respData[[i]]$x = respData[[i]]$x |> 
+        inner_join(persons,by='person_id') |>
+        select(-'person_id') |>
+        rename(person_id='new_person_id')
+    }
+  }
+  
   
   abl = mapply(ability, respData, models, SIMPLIFY=FALSE,
                MoreArgs = list(method="EAP", prior="Jeffreys"))
