@@ -63,8 +63,6 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
     distinct(.data$person_id, .data[[item_property]]) |>
     count(.data$person_id)
   
-  np_old = nrow(persons)
-  
   persons = persons |>
     filter(.data$n==nd) |>
     mutate(new_person_id = dense_rank(.data$person_id)) |>
@@ -88,17 +86,14 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
     stop('Some models could not be estimated')
   }
   
-  if(np < np_old)
+  for(i in seq_along(respData))
   {
-    for(i in seq_along(respData))
-    {
-      respData[[i]] = get_resp_data(respData[[i]], summarised=TRUE)
+    respData[[i]] = get_resp_data(respData[[i]], summarised=TRUE)
       
-      respData[[i]]$x = respData[[i]]$x |> 
-        inner_join(persons,by='person_id') |>
-        select(-'person_id') |>
-        rename(person_id='new_person_id')
-    }
+    respData[[i]]$x = respData[[i]]$x |> 
+      inner_join(persons,by='person_id') |>
+      select(-'person_id') |>
+      rename(person_id='new_person_id')
   }
   
   
