@@ -76,6 +76,9 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
                          parms_check=NULL,
                          raw=FALSE)
 {
+  if(all(extra_columns=='booklet_id')) extra_columns=NULL
+  extra_columns = extra_columns[extra_columns != 'booklet_id']
+  
 
   if(inherits(dataSrc,'dx_resp_data'))
   {
