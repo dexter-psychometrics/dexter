@@ -76,9 +76,14 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
                          parms_check=NULL,
                          raw=FALSE)
 {
-  if(all(extra_columns=='booklet_id')) extra_columns=NULL
-  extra_columns = extra_columns[extra_columns != 'booklet_id']
-  
+  if(!is.null(extra_columns))
+  {
+    extra_columns = extra_columns[!extra_columns %in% c('person_id','item_id','item_score')]
+    
+    if(!raw) extra_columns = extra_columns[extra_columns != 'booklet_id']
+    
+    if(length(extra_columns)==0) extra_columns=NULL
+  }
 
   if(inherits(dataSrc,'dx_resp_data'))
   {
