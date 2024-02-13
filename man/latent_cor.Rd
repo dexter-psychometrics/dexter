@@ -35,6 +35,13 @@ List containing a estimated correlation matrix, the corresponding standard devia
 and the lower and upper limits of the highest posterior density interval
 }
 \description{
-Estimates correlations between latent traits. Use an item_property to distinguish the different scales. 
+Estimates correlations between latent traits using plausible values as described in Marsman, et al. (2022). 
+An item_property is used to distinguish the different scales.
+}
+\details{
 This function uses plausible values so results may differ slightly between calls.
+}
+\references{
+Marsman, M., Bechger, T. M., & Maris, G. K. (2022). Composition algorithms for conditional distributions. 
+In Essays on Contemporary Psychometrics (pp. 219-250). Cham: Springer International Publishing.
 }
