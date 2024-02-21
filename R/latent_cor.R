@@ -1,8 +1,8 @@
 
 #' Latent correlations
 #'
-#' Estimates correlations between latent traits. Use an item_property to distinguish the different scales. 
-#' This function uses plausible values so results may differ slightly between calls. 
+#' Estimates correlations between latent traits using plausible values as described in Marsman, et al. (2022). 
+#' An item_property is used to distinguish the different scales. 
 #'
 #' @param dataSrc A connection to a dexter database or a data.frame with columns: person_id, item_id, item_score and 
 #' the item_property
@@ -14,9 +14,14 @@
 #' @param hpd width of Bayesian highest posterior density interval around the correlations, 
 #'  value must be between 0 and 1.
 #' @param use Only complete.obs at this time. Respondents who don't have a score for one or more scales are removed.
-#' 
 #' @return List containing a estimated correlation matrix, the corresponding standard deviations, 
 #' and the lower and upper limits of the highest posterior density interval
+#' @details
+#' This function uses plausible values so results may differ slightly between calls. 
+#' 
+#' @references 
+#' Marsman, M., Bechger, T. M., & Maris, G. K. (2022). Composition algorithms for conditional distributions. 
+#' In Essays on Contemporary Psychometrics (pp. 219-250). Cham: Springer International Publishing.
 #' 
 latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.95, use="complete.obs")
 {
