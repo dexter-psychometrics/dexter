@@ -32,7 +32,11 @@ logL = function(parms, mean_gibbs=FALSE)
            function(stb)
            {
              d = design[[stb$booklet_id[1]]]
-             log(elsym(b, a, d$first, d$last)) * stb$N
+             # impossible scores get a result of 0
+             # since they always have N=0 by definition
+             # it's easier to filter them out
+             w = stb$N>0
+             log(elsym(b, a, d$first, d$last)[w]) * stb$N[w]
            }) |>
       unlist() |>
       sum()
@@ -46,6 +50,15 @@ logL = function(parms, mean_gibbs=FALSE)
   {
     llb(b)
   }
+}
+
+logLik.prms = function(object,...)
+{
+  ll = logL(object)
+ 
+  attr(ll, "df") = sum(object$inputs$ssIS$item_score>0)-1L
+  class(ll) = "logLik"
+  ll
 }
 
 

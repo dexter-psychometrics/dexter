@@ -476,14 +476,13 @@ add_booklet = function(db, x, booklet_id, auto_add_unknown_rules = FALSE) {
     
     dbExecute_param(db,'INSERT INTO dxadministrations(person_id,booklet_id) VALUES(:person_id,:booklet_id);', 
               select(x, 'person_id', 'booklet_id'))
-          
+    
+   
     responses = x |>
       select(all_of(c(design$item_id, "booklet_id", "person_id"))) |>
       pivot_longer(all_of(design$item_id), values_drop_na = FALSE,
-                   names_to='item_id', values_to='response')
+                   names_to='item_id', values_to='response',values_transform=as.character)
     
-            
-    responses$response = as.character(responses$response)
     responses$response[is.na(responses$response)] = 'NA'
                   
     new_rules = anti_join(responses, dbGetQuery(db, "SELECT item_id, response FROM dxscoring_rules;"), 

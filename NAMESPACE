@@ -55,6 +55,7 @@ export(fit_enorm)
 S3method(print,prms)
 S3method(coef,prms)
 S3method(plot,prms)
+S3method(logLik,prms)
 
 export(information)
 export(expected_score)
