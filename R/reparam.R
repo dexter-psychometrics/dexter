@@ -361,9 +361,9 @@ toOPLM = function(a, b, first, last, H=NULL, fixed_b=NULL, lambda=NULL)
         }
       }
       if (is.null(fixed_b)){
-        c = mean(beta[r,])
-        b_rn[r,] = b_rn[r,]*exp(c*a_org)
-        beta[r,] = beta[r,] - c ## mean center
+        mean_beta = mean(beta[r,])
+        b_rn[r,] = b_rn[r,]*exp(mean_beta*a_org)
+        beta[r,] = beta[r,] - mean_beta ## mean center
       }
     }
     if (nrow(beta)>2) cov.beta=cov(beta)

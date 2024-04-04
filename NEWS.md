@@ -2,7 +2,7 @@
 
 * latent_cor now uses all observations for model fitting while still using only complete observations for computing the correlations
 
-* bugfix, using 'booklet_id' as a covariate in plausible_values no longer causes a crash (although it is not best practice either)
+* bugfix, using 'booklet_id' as a covariate in plausible_values no longer causes a crash.
 
 # dexter 1.4.0
 

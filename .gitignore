@@ -6,5 +6,6 @@
 *.so
 *.dll
 /revdep/.cache.rds
-tmpdexter.Rproj
+tmp
+dexter.Rproj
 docs
