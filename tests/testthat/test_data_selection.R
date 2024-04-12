@@ -221,7 +221,7 @@ test_that('input data.frames survives',  {
 test_that('get responses works correctly with predicates',
 {
 
-  db = open_project('../verbAggression.db')
+  db = open_project(test_path('verbAggression.db'))
   
   #two ways to do the same
   

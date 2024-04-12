@@ -77,9 +77,9 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'))
   } else
   {
     method='CML'
-    parms = transform.df.parms(parms,'b',include.zero=TRUE)
-    parms$item_id = ffactor(as.character(parms$item_id))
-	parms = arrange(parms, .data$item_id,.data$item_score)
+    parms = transform.df.parms(parms,'b')
+    parms$item_id = factor(as.character(parms$item_id))
+    parms = arrange(parms,.data$item_id,.data$item_score)
     a = parms$item_score
     b = parms$b
     
@@ -88,7 +88,7 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'))
       group_by(.data$item_id) |>
       summarise(first=as.integer(min(.data$rn)), last=as.integer(max(.data$rn))) |>
       ungroup() |>
-	  arrange(.data$item_id)
+      arrange(.data$item_id)
     
     if(is.null(design))
     {
@@ -117,14 +117,13 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'))
 
 
 
-
 # parms.df 
 # data.frame with columns item_id, item_score, and one of b, eta, beta/delta
 # it is assumed that parms.df comes from user, so includes checks
 #
 # returns data.frame in requested parametrization
 #
-transform.df.parms = function(parms.df, out.format = c('b','beta','eta'), include.zero = TRUE)
+transform.df.parms = function(parms.df, out.format = c('b','beta','eta'))
 {
   # start with many checks
   out.format = match.arg(out.format)
@@ -163,10 +162,9 @@ transform.df.parms = function(parms.df, out.format = c('b','beta','eta'), includ
     summarise(min_score = min(.data$item_score), max_score = max(.data$item_score)) |>
     ungroup()
   
-  in.zero = any(mm$min_score == 0)
-  
-  if(in.zero && any(mm$min_score) != 0)
-    stop("Either all items or none of the items should include a zero score parameter")
+
+  if(any(mm$min_score == 0))
+    stop("Parameters for zero score category are not supported")
   
   if(any(mm$max_score == 0))
     stop('All items should contain at least one non-zero score parameter')
@@ -174,7 +172,7 @@ transform.df.parms = function(parms.df, out.format = c('b','beta','eta'), includ
   if(any(mm$min_score<0))
     stop("Negative scores are not allowed")
   
-  if(in.format == 'b' && any(parms.df$b < 0))
+  if(in.format == 'b' && any(parms.df$b <= 0))
     stop("A 'b' parameter cannot be negative, perhaps you meant to include a 'beta' parameter?")
   
   fl = parms.df |>
@@ -184,84 +182,13 @@ transform.df.parms = function(parms.df, out.format = c('b','beta','eta'), includ
     ungroup() |>
     arrange(.data$item_id)
   
-  args = list(first = fl$first, last = fl$last, parms.df = parms.df, 
-              out.zero = include.zero, in.zero = in.zero)
+  args = list(first = fl$first, last = fl$last, parms.df = parms.df)
   do.call(get(paste0(in.format,'2',out.format)), args)[,c('item_id','item_score',out.format)] |>
     arrange(.data$item_id,.data$item_score)
 }
 
 
 
-
-#######################################################################
-## Some functions to transform from one parameterization/Normalization to the other
-#######################################################################
-
-# If the zero category is present and has to be removed from
-# parameters b, item_scores a, and index vectors first and last
-remove_zero = function(a,b,first,last)
-{
-  if (is.matrix(b)) {
-    b=b[,-first]
-    if (is.null(dim(b))) b=as.matrix(t(b))
-  }
-  if (is.vector(b)) b=b[-first]
-  a=a[-first]
-  new_first=first
-  new_last=last-1L
-  for (i in 2:length(first))
-  {
-    ncat=last[i]-first[i]
-    new_first[i]=new_last[i-1]+1L
-    new_last[i]=new_first[i]+ncat-1L
-  }
-  return(list(a = a, b = b, first=new_first, last=new_last))
-}
-
-## add zero category 
-add_zero = function(a, b, first,last)
-{
-  new_first=first[1]
-  new_last=last[1]+1L
-  if (length(first)>1)
-  {
-    for (i in 2:length(first))
-    {
-      nn=last[i]-first[i]
-      new_first[i]=new_last[i-1]+1L
-      new_last=c(new_last,new_first[i]+nn+1L)
-    }
-  }
-  new_a = integer(length(a)+length(first))
-  new_b = double(length(a)+length(first))
-  new_a[-new_first]=a 
-  new_b[new_first]=1
-  new_b[-new_first]=b
-  return(list(b=new_b, a=new_a, first=new_first, last=new_last))
-}
-
-## Makes the reparameterization matrix from log(b) to beta
-makeD <- function(a,first,last)
-{
-  k = length(a)
-  D = matrix(0,k,k)
-  tel=1
-  for (i in 1:length(first))
-  {
-    for (j in 1:(last[i]-first[i]+1))
-    {
-      if (j==1){
-        D[tel,tel]=-1/a[tel]
-      }else
-      {
-        D[tel,tel-1]=-1/(a[tel-1]-a[tel])
-        D[tel,tel]=1/(a[tel-1]-a[tel])        
-      }
-      tel=tel+1
-    }
-  }
-  return(D)
-}
 
 
 ################################################################
@@ -325,27 +252,70 @@ b2eta_ <-function(a,b,first,last)
   eta = beta2eta_(a, beta, first, last)
   return(eta)
 }
-####################################################################
 
-### Change parameterization and normalization to produce OPCML output
-## assumes that the first parameter is the reference unless there are fixed parameters
-# TO DO: TB. Aanpassen zodat ook lambda wordt ge-renormaliseerd.
-toOPLM = function(a, b, first, last, H=NULL, fixed_b=NULL, lambda=NULL)
+
+#####################
+# Some functions to transform user-provided (i.e., fixed) parameter values from one 
+# parameterization to the other.
+#####################
+beta2eta = function(first, last, parms.df)
+{
+  df.new = parms.df
+  df.new$eta = beta2eta_(df.new$item_score, df.new$beta, first, last)
+  return(df.new)
+}
+
+beta2b = function(first, last, parms.df)
+{
+  df.new = parms.df
+  df.new$b = eta2b_(beta2eta_(df.new$item_score, df.new$beta, first, last))
+  return(df.new)
+}
+
+eta2b = function(first, last, parms.df)
+{
+  df.new = parms.df
+  df.new$b = eta2b_(df.new$eta)
+  return(df.new)
+}
+
+b2b = function(first, last, parms.df) parms.df
+
+# from dexter
+makeD = function(a,first,last)
+{
+  k = length(a)
+  D = matrix(0,k,k)
+  tel=1
+  for (i in 1:length(first))
+  {
+    for (j in 1:(last[i]-first[i]+1))
+    {
+      if (j==1){
+        D[tel,tel]=-1/a[tel]
+      }else
+      {
+        D[tel,tel-1]=-1/(a[tel-1]-a[tel])
+        D[tel,tel]=1/(a[tel-1]-a[tel])        
+      }
+      tel=tel+1
+    }
+  }
+  return(D)
+}
+
+# from dexter, just removed the part that removes the 0 cat
+toOPLM = function(a, b, first, last, H=NULL, fixed_b=NULL, lambda=NULL, method=c('CML','Bayes'))
 {
   b_rn = b
   a_org = a
-  if (!is.null(H)) H=H[-first,-first]
-  if (!is.null(fixed_b)) fixed_b=fixed_b[-first]
-  tmp = remove_zero(a,b,first,last)
-  b = tmp$b; a = tmp$a
-  first = tmp$first; last = tmp$last
-  
-  logb=log(b)
-  cov.beta=NULL
-  ########################
-  
+
+  logb = log(b)
+  cov.beta = NULL
+  method=match.arg(method)
+
   ### Bayesian: b is a matrix
-  if (is.matrix(b))
+  if(method=='Bayes')
   {
     k=ncol(b)
     beta=b
@@ -368,7 +338,7 @@ toOPLM = function(a, b, first, last, H=NULL, fixed_b=NULL, lambda=NULL)
       }
     }
     if (nrow(beta)>2) cov.beta=cov(beta)
-  }else
+  }else if(method=='CML')
   {                                       ### CML; b is a vector
     DD = makeD(a,first,last)
     if (is.null(fixed_b))
@@ -376,7 +346,8 @@ toOPLM = function(a, b, first, last, H=NULL, fixed_b=NULL, lambda=NULL)
       beta = DD%*%logb
       b_rn = b_rn*exp(mean(beta)*a_org) # re-normalize b such that it corresponds to beta
       k  = length(b)
-      CC = matrix(-1/k,k,k); diag(CC)=(k-1)/k
+      CC = matrix(-1/k,k,k)
+      diag(CC)=(k-1)/k
       beta = CC%*%beta
       if (!is.null(H))
       {
@@ -389,126 +360,12 @@ toOPLM = function(a, b, first, last, H=NULL, fixed_b=NULL, lambda=NULL)
       beta = DD%*%logb
       if (!is.null(H))
       {
-        fixed_set = which(!is.na(fixed_b))
-        cov.beta  = solve(H[-fixed_set,-fixed_set])
-        cov.beta  = DD[,-fixed_set]%*%cov.beta%*%t(DD[,-fixed_set])
+        cov.beta  = solve(H[!fixed_b,!fixed_b])
+        cov.beta  = DD[,!fixed_b]%*%cov.beta%*%t(DD[,!fixed_b]) #this brings the fixed params back
       }
     }
   }  
   return(list(beta=beta, cov.beta=cov.beta, a=a, b_renorm = b_rn, first=first, last=last))
 }
 
-## Thus function expects category thresholds beta, a vector of item_category scores a,
-#  and first and last. All without the zero category.
-#  It returns dexter parameters b, as well as new a, first and last with the zero category.
-toDexter <- function(beta, a, first, last, re_normalize=TRUE)
-{
-  if (re_normalize) beta = beta - beta[1]  # normalize different
-  b = beta2b_(a,beta,first,last)
-  names(b)=names(beta)
-  
-  ## add zero category
-  tmp = add_zero(a,b,first,last)
-  
-  ## put everything in a (minimal) parms object
-  est=list(b=tmp$b, a=tmp$a)
-  inputs=list(ssIS=list(item_score=tmp$a),ssI=list(first=tmp$first,last=tmp$last))
-  parms = list(est=est, inputs=inputs)
-  return(parms)
-}
 
-
-#####################
-# Some functions to transform user-provided (i.e., fixed) parameter values from one 
-# parameterization to the other.
-#####################
-beta2eta <-function(first, last, parms.df, out.zero=TRUE, in.zero=FALSE)
-{
-  df.new = parms.df
-  df.new$eta = beta2eta_(df.new$item_score, df.new$beta, first, last)
-  if (out.zero!=in.zero)
-  {
-    if (in.zero) df.new = parms.df[-first,] # zero in but not out
-    if (out.zero) # zero out but not in
-    {
-      tmp = add_zero(parms.df$item_score, parms.df$b, first, last)
-      df.new = data.frame(item_id = rep("i",length(tmp$a)), item_score = tmp$a, 
-                          beta = rep(0,length(tmp$a)), eta = rep(0,length(tmp$a)),
-                          stringsAsFactors = FALSE)
-      for (i in 1:length(tmp$first))
-      {
-        df.new$item_id[tmp$first[i]:tmp$last[i]] = parms.df$item_id[first[i]]
-        df.new$beta[(tmp$first[i]+1):tmp$last[i]] = parms.df$beta[first[i]:last[i]]
-        df.new$eta[(tmp$first[i]+1):tmp$last[i]] = parms.df$eta[first[i]:last[i]]
-      }
-    }
-  }
-  return(df.new)
-}
-
-beta2b <-function(first, last, parms.df, out.zero=TRUE, in.zero=FALSE)
-{
-  df.new = parms.df
-  df.new$b = eta2b_(beta2eta_(df.new$item_score, df.new$beta, first, last))
-  if (out.zero!=in.zero)
-  {
-    if (in.zero) df.new = parms.df[-first,] # zero in but not out
-    if (out.zero) # zero out but not in
-    {
-      tmp = add_zero(df.new$item_score, df.new$b, first, last)
-      df.new = data.frame(item_id = rep("i",length(tmp$a)), item_score = tmp$a, 
-                          beta = rep(0,length(tmp$a)), b = tmp$b,
-                          stringsAsFactors = FALSE)
-      for (i in 1:length(tmp$first))
-      {
-        df.new$item_id[tmp$first[i]:tmp$last[i]] = parms.df$item_id[first[i]]
-        df.new$beta[(tmp$first[i]+1):tmp$last[i]] = parms.df$beta[first[i]:last[i]]
-      }
-    }
-  }
-  return(df.new)
-}
-
-eta2b <-function(first, last, parms.df, out.zero=TRUE, in.zero=FALSE)
-{
-  df.new = parms.df
-  df.new$b = eta2b_(df.new$eta)
-  if (out.zero!=in.zero)
-  {
-    if (in.zero) df.new = parms.df[-first,] # zero in but not out
-    if (out.zero) # zero out but not in
-    {
-      tmp = add_zero(df.new$item_score, df.new$b, first, last)
-      df.new = data.frame(item_id = rep("i",length(tmp$a)), item_score = tmp$a, 
-                          eta = rep(0,length(tmp$a)), b = tmp$b,
-                          stringsAsFactors = FALSE)
-      for (i in 1:length(tmp$first))
-      {
-        df.new$item_id[tmp$first[i]:tmp$last[i]] = parms.df$item_id[first[i]]
-        df.new$eta[(tmp$first[i]+1):tmp$last[i]] = parms.df$eta[first[i]:last[i]]
-      }
-    }
-  }
-  return(df.new)
-}
-
-b2b <-function(first, last, parms.df, out.zero=TRUE, in.zero=TRUE)
-{
-  df.new=parms.df
-  if (out.zero!=in.zero)
-  {
-    if (in.zero) df.new = parms.df[-first,] # zero in but not out
-    if (out.zero) # zero out but not in
-    {
-      tmp = add_zero(parms.df$item_score, parms.df$b, first, last)
-      df.new = data.frame(item_id = rep("i",length(tmp$a)), item_score = tmp$a, 
-                          b = tmp$b, stringsAsFactors = FALSE)
-      for (i in 1:length(tmp$first))
-      {
-        df.new$item_id[tmp$first[i]:tmp$last[i]] = parms.df$item_id[first[i]]
-        df.new$eta[(tmp$first[i]+1):tmp$last[i]] = parms.df$eta[first[i]:last[i]]
-      }
-    }
-  }
-  return(df.new)
-}

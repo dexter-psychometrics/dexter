@@ -61,6 +61,68 @@ individual_differences = function(dataSrc, predicate = NULL)
   outpt
 }
 
+# Estimate a single ability for a whole score distribution.
+# when testing for overdispersion
+theta_score_distribution = function(b,a,first,last,scoretab)
+{
+  ms.a = sum(a[last])
+  theta = 0
+  np = sum(scoretab)
+  escore = -1
+  score = ((0:ms.a) %*% scoretab)[1,1,drop=TRUE]
+  
+  first0 = as.integer(first-1L)
+  last0 = as.integer(last-1L)
+  
+  while (abs(escore-score)>1e-6)
+  {
+    escore = np * Escore_C(theta,b,a,first0,last0)
+    theta = theta + log(score/escore)
+  }
+  return(theta)
+}
+
+
+
+## Get the score distribution of a booklet from fit_enorm
+#  based on a polynomial smoothing of the log-lambda's
+#  Currently only implemented for CML
+# TO DO: Implement for Bayes.
+# Check e.g., plot(0:48,log(lambda),col="green"); lines(0:48,log_l_pr)
+# beta = as.numeric(qr$coefficients)[-1]
+# n.obs is the exact observed score distributions if CML
+ENORM2ScoreDist = function(b, a, lambda, first, last, degree=2) 
+{
+  
+  log_l_pr = smooth_log_lambda(log(lambda), degree=degree)
+  
+  g = elsymC(b,a,first-1L,last-1L)
+  lambda[is.na(lambda)] = 0
+  sc_obs = g*lambda
+  sc_sm = g*exp(log_l_pr)
+  
+  data.frame(score    = 0:sum(a[last]),
+             n.obs    = sc_obs, 
+             n.smooth = sc_sm,
+             p.obs    = sc_obs/sum(sc_obs),
+             p.smooth = sc_sm/sum(sc_sm))
+}
+
+
+# Polynomial smoothing of the log-lambda's
+smooth_log_lambda = function(log_lambda, degree, robust=TRUE)
+{
+  score_range = 0:(length(log_lambda)-1)
+  degree = min(degree, sum(!is.na(log_lambda)))
+  if (robust){
+    qr = lmsreg(log_lambda ~ poly(score_range, degree, raw=TRUE))
+  }else
+  {
+    qr = lm(log_lambda ~ poly(score_range, degree, raw=TRUE))
+  }
+  predict(qr, new=data.frame(score_range))
+}
+
 
 
 print.tind=function(x,...)

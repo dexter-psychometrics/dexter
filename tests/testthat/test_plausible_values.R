@@ -6,7 +6,7 @@ library(dplyr)
 RcppArmadillo::armadillo_throttle_cores(1)
 
 test_that('populations work',{
-  db = open_project('../verbAggression.db')
+  db = open_project(test_path('verbAggression.db'))
   
   #artificially create two overlapping booklets
   f2 = fit_enorm(db, (gender=='Male' & item_position<=16) | 

@@ -7,7 +7,7 @@ RcppArmadillo::armadillo_throttle_cores(1)
 
 test_that('latent correlations work',{
   
-  db = open_project('../verbAggression.db')
+  db = open_project(test_path('verbAggression.db'))
 
   lt = latent_cor(db,'behavior')
   x = get_responses(db, columns=c('person_id','item_id','item_score','behavior')) |>

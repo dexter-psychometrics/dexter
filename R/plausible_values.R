@@ -299,7 +299,7 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
   {
     if(inherits(parms,'data.frame'))
     {
-      parms = transform.df.parms(parms,'b', TRUE)
+      parms = transform.df.parms(parms,'b')
       pcheck = parms[,c('item_id','item_score')]
     } else
     {

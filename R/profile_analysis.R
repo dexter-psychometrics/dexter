@@ -177,7 +177,7 @@ profiles = function(dataSrc, parms, item_property, predicate=NULL, merge_within_
 
 # first and last are reduced to only the items occurring in A
 # NA categories can be applied by removing them from A as well as first and last
-E_profile = function(b, a, first, last, A, cIM=NULL)
+E_profile = function(b, a, first, last, A, cIM_score=NULL)
 {
   nSub = length(A)
   
@@ -189,8 +189,8 @@ E_profile = function(b, a, first, last, A, cIM=NULL)
   E = matrix(0, nSub, Msc+1)
   for (j in 1:nSub)
   {
-    hh = SSTable(b, a, first, last, AB=list(A[[j]], setdiff(items, A[[j]])), cIM=cIM)
-      
+    hh = SSTable(b, a, first, last,setA=A[[j]],setB=setdiff(items, A[[j]]), cIM_score=cIM_score)
+
     Msc_sub[j] = nrow(hh) - 1L
     for (i in 1:nrow(hh))
     {
@@ -212,6 +212,7 @@ E_profile = function(b, a, first, last, A, cIM=NULL)
   
   Etab
 }
+
 
 
 # Chi-square disctance between observed and expected

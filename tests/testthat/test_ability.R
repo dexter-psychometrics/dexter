@@ -6,7 +6,7 @@ RcppArmadillo::armadillo_throttle_cores(1)
 
 test_that('inconsistencies between data and parms are handled correctly',{
 
-  db = open_project('../verbAggression.db')
+  db = open_project(test_path('verbAggression.db'))
   
   f1 = fit_enorm(db)
   f2 = fit_enorm(db, item_id != 'S4DoShout')
@@ -26,7 +26,7 @@ test_that('inconsistencies between data and parms are handled correctly',{
 
 test_that('verbAgg abilities', {
 
-  db = open_project('../verbAggression.db')
+  db = open_project(test_path('verbAggression.db'))
   f = fit_enorm(db)
   
   

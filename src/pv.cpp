@@ -77,6 +77,9 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 		
 		int x,y,k, pvcol, cntr;
 		double u, atheta;
+		
+		expat[0] = 1;
+		p[0]=1;
 
 		dqrng::xoshiro256plus lrng(rng);      		
 		lrng.long_jump(thread + 1);			
@@ -115,9 +118,8 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 					const int item_end = bk_cnit[bk+1];
 					const int max_a = bk_max_a[bk];
 					
-					const double pmu = mu[scoretab_pop[tab]];
+					const double pmu = mu[scoretab_pop[tab]];				
 					
-					expat[0] = 1.0;
 					
 					for(;max_score>=0; max_score--)
 						if(scoretab[scoretab_start + max_score] > 0)
@@ -133,9 +135,8 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 						x = 0;
 						for (int i=item_start; i<item_end; i++)
 						{
-							p[0] = b[first[i]]; 
 							k=1;
-							for (int j=first[i]+1;j<=last[i];j++) // note the +1
+							for (int j=first[i];j<=last[i];j++) 
 							{
 								p[k] = p[k-1] + b[j] * expat[a[j]]; 
 								k++;
@@ -144,11 +145,14 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 							k=0;
 							while (u > p[k])
 								k++;
-							if (k > 0) // if seems unnecessary since zero cat should be in a and A?
-								x += A[first[i]+k];
+							if (k > 0) 
+							{
+								x += A[first[i]+k-1];
 								
-							if(x > max_score)
-								break;
+								if(x > max_score)
+									break;
+							}	
+							
 						}	
 						y = scoretab_start + x;
 						
@@ -233,8 +237,11 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 			
 		vec b(bmat.n_rows), expat(bk_max_a.max()+1, fill::zeros), p(bk_max_a.max()+1, fill::zeros);
 	
-		int x,y,k, pvcol, prs, cntr;
+		int x,y,k, pvcol, prs, cntr,max_score,np,bcol;
 		double u, atheta;
+		
+		expat[0] = 1;
+		p[0] = 1;
 
 		dqrng::xoshiro256plus lrng(rng);      		
 		lrng.long_jump(thread + 1);			
@@ -248,7 +255,7 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 			
 			const int niter = (npv/nchains + (chain < npv % nchains) -1)*step + warmup;
 			
-			int bcol = 0;
+			bcol = 0;
 			if(bstep>0) bcol = chain;
 			
 			scoretab.zeros();			
@@ -282,17 +289,15 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 						
 						const int item_start = bk_cnit[bk];
 						const int item_end = bk_cnit[bk+1];
-						const int max_a = bk_max_a[bk];
+						const int max_a = bk_max_a[bk];						
 						
-						expat[0] = 1.0;
-						
-						int max_score = gscoretab_nscores[tab] - 1;	
+						max_score = gscoretab_nscores[tab] - 1;	
 						
 						for(;max_score>=0; max_score--)
 							if(scoretab.at(scoretab_start + max_score, prior_num) > 0)
 								break;
 								
-						int np = accu(scoretab.col(prior_num).subvec(scoretab_start, gscoretab_cnscores(tab+1)-1));				
+						np = accu(scoretab.col(prior_num).subvec(scoretab_start, gscoretab_cnscores(tab+1)-1));				
 						
 						while(np>0)
 						{
@@ -304,9 +309,8 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 							x = 0;
 							for (int i=item_start; i<item_end; i++)
 							{
-								p[0] = b[first[i]]; 
 								k=1;
-								for (int j=first[i]+1; j<=last[i]; j++) // note the +1
+								for (int j=first[i]; j<=last[i]; j++) 
 								{
 									p[k] = p[k-1] + b[j] * expat[a[j]]; 
 									k++;
@@ -316,10 +320,11 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 								while (u > p[k])
 									k++;
 								if (k > 0) 
-									x += A[first[i]+k];
-									
-								if(x > max_score)
-									break;
+								{
+									x += A[first[i]+k-1];
+									if(x > max_score)
+										break;
+								}								
 							}	
 							y = scoretab_start + x;
 
@@ -430,8 +435,8 @@ void PV_sve(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first,
 		
 		vec lookup(maxA+1);
 		vec p(maxA+1, fill::zeros); 
-		lookup[0] = 1.0;
-	
+		lookup[0] = 1;
+		p[0]=1;
 #pragma omp for		
 		for(int prs=0; prs<np; prs++)
 		{
@@ -445,9 +450,8 @@ void PV_sve(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first,
 				x=0;
 				for(int i=bcni[bk]; i<bcni[bk+1]; i++)
 				{
-					p[0] = b[bk_first[i]]; 
 					k=1;
-					for (int j=bk_first[i]+1;j<=bk_last[i];j++) 
+					for (int j=bk_first[i];j<=bk_last[i];j++) 
 					{
 						p[k] = p[k-1] + b[j]*lookup[a[j]]; 
 						k++;
@@ -456,7 +460,7 @@ void PV_sve(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first,
 					k = 0;
 					while (u > p[k])
 						k++;
-					x += a[bk_first[i]+k];
+					if(k>0) x += a[bk_first[i]+k-1];
 				}
 				
 				acc = std::exp((theta-pv[prs])*(booklet_score[prs]-x));

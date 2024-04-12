@@ -5,9 +5,11 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 bibliography: dexter.bib
 output: rmarkdown::html_vignette
 vignette: >
+  %\VignetteEncoding{UTF-8}
   %\VignetteIndexEntry{One theta to rule them all: Test Individual Differences}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+editor_options: 
+  chunk_output_type: console
 ---
 
 <style>

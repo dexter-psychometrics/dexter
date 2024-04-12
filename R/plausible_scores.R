@@ -83,6 +83,7 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
   
   items = factor(items,levels=levels(parms$items$item_id))
   
+  # 0-indexed for use in c functions
   fl = parms$items |>
     filter(.data$item_id %in% items) |>
     mutate(first = .data$first-1L, last = .data$last-1L)
@@ -126,7 +127,7 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
         b_index = 1L
         for(pn in sprintf('PV%i',1:nPS))
         {
-          pvbk[[pn]] = sampleNRM2_test(pvbk[[pn]], b[,b_index], a, fl_bk$first, fl_bk$last)[,1,drop=TRUE] + pvbk$booklet_score
+          pvbk[[pn]] = sampleNRM_testC(pvbk[[pn]], b[,b_index], a, fl_bk$first, fl_bk$last)[,1,drop=TRUE] + pvbk$booklet_score
           b_index = b_index + bstep
         }    
       }
@@ -140,7 +141,7 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
     
     for(pn in sprintf('PV%i',1:nPS))
     {
-      pv[[pn]] = sampleNRM2_test(pv[[pn]], b[,b_index], a, fl$first, fl$last)[,1,drop=TRUE]
+      pv[[pn]] = sampleNRM_testC(pv[[pn]], b[,b_index], a, fl$first, fl$last)[,1,drop=TRUE]
       b_index = b_index + bstep
     }
   }

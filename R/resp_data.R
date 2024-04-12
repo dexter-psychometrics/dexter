@@ -362,6 +362,7 @@ resp_data.from_resp_data = function(rsp, extra_columns=NULL, summarised=FALSE, p
     } else
     {
       suppressWarnings({no_par = dplyr::setdiff(rsp$x[,c('item_id','item_score')], parms_check)})
+      no_par = filter(no_par,.data$item_score>0)
     }
     
     if(nrow(no_par) > 0)
@@ -449,7 +450,7 @@ resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
   {
     suppressWarnings({
       uncalibrated = dplyr::setdiff(x[x$item_score>0,c('item_id','item_score')], 
-                                    parms_check[parms_check$item_score>0, c('item_id','item_score')])}) 
+                                    parms_check[, c('item_id','item_score')])}) 
     
     if(nrow(uncalibrated) > 0)
       stop_no_param(uncalibrated)

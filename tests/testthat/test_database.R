@@ -6,7 +6,7 @@ library(RSQLite)
 
 RcppArmadillo::armadillo_throttle_cores(1)
 
-verbAggCopy = function(pth = '../verbAggression.db')
+verbAggCopy = function(pth = test_path('verbAggression.db'))
 {
   con = dbConnect(SQLite(), ":memory:")
   db = open_project(pth)

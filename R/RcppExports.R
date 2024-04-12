@@ -105,52 +105,56 @@ tia_C <- function(booklet_id, booklet_score, item_id, item_score, nb, nit, frst_
     .Call(`_dexter_tia_C`, booklet_id, booklet_score, item_id, item_score, nb, nit, frst_item, ds_booklet_id, ds_item_id)
 }
 
-ElSym_C <- function(b, a, first, last, item1, item2, nI, mS, g) {
-    invisible(.Call(`_dexter_ElSym_C`, b, a, first, last, item1, item2, nI, mS, g))
+elsymC <- function(b, a, first, last, omit_item = -1L) {
+    .Call(`_dexter_elsymC`, b, a, first, last, omit_item)
+}
+
+list_elsymiC <- function(b, a, first, last) {
+    .Call(`_dexter_list_elsymiC`, b, a, first, last)
 }
 
 possible_scores_C <- function(a, first, last) {
     .Call(`_dexter_possible_scores_C`, a, first, last)
 }
 
-ittotmat0_C <- function(b, a, c, first, last, ps) {
-    .Call(`_dexter_ittotmat0_C`, b, a, c, first, last, ps)
+ittotmatC <- function(b, a, c, first, last, ps) {
+    .Call(`_dexter_ittotmatC`, b, a, c, first, last, ps)
 }
 
-E_booklets <- function(b, a, first, last, scoretab, n_score, nit) {
-    .Call(`_dexter_E_booklets`, b, a, first, last, scoretab, n_score, nit)
+sstable_nrmC <- function(a, b, firstA, lastA, firstB, lastB) {
+    .Call(`_dexter_sstable_nrmC`, a, b, firstA, lastA, firstB, lastB)
 }
 
-NR_booklets <- function(b, a, first, last, scoretab, n_score, nit, max_par_bk, EsufI, H) {
-    invisible(.Call(`_dexter_NR_booklets`, b, a, first, last, scoretab, n_score, nit, max_par_bk, EsufI, H))
+sstable_imC <- function(a, b, c, firstA, lastA, firstB, lastB) {
+    .Call(`_dexter_sstable_imC`, a, b, c, firstA, lastA, firstB, lastB)
 }
 
-calibrate_Bayes_chains <- function(a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, bkscoretab, b_start, fixed_b, warmup, step, ndraws, progress_init, max_cores, prior_eta = 0.5, prior_rho = 0.5) {
-    .Call(`_dexter_calibrate_Bayes_chains`, a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, bkscoretab, b_start, fixed_b, warmup, step, ndraws, progress_init, max_cores, prior_eta, prior_rho)
+elsym_binomC <- function(lbinom, b, a, first, last, omit_item = -1L) {
+    .Call(`_dexter_elsym_binomC`, lbinom, b, a, first, last, omit_item)
 }
 
-meanElSym <- function(b, a, first, last, item1, item2, nI, mS, g) {
-    invisible(.Call(`_dexter_meanElSym`, b, a, first, last, item1, item2, nI, mS, g))
+list_elsymi_binomC <- function(lbinom, b, a, first, last) {
+    .Call(`_dexter_list_elsymi_binomC`, lbinom, b, a, first, last)
 }
 
-E_booklets_mean <- function(b, a, first, last, scoretab, n_score, nit) {
-    .Call(`_dexter_E_booklets_mean`, b, a, first, last, scoretab, n_score, nit)
+Expect <- function(b, a, first, last, scoretab, n_score, nit) {
+    .Call(`_dexter_Expect`, b, a, first, last, scoretab, n_score, nit)
 }
 
-NR_booklets_mean <- function(b, a, first, last, scoretab, n_score, nit, max_par_bk, EsufI, H) {
-    invisible(.Call(`_dexter_NR_booklets_mean`, b, a, first, last, scoretab, n_score, nit, max_par_bk, EsufI, H))
+Expect_binom <- function(lbinom, b, a, first, last, scoretab, n_score, nit) {
+    .Call(`_dexter_Expect_binom`, lbinom, b, a, first, last, scoretab, n_score, nit)
 }
 
-ittotmat_C <- function(b, a, c, first, last, ps) {
-    .Call(`_dexter_ittotmat_C`, b, a, c, first, last, ps)
+Hess <- function(b, a, first, last, scoretab, n_score, nit, max_cores, E, H) {
+    invisible(.Call(`_dexter_Hess`, b, a, first, last, scoretab, n_score, nit, max_cores, E, H))
 }
 
-ss_table_enorm_C <- function(a, b, first, last, firstA, lastA, firstB, lastB) {
-    .Call(`_dexter_ss_table_enorm_C`, a, b, first, last, firstA, lastA, firstB, lastB)
+Hess_binom <- function(lbinom, b, a, first, last, scoretab, n_score, nit, max_cores, E, H) {
+    invisible(.Call(`_dexter_Hess_binom`, lbinom, b, a, first, last, scoretab, n_score, nit, max_cores, E, H))
 }
 
-ss_table_im_C <- function(a, b, c, first, last, firstA, lastA, firstB, lastB) {
-    .Call(`_dexter_ss_table_im_C`, a, b, c, first, last, firstA, lastA, firstB, lastB)
+calibrate_Bayes_chains <- function(a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, sufI_zero, bkscoretab, b_start, item_fixed, warmup, step, ndraws, progress_init, max_cores, prior_eta = 0.5, prior_rho = 0.5) {
+    .Call(`_dexter_calibrate_Bayes_chains`, a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, sufI_zero, bkscoretab, b_start, item_fixed, warmup, step, ndraws, progress_init, max_cores, prior_eta, prior_rho)
 }
 
 omp_ncores <- function() {
@@ -169,15 +173,15 @@ PV_sve <- function(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu,
     invisible(.Call(`_dexter_PV_sve`, b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, max_cores, pv_mat, pv_col_indx, niter))
 }
 
-sampleNRM2_test <- function(theta, b, a, first, last) {
-    .Call(`_dexter_sampleNRM2_test`, theta, b, a, first, last)
+sampleNRM_testC <- function(theta, b, a, first, last) {
+    .Call(`_dexter_sampleNRM_testC`, theta, b, a, first, last)
 }
 
-sampleNRM2_item <- function(theta, b, a, first, last) {
-    .Call(`_dexter_sampleNRM2_item`, theta, b, a, first, last)
+sampleNRM_itemC <- function(theta, b, a, first, last) {
+    .Call(`_dexter_sampleNRM_itemC`, theta, b, a, first, last)
 }
 
-sampleIM <- function(bIM, cIM, a, first, last, scoretab) {
-    .Call(`_dexter_sampleIM`, bIM, cIM, a, first, last, scoretab)
+sampleIMC <- function(bIM, cIM, a, first, last, scoretab) {
+    .Call(`_dexter_sampleIMC`, bIM, cIM, a, first, last, scoretab)
 }
 

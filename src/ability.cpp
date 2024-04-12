@@ -25,20 +25,20 @@ arma::vec Escore_C(const arma::vec& theta, const arma::vec& b, const arma::ivec&
 	
 	vec score(m, fill::zeros);
 
-	lookup[0] = 1.0;
+	lookup[0] = 1;
 	  
 	for(int p=0; p<m; p++)
 	{
 		for(int i=1; i <= maxA; i++)
 		{
-			lookup[i] = exp(i*theta[p]);
+			lookup[i] = std::exp(i*theta[p]);
 		}
 	  
 		for (int i=0; i<nI; i++)
 		{
-			num=0.0;
-			denom=1.0;
-			for (int j=first[i]+1;j<=last[i];j++) // note +1
+			num = 0;
+			denom = 1;
+			for (int j=first[i];j<=last[i];j++) 
 			{
 			  num    +=a[j]*b[j]*lookup[a[j]];
 			  denom  +=     b[j]*lookup[a[j]];
@@ -53,7 +53,7 @@ arma::vec Escore_C(const arma::vec& theta, const arma::vec& b, const arma::ivec&
 
 
 // non vectorized for use in  theta_mle
-double Escore_single(double theta, const vec& b, const ivec& a, const ivec& first,  const ivec& last, const int n, const int max_a)
+double Escore_single(const double theta, const vec& b, const ivec& a, const ivec& first,  const ivec& last, const int n, const int max_a)
 {
 
   double denom, num;
@@ -65,14 +65,14 @@ double Escore_single(double theta, const vec& b, const ivec& a, const ivec& firs
 
   for(int i=1; i <= max_a; i++)
   {
-    lookup[i] = exp(i*theta);
+    lookup[i] = std::exp(i*theta);
   }
   
   for (int i=0; i<n; i++)
   {
-    num=0.0;
-    denom=1.0;
-    for (int j=first[i]+1;j<=last[i];j++) // note +1
+    num = 0;
+    denom = 1;
+    for (int j=first[i];j<=last[i];j++) 
     {
       num    +=a[j]*b[j]*lookup[a[j]];
 	  denom  +=     b[j]*lookup[a[j]];
@@ -135,22 +135,22 @@ double escore_wle(const double theta, const arma::vec& b, const arma::ivec& a, c
 	
 	std::vector<long double> Fij(max_ncat);
 	
-	long double I=0,J=0;
+	long double I=0,J=0,colsm,M1,M2,M3,M;
 
 
 	for(int i=0;i<nI;i++)
 	{
-		long double colsm = 0;	
+		colsm = 1;	
 		for(int j = first[i],k=0; j<=last[i]; j++, k++)
 		{
-			Fij[k] = b[j] * exp(a[j] * theta);
+			Fij[k] = b[j] * std::exp(a[j] * theta);
 			colsm += Fij[k];
 		}
 
-		long double M1=0, M2=0, M3=0;
+		M1=0; M2=0; M3=0;
 		for(int j=first[i], k=0; j<=last[i];j++, k++)
 		{
-			long double M = Fij[k]/colsm;	
+			M = Fij[k]/colsm;	
 			M1 += a[j] * M;
 			M2 += (a[j] * a[j]) * M;
 			M3 += (a[j] * a[j] * a[j]) * M;			
@@ -216,22 +216,25 @@ arma::vec theta_wle_sec(const arma::vec& b, const arma::ivec& a,
 	return theta;
 }
 
+// this does not seem to depend on parametrisation
+
 //only reason for this to be in c is extended precision type
 // [[Rcpp::export]]
 Rcpp::List theta_EAP_GH_c(const arma::mat& p_score, const arma::vec& theta, const arma::vec& weights)
 {
 	const int ns = p_score.n_cols, nt=p_score.n_rows;
+	long double sumw,m,var;
 	std::vector<long double> w(nt);
 	vec eap(ns), se(ns);
 	for(int s=0; s<ns; s++)
 	{
-		long double sumw=0;
+		sumw=0;
 		for(int t=0; t<nt; t++)
 		{
 			w[t] = p_score.at(t,s) * weights[t];
 			sumw += w[t]; 
 		}
-		long double m=0, var=0;
+		m=0; var=0;
 		for(int t=0; t<nt; t++)	m += theta[t] * w[t]/sumw;
 		for(int t=0; t<nt; t++)	var += (theta[t] - m) * (theta[t] - m) * w[t]/sumw;
 		eap[s] = m;
@@ -267,13 +270,13 @@ void IJ_c(const arma::vec& theta, const arma::vec& b, const arma::ivec& a,
 		{
 			for(int j = first[i]; j<=last[i]; j++)
 			{
-				Fij.at(k, j-first[i]) = b[j] * exp(a[j] * theta[k]);
+				Fij.at(k, j-first[i]) = b[j] * std::exp(a[j] * theta[k]);
 			}
 		}
 
 		for(int j=0;j<nT;j++)
 		{
-			colsm = 0.0;	
+			colsm = 1;	// adaptation for omitting 0 cat
 			for(int q=0;q<=last[i] - first[i];q++)
 			{
 				colsm  += Fij.at(j,q);

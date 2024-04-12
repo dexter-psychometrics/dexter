@@ -7,7 +7,7 @@ RcppArmadillo::armadillo_throttle_cores(1)
 
 test_that('complete case works',{
   
-  db = open_project('../verbAggression.db')
+  db = open_project(test_path('verbAggression.db'))
 
   ref_items = get_items(db) |> 
     filter(behavior == 'Scold') |> 

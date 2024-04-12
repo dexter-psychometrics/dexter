@@ -405,10 +405,9 @@ profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, mod
   if(!is.null(x) && x %in% props) 
     props = c(x, props[props!=x])
   
+  setA = which(domains[[item_property]] == props[1])
+  setB = which(domains[[item_property]] == props[2])             
 
-  AB = list(A = which(domains[[item_property]] == props[1]), 
-            B = which(domains[[item_property]] == props[2]))
-  
   # fit interaction model and compute ssTable
   models = by_rd(respData, covariate, fit_inter_, regs=FALSE) 
   
@@ -417,11 +416,11 @@ profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, mod
       if(model=="IM")
       {
         SSTable(b=m$est$bIM, a=m$inputs$ssIS$item_score, 
-                first=m$inputs$ssI$first, last=m$inputs$ssI$last, AB = AB, m$est$cIM)
+                first=m$inputs$ssI$first, last=m$inputs$ssI$last, setA=setA, setB=setB, cIM_score = m$est$cIM_score)
       } else
       {
         SSTable(b=m$est$bRM, a=m$inputs$ssIS$item_score, 
-                first=m$inputs$ssI$first, last=m$inputs$ssI$last, AB = AB)
+                first=m$inputs$ssI$first, last=m$inputs$ssI$last, setA=setA, setB=setB)
       }
   })
 
@@ -467,3 +466,336 @@ profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, mod
   invisible(NULL)
 }
 
+
+
+#' Plot for the extended nominal Response model
+#' 
+#' The plot shows 'fit' by comparing the expected score based on the model (grey line)
+#' with the average scores based on the data (black line with dots) for groups of students
+#' with similar estimated ability.
+#' 
+#' @param x object produced by fit_enorm
+#' @param item_id which item to plot, if NULL, one plot for each item is made
+#' @param dataSrc data source, see details
+#' @param predicate an expression to subset data in dataSrc
+#' @param nbins number of ability groups
+#' @param ci confidence interval for the error bars, between 0 and 1. Use 0 to suppress the error bars.
+#' Default = 0.95 for a 95\% confidence interval
+#' @param add logical; if TRUE add to an already existing plot
+#' @param col color for the observed score average
+#' @param col.model color for the expected score based on the model
+#' @param ... further arguments to plot
+#' @return 
+#' Silently, a data.frame with observed and expected values possibly useful to create a numerical fit measure.
+#' @details
+#' The standard plot shows the fit against the sample on which the parameters were fitted. If
+#' dataSrc is provided, the fit is shown against the observed data in dataSrc. This may be useful 
+#' for plotting the fit in different subgroups as a visual test for item level DIF. The confidence 
+#' intervals denote the uncertainty about the predicted pvalues within the ability groups for the 
+#' sample size in dataSrc (if not NULL) or the original data on which the model was fit.
+#' 
+#' @method plot prms
+#' 
+plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci = .95, 
+                     add=FALSE, col = 'black', col.model='grey80', ...)
+{
+  check_num(nbins,'integer',.length=1, .min=2)
+  dots = list(...)
+  
+  if(is.null(item_id))
+  {
+    if('items' %in% names(dots))
+    {
+      # common typo
+      item_id = dots$items
+      dots$items = NULL
+    } else
+    {
+      item_id = x$inputs$ssI$item_id
+    }
+  }
+  if(length(setdiff(item_id,x$inputs$ssI$item_id))>0)
+  {
+    message('The following items were not found in your fit object')
+    print(setdiff(item_id,x$inputs$ssI$item_id))
+    stop('unknown item',call.=FALSE)
+  }
+  
+  if(!is.null(dataSrc))
+  {
+    check_dataSrc(dataSrc)
+    qtpredicate = eval(substitute(quote(predicate)))
+    env = caller_env()
+    respData = get_resp_data(dataSrc, qtpredicate, env=env, retain_person_id=FALSE,
+                             parms_check=filter(x$inputs$ssIS, .data$item_id %in% local(item_id)))
+    
+    if(length(setdiff(as.character(item_id), levels(respData$design$item_id)))>0)
+    {
+      message('The following items were not found in dataSrc')
+      print(setdiff(as.character(item_id), levels(x$design$item_id)))
+      stop('unknown item',call.=FALSE)
+    }
+    
+    x$abl_tables = list()
+    
+    x$abl_tables$mle =  suppressWarnings({inner_join(respData$design, x$inputs$ssI,by='item_id')}) |>
+      group_by(.data$booklet_id) |>
+      do({
+        est = theta_MLE(b=x$est$b, a=x$inputs$ssIS$item_score, first=.$first, last=.$last, se=FALSE)
+        theta = est$theta[2:(length(est$theta)-1)]
+        tibble(booklet_score=1:length(theta), theta = theta)
+      }) |>
+      ungroup() 
+    
+    x$inputs$plt = get_sufStats_nrm(respData, check_sanity=FALSE)$plt
+  }
+  
+  
+  #many plots
+  if(length(item_id) > 1)
+  {
+    out = lapply(item_id, function(itm) do.call(plot, append(list(x=x, item_id=itm, nbins=nbins, ci=ci), dots)))
+    names(out) = as.character(item_id)
+    
+    return(invisible(out))
+  }
+  # for dplyr
+  item_id_ = as.character(item_id)
+  
+  expf = expected_score(x, items = item_id)
+  
+  max_score = x$inputs$ssIS |>
+    filter(.data$item_id == item_id_) |>
+    pull(.data$item_score) |>
+    max()
+  
+  plt = x$inputs$plt |>
+    filter(.data$item_id==item_id_) |>
+    inner_join(x$abl_tables$mle, by=c('booklet_id','booklet_score')) |>
+    mutate(abgroup = weighted_ntile(.data$theta, .data$N, n = nbins)) |>
+    group_by(.data$abgroup) |>
+    summarize(gr_theta = weighted.mean(.data$theta,.data$N), avg_score = weighted.mean(.data$meanScore,.data$N), n=sum(.data$N)) |>
+    ungroup() |>
+    mutate(expected_score = expf(.data$gr_theta))
+  
+  rng = max(plt$gr_theta) - min(plt$gr_theta)
+  rng = c(min(plt$gr_theta)-.5*rng/nbins,
+          max(plt$gr_theta)+.5*rng/nbins)
+  
+  plot.args = merge_arglists(dots,
+                             default=list(bty='l',xlab = expression(theta), ylab='score',main=item_id,
+                                          lwd=par('lwd')),
+                             override=list(x = rng,y = c(0,max_score), type="n"))
+  
+  plot.args$main = fstr(plot.args$main, list(item_id=item_id))
+  plot.args$sub = fstr(plot.args$sub, list(item_id=item_id))
+  
+  if(!add) do.call(plot, plot.args)
+  
+  plot(expf,from = rng[1], to=rng[2], col=col.model, add=TRUE,lwd=plot.args$lwd)
+  
+  plt$outlier = FALSE
+  
+  if(!is.null(ci) && !is.na(ci) && ci !=0)
+  {
+    if(ci>1 && ci<100)
+      ci = ci/100
+    
+    if(ci<0 || ci >= 1)
+      stop('confidence interval must be between 0 and 1')
+    
+    qnt = abs(qnorm((1-ci)/2))
+    
+    I=information(x, items = item_id)
+    plt = plt |>
+      mutate(se = sqrt(I(.data$gr_theta)/.data$n),
+             conf_min = pmax(.data$expected_score - qnt*.data$se,0),
+             conf_max = pmin(.data$expected_score + qnt*.data$se,max_score)) |>
+      mutate(outlier = .data$avg_score < .data$conf_min | .data$avg_score > .data$conf_max)
+    
+    suppressWarnings({
+      arrows(plt$gr_theta, plt$conf_min, 
+             plt$gr_theta, plt$conf_max, 
+             lwd=plot.args$lwd,
+             length=0.05, angle=90, code=3, col=col.model)})
+  } 
+  
+  lines(plt$gr_theta,plt$avg_score,col=col,lwd=plot.args$lwd)  
+  points(plt$gr_theta, plt$avg_score, 
+         bg = if_else(plt$outlier, qcolors(1), coalesce(plot.args$bg,'transparent')), 
+         pch = coalesce(dots$pch,21), col=col)
+  invisible(df_format(plt))
+}
+
+
+
+
+#' A plot method for the interaction model
+#'
+#' Plot the item-total regressions fit by the interaction (or Rasch) model
+#'
+#'
+#' @param x An object produced by function \code{fit_inter}
+#' @param items The items to plot (item_id's). If NULL, all items will be plotted
+#' @param summate If FALSE, regressions for polytomous items will be shown for each
+#' response option separately; default is TRUE.
+#' @param overlay If TRUE and more than one item is specified, there will be two plots,
+#' one for the Rasch model and the other for the interaction model, with all items
+#' overlayed; otherwise, one plot for each item with the two models overlayed. Ignored
+#' if summate is FALSE. Default is FALSE
+#' @param curtains 100*the tail probability of the sum scores to be shaded. Default is 10.
+#' Set to 0 to have no curtains shown at all.
+#' @param show.observed If TRUE, the observed proportion correct at each sum score
+#' will be shown as dots. Default is FALSE.
+#' @param ... Any additional plotting parameters.
+#' @details
+#' Customization of title and subtitle can be done by using the arguments main and sub.
+#' These arguments can contain references to the variables item_id (if overlay=FALSE) or model (if overlay=TRUE)
+#' by prefixing them with a dollar sign, e.g. plot(m, main='item: $item_id')
+#' @method plot rim
+#'
+plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
+                    curtains=10, show.observed=TRUE, ...){
+  allItems = as.character(x$inputs$ssI$item_id)
+  if(!is.null(items))
+  {
+    if(length(setdiff(items, allItems)) > 0) 
+      stop(paste('item(s):', paste0(setdiff(items, allItems), collapse=', '), 'not found'))
+  } else
+  {
+    items = allItems
+  }
+  user.args = list(...)
+  
+  qua = curtains/200
+  qnt=NULL
+  if(qua>0 && qua<.5) {
+    #qnt = quantile(rep(as.integer(x$inputs$scoretab$booklet_score), x$inputs$scoretab$N), c(qua,1-qua))
+    qnt = weighted_quantile(x$inputs$scoretab$booklet_score, x$inputs$scoretab$N, c(qua,1-qua))
+  }
+  
+  npic = length(items)
+  
+  max_score = ncol(x$est$itrRM)-1L
+  scores = x$est$possible_scores
+  zRM = x$est$itrRM[,scores+1L]
+  zIM = x$est$itrIM[,scores+1L]
+  
+  
+  if (overlay && !summate) overlay=FALSE
+  if (overlay) 
+  {
+    # only summate possible
+    # do the Rasch model
+    #
+    z = zRM[row.names(zRM) %in% items,]
+    items = row.names(z)
+    maxy = max(z[1,ncol(z)])
+    
+    plot.args = merge_arglists(user.args,
+                               default=list(main="$model model",xlab="Test score",
+                                            ylab="Item score", bty='l'),
+                               override=list(x = c(0,max_score),y= c(0,maxy), type="n"))
+    
+    plot.args$main = fstr(plot.args$main, list(model='Rasch'))
+    plot.args$sub = fstr(plot.args$sub, list(model='Rasch'))
+    
+    do.call(plot, plot.args)
+    draw_curtains(qnt)
+    
+    for (i in 1:npic) 
+      lines(scores,z[i,]) # the actual lines
+    lx = sample(scores, npic, replace = FALSE) # label the lines
+    for (i in 1:npic) {
+      points(lx[i], z[i,lx[i]+1], col="white", cex=1.6, pch=19)
+      text(lx[i], z[i,lx[i]+1], items[i], co=1, cex=.6)
+    }
+    # do the Interaction model
+    #
+    z = zIM[row.names(zIM) %in% items,]
+    
+    plot.args = merge_arglists(user.args,
+                               default=list(main="$model model",xlab="Test score",
+                                            ylab="Item score", bty='l'),
+                               override=list(x = c(0,max_score),y= c(0,maxy), type="n"))
+    
+    plot.args$main = fstr(plot.args$main, list(model='Interaction'))
+    plot.args$sub = fstr(plot.args$sub, list(model='Interaction'))
+    
+    do.call(plot, plot.args)
+    draw_curtains(qnt)
+    
+    for (i in 1:npic) 
+      lines(scores, z[i,])
+    lx = sample(scores, npic, replace = FALSE) # label the lines
+    for (i in 1:npic) {
+      points(lx[i], z[i,lx[i]+1], col="white", cex=1.6, pch=19)
+      text(lx[i], z[i,lx[i]+1], items[i], col=1, cex=.6)
+    }
+    
+    # end of overlay
+    
+  } else {
+    # not overlay: do many plots
+    
+    if (summate) {
+      # for each item in turn, do both models (with summation), and plot
+      
+      for (i in items) {
+        maxy = zRM[row.names(zRM)==i,ncol(zRM)]
+        
+        plot.args = merge_arglists(user.args,
+                                   default=list(main='Item $item_id',xlab="Test score",
+                                                ylab="Item score", bty='l'),
+                                   override=list(x = c(0,max_score),y = c(0,maxy), type="n"))
+        
+        plot.args$main = fstr(plot.args$main, list(item_id=i))
+        plot.args$sub = fstr(plot.args$sub, list(item_id=i))
+        
+        do.call(plot, plot.args)
+        
+        draw_curtains(qnt)
+        if(show.observed) {
+          plt = filter(x$inputs$plt, .data$item_id == i)
+          points(plt$booklet_score, plt$meanScore, col="coral",pch=20)
+        }
+        lines(scores, zIM[row.names(zIM)==i,], col="gray80", lwd=3)
+        lines(scores, zRM[row.names(zRM)==i,])
+      }
+      
+    } else {
+      zI = x$est$ctrIM[,scores+1L]
+      zR = x$est$ctrRM[,scores+1L]
+      # for each item in turn, similar but possibly multiline and coloured
+      for (i in items) {
+        ssI = filter(x$inputs$ssI, .data$item_id==i)
+        prb = zI[ssI$first : ssI$last, ]
+        
+        
+        pte = lighten(qcolors(nrow(prb)),.6)
+        
+        plot.args = merge_arglists(user.args,
+                                   default=list(main='Item $item_id',xlab="Test score",
+                                                ylab="Probability",bty='l'),
+                                   override=list(x = c(0,max_score),y = 0:1, type="n"))
+        
+        plot.args$main = fstr(plot.args$main, list(item_id=i))
+        plot.args$sub = fstr(plot.args$sub, list(item_id=i))
+        
+        do.call(plot, plot.args)
+        
+        draw_curtains(qnt)
+        for (j in 1:nrow(prb)) {
+          lines(scores, prb[j,], col=pte[j], lwd=3)
+        }
+        prb = zR[ssI$first : ssI$last,]
+        pte = qcolors(nrow(prb))
+        for (j in 1:nrow(prb)) {
+          lines(scores, prb[j,], col=pte[j])
+        }
+      } # eo items
+      
+    } # eo not summate
+    
+  } # eo not overlay
+}

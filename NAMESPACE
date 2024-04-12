@@ -54,8 +54,16 @@ export(fit_enorm)
 
 S3method(print,prms)
 S3method(coef,prms)
-S3method(plot,prms)
 S3method(logLik,prms)
+
+
+
+#latent_cor.R
+export(latent_cor)
+
+#ability.R
+export(ability)
+export(ability_tables)
 
 export(information)
 export(expected_score)
@@ -66,13 +74,6 @@ S3method(print,inf_func)
 S3method(print,exp_func)
 S3method(print,sim_func)
 S3method(print,pmf_func)
-
-#latent_cor.R
-export(latent_cor)
-
-#ability.R
-export(ability)
-export(ability_tables)
 
 #plausible_values.R
 export(plausible_values)
@@ -86,7 +87,6 @@ export(fit_inter)
 export(fit_domains)
 export(r_score_IM)
 
-S3method(plot,rim)
 S3method(print,rim)
 S3method(coef,rim)
 
@@ -97,6 +97,8 @@ export(profile_tables)
 #plots.R
 export(profile_plot)
 export(distractor_plot)
+S3method(plot,prms)
+S3method(plot,rim)
 
 #dif.R
 export(DIF)
@@ -128,6 +130,3 @@ S3method(coef,sts_par)
 #resp_data.R
 export(get_resp_data)
 export(get_resp_matrix)
-
-
-

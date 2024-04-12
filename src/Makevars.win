@@ -1,7 +1,6 @@
+##CXX_STD = CXX14
 
-
-## this raises a note on cran nowadays so remove it, cx11 is now minimal standard for 3.6 and up
-## CXX_STD = CXX11
+##PKG_CPPFLAGS = -I../inst/include -mfma -msse4.2 -mavx
 
 PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) 
 PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)

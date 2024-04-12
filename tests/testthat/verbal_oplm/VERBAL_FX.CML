@@ -1,0 +1,215 @@
+
+                                                                               
+ Jobname = VERBAL_F                                          OPLM, Version 3.0
+
+
+
+ Control flow, options and defaults.
+ -----------------------------------
+ The data are read from C:\TMP\VERBAL~1.DAT                                                     
+ With FORMAT
+ (i1,t2,24i1)                                                          
+                                                                       
+                                                                       
+
+ Number of (legal) records skipped =     0
+ Number of illegal records (skipped) =     0
+
+ OPPRE is called with argument C:\TMP\VERBAL_F.SCR                                                             
+
+ Logical variables:
+           Classical item-analysis: F
+           Subject-parameters: F
+           Output covariance-matrix: F
+           Make log-file: F
+           Output parameter-file: T
+           Datafile in expanded form: F
+           Compute full information matrix: T
+           Tests use information matrix: F
+           Each category is observed at least once: T
+
+                 IEP and DIAGONAL     IEP and COMPLETE      N-R
+ Stop-criterion:       0.5000E-08      0.5000E-05      0.1000E-07
+ Max #iterations:            5000              50              30
+
+ NREFRESH =  5
+ KEEPPRE = 1
+ Size of output = standard
+ Number of columns in tables = 2
+
+ Creation date .SCR-file :  9- 7-2017 at 14:43
+
+ Creation date .PRE-file :  9- 7-2017 at 14:43
+
+                          RESULTS CALIBRATION.
+
+   nr label      A      B    SE(B)    S*  DF     P       M*     M2*     M3* 
+----------------------------------------------------------------------------
+ 
+    1 S1DoCurs   1  -1.342    ---   8.877  6  0.181  -1.513  -0.702  -0.537
+            [:2]    -0.638    ---   4.065  7  0.772   0.334   0.212   0.345
+ 
+    2 S1DoScol   1  -0.670    ---   9.056  7  0.249  -2.298  -2.087  -2.849
+            [:2]    -0.259    ---   4.504  6  0.609  -1.365   0.243  -0.939
+ 
+    3 S1DoShou   1   0.325    ---   2.902  7  0.894  -1.089  -0.675  -0.537
+            [:2]     0.369    ---   3.009  4  0.556  -0.078   1.999   2.034
+ 
+    4 S1WantCu   1  -1.233    ---   3.299  6  0.771   1.028   0.103   0.860
+            [:2]    -0.898    ---   8.817  7  0.266  -0.921  -0.773  -0.090
+ 
+    5 S1WantSc   1  -0.679    ---   4.757  6  0.575   0.200  -0.329   0.975
+            [:2]    -0.669    ---   1.660  6  0.948  -1.328  -1.501  -0.638
+ 
+    6 S1WantSh   1  -0.498  0.142   6.453  6  0.374  -0.035   0.125   0.347
+            [:2]     0.119  0.175   3.604  4  0.462   0.661   1.605   0.967
+ 
+    7 S2DoCurs   1  -0.995  0.154   7.257  5  0.202  -2.222  -0.580  -0.748
+            [:2]    -0.642  0.152   7.749  6  0.257   0.207   0.422  -0.490
+ 
+    8 S2DoScol   1  -0.355  0.143   8.828  6  0.183  -2.627  -2.160  -2.613
+            [:2]     0.076  0.178   4.008  4  0.405  -0.010  -0.173  -1.290
+ 
+    9 S2DoShou   1   0.799  0.163   7.745  5  0.171   0.017  -1.861  -1.708
+            [:2]     0.737  0.263   2.838  2  0.242  -0.048  -0.383  -0.122
+ 
+   10 S2WantCu   1  -1.793  0.172   6.341  4  0.175   1.260  -0.563   0.563
+            [:2]    -0.837  0.140   5.032  6  0.540   0.214   0.283  -0.358
+ 
+   11 S2WantSc   1  -0.844  0.152   9.997  5  0.075  -0.153  -0.377  -0.344
+            [:2]    -0.614  0.155   4.050  5  0.542   0.732   1.041   0.200
+ 
+   12 S2WantSh   1  -0.315  0.148   3.450  6  0.751   0.373   0.226   0.594
+            [:2]    -0.233  0.173   5.934  5  0.313  -1.137  -0.019  -0.352
+ 
+   13 S3DoCurs   1  -0.403  0.136   8.048  6  0.235   0.032  -0.633  -0.280
+            [:2]     0.861  0.207   3.388  3  0.336   0.779   0.327   1.744
+ 
+   14 S3DoScol   1   0.685  0.155  10.034  6  0.123  -0.161  -0.930  -1.589
+            [:2]     1.418  0.310   1.159  1  0.282  -0.096   1.167  -0.023
+ 
+   15 S3DoShou   1   1.909  0.219   0.606  3  0.895   0.124   0.293   0.595
+            [:2]     2.685  0.746   0.000  0 99.999  99.999  -0.134  -0.225
+ 
+   16 S3WantCu   1  -0.940  0.141   9.875  6  0.130   1.591   2.334   1.543
+            [:2]     0.181  0.166  12.435  5  0.029  -0.222   2.144   2.442
+ 
+   17 S3WantSc   1  -0.003  0.140   9.217  6  0.162  -0.640  -0.563  -1.139
+            [:2]     1.053  0.236   1.446  2  0.485   0.179   1.084   1.192
+ 
+   18 S3WantSh   1   0.666  0.154   3.535  6  0.739   0.317   1.088   0.105
+            [:2]     1.709  0.340   0.000  0 99.999   0.184   0.149  -0.123
+ 
+   19 S4DoCurs   1  -1.039  0.145   9.480  5  0.091  -2.006  -1.163  -0.723
+            [:2]    -0.068  0.158   7.022  5  0.219   0.922   2.161   2.091
+ 
+   20 S4DoScol   1  -0.166  0.141   2.936  6  0.817  -0.552  -1.264  -0.941
+            [:2]     0.502  0.199   1.321  3  0.724  -0.465   0.378  -0.004
+ 
+   21 S4DoShou   1   1.164  0.176   4.842  5  0.435   0.172  -0.730   0.022
+            [:2]     1.282  0.340   0.000  0 99.999  -0.227   0.791   0.236
+ 
+   22 S4WantCu   1  -1.372  0.150   2.517  5  0.774   1.085   0.272   0.206
+            [:2]    -0.156  0.151   2.385  5  0.794   1.550   0.715   1.221
+ 
+   23 S4WantSc   1  -0.156  0.143   5.386  6  0.495  -1.266  -2.142  -1.486
+            [:2]     0.338  0.193   1.858  3  0.602  -0.212  -0.278   0.828
+ 
+   24 S4WantSh   1   0.455  0.154  13.469  6  0.036   0.934   2.048   2.148
+            [:2]     0.483  0.227   3.057  2  0.217   0.153   2.429   0.690
+----------------------------------------------------------------------------
+ *: only main diagonal of information matrix is used to compute these values.
+
+
+    log-likelihood =      -5177.78    (-.517778208377D+04)
+ -2*log-likelihood =      10355.56    (0.103555641675D+05)
+ Number of parameters estimated =  38
+ Geometric mean of discrimination indices =  1.000
+
+
+ Distribution of p-values for S-tests.
+
+ 0.--/---/---.1-----.2-----.3-----.4-----.5-----.6-----.7-----.8-----.9-----1.
+   0/  2/  2     7      9      3      5      4      2      7      3      1
+
+ Total:  45
+ p-values out of range:   3
+
+ C:\TMP\VERBAL_F.PAR created.
+
+
+                              SUMMARY OF R1c-STATISTICS
+
+ booklet   #items   #groups   #deviates    sum sq.    R1c   
+-------------------------------------------------------------
+     1       24        4        188        245.27
+
+ R1c* =    245.267;  df =  150;  p =     0.0000
+ The reported R1c*-statistic is an approximation to R1c.
+
+ Number of deviates for nonzero categories = 192
+    number of cells with expected frequency < 5 =  43 ( 22.4%)
+    number of cells with expected frequency < 1 =  15 (  7.8%)
+
+ Number of deviates for zero categories = 96
+    number of cells with expected frequency < 5 =   0 (  0.0%)
+    number of cells with expected frequency < 1 =   0 (  0.0%)
+
+ Number of deviates for all categories = 288
+    number of cells with expected frequency < 5 =  43 ( 14.9%)
+    number of cells with expected frequency < 1 =  15 (  5.2%)
+
+
+               R1c-components of item categories
+               ---------------------------------
+
+   nr  label   cat  sum of sq.  #terms  average  #dev>2
+
+    1  S1DoCurs  1        1.246     4      0.312     0
+                 2        0.171     4      0.043     0
+    2  S1DoScol  1        6.925     4      1.731     0
+                 2        3.798     4      0.949     0
+    3  S1DoShou  1        7.600     4      1.900     1
+                 2       45.353     4     11.338     1
+    4  S1WantCu  1        4.208     4      1.052     0
+                 2        4.512     4      1.128     0
+    5  S1WantSc  1        1.771     4      0.443     0
+                 2        2.980     4      0.745     0
+    6  S1WantSh  1        3.710     4      0.928     0
+                 2        3.910     4      0.977     0
+    7  S2DoCurs  1        2.195     4      0.549     0
+                 2        1.883     4      0.471     0
+    8  S2DoScol  1        6.941     4      1.735     0
+                 2        5.329     4      1.332     0
+    9  S2DoShou  1        4.914     4      1.229     0
+                 2        0.930     4      0.233     0
+   10  S2WantCu  1        1.996     4      0.499     0
+                 2        0.315     4      0.079     0
+   11  S2WantSc  1        4.899     4      1.225     0
+                 2        3.955     4      0.989     0
+   12  S2WantSh  1        3.981     4      0.995     0
+                 2        1.844     4      0.461     0
+   13  S3DoCurs  1        7.850     4      1.963     1
+                 2        9.812     4      2.453     1
+   14  S3DoScol  1        7.661     4      1.915     0
+                 2        8.460     4      2.115     1
+   15  S3DoShou  1        0.264     4      0.066     0
+                 2        0.437     4      0.109     0
+   16  S3WantCu  1        2.280     4      0.570     0
+                 2       12.835     4      3.209     1
+   17  S3WantSc  1        3.302     4      0.825     0
+                 2        2.741     4      0.685     0
+   18  S3WantSh  1        1.671     4      0.418     0
+                 2        0.925     4      0.231     0
+   19  S4DoCurs  1        9.463     4      2.366     1
+                 2       10.730     4      2.682     1
+   20  S4DoScol  1        4.445     4      1.111     0
+                 2        1.494     4      0.374     0
+   21  S4DoShou  1        4.127     4      1.032     0
+                 2        4.238     4      1.060     0
+   22  S4WantCu  1        2.311     4      0.578     0
+                 2        1.169     4      0.292     0
+   23  S4WantSc  1        4.470     4      1.117     0
+                 2        4.097     4      1.024     0
+   24  S4WantSh  1        0.794     4      0.198     0
+                 2       14.324     4      3.581     2

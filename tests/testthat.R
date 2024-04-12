@@ -1,5 +1,5 @@
 Sys.setenv("R_TESTS" = "")
 library(testthat)
-library(dexter)
-test_check("dexter")
+library(elsym)
+test_check("elsym")
 
