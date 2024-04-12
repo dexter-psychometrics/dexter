@@ -61,6 +61,11 @@ reference:
   - title: Datasets
     contents:
       - has_keyword("datasets")
+  - title: internal
+    contents:
+      - coef.p2pass
+      - coef.prms
+      - dexter-package
 
 navbar:
   type: inverse
