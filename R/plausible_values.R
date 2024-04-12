@@ -180,9 +180,9 @@ pv_chain = function(x, design, b, a, nPV,
 #' A covariate must be a discrete person property (e.g. not a float) that indicates nominal categories, e.g. gender or school.
 #' If dataSrc is a data.frame, it must contain the covariate.
 #' @param nPV Number of plausible values to draw per person.
-#' @param parms_draw when the item parameters are estimated Bayesianly (see: \code{\link{fit_enorm}}), 
-#' parms_draw specifies whether to use a sample(a different item parameter draw for each plausible values draw) or the posterior mean
-#' of the item draws. Alternatively, it can be an integer specifying a specific draw. Ignored when parms is not estimated Bayesianly.
+#' @param parms_draw when the item parameters are estimated with method "Bayes" (see: \code{\link{fit_enorm}}), 
+#' parms_draw specifies whether to use a sample (a different item parameter draw for each plausible values draw) or the posterior mean
+#' of the item draws. Alternatively, it can be an integer specifying a specific draw. It is ignored when parms is not estimated Bayesianly.
 #' @param prior_dist use a normal prior for the plausible values or a mixture of two normals. 
 #' A mixture is only possible when there are no covariates.
 #' @param merge_within_persons If a person took multiple booklets, this indicates

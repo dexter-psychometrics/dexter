@@ -1,4 +1,4 @@
-# dexter 1.4.1
+# dexter 1.4.2
 
 * latent_cor now uses all observations for model fitting while still using only complete observations for computing the correlations
 

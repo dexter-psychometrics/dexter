@@ -461,37 +461,6 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// calibrate_Bayes_C
-Rcpp::List calibrate_Bayes_C(const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const arma::ivec& ib, const arma::ivec& bi, const arma::ivec& nbi, const arma::ivec& nib, arma::ivec& bfirst, arma::ivec& blast, const arma::ivec& bmax, const arma::ivec& m, const arma::ivec& sufI, const arma::ivec& bkscoretab, const arma::vec& b_in, const arma::vec& fixed_b, const int from, const int step, const int ndraws, const arma::ivec progress_init, const double prior_eta, const double prior_rho);
-RcppExport SEXP _dexter_calibrate_Bayes_C(SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP ibSEXP, SEXP biSEXP, SEXP nbiSEXP, SEXP nibSEXP, SEXP bfirstSEXP, SEXP blastSEXP, SEXP bmaxSEXP, SEXP mSEXP, SEXP sufISEXP, SEXP bkscoretabSEXP, SEXP b_inSEXP, SEXP fixed_bSEXP, SEXP fromSEXP, SEXP stepSEXP, SEXP ndrawsSEXP, SEXP progress_initSEXP, SEXP prior_etaSEXP, SEXP prior_rhoSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type ib(ibSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type bi(biSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type nbi(nbiSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type nib(nibSEXP);
-    Rcpp::traits::input_parameter< arma::ivec& >::type bfirst(bfirstSEXP);
-    Rcpp::traits::input_parameter< arma::ivec& >::type blast(blastSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type bmax(bmaxSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type m(mSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type sufI(sufISEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type bkscoretab(bkscoretabSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type b_in(b_inSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type fixed_b(fixed_bSEXP);
-    Rcpp::traits::input_parameter< const int >::type from(fromSEXP);
-    Rcpp::traits::input_parameter< const int >::type step(stepSEXP);
-    Rcpp::traits::input_parameter< const int >::type ndraws(ndrawsSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec >::type progress_init(progress_initSEXP);
-    Rcpp::traits::input_parameter< const double >::type prior_eta(prior_etaSEXP);
-    Rcpp::traits::input_parameter< const double >::type prior_rho(prior_rhoSEXP);
-    rcpp_result_gen = Rcpp::wrap(calibrate_Bayes_C(a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, bkscoretab, b_in, fixed_b, from, step, ndraws, progress_init, prior_eta, prior_rho));
-    return rcpp_result_gen;
-END_RCPP
-}
 // calibrate_Bayes_chains
 Rcpp::List calibrate_Bayes_chains(const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const arma::ivec& ib, const arma::ivec& bi, const arma::ivec& nbi, const arma::ivec& nib, arma::ivec& bfirst, arma::ivec& blast, const arma::ivec& bmax, const arma::ivec& m, const arma::ivec& sufI, const arma::ivec& bkscoretab, const arma::mat& b_start, const arma::vec& fixed_b, const int warmup, const int step, const int ndraws, const arma::ivec progress_init, const int max_cores, const double prior_eta, const double prior_rho);
 RcppExport SEXP _dexter_calibrate_Bayes_chains(SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP ibSEXP, SEXP biSEXP, SEXP nbiSEXP, SEXP nibSEXP, SEXP bfirstSEXP, SEXP blastSEXP, SEXP bmaxSEXP, SEXP mSEXP, SEXP sufISEXP, SEXP bkscoretabSEXP, SEXP b_startSEXP, SEXP fixed_bSEXP, SEXP warmupSEXP, SEXP stepSEXP, SEXP ndrawsSEXP, SEXP progress_initSEXP, SEXP max_coresSEXP, SEXP prior_etaSEXP, SEXP prior_rhoSEXP) {
@@ -800,7 +769,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dexter_ittotmat0_C", (DL_FUNC) &_dexter_ittotmat0_C, 6},
     {"_dexter_E_booklets", (DL_FUNC) &_dexter_E_booklets, 7},
     {"_dexter_NR_booklets", (DL_FUNC) &_dexter_NR_booklets, 10},
-    {"_dexter_calibrate_Bayes_C", (DL_FUNC) &_dexter_calibrate_Bayes_C, 21},
     {"_dexter_calibrate_Bayes_chains", (DL_FUNC) &_dexter_calibrate_Bayes_chains, 22},
     {"_dexter_meanElSym", (DL_FUNC) &_dexter_meanElSym, 9},
     {"_dexter_E_booklets_mean", (DL_FUNC) &_dexter_E_booklets_mean, 7},

@@ -79,15 +79,16 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'))
     method='CML'
     parms = transform.df.parms(parms,'b',include.zero=TRUE)
     parms$item_id = ffactor(as.character(parms$item_id))
+	parms = arrange(parms, .data$item_id,.data$item_score)
     a = parms$item_score
     b = parms$b
     
     fl = parms |>
-      arrange(.data$item_id) |>
       mutate(rn=row_number()) |>
       group_by(.data$item_id) |>
       summarise(first=as.integer(min(.data$rn)), last=as.integer(max(.data$rn))) |>
-      ungroup() 
+      ungroup() |>
+	  arrange(.data$item_id)
     
     if(is.null(design))
     {
@@ -186,7 +187,7 @@ transform.df.parms = function(parms.df, out.format = c('b','beta','eta'), includ
   args = list(first = fl$first, last = fl$last, parms.df = parms.df, 
               out.zero = include.zero, in.zero = in.zero)
   do.call(get(paste0(in.format,'2',out.format)), args)[,c('item_id','item_score',out.format)] |>
-    arrange(.data$item_id)
+    arrange(.data$item_id,.data$item_score)
 }
 
 

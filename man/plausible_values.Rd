@@ -30,9 +30,9 @@ If dataSrc is a data.frame, it must contain the covariate.}
 
 \item{nPV}{Number of plausible values to draw per person.}
 
-\item{parms_draw}{when the item parameters are estimated Bayesianly (see: \code{\link{fit_enorm}}), 
-parms_draw specifies whether to use a sample(a different item parameter draw for each plausible values draw) or the posterior mean
-of the item draws. Alternatively, it can be an integer specifying a specific draw. Ignored when parms is not estimated Bayesianly.}
+\item{parms_draw}{when the item parameters are estimated with method "Bayes" (see: \code{\link{fit_enorm}}), 
+parms_draw specifies whether to use a sample (a different item parameter draw for each plausible values draw) or the posterior mean
+of the item draws. Alternatively, it can be an integer specifying a specific draw. It is ignored when parms is not estimated Bayesianly.}
 
 \item{prior_dist}{use a normal prior for the plausible values or a mixture of two normals. 
 A mixture is only possible when there are no covariates.}
