@@ -1,11 +1,7 @@
 pandoc: 3.1.11
-pkgdown: 2.0.7
+pkgdown: 2.0.8
 pkgdown_sha: ~
 articles:
-  DIF_vignette: DIF_vignette.html
-  Equating: Equating.html
-  Plausible_Values: Plausible_Values.html
-  Test_Individual_differences: Test_Individual_differences.html
   2017-12-13-hello: blog/2017-12-13-hello.html
   2018-02-09-dexter-is-1: blog/2018-02-09-dexter-is-1.html
   2018-02-25-item-total-regressions-in-dexter: blog/2018-02-25-item-total-regressions-in-dexter.html
@@ -55,8 +51,12 @@ articles:
   2023-05-20-dexter-paper: blog/2023-05-20-dexter-paper.html
   2024-01-03-happy-2024: blog/2024-01-03-happy-2024.html
   about: blog/about.html
-  index: blog/index.html
   dexter: dexter.html
+  DIF_vignette: DIF_vignette.html
+  Equating: Equating.html
+  index: blog/index.html
+  Plausible_Values: Plausible_Values.html
   profile-plots: profile-plots.html
-last_built: 2024-04-04T07:00Z
+  Test_Individual_differences: Test_Individual_differences.html
+last_built: 2024-04-12T13:13Z
 
