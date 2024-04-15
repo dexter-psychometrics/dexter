@@ -42,6 +42,9 @@ Rcpp::List calibrate_Bayes_chains(const arma::ivec& a, const arma::ivec& first, 
 {
 	const int nchains = b_start.n_cols;
 	const int max_cat = max(last-first)+1;
+	const int npar = b_start.n_rows;
+	
+	const bool normalize = item_fixed.max() == 0;
 	
 	progress_prl pb(ndraws, progress_init);	
 
@@ -66,7 +69,7 @@ Rcpp::List calibrate_Bayes_chains(const arma::ivec& a, const arma::ivec& first, 
 
 	const int max_bscore = max(bmax);
 
-	mat out_b(b_start.n_rows,ndraws), out_bklambda(bkscoretab.n_elem, ndraws);
+	mat out_b(npar,ndraws), out_bklambda(bkscoretab.n_elem, ndraws);
 	
 	arma::ivec chain_start(nchains,fill::zeros);
 	
@@ -83,7 +86,7 @@ Rcpp::List calibrate_Bayes_chains(const arma::ivec& a, const arma::ivec& first, 
 		vec b(b_start.n_rows);
 
 		int bk,out_index;
-		long double sm;
+		long double sm, geo_mean;
 		double r_zero, b_zero;
 		
 		dqrng::xoshiro256plus lrng(rng);      		
@@ -153,12 +156,22 @@ Rcpp::List calibrate_Bayes_chains(const arma::ivec& a, const arma::ivec& first, 
 						b[j] = rgamma(lrng, sufI[j] + prior_eta, 1/(y[c] + prior_rho))/b_zero;					
 					
 				}
-				
-				b.replace(datum::nan, 1); 	
+				// much faster convergence with 0 cat means we have to normalize frequently to prevent overflow in lambda's because b's tend to zero
+				// Every iteration is not strictly necessary but easier
+				if(normalize)
+				{
+					geo_mean=0;
+					for(int j=0;j<npar;j++)
+						geo_mean += std::log(b[j]);
+					geo_mean = std::exp(geo_mean/npar);
+					for(int j=0;j<npar;j++)
+						b[j] = b[j]/geo_mean;					
+				}
 
 				if(iter >= warmup && (iter - warmup) % step == 0)	
 				{
 					pb.tick(thread == 0);
+					out_bklambda.col(out_index) = bklambda;
 					out_b.col(out_index++) = b;
 					if(thread==0) pb.checkInterrupt(); 
 				}
