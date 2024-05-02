@@ -79,7 +79,7 @@ for a single item, an arbitrary group of items or all items"><!-- mathjax --><sc
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Functions of theta</h1>
-    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/R/enorm.R" class="external-link"><code>R/enorm.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/R/theta_functions.R" class="external-link"><code>R/theta_functions.R</code></a></small>
     <div class="hidden name"><code>information.Rd</code></div>
     </div>
 
@@ -89,13 +89,36 @@ for a single item, an arbitrary group of items or all items</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">information</span><span class="op">(</span><span class="va">parms</span>, items <span class="op">=</span> <span class="cn">NULL</span>, booklet_id <span class="op">=</span> <span class="cn">NULL</span>, which.draw <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">information</span><span class="op">(</span></span>
+<span>  <span class="va">parms</span>,</span>
+<span>  items <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  booklet_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  parms_draw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"average"</span>, <span class="st">"sample"</span><span class="op">)</span>,</span>
+<span>  by_chain <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">expected_score</span><span class="op">(</span><span class="va">parms</span>, items <span class="op">=</span> <span class="cn">NULL</span>, booklet_id <span class="op">=</span> <span class="cn">NULL</span>, which.draw <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="fu">expected_score</span><span class="op">(</span></span>
+<span>  <span class="va">parms</span>,</span>
+<span>  items <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  booklet_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  parms_draw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"average"</span>, <span class="st">"sample"</span><span class="op">)</span>,</span>
+<span>  by_chain <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">r_score</span><span class="op">(</span><span class="va">parms</span>, items <span class="op">=</span> <span class="cn">NULL</span>, booklet_id <span class="op">=</span> <span class="cn">NULL</span>, which.draw <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="fu">r_score</span><span class="op">(</span></span>
+<span>  <span class="va">parms</span>,</span>
+<span>  items <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  booklet_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  parms_draw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"average"</span>, <span class="st">"sample"</span><span class="op">)</span>,</span>
+<span>  by_chain <span class="op">=</span> <span class="va">by_chain</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">p_score</span><span class="op">(</span><span class="va">parms</span>, items <span class="op">=</span> <span class="cn">NULL</span>, booklet_id <span class="op">=</span> <span class="cn">NULL</span>, which.draw <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">p_score</span><span class="op">(</span></span>
+<span>  <span class="va">parms</span>,</span>
+<span>  items <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  booklet_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  parms_draw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"average"</span>, <span class="st">"sample"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -113,9 +136,15 @@ depending on parametrization, a column named either beta/delta, eta or b</p></dd
 <dd><p>id of a single booklet (e.g. the test information function), if items is not NULL this is ignored</p></dd>
 
 
-<dt>which.draw</dt>
-<dd><p>the number of the random draw (only applicable if calibration method was Bayes). If NULL, the mean 
-beta parameter will be used</p></dd>
+<dt>parms_draw</dt>
+<dd><p>when the item parameters are estimated with method "Bayes" (see: <code><a href="fit_enorm.html">fit_enorm</a></code>), 
+parms_draw specifies whether to use a sample (a different item parameter draw for each output column) or the posterior mean
+of the item draws. Alternatively, it can be an integer specifying a specific draw. It is ignored when parms is not estimated Bayesianly.</p></dd>
+
+
+<dt>by_chain</dt>
+<dd><p>add a separate dimension to the output denoting the chains in the Bayesian simulation. Useful for advanced users 
+to check autocorrelation and mixing on substantive outcome measures. Defaults to FALSE. Ignored if parms is not estimated Bayesianly or parms_draw is an integer.</p></dd>
 
 </dl></div>
     <div id="value">
@@ -206,7 +235,7 @@ the score given theta</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
       </footer></div>
