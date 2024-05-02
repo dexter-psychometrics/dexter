@@ -297,9 +297,11 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
     
   } else
   {
+    # TO DO: ik vind dit onleesbaar: is de check nou dat alle parms er in moetne zitten of dat
+    # er geen scores zijn die neit door parms gedekt worden? Tweede toch?
     if(inherits(parms,'data.frame'))
     {
-      parms = transform.df.parms(parms,'b')
+      #parms = transform.df.parms(parms,'b')
       pcheck = parms[,c('item_id','item_score')]
     } else
     {

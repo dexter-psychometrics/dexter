@@ -153,8 +153,8 @@ Hess_binom <- function(lbinom, b, a, first, last, scoretab, n_score, nit, max_co
     invisible(.Call(`_dexter_Hess_binom`, lbinom, b, a, first, last, scoretab, n_score, nit, max_cores, E, H))
 }
 
-calibrate_Bayes_chains <- function(a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, sufI_zero, bkscoretab, b_start, item_fixed, warmup, step, ndraws, progress_init, max_cores, prior_eta = 0.5, prior_rho = 0.5) {
-    .Call(`_dexter_calibrate_Bayes_chains`, a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, sufI_zero, bkscoretab, b_start, item_fixed, warmup, step, ndraws, progress_init, max_cores, prior_eta, prior_rho)
+calibrate_Bayes_chains <- function(a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, sufI_zero, bkscoretab, b_start, item_fixed, warmup, step, ndraws, progress_init, max_cores, prior_eta = 0.5, prior_rho = 0.5, prior_nu = 0.1) {
+    .Call(`_dexter_calibrate_Bayes_chains`, a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, sufI_zero, bkscoretab, b_start, item_fixed, warmup, step, ndraws, progress_init, max_cores, prior_eta, prior_rho, prior_nu)
 }
 
 omp_ncores <- function() {

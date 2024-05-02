@@ -575,8 +575,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // calibrate_Bayes_chains
-Rcpp::List calibrate_Bayes_chains(const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const arma::ivec& ib, const arma::ivec& bi, const arma::ivec& nbi, const arma::ivec& nib, arma::ivec& bfirst, arma::ivec& blast, const arma::ivec& bmax, const arma::ivec& m, const arma::ivec& sufI, const arma::ivec& sufI_zero, const arma::ivec& bkscoretab, const arma::mat& b_start, const arma::ivec& item_fixed, const int warmup, const int step, const int ndraws, const arma::ivec progress_init, const int max_cores, const double prior_eta, const double prior_rho);
-RcppExport SEXP _dexter_calibrate_Bayes_chains(SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP ibSEXP, SEXP biSEXP, SEXP nbiSEXP, SEXP nibSEXP, SEXP bfirstSEXP, SEXP blastSEXP, SEXP bmaxSEXP, SEXP mSEXP, SEXP sufISEXP, SEXP sufI_zeroSEXP, SEXP bkscoretabSEXP, SEXP b_startSEXP, SEXP item_fixedSEXP, SEXP warmupSEXP, SEXP stepSEXP, SEXP ndrawsSEXP, SEXP progress_initSEXP, SEXP max_coresSEXP, SEXP prior_etaSEXP, SEXP prior_rhoSEXP) {
+Rcpp::List calibrate_Bayes_chains(const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const arma::ivec& ib, const arma::ivec& bi, const arma::ivec& nbi, const arma::ivec& nib, arma::ivec& bfirst, arma::ivec& blast, const arma::ivec& bmax, const arma::ivec& m, const arma::ivec& sufI, const arma::ivec& sufI_zero, const arma::ivec& bkscoretab, const arma::mat& b_start, const arma::ivec& item_fixed, const int warmup, const int step, const int ndraws, const arma::ivec progress_init, const int max_cores, const double prior_eta, const double prior_rho, const double prior_nu);
+RcppExport SEXP _dexter_calibrate_Bayes_chains(SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP ibSEXP, SEXP biSEXP, SEXP nbiSEXP, SEXP nibSEXP, SEXP bfirstSEXP, SEXP blastSEXP, SEXP bmaxSEXP, SEXP mSEXP, SEXP sufISEXP, SEXP sufI_zeroSEXP, SEXP bkscoretabSEXP, SEXP b_startSEXP, SEXP item_fixedSEXP, SEXP warmupSEXP, SEXP stepSEXP, SEXP ndrawsSEXP, SEXP progress_initSEXP, SEXP max_coresSEXP, SEXP prior_etaSEXP, SEXP prior_rhoSEXP, SEXP prior_nuSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -603,7 +603,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int >::type max_cores(max_coresSEXP);
     Rcpp::traits::input_parameter< const double >::type prior_eta(prior_etaSEXP);
     Rcpp::traits::input_parameter< const double >::type prior_rho(prior_rhoSEXP);
-    rcpp_result_gen = Rcpp::wrap(calibrate_Bayes_chains(a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, sufI_zero, bkscoretab, b_start, item_fixed, warmup, step, ndraws, progress_init, max_cores, prior_eta, prior_rho));
+    Rcpp::traits::input_parameter< const double >::type prior_nu(prior_nuSEXP);
+    rcpp_result_gen = Rcpp::wrap(calibrate_Bayes_chains(a, first, last, ib, bi, nbi, nib, bfirst, blast, bmax, m, sufI, sufI_zero, bkscoretab, b_start, item_fixed, warmup, step, ndraws, progress_init, max_cores, prior_eta, prior_rho, prior_nu));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -783,7 +784,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dexter_Expect_binom", (DL_FUNC) &_dexter_Expect_binom, 8},
     {"_dexter_Hess", (DL_FUNC) &_dexter_Hess, 10},
     {"_dexter_Hess_binom", (DL_FUNC) &_dexter_Hess_binom, 11},
-    {"_dexter_calibrate_Bayes_chains", (DL_FUNC) &_dexter_calibrate_Bayes_chains, 23},
+    {"_dexter_calibrate_Bayes_chains", (DL_FUNC) &_dexter_calibrate_Bayes_chains, 24},
     {"_dexter_omp_ncores", (DL_FUNC) &_dexter_omp_ncores, 0},
     {"_dexter_pv_chain_normal", (DL_FUNC) &_dexter_pv_chain_normal, 19},
     {"_dexter_pv_chain_mix", (DL_FUNC) &_dexter_pv_chain_mix, 19},

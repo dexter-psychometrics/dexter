@@ -213,6 +213,29 @@ coef.prms = function(object, hpd = 0.95, what=c('items','var','posterior'), ...)
   }
 }
 
+# have not found useful methods yet for the many parameters we typically have
+# as.array.prms = function(x,...)
+# {
+#   #dimensions: iteration,chain,parameter
+#   if(x$inputs$method!="Bayes")
+#     stop('This method is only defined for Bayesian estimation')
+#   
+#   s = drop(x$est$chain_start)
+#   s = mapply(s,c(s[-1]-1,nrow(beta)),FUN=':')
+#   mn = min(sapply(s,length))
+#   s = lapply(s,function(i) i[1:mn])
+#   
+#   out = array(0,
+#               dim=c(mn,length(s), ncol(x$est$beta)), 
+#               dimnames=list(iteration=1:mn, chain=seq_along(s), item_score=paste(x$inputs$ssIS$item_id, x$inputs$ssIS$item_score)))
+#   for(i in seq_along(s))
+#   {
+#     out[,i,] = x$est$beta[s[[i]],]
+#   }
+#   out
+# 
+# }
+
 # returns log likelihood, or vector of log likelihoods if bayes
 logL = function(parms, mean_gibbs=FALSE)
 {
@@ -257,10 +280,12 @@ logLik.prms = function(object,...)
 {
   ll = logL(object)
   
-  attr(ll, "df") = sum(object$inputs$ssIS$item_score>0)-1L
+  attr(ll, "df") = nrow(object$inputs$ssIS)-1L
   class(ll) = "logLik"
   ll
 }
+
+
 
 
 # Calibration -------------------------------------------------------------
@@ -511,7 +536,7 @@ calibrate_Bayes = function(ss,  nIter, fixed_params=NULL,
       # to do: check this again, 0 madness
       sample_beta = rmvnorm(nchains,cml$beta, cml$acov.beta/2)
       
-      b = apply(sample_beta,1,function(beta){ beta2b_(ss$ssIS$item_score,beta,ss$ssI$first, ss$ssI$last)})
+      b = apply(sample_beta,1,function(beta){ beta2b(ss$ssIS$item_score,beta,ss$ssI$first, ss$ssI$last)})
       
     }
   }
@@ -534,6 +559,7 @@ calibrate_Bayes = function(ss,  nIter, fixed_params=NULL,
 
   prior_eta = 0.5
   prior_rho = 0.5
+  prior_nu = 0.1
   
   # bookkeeping: make some extra counts and indexes for C function
   design = ss$design |>
@@ -563,7 +589,7 @@ calibrate_Bayes = function(ss,  nIter, fixed_params=NULL,
                                  ss$ssIS$sufI, ss$ssI$n0, ss$scoretab$N, b, item_fixed, 
                                  from, step, 
                                  as.integer(nIter), pb$cpp_prog_init(), ncores,
-                                 prior_eta, prior_rho)
+                                 prior_eta, prior_rho, prior_nu)
 
 
   
@@ -573,7 +599,9 @@ calibrate_Bayes = function(ss,  nIter, fixed_params=NULL,
   colnames(out$lambda) = paste(ss$scoretab$booklet_id, ss$scoretab$booklet_score, sep='-')
   
   return(list(a=ss$ssIS$item_score, b=report$b_renorm, 
-              lambda=out$lambda, beta=report$beta,gibbs_b=out$b,chain_start=out$chain_start)) 
+              lambda=out$lambda, beta=report$beta,gibbs_b=out$b,
+              chain_start=out$chain_start,
+              priors=list(eta=prior_eta, rho=prior_rho, nu=prior_nu))) 
 }
 
 

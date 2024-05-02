@@ -7,9 +7,11 @@ output:
   rmarkdown::html_vignette:
     df_print: kable
 vignette: >
+  %\VignetteEncoding{UTF-8}
   %\VignetteIndexEntry{Dexter: The Fundamentals}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+editor_options: 
+  chunk_output_type: console
 ---
 
 <style>

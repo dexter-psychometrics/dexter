@@ -8,10 +8,10 @@
 # the default 'sample' returns the complete matrix, i.e. the sample is the census in the original order
 # any subsequent 'sampling' must be done in the caller function itself
 
-
-simplify_parms = function(parms, design=NULL, draw = c('sample','average'))
+simplify_parms = function(parms, design=NULL, draw = c('sample','average'), by_chain=FALSE)
 {
   check_df(design, 'item_id', nullable=TRUE)
+  chain_index = NULL
   if(!is.numeric(draw))
   {
     draw = match.arg(draw)
@@ -19,7 +19,6 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'))
   {
     draw = as.integer(draw)
     check_num(draw,'integer',.length=1)
-    
   }
   
   if(!is.null(design))
@@ -51,7 +50,15 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'))
       b = parms$est$b[draw,]	
     } else if(draw == 'average')
     {
-      b = colMeans(parms$est$b)  
+      if(by_chain)
+      {
+        s = parms$est$chain_start
+        chain_index = mapply(s,c(s[-1]-1,nrow(b)), FUN=`:`,SIMPLIFY=FALSE)
+        b = do.call(rbind, lapply(chain_index, function(indx) colMeans(b[indx,])))
+      } else
+      {
+        b = colMeans(parms$est$b)  
+      }
     } else 
     {
       b = parms$est$b
@@ -77,18 +84,27 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'))
   } else
   {
     method='CML'
+
+    if(!is.null(design)) parms = semi_join(parms,design,by='item_id')
+    
     parms = transform.df.parms(parms,'b')
     parms$item_id = factor(as.character(parms$item_id))
-    parms = arrange(parms,.data$item_id,.data$item_score)
+    #parms = arrange(parms,.data$item_id,.data$item_score) result is sorted
     a = parms$item_score
     b = parms$b
     
-    fl = parms |>
-      mutate(rn=row_number()) |>
-      group_by(.data$item_id) |>
-      summarise(first=as.integer(min(.data$rn)), last=as.integer(max(.data$rn))) |>
-      ungroup() |>
-      arrange(.data$item_id)
+    if(n_distinct(parms$item_id)==1)
+    {
+      fl = tibble(item_id=parms$item_id[1],first=1L,last=nrow(parms))
+    } else
+    {
+      fl = parms |>
+        mutate(rn=row_number()) |>
+        group_by(.data$item_id) |>
+        summarise(first=as.integer(min(.data$rn)), last=as.integer(max(.data$rn))) |>
+        ungroup() |>
+        arrange(.data$first)
+    }
     
     if(is.null(design))
     {
@@ -112,23 +128,15 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'))
   design$first0 = design$first - 1L
   design$last0 = design$last - 1L
   
-  list(a=a, b=b, design=design, items = fl, method=method)
+  list(a=a, b=b, design=design, items = fl, method=method, chain_index=chain_index)
 }
 
 
-
-# parms.df 
-# data.frame with columns item_id, item_score, and one of b, eta, beta/delta
-# it is assumed that parms.df comes from user, so includes checks
-#
-# returns data.frame in requested parametrization
-#
 transform.df.parms = function(parms.df, out.format = c('b','beta','eta'))
 {
-  # start with many checks
   out.format = match.arg(out.format)
   colnames(parms.df) = tolower(colnames(parms.df))
-  parms.df=ungroup(parms.df)
+  parms.df = ungroup(parms.df)
   
   if('delta' %in% colnames(parms.df))
     parms.df = rename(parms.df, beta = 'delta')
@@ -152,41 +160,50 @@ transform.df.parms = function(parms.df, out.format = c('b','beta','eta'))
   if(n_distinct(parms.df$item_id, parms.df$item_score) < nrow(parms.df))
     stop('multiple parameters supplied for the same item and score')
   
-  parms.df = parms.df |> 
-    mutate(item_id = as.character(.data$item_id), item_score = as.integer(.data$item_score)) |>
-    arrange(.data$item_id, .data$item_score)
   
-  
-  mm = parms.df |> 
-    group_by(.data$item_id) |> 
-    summarise(min_score = min(.data$item_score), max_score = max(.data$item_score)) |>
-    ungroup()
-  
-
-  if(any(mm$min_score == 0))
-    stop("Parameters for zero score category are not supported")
-  
-  if(any(mm$max_score == 0))
-    stop('All items should contain at least one non-zero score parameter')
-  
-  if(any(mm$min_score<0))
-    stop("Negative scores are not allowed")
+  if(any(parms.df$item_score <= 0))
+    stop("Items scores of 0 or less are not supported")
   
   if(in.format == 'b' && any(parms.df$b <= 0))
     stop("A 'b' parameter cannot be negative, perhaps you meant to include a 'beta' parameter?")
   
-  fl = parms.df |>
-    mutate(rn = row_number()) |>
-    group_by(.data$item_id) |> 
-    summarize(first = as.integer(min(.data$rn)), last = as.integer(max(.data$rn))) |>
-    ungroup() |>
-    arrange(.data$item_id)
+  parms.df$item_id = as.character(parms.df$item_id)
+  parms.df$item_score = as.integer(parms.df$item_score)
   
-  args = list(first = fl$first, last = fl$last, parms.df = parms.df)
-  do.call(get(paste0(in.format,'2',out.format)), args)[,c('item_id','item_score',out.format)] |>
-    arrange(.data$item_id,.data$item_score)
+  if(in.format!=out.format)
+  {
+    if(in.format == 'beta' && out.format == 'b')
+    {
+      if(n_distinct(parms.df$item_id) == 1) 
+      {
+        parms.df$b = item_beta2b(parms.df$item_score,parms.df$beta)
+        return(parms.df)
+      }
+      parms.df = parms.df |>
+        group_by(.data$item_id) |>
+        arrange(.data$item_score) |>
+        mutate(b = item_beta2b(.data$item_score,.data$beta)) |>
+        ungroup()
+    } else if(in.format == 'beta' && out.format == 'eta')
+    {
+      parms.df = parms.df |>
+        group_by(.data$item_id) |>
+        arrange(.data$item_score) |>
+        mutate(b = item_beta2eta(.data$item_score,.data$beta)) |>
+        ungroup()
+    } else if(in.format== 'eta' && out.format == 'b')
+    {
+      parms.df$b = exp(-parms.df$eta)
+    } else
+    {
+      stop_(sprintf('transformation %s -> %s not implemented', in.format, out.format))
+    }
+  } 
+  
+  parms.df = arrange(parms.df,.data$item_id, .data$item_score)
+  
+  parms.df
 }
-
 
 
 
@@ -196,90 +213,30 @@ transform.df.parms = function(parms.df, out.format = c('b','beta','eta'))
 # These are low-level functions with vectors or scalars as input
 # and as output. Use apply when the input is a matrix.
 #################################################################
-beta2eta_ <-function(a, beta, first, last)
+# a and beta must be sorted by a
+
+item_beta2b = function(a,beta)
 {
-  eta = rep(0,length(beta))
-  nI = length(first)
-  for (i in 1:nI)
+  exp(-cumsum(beta * (a - c(0L,a[-length(a)]))))
+}
+
+
+item_beta2eta = function(a,beta)
+{
+  cumsum(beta * (a - c(0L,a[-length(a)])))
+}
+
+
+beta2b = function(a,beta,first,last)
+{
+  indx = mapply(first,last,FUN=':',SIMPLIFY=FALSE)
+  for(i in indx)
   {
-    m = last[i]-first[i]
-    eta[first[i]] = beta[first[i]]*a[first[i]]
-    if (m>0)
-    {
-      for (j in (first[i]+1):last[i]) 
-      {
-        eta[j] = eta[j] + beta[first[i]]*a[first[i]]
-        for (g in (first[i]+1):j)
-        {
-          eta[j] = eta[j] + beta[g]*(a[g]-a[g-1])
-        }
-      }
-    }
+    beta[i] = item_beta2b(a[i],beta[i])
   }
-  return(eta)
+  beta
 }
 
-eta2beta_ <-function(a, eta, first, last)
-{
-  beta = rep(0,length(eta))
-  for (i in 1:length(first))
-  {
-    beta[first[i]] = eta[first[i]]/a[first[i]]
-    for (j in (first[i]+1):last[i]) beta[j] = (eta[j]-eta[j-1])/(a[j]-a[j-1])
-  }
-  return(beta)
-}
-
-eta2b_ <- function(eta){exp(-eta)}
-
-beta2b_ <-function(a,beta,first,last)
-{
-  eta = beta2eta_(a,beta,first,last)
-  eta2b_(eta)
-}
-
-b2beta_ <-function(a,b,first,last)
-{
-  DD = makeD(a,first,last)
-  beta = DD%*%log(b)
-  return(beta)
-}
-
-b2eta_ <-function(a,b,first,last)
-{
-  DD = makeD(a,first,last)
-  beta = DD%*%log(b)
-  eta = beta2eta_(a, beta, first, last)
-  return(eta)
-}
-
-
-#####################
-# Some functions to transform user-provided (i.e., fixed) parameter values from one 
-# parameterization to the other.
-#####################
-beta2eta = function(first, last, parms.df)
-{
-  df.new = parms.df
-  df.new$eta = beta2eta_(df.new$item_score, df.new$beta, first, last)
-  return(df.new)
-}
-
-beta2b = function(first, last, parms.df)
-{
-  df.new = parms.df
-  df.new$b = eta2b_(beta2eta_(df.new$item_score, df.new$beta, first, last))
-  return(df.new)
-}
-
-eta2b = function(first, last, parms.df)
-{
-  df.new = parms.df
-  df.new$b = eta2b_(df.new$eta)
-  return(df.new)
-}
-
-b2b = function(first, last, parms.df) parms.df
 
 # from dexter
 makeD = function(a,first,last)
