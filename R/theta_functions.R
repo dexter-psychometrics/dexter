@@ -102,7 +102,7 @@ theta_function = function(parms, items=NULL, booklet=NULL, parms_draw=c('average
   
   if(!is.null(items))
   {
-    fl = parms$design |> 
+    fl = parms$items |> 
       filter(.data$item_id %in% items)
     
     if(nrow(fl) != length(items))

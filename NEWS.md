@@ -1,5 +1,7 @@
 # dexter 1.5.0
 
+* bugfix: previous dexter versions could place the wrong domain name with the profile categories if not all booklets had the same domains
+
 * lower autocorrelation for `fit_enorm(..., method='Bayes')`
 
 

@@ -208,11 +208,9 @@ transform.df.parms = function(parms.df, out.format = c('b','beta','eta'))
 
 
 
-################################################################
-## Functions to go from one set of parameters to an other
-# These are low-level functions with vectors or scalars as input
-# and as output. Use apply when the input is a matrix.
-#################################################################
+
+# parametrisations --------------------------------------------------------
+
 # a and beta must be sorted by a
 
 item_beta2b = function(a,beta)
@@ -230,11 +228,12 @@ item_beta2eta = function(a,beta)
 beta2b = function(a,beta,first,last)
 {
   indx = mapply(first,last,FUN=':',SIMPLIFY=FALSE)
+  b = double(length(beta))
   for(i in indx)
   {
-    beta[i] = item_beta2b(a[i],beta[i])
+    b[i] = item_beta2b(a[i],beta[i])
   }
-  beta
+  b
 }
 
 
@@ -261,7 +260,7 @@ makeD = function(a,first,last)
   return(D)
 }
 
-# from dexter, just removed the part that removes the 0 cat
+# copied from previous dexter version, just removed the part that removes the 0 cat
 toOPLM = function(a, b, first, last, H=NULL, fixed_b=NULL, lambda=NULL, method=c('CML','Bayes'))
 {
   b_rn = b
