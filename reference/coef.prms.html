@@ -115,17 +115,32 @@ variance-covariance matrix (CML only) or <code>posterior</code> for all draws of
     <h2>Value</h2>
     
 
-<p>Depends on the calibration method and the value of 'what'. For 'items'</p>
+<p>Depends on the calibration method and the value of 'what'. For <code>what="items"</code>:</p>
 
 
-<dl><dt>CML</dt>
+<dl><dt>CML calibration</dt>
 <dd><p>a data.frame with columns: item_id, item_score, beta, SE_beta</p></dd>
 
-<dt>Bayes</dt>
+<dt>Bayesian calibration</dt>
 <dd><p>a data.frame with columns: item_id, item_score, mean_beta, SD_beta, &lt;hpd_b_left&gt;, &lt;hpd_b_right&gt;</p></dd>
 
 
-</dl><p>The posterior distribution and variance covariance matrix are returned as matrices.</p>
+</dl><p>If <code>what="var"</code> or <code>what="posterior"</code> then  a matrix is returned with the variance-covariance matrix or the posterior draws 
+respectively.</p>
+    </div>
+    <div id="details">
+    <h2>Details</h2>
+    <p>The parametrisation of IRT models is far from uniform and depends on the author. Dexter uses the following parametrisation for the 
+extended Nominal Response Model (NRM):</p>
+<p>$$
+P(X=a_j|\beta,\theta) = \frac{\exp\left(a_j\theta-\sum_{g=1}^{j}\beta_g(a_g-a_{g-1})\right)}{1+\sum_h \exp\left(a_h\theta-\sum_{g=1}^{h}\beta_g(a_g-a_{g-1})\right)}
+$$</p>
+<p>where \(a_j\) is a shorthand for the integer score belonging to the j-th category of an item.</p>
+<p>For dichotomous items with \(a_1=1\) (i.e. the only possible scores are 0 and 1)
+this formula simplifies to the standard Rasch model: \(P(x=1|\beta,\theta)=\frac{\exp(\theta-\beta)}{1+\exp(\theta-\beta)}\). For polytomous items, 
+when all scores are equal to the categories (i.e. \(a_j=j\) for all \(j\)) 
+the NRM is equal to the Partial Credit Model, although with a different parametrisation than is commonly used. 
+For dichotomous items and for all polytomous items where \(a_j-a_{j-1}\) is constant, the formulation is equal to the OPLM.</p>
     </div>
 
   </div>

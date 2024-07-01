@@ -97,6 +97,7 @@
 <span>  nPS <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  prior_dist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>, <span class="st">"mixture"</span><span class="op">)</span>,</span>
 <span>  keep.observed <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  by_item <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  merge_within_persons <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -147,6 +148,10 @@ A mixture is only possible when there are no covariates.</p></dd>
 <dt>keep.observed</dt>
 <dd><p>If responses to one or more of the items have been observed,
 the user can choose to keep these observations or generate new ones.</p></dd>
+
+
+<dt>by_item</dt>
+<dd><p>return scores per item instead of sumscores</p></dd>
 
 
 <dt>merge_within_persons</dt>
