@@ -42,6 +42,7 @@ fit_enorm = function(dataSrc, predicate = NULL, fixed_params = NULL, method=c("C
   method = match.arg(method)
   qtpredicate = eval(substitute(quote(predicate)))
   env = rlang::caller_env()
+  check_dataSrc(dataSrc)
 
   fit_enorm_(dataSrc, qtpredicate = qtpredicate, fixed_params = fixed_params,
              method=method, nDraws=nDraws, env=env, merge_within_persons=merge_within_persons)
@@ -154,15 +155,32 @@ print.prms = function(x, ...){
 #' @param ... further arguments to coef are ignored
 #'  
 #' @return 
-#' Depends on the calibration method and the value of 'what'. For 'items' 
+#' Depends on the calibration method and the value of 'what'. For \code{what="items"}: 
 #' 
 #' \describe{
-#' \item{CML}{a data.frame with columns: item_id, item_score, beta, SE_beta}
-#' \item{Bayes}{a data.frame with columns: item_id, item_score, mean_beta, SD_beta, <hpd_b_left>, <hpd_b_right>}
+#' \item{CML calibration}{a data.frame with columns: item_id, item_score, beta, SE_beta}
+#' \item{Bayesian calibration}{a data.frame with columns: item_id, item_score, mean_beta, SD_beta, <hpd_b_left>, <hpd_b_right>}
 #' }
 #' 
-#' The posterior distribution and variance covariance matrix are returned as matrices.
+#' If \code{what="var"} or \code{what="posterior"} then  a matrix is returned with the variance-covariance matrix or the posterior draws 
+#' respectively.
 #' 
+#' @details
+#' 
+#' The parametrisation of IRT models is far from uniform and depends on the author. Dexter uses the following parametrisation for the 
+#' extended Nominal Response Model (NRM):
+#' 
+#' \deqn{
+#' P(X=a_j|\beta,\theta) = \frac{\exp\left(a_j\theta-\sum_{g=1}^{j}\beta_g(a_g-a_{g-1})\right)}{1+\sum_h \exp\left(a_h\theta-\sum_{g=1}^{h}\beta_g(a_g-a_{g-1})\right)}
+#' } 
+#' 
+#' where \eqn{a_j} is a shorthand for the integer score belonging to the j-th category of an item. 
+#' 
+#' For dichotomous items with \eqn{a_1=1} (i.e. the only possible scores are 0 and 1)
+#' this formula simplifies to the standard Rasch model: \eqn{P(x=1|\beta,\theta)=\frac{\exp(\theta-\beta)}{1+\exp(\theta-\beta)}}. For polytomous items, 
+#' when all scores are equal to the categories (i.e. \eqn{a_j=j} for all \eqn{j}) 
+#' the NRM is equal to the Partial Credit Model, although with a different parametrisation than is commonly used. 
+#' For dichotomous items and for all polytomous items where \eqn{a_j-a_{j-1}} is constant, the formulation is equal to the OPLM.
 #' 
 #' 
 coef.prms = function(object, hpd = 0.95, what=c('items','var','posterior'), ...)

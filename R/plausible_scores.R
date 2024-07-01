@@ -27,16 +27,19 @@
 #' A mixture is only possible when there are no covariates.
 #' @param merge_within_persons If a person took multiple booklets, this indicates
 #' whether plausible scores are generated per person (TRUE) or per booklet (FALSE)
+#' @param by_item return scores per item instead of sumscores
 #' @return A data.frame with columns booklet_id, person_id, booklet_score and nPS plausible scores
 #' named PS1...PSn.
 #'  
 plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, parms_draw = c('sample','average'),
                             covariates=NULL, nPS=1, prior_dist = c("normal", "mixture"),
-                            keep.observed=TRUE,merge_within_persons=FALSE)  
+                            keep.observed=TRUE, by_item=FALSE, merge_within_persons=FALSE)  
 {
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
   check_dataSrc(dataSrc)
+  parms_draw = match.arg(parms_draw)
+  prior_dist = match.arg(prior_dist)
   
   pb = get_prog_bar(nsteps=if(is.null(parms)) 130 else 100, 
                     retrieve_data = is_db(dataSrc))
@@ -81,15 +84,17 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
   parms = res$parms
   pv = res$pv
   
-  items = factor(items,levels=levels(parms$items$item_id))
+  items = sort(factor(items,levels=levels(parms$items$item_id)))
   
   # 0-indexed for use in c functions
   fl = parms$items |>
     filter(.data$item_id %in% items) |>
-    mutate(first = .data$first-1L, last = .data$last-1L)
+    select('item_id','first0','last0')
+  
+  multiple_b = !is.null(dim(parms$b)) && ncol(parms$b)>1
   
   a = parms$a
-  if(is.matrix(parms$b))
+  if(multiple_b)
   {
     b = t(parms$b)
     bstep = as.integer((ncol(b)-1)/max(nPS-1,1))
@@ -99,57 +104,113 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
     bstep = 0L
   }
   
-  if(keep.observed && any(respData$design$item_id %in% items))
+  
+  if(by_item)
   {
-    # keep track of sumscore on selected items
+    pv = droplevels(pv)
+    if(is.unsorted(pv$person_id)) pv = arrange(pv,.data$person_id)
+
+    nit = length(items)
+    np = nrow(pv)
     
-    respData = semi_join_rd(respData, tibble(item_id=items), by='item_id', .recompute_sumscores = TRUE)
-    respData = get_resp_data(respData, summarised = TRUE, protect_x = !is_db(dataSrc))
-    
-    pv = pv |> 
-      select(-'booklet_score') |>
-      left_join(respData$x,  by=c("person_id", "booklet_id")) |>
-      mutate(booklet_score = coalesce(.data$booklet_score, 0L))
-    
-    pv = lapply(split(pv, pv$booklet_id), function(pvbk)
+    x = tibble(person_id=rep(pv$person_id,nit),item_id=rep(items,each=np)) 
+      
+    b_index = 1L
+    for(i in 1:nPS)
     {
-      bk = pvbk$booklet_id[1]
-      
-      fl_bk = fl |>
-        anti_join(filter(respData$design, .data$booklet_id == bk), by='item_id')
-      
-      #nothing to augment case
-      if(nrow(fl_bk) == 0)
+        
+      x[[sprintf('PS%i',i)]] = as.integer(sampleNRM_itemC(pv[[sprintf('PV%i',i)]], b[,b_index], a, fl$first0, fl$last0))
+      b_index = b_index + bstep
+    }
+    
+    if(keep.observed && any(respData$design$item_id %in% items))
+    {
+      m = get_resp_matrix(filter(respData$x, .data$item_id %in% items ))
+      if(ncol(m) == length(items))
       {
-        for(pn in sprintf('PV%i',1:nPS)) pvbk[[pn]] = pvbk$booklet_score
-      } else
-      {
-        b_index = 1L
-        for(pn in sprintf('PV%i',1:nPS))
-        {
-          pvbk[[pn]] = sampleNRM_testC(pvbk[[pn]], b[,b_index], a, fl_bk$first, fl_bk$last)[,1,drop=TRUE] + pvbk$booklet_score
-          b_index = b_index + bstep
-        }    
+        w = which(!is.na(m))
+        m = as.integer(m[w])
       }
-      pvbk
-    }) |>
-      bind_rows()
+      else
+      {
+        # not all items are in responses
+        w = apply(m,2,\(mcol) unname(which(!is.na(mcol))),simplify=FALSE)
+        w = mapply(w,0:(length(w)-1), FUN= \(a,b) a+b*np, SIMPLIFY=FALSE )
+
+        ii = left_join(tibble(item_id=items), tibble(item_id=colnames(m), present=TRUE), by='item_id') |>
+          mutate(present=coalesce(.data$present,FALSE)) |>
+          arrange(.data$item_id) |>
+          mutate(cnt=cumsum(as.integer(!.data$present))*np) |>
+          filter(present)
+          
+        m = as.integer(m[unlist(w)])
+          
+        w = unlist(mapply(ii$cnt, w, FUN='+',SIMPLIFY=FALSE))
+      }
+      
+      for(i in 1:nPS)
+      {
+        x[[sprintf('PS%i',i)]][w] = m
+      }
+    }
+    if(!is.null(covariates))
+      pv = inner_join(select(pv,all_of(c('person_id',covariates))), x, by='person_id')
+    else
+      pv = x
     
   } else
   {
-    b_index = 1L
-    
-    for(pn in sprintf('PV%i',1:nPS))
+    if(keep.observed && any(respData$design$item_id %in% items))
     {
-      pv[[pn]] = sampleNRM_testC(pv[[pn]], b[,b_index], a, fl$first, fl$last)[,1,drop=TRUE]
-      b_index = b_index + bstep
+      # keep track of sumscore on selected items
+      
+      respData = semi_join_rd(respData, tibble(item_id=items), by='item_id', .recompute_sumscores = TRUE)
+      respData = get_resp_data(respData, summarised = TRUE, protect_x = !is_db(dataSrc))
+      
+      pv = pv |> 
+        select(-'booklet_score') |>
+        left_join(respData$x,  by=c("person_id", "booklet_id")) |>
+        mutate(booklet_score = coalesce(.data$booklet_score, 0L))
+      
+      pv = lapply(split(pv, pv$booklet_id), function(pvbk)
+      {
+        bk = pvbk$booklet_id[1]
+        
+        fl_bk = fl |>
+          anti_join(filter(respData$design, .data$booklet_id == bk), by='item_id')
+        
+        #nothing to augment case
+        if(nrow(fl_bk) == 0)
+        {
+          for(pn in sprintf('PV%i',1:nPS)) pvbk[[pn]] = pvbk$booklet_score
+        } else
+        {
+          b_index = 1L
+          for(pn in sprintf('PV%i',1:nPS))
+          {
+            pvbk[[pn]] = sampleNRM_testC(pvbk[[pn]], b[,b_index], a, fl_bk$first0, fl_bk$last0)[,1,drop=TRUE] + pvbk$booklet_score
+            b_index = b_index + bstep
+          }    
+        }
+        pvbk
+      }) |>
+        bind_rows()
+      
+    } else
+    {
+      b_index = 1L
+      
+      for(pn in sprintf('PV%i',1:nPS))
+      {
+        pv[[pn]] = sampleNRM_testC(pv[[pn]], b[,b_index], a, fl$first0, fl$last0)[,1,drop=TRUE]
+        b_index = b_index + bstep
+      }
     }
   }
   
   pv |>
-    select(-'booklet_score') |>
+    select(-any_of('booklet_score')) |>
     rename_with(gsub, pattern='^PV(?=\\d+$)',replacement='PS', perl=TRUE)  |>
     mutate_if(is.factor, as.character) |>
     df_format()
 }
-

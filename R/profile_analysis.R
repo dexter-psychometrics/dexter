@@ -46,7 +46,7 @@ profile_tables_ = function(items, a, b, design, domains, item_property)
     mutate(dcat = dense_rank(.data[[item_property]])) |>
     arrange(.data$booklet_id, .data$dcat, .data$item_id) 
   
-  domain_category_index = distinct(design, .data[[item_property]], dcat )
+  domain_category_index = distinct(design, .data[[item_property]], .data$dcat )
   
   design |>
     group_by(.data$booklet_id) |>
@@ -63,7 +63,7 @@ profile_tables_ = function(items, a, b, design, domains, item_property)
       
     }) |>
     ungroup() |>
-    select(-dcat)
+    select(-'dcat')
 }
 
 # to~do: example

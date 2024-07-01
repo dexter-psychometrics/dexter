@@ -14,6 +14,7 @@ plausible_scores(
   nPS = 1,
   prior_dist = c("normal", "mixture"),
   keep.observed = TRUE,
+  by_item = FALSE,
   merge_within_persons = FALSE
 )
 }
@@ -45,6 +46,8 @@ A mixture is only possible when there are no covariates.}
 
 \item{keep.observed}{If responses to one or more of the items have been observed,
 the user can choose to keep these observations or generate new ones.}
+
+\item{by_item}{return scores per item instead of sumscores}
 
 \item{merge_within_persons}{If a person took multiple booklets, this indicates
 whether plausible scores are generated per person (TRUE) or per booklet (FALSE)}
