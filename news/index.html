@@ -85,7 +85,7 @@
 <h2 class="page-header" data-toc-text="1.5.0" id="dexter-150">dexter 1.5.0<a class="anchor" aria-label="anchor" href="#dexter-150"></a></h2>
 <ul><li><p>bugfix in <code><a href="../reference/profiles.html">profiles()</a></code>: correct domain names when different booklets don’t have the same domains</p></li>
 <li><p>improvements leading to lower autocorrelation for <code>fit_enorm(..., method='Bayes')</code></p></li>
-<li><p><code>plausible_scores</code> can now return scores per item to generate complete partially imputed datasets</p></li>
+<li><p><code>plausible_scores</code> can now return scores per item to generate complete (partially imputed) datasets</p></li>
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.4.2" id="dexter-142">dexter 1.4.2<small>2024-04-12</small><a class="anchor" aria-label="anchor" href="#dexter-142"></a></h2>
@@ -140,7 +140,7 @@
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.1.4" id="dexter-114">dexter 1.1.4<small>2021-10-28</small><a class="anchor" aria-label="anchor" href="#dexter-114"></a></h2>
 <ul><li>changed sd_score for items in tia_tables() for type=‘averaged’ to the actual sd rather than a weighted average of sd over booklets (which was the case in previous versions)</li>
-<li>tia_tables now returns a list with data.frame elements booklets and items with snake case column names rather than elements testStats and itemStats. testStas and itemStats are also still included for the time being to not break existing code.</li>
+<li>tia_tables now returns a list with data.frame elements booklets and items with snake case column names rather than elements testStats and itemStats. testStats and itemStats are also still included for the time being to not break existing code.</li>
 <li>corrected a minor bug which caused progress bars to hang or not complete to 100%</li>
 <li>get_resp_matrix no longer includes empty rows for missing factor levels</li>
 </ul></div>
