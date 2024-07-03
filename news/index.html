@@ -83,8 +83,9 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.5.0" id="dexter-150">dexter 1.5.0<a class="anchor" aria-label="anchor" href="#dexter-150"></a></h2>
-<ul><li><p>bugfix: previous dexter versions could place the wrong domain name with the profile categories if not all booklets had the same domains</p></li>
-<li><p>lower autocorrelation for <code>fit_enorm(..., method='Bayes')</code></p></li>
+<ul><li><p>bugfix in <code><a href="../reference/profiles.html">profiles()</a></code>: correct domain names when different booklets don’t have the same domains</p></li>
+<li><p>improvements leading to lower autocorrelation for <code>fit_enorm(..., method='Bayes')</code></p></li>
+<li><p><code>plausible_scores</code> can now return scores per item to generate complete partially imputed datasets</p></li>
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.4.2" id="dexter-142">dexter 1.4.2<small>2024-04-12</small><a class="anchor" aria-label="anchor" href="#dexter-142"></a></h2>

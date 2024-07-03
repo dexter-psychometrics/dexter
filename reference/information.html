@@ -93,24 +93,21 @@ for a single item, an arbitrary group of items or all items</p>
 <span>  <span class="va">parms</span>,</span>
 <span>  items <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  booklet_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  parms_draw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"average"</span>, <span class="st">"sample"</span><span class="op">)</span>,</span>
-<span>  by_chain <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  parms_draw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"average"</span>, <span class="st">"sample"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">expected_score</span><span class="op">(</span></span>
 <span>  <span class="va">parms</span>,</span>
 <span>  items <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  booklet_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  parms_draw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"average"</span>, <span class="st">"sample"</span><span class="op">)</span>,</span>
-<span>  by_chain <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  parms_draw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"average"</span>, <span class="st">"sample"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">r_score</span><span class="op">(</span></span>
 <span>  <span class="va">parms</span>,</span>
 <span>  items <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  booklet_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  parms_draw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"average"</span>, <span class="st">"sample"</span><span class="op">)</span>,</span>
-<span>  by_chain <span class="op">=</span> <span class="va">by_chain</span></span>
+<span>  parms_draw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"average"</span>, <span class="st">"sample"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">p_score</span><span class="op">(</span></span>
@@ -140,11 +137,6 @@ depending on parametrization, a column named either beta/delta, eta or b</p></dd
 <dd><p>when the item parameters are estimated with method "Bayes" (see: <code><a href="fit_enorm.html">fit_enorm</a></code>), 
 parms_draw specifies whether to use a sample (a different item parameter draw for each output column) or the posterior mean
 of the item draws. Alternatively, it can be an integer specifying a specific draw. It is ignored when parms is not estimated Bayesianly.</p></dd>
-
-
-<dt>by_chain</dt>
-<dd><p>add a separate dimension to the output denoting the chains in the Bayesian simulation. Useful for advanced users 
-to check autocorrelation and mixing on substantive outcome measures. Defaults to FALSE. Ignored if parms is not estimated Bayesianly or parms_draw is an integer.</p></dd>
 
 </dl></div>
     <div id="value">
