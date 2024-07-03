@@ -21,7 +21,7 @@ Imports:
     DBI (>= 1.0.0),
     MASS (>= 7.3),
     tidyr (>= 1.2.0),
-    rlang (>= 0.4.1),    
+    rlang (>= 1.0.0),    
     dplyr (>= 1.1.0),
     Rcpp (>= 1.0.1),
     RcppArmadillo (>= 0.12.6.6.0),
@@ -30,7 +30,7 @@ Imports:
     methods,
     utils
 LinkingTo: Rcpp, RcppArmadillo (>= 0.12.6.6.0), dqrng, BH, sitmo
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Suggests:
     knitr,
     rmarkdown,

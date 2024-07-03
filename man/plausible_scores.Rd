@@ -36,7 +36,7 @@ parms_draw specifies whether to use a sample(a different item parameter draw for
 of the item draws. Alternatively, it can be an integer specifying a specific draw. Ignored when parms is not estimated Bayesianly.}
 
 \item{covariates}{name or a vector of names of the variables to group the population, used to update the prior.
-A covariate must be a discrete person covariate (e.g. not a float) that indicates nominal categories, e.g. gender or school
+A covariate must be a discrete person covariate that indicates nominal categories, e.g. gender or school
 If dataSrc is a data.frame, it must contain the covariate.}
 
 \item{nPS}{Number of plausible testscores to generate per person.}

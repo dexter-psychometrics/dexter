@@ -4,7 +4,7 @@
 
 * improvements leading to lower autocorrelation for `fit_enorm(..., method='Bayes')`
 
-* `plausible_scores` can now return scores per item to generate complete partially imputed datasets
+* `plausible_scores` can now return scores per item to generate complete (partially imputed) datasets
 
 
 # dexter 1.4.2
@@ -65,7 +65,7 @@
 # dexter 1.1.4
 
 * changed sd_score for items in tia_tables() for type='averaged' to the actual sd rather than a weighted average of sd over booklets (which was the case in previous versions) 
-* tia_tables now returns a list with data.frame elements booklets and items with snake case column names rather than elements testStats and itemStats. testStas and itemStats are also still included for the time being to not break existing code.
+* tia_tables now returns a list with data.frame elements booklets and items with snake case column names rather than elements testStats and itemStats. testStats and itemStats are also still included for the time being to not break existing code.
 * corrected a minor bug which caused progress bars to hang or not complete to 100%
 * get_resp_matrix no longer includes empty rows for missing factor levels
 

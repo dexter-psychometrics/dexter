@@ -33,10 +33,6 @@ fast_factor_lev <- function(x, levs, as_int) {
     .Call(`_dexter_fast_factor_lev`, x, levs, as_int)
 }
 
-ppoint <- function(x) {
-    .Call(`_dexter_ppoint`, x)
-}
-
 fill_resp_matrix <- function(person_id, item_id, item_score, out) {
     invisible(.Call(`_dexter_fill_resp_matrix`, person_id, item_id, item_score, out))
 }

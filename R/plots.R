@@ -502,6 +502,13 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
   check_num(nbins,'integer',.length=1, .min=2)
   dots = list(...)
   
+  if(inherits(x,"mst_enorm"))
+  {
+    m = x$inputs$method
+    x$inputs = x$mst_inputs
+    x$inputs$method = m
+  }
+  
   if(is.null(item_id))
   {
     if('items' %in% names(dots))

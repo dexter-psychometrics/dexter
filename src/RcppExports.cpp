@@ -126,17 +126,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// ppoint
-std::string ppoint(SEXP x);
-RcppExport SEXP _dexter_ppoint(SEXP xSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(ppoint(x));
-    return rcpp_result_gen;
-END_RCPP
-}
 // fill_resp_matrix
 void fill_resp_matrix(const IntegerVector& person_id, const IntegerVector& item_id, const IntegerVector& item_score, arma::imat& out);
 RcppExport SEXP _dexter_fill_resp_matrix(SEXP person_idSEXP, SEXP item_idSEXP, SEXP item_scoreSEXP, SEXP outSEXP) {
@@ -754,7 +743,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dexter_IJ_c", (DL_FUNC) &_dexter_IJ_c, 8},
     {"_dexter_fast_factor", (DL_FUNC) &_dexter_fast_factor, 2},
     {"_dexter_fast_factor_lev", (DL_FUNC) &_dexter_fast_factor_lev, 3},
-    {"_dexter_ppoint", (DL_FUNC) &_dexter_ppoint, 1},
     {"_dexter_fill_resp_matrix", (DL_FUNC) &_dexter_fill_resp_matrix, 4},
     {"_dexter_ds_connected_groups", (DL_FUNC) &_dexter_ds_connected_groups, 1},
     {"_dexter_make_booklets", (DL_FUNC) &_dexter_make_booklets, 6},

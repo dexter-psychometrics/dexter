@@ -70,6 +70,15 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
   {
     if(inherits(fixed_params,'prms'))
     {
+      if(inherits(fixed_params,"mst_enorm"))
+      {
+        m = x$inputs$method
+        x$inputs = x$mst_inputs
+        x$inputs$method = m
+        x$est$b = x$mst_est$b
+        x$est$a = x$mst_est$a
+      }
+      
       if (fixed_params$inputs$method!="CML")
         message("Posterior means are taken as values for fixed parameters")
       
@@ -186,6 +195,13 @@ coef.prms = function(object, hpd = 0.95, what=c('items','var','posterior'), ...)
 {
   x = object
   what = match.arg(what)
+  
+  if(inherits(x,"mst_enorm"))
+  {
+    m = x$inputs$method
+    x$inputs = x$mst_inputs
+    x$inputs$method = m
+  }
   
   if(what=='items')
   {

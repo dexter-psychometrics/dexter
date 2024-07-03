@@ -23,7 +23,7 @@ get_resp_matrix(dataSrc, qtpredicate = NULL, env = NULL)
 \arguments{
 \item{dataSrc}{data.frame, integer matrix, dexter database or `dx_resp_data` object}
 
-\item{qtpredicate}{quoted predicate}
+\item{qtpredicate}{quoted predicate, e.g. \code{quote(booklet_id=='bk01')}}
 
 \item{extra_columns}{to be returned in addition to person_id, booklet_id, item_score, item_id}
 
@@ -61,7 +61,7 @@ easy connection of your own package to the data management capabilities of dexte
 \description{
 These functions are meant for people who want to develop their own models based
 on the data management structure of dexter. The benefit is some extra speed and less memory usage 
-compared to using `get_responses` or `get_testscores`.
+compared to using \code{get_responses} or \code{get_testscores}.
 The return value of get_resp_data can be used as the 'dataSrc' argument in analysis functions.
 }
 \details{

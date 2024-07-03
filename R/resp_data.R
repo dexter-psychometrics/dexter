@@ -33,7 +33,7 @@ stop_no_param = function(items)
 #'
 #' These functions are meant for people who want to develop their own models based
 #' on the data management structure of dexter. The benefit is some extra speed and less memory usage 
-#' compared to using `get_responses` or `get_testscores`.
+#' compared to using \code{get_responses} or \code{get_testscores}.
 #' The return value of get_resp_data can be used as the 'dataSrc' argument in analysis functions.
 #' 
 #' Regular users are advised not to use these functions 
@@ -41,7 +41,7 @@ stop_no_param = function(items)
 #' 
 #'
 #' @param dataSrc data.frame, integer matrix, dexter database or `dx_resp_data` object
-#' @param qtpredicate quoted predicate
+#' @param qtpredicate quoted predicate, e.g. \code{quote(booklet_id=='bk01')}
 #' @param extra_columns to be returned in addition to person_id, booklet_id, item_score, item_id
 #' @param summarised if TRUE, no item scores are returned, just booklet scores
 #' @param env environment for evaluation of qtpredicate, defaults to caller environment
@@ -439,7 +439,7 @@ resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
     stop_(sprintf("column(s) %s in dataSrc contain NA values", paste0('`',cnm,'`',collapse=', ')))
   }
   
-  pointers = lapply(x, ppoint)
+  pointers = lapply(x, obj_address)
   
   x$item_id = ffactor(x$item_id)
   
@@ -484,16 +484,16 @@ resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
   if(summarised && protect_x)
   {
     # to do: tricky for such a small gain, better make new variables instead of overwrite
-    if(ppoint(x$item_score) == pointers$item_score)
+    if(obj_address(x$item_score) == pointers$item_score)
       x$item_score = duplicate(x$item_score)
     
-    if(ppoint(x$person_id) == pointers$person_id)
+    if(obj_address(x$person_id) == pointers$person_id)
       x$person_id = duplicate(x$person_id)
     
-    if(ppoint(x$item_id) == pointers$item_id)
+    if(obj_address(x$item_id) == pointers$item_id)
       x$item_id = duplicate(x$item_id)
     
-    if('booklet_id' %in% names(pointers) && ppoint(x$booklet_id) == pointers$booklet_id)
+    if('booklet_id' %in% names(pointers) && obj_address(x$booklet_id) == pointers$booklet_id)
       x$booklet_id = duplicate(x$booklet_id)
   }  
   
@@ -520,7 +520,7 @@ resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
     
   } else
   {
-    if(protect_x && ppoint(x$item_score) == pointers$item_score)
+    if(protect_x && obj_address(x$item_score) == pointers$item_score)
       x$item_score = duplicate(x$item_score)
     
     if(summarised)

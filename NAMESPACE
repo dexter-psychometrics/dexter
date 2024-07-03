@@ -6,7 +6,7 @@ importFrom(RSQLite, "SQLite")
 importFrom(DBI,"dbExecute", "dbGetQuery","dbDisconnect", "dbConnect", "dbListFields",
             "dbCommit","dbRollback","dbBegin", "dbReadTable", "dbExistsTable", "dbIsValid",
             "dbSendQuery","dbColumnInfo","dbClearResult") 
-importFrom(rlang,"caller_env",".data","eval_tidy","duplicate","env_has")
+importFrom(rlang,"caller_env",".data","eval_tidy","duplicate","env_has","obj_address")
 importFrom(tidyr, "pivot_longer", "pivot_wider", "fill")
 importFrom(MASS, "lmsreg")
 

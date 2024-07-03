@@ -54,13 +54,6 @@ SEXP fast_factor_lev( SEXP x, SEXP levs, bool as_int)
 }
 
 
-// [[Rcpp::export]]
-std::string ppoint(SEXP x)
-{
-	return tfm::format("%p", x);
-}
-
-
 // assumed there are no double responses
 // to do: can be faster if we unroll the loop
 // [[Rcpp::export]]
@@ -877,6 +870,8 @@ List polytomize_C(IntegerVector& booklet_id, IntegerVector& person_id, IntegerVe
 
 // utility function to check if data is safe to use with above functions
 
+// this function has a false postive "possibly lost" result in valgrind due to omp, see: "gcc.gnu.org/bugzilla/show_bug.cgi?id=36298"
+
 // [[Rcpp::export]]
 bool is_person_booklet_sorted(const IntegerVector& booklet_id, const IntegerVector& person_id, const int ncores)
 {
@@ -886,8 +881,7 @@ bool is_person_booklet_sorted(const IntegerVector& booklet_id, const IntegerVect
 #pragma omp parallel for num_threads(ncores)
 	for(int i=1; i<n; i++)
 	{
-		if((booklet_id[i] < booklet_id[i-1] && person_id[i] == person_id[i-1]) ||
-		   (person_id[i] < person_id[i-1]))
+		if((booklet_id[i] < booklet_id[i-1] && person_id[i] == person_id[i-1]) || (person_id[i] < person_id[i-1]))
 		   sorted = false; 
 	}
 	return sorted;
