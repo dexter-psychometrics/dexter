@@ -122,13 +122,19 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
     d = respData$x |>
       mutate(bs=.data$booklet_score-.data$item_score) |>
       group_by(.data$booklet_id, .data$item_id, .data$response) |>
-      summarise(item_score=first(.data$item_score), n=n(), rbsum=sum(.data$bs), rb2sum=sum(.data$bs^2), .groups='drop_last') |>
+      summarise(item_score=first(.data$item_score), n=n(), rbsum=sum(.data$bs), rb2sum=sum(.data$bs^2), 
+                bsum = sum(.data$booklet_score), b2sum=sum(.data$booklet_score^2), 
+                .groups='drop_last') |>
       mutate(N = sum(.data$n), 
-             bmean = sum(.data$rbsum)/.data$N, 
-             b2mean = sum(.data$rb2sum)/.data$N,
+             rbmean = sum(.data$rbsum)/.data$N, 
+             rb2mean = sum(.data$rb2sum)/.data$N,
+             bmean = sum(.data$bsum)/.data$N, 
+             b2mean = sum(.data$b2sum)/.data$N,
              rvalue = .data$n/.data$N,
-             rar = (.data$rbsum/.data$N - .data$rvalue*.data$bmean)/
-                   sqrt(.data$rvalue*(1-.data$rvalue)*(.data$b2mean - .data$bmean^2)) ) |>
+             rar = (.data$rbsum/.data$N - .data$rvalue*.data$rbmean)/
+               sqrt(.data$rvalue*(1-.data$rvalue)*(.data$rb2mean - .data$rbmean^2)),
+             rat = (.data$bsum/.data$N - .data$rvalue*.data$bmean)/
+               sqrt(.data$rvalue*(1-.data$rvalue)*(.data$b2mean - .data$bmean^2))) |>
       ungroup() 
     
     # type==compared makes little sense to me for distractors, so treated same as raw
@@ -138,11 +144,12 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
         group_by(.data$item_id, .data$response, .data$item_score) |>
         summarise(n=sum(.data$n),
                   rvalue = weighted.mean(.data$rvalue,.data$N),
-                  rar = weighted.mean(.data$rar,.data$N, na.rm=TRUE)) |>
+                  rar = weighted.mean(.data$rar,.data$N, na.rm=TRUE),
+                  rat = weighted.mean(.data$rat,.data$N, na.rm=TRUE)) |>
         ungroup()
     } else
     {
-      d = select(d, 'booklet_id', 'item_id', 'response', 'item_score', 'n', 'rvalue', 'rar')
+      d = select(d, 'booklet_id', 'item_id', 'response', 'item_score', 'n', 'rvalue', 'rar','rat')
     }
     
     out$distractors = d |>

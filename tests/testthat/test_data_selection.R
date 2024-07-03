@@ -3,7 +3,6 @@ context('test data selection')
 library(dplyr)
 library(DBI)
 
-# to do: test what happens if integers or factors are used as booklet/person/item id's
 RcppArmadillo::armadillo_throttle_cores(1)
 
 
@@ -99,7 +98,7 @@ expect_valid_respData = function(respData, msg='respData')
       pull(res) |>
       expect_true(info=sprintf("%s - booklet_score incorrect", msg))
     
-  }
+  } 
   
   expect_false(is_grouped_df(respData$x), info = sprintf("%s - x is grouped", msg))
   expect_false(is_grouped_df(respData$design), info = sprintf("%s - design is grouped", msg))
@@ -189,10 +188,29 @@ test_that('merging works',
   close_project(db)
 })
 
+test_that('integers and factors',{
+  x = tibble(item_id=rep(1:10,10),person_id=rep(c(1,4:12),each=10),item_score=sample(0:3,100,replace=TRUE))
+  
+  r = get_resp_data(x)
+  
+  tst = inner_join(mutate_if(x,is.numeric,as.integer),
+                    mutate(r$x,across(c(person_id,item_id),\(i) as.integer(as.character(i)))),
+                   by=c('person_id','item_id'), suffix=c('.in','.out'))
+  
+  excpect_true(nrow(tst) == nrow(x) && all(tst$item_score.in == tst$item_score.out),label='integer match respdata')
+  
+  x = mutate(x,
+             person_id = factor(as.character(person_id),levels=as.character(sample(1:100,100))),
+             item_id = factor(as.character(item_id),levels=as.character(sample(1:100,100))))
+  
+  r = get_resp_data(x)
+  
+  tst = inner_join(x,r$x,by=c('person_id','item_id'), suffix=c('.in','.out'))
+  
+  excpect_true(nrow(tst) == nrow(x) && all(tst$item_score.in == tst$item_score.out),label='factor match respdata')
+  
+})
 
-
-
-# to also do: check parms and profiles
 
 test_that('input data.frames survives',  {
 

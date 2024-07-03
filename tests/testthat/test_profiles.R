@@ -3,8 +3,6 @@ context('Test profile analysis')
 library(dplyr)
 
 
-# to do: check for proper number of rows
-
 test_that('profile analysis verb agg',{
 
   db = open_project(test_path('verbAggression.db'))
