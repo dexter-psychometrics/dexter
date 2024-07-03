@@ -197,7 +197,7 @@ test_that('integers and factors',{
                     mutate(r$x,across(c(person_id,item_id),\(i) as.integer(as.character(i)))),
                    by=c('person_id','item_id'), suffix=c('.in','.out'))
   
-  excpect_true(nrow(tst) == nrow(x) && all(tst$item_score.in == tst$item_score.out),label='integer match respdata')
+  expect_true(nrow(tst) == nrow(x) && all(tst$item_score.in == tst$item_score.out),label='integer match respdata')
   
   x = mutate(x,
              person_id = factor(as.character(person_id),levels=as.character(sample(1:100,100))),
@@ -207,7 +207,7 @@ test_that('integers and factors',{
   
   tst = inner_join(x,r$x,by=c('person_id','item_id'), suffix=c('.in','.out'))
   
-  excpect_true(nrow(tst) == nrow(x) && all(tst$item_score.in == tst$item_score.out),label='factor match respdata')
+  expect_true(nrow(tst) == nrow(x) && all(tst$item_score.in == tst$item_score.out),label='factor match respdata')
   
 })
 
