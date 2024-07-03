@@ -221,7 +221,7 @@ check_dataSrc = function(x)
   if(is_db(x))
   {
     if(dbIsValid(x)) return(NULL)
-    stop_('your database connection is no longer valid, you need to reconnect. see: ?open_project for details')
+    stop_('your database connection is no longer valid, you need to reconnect. See: ?open_project for details')
   }
     
      

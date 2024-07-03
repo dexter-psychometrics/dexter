@@ -5,7 +5,10 @@
 *.o
 *.so
 *.dll
+*.gcda
+*.gcno
 /revdep/.cache.rds
 tmp
 dexter.Rproj
 docs
+smoke_testing

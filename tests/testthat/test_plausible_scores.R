@@ -5,6 +5,46 @@ library(dplyr)
 
 RcppArmadillo::armadillo_throttle_cores(1)
 
+
+test_that('basic plausible scores checks',{
+  db = open_project(test_path('verbAggression.db'))
+  f = fit_enorm(db)
+
+  itm = get_items(db) |> filter(item_id!='S1DoCurse')
+  
+  ps = plausible_scores(db,f,items=itm,nPS=2) |>
+    inner_join(get_testscores(db), by=c('booklet_id','person_id'))
+  
+  expect_true(all(between(ps$booklet_score-ps$PS1,0,2)) && all(between(ps$booklet_score-ps$PS2,0,2)),
+              label = 'keep.observed=TRUE works for sumscores')
+  
+  ps = plausible_scores(db,f,items=itm,nPS=2, keep.observed=FALSE) |>
+    inner_join(get_testscores(db), by=c('booklet_id','person_id'))
+    
+  # conservative to account for chance factor
+  expect_gt(cor(ps$booklet_score,ps$PS1),.75,label='PS positive correlation with sumscore')
+  
+  expect_false(all(between(ps$booklet_score-ps$PS1,0,2)) || all(between(ps$booklet_score-ps$PS2,0,2)),
+              label = 'keep.observed=FALSE works for sumscores')
+  
+  r = get_responses(db, item_id!='S2DoScold') 
+  
+  ps = plausible_scores(r,f,items=get_items(db),nPS=2,by_item=TRUE) |>
+    inner_join(get_responses(db), by=c('item_id','person_id'))
+  
+  w=which(ps$item_id=='S2DoScold')
+  expect_true(all(ps$item_score[!w] == ps$PS1[!w]) && all(ps$item_score[!w] == ps$PS2[!w]), 
+              label='by_item keep observed works')
+  
+  expect_true(!all(ps$item_score[w] == ps$PS1[w]) && !all(ps$item_score[w] == ps$PS2[w]), 
+              label='by_item keep observed works (2)')
+  
+  expect_gt(cor(ps$item_score[w], ps$PS2[w]),.1,label='PS by item, positive correlation')
+  
+  
+  
+})
+
 test_that('plausible scores works',{
   skip_on_cran()
   # simulate some data

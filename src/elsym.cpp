@@ -308,7 +308,6 @@ void elsym_partial(const arma::vec& b, const arma::ivec& a, int *first, int *las
 
 // Interaction model, matrix for EM
 // doubtfull if omp is worth it
-// matrix for nrm could be done much faster with a single call to elsym_i
 // to check: dexter seems to use mean elsym
 // expect long double to be sufficiently large and precise on all common archs
 

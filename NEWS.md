@@ -1,8 +1,10 @@
 # dexter 1.5.0
 
-* bugfix: previous dexter versions could place the wrong domain name with the profile categories if not all booklets had the same domains
+* bugfix in `profiles()`: correct domain names when different booklets don't have the same domains
 
-* lower autocorrelation for `fit_enorm(..., method='Bayes')`
+* improvements leading to lower autocorrelation for `fit_enorm(..., method='Bayes')`
+
+* `plausible_scores` can now return scores per item to generate complete partially imputed datasets
 
 
 # dexter 1.4.2

@@ -1,5 +1,4 @@
 
-
 # faster factor, does not handle or check for NA values
 ffactor = function (x, levels=NULL, as_int=FALSE) 
 {

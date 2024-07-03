@@ -11,8 +11,6 @@
 #' @param parms_draw when the item parameters are estimated with method "Bayes" (see: \code{\link{fit_enorm}}), 
 #' parms_draw specifies whether to use a sample (a different item parameter draw for each output column) or the posterior mean
 #' of the item draws. Alternatively, it can be an integer specifying a specific draw. It is ignored when parms is not estimated Bayesianly.
-#' @param by_chain add a separate dimension to the output denoting the chains in the Bayesian simulation. Useful for advanced users 
-#' to check autocorrelation and mixing on substantive outcome measures. Defaults to FALSE. Ignored if parms is not estimated Bayesianly or parms_draw is an integer. 
 #' @return Each function returns a new function which accepts a vector of theta's. These return the following values: 
 #' \describe{
 #' \item{information}{an equal length vector with the information estimate at each value of theta.}
@@ -59,21 +57,21 @@
 #' 
 #' \dontshow{ RcppArmadillo::armadillo_reset_cores()}
 #' 
-information = function(parms, items=NULL, booklet_id=NULL, parms_draw = c('average','sample'), by_chain=FALSE)
+information = function(parms, items=NULL, booklet_id=NULL, parms_draw = c('average','sample'))
 {
-  theta_function(parms, items=items, booklet=booklet_id, parms_draw=parms_draw, what='information', by_chain=by_chain)
+  theta_function(parms, items=items, booklet=booklet_id, parms_draw=parms_draw, what='information')
 }
 
 #' @rdname information
-expected_score = function(parms, items=NULL, booklet_id=NULL, parms_draw = c('average','sample'),by_chain=FALSE)
+expected_score = function(parms, items=NULL, booklet_id=NULL, parms_draw = c('average','sample'))
 {
-  theta_function(parms, items=items, booklet=booklet_id, parms_draw=parms_draw, what='expected', by_chain=by_chain)
+  theta_function(parms, items=items, booklet=booklet_id, parms_draw=parms_draw, what='expected')
 }
 
 #' @rdname information
-r_score = function(parms, items=NULL, booklet_id=NULL, parms_draw = c('average','sample'),by_chain=by_chain)
+r_score = function(parms, items=NULL, booklet_id=NULL, parms_draw = c('average','sample'))
 {
-  theta_function(parms, items=items, booklet=booklet_id, parms_draw=parms_draw, what='sim', by_chain=FALSE)
+  theta_function(parms, items=items, booklet=booklet_id, parms_draw=parms_draw, what='sim')
 }
 
 #' @rdname information
@@ -85,20 +83,17 @@ p_score = function(parms, items=NULL, booklet_id=NULL, parms_draw = c('average',
 
 
 theta_function = function(parms, items=NULL, booklet=NULL, parms_draw=c('average','sample'), 
-                          what=c('information','expected','sim','pmf'),
-                          by_chain=FALSE)
+                          what=c('information','expected','sim','pmf'))
 {
   what = match.arg(what)
   if(is.factor(items)) items = as.character(items)
   check_character(items,nullable=TRUE)
   check_string(booklet,name='booklet_id',nullable=TRUE)
 
-  # TO DO: chains and parms_draw only fully implemented for expected yet
-  
   if(is.numeric(parms_draw)) parms_draw = as.integer(parms_draw)
   else parms_draw = match.arg(parms_draw)
   
-  parms = simplify_parms(parms, draw=parms_draw, by_chain=by_chain)
+  parms = simplify_parms(parms, draw=parms_draw)
   
   if(!is.null(items))
   {
@@ -126,14 +121,7 @@ theta_function = function(parms, items=NULL, booklet=NULL, parms_draw=c('average
   a = parms$a
   b = parms$b
   multiple_b = !is.null(dim(b)) && ncol(b)>1
-  if(parms_draw=='average') by_chain = FALSE
-  if(by_chain && multiple_b)
-  {
-    chain_index = parms$chain_index
-    mn = min(sapply(chain_index,length))
-    chain_index = lapply(chain_index,function(i) i[1:mn])
-  }
-  
+
   rm(parms)
 
   #output
@@ -150,7 +138,7 @@ theta_function = function(parms, items=NULL, booklet=NULL, parms_draw=c('average
       if(multiple_b)
       {
         res = matrix(0,nrow = length(theta), ncol=nrow(b))
-        for(i in 1:row(b))
+        for(i in 1:nrow(b))
           res[w,i] = IJ_(b[i,],a,fl$first, fl$last, theta[is.finite(theta)])$I
       } else
       {
@@ -174,22 +162,7 @@ theta_function = function(parms, items=NULL, booklet=NULL, parms_draw=c('average
         stop('theta may not contain nan/NA values') 
       
       w = is.finite(theta)
-      if(multiple_b && by_chain)
-      {
-        res = array(0,dim=c(length(theta), length(chain_index[[1]]), length(chain_index)))
-        for(i in seq_along(chain_index))
-        {
-          for(j in 1:mn)
-          {
-            #cat(sprintf("%i:%i\n",i,indx))
-            res[w,j,i] = E_score(theta[w],  
-                                    b=b[chain_index[[i]][j],], a=a, 
-                                    first=fl$first, last=fl$last)
-          }
-        }    
-        #cat('done\n')
-        res[!w & theta > 0,,] = max_score
-      } else if(multiple_b)
+      if(multiple_b)
       {
         res = matrix(0,nrow = length(theta), ncol=nrow(b))
         for(i in 1:nrow(b))
@@ -213,23 +186,40 @@ theta_function = function(parms, items=NULL, booklet=NULL, parms_draw=c('average
     class(out) = append('exp_func',class(out))
   } else if(what=='sim')
   {
-    # TO DO
-    if(multiple_b) stop('not implementd')
     out = function(theta)
     {
-      res = rscore_item(theta,b=b,a=a,first = fl$first, last = fl$last)
-      colnames(res) = fl$item_id
+      if(multiple_b)
+      {
+        res = array(0,dim=c(length(theta), nrow(fl), nrow(b)))
+        colnames(res) = fl$item_id
+        for(i in 1:nrow(b))
+          res[,,i] = rscore_item(theta,b=b[i,],a=a,first = fl$first, last = fl$last)
+      } else
+      {
+        res = rscore_item(theta,b=b,a=a,first = fl$first, last = fl$last)
+        colnames(res) = fl$item_id
+      }
       res
     }
     class(out) = append('sim_func',class(out))
   } else if(what=='pmf')
   {
-    # TO DO
-    if(multiple_b) stop('not implementd')
     out = function(theta)
     {
-      res = pscore(theta,b=b,a=a,first = fl$first, last = fl$last)
-      t(res)
+      check_num(theta)
+      if(any(is.na(theta) | is.nan(theta))) 
+        stop('theta may not contain nan/NA values') 
+      
+      if(multiple_b)
+      {
+        res = array(0,dim=c(length(theta), 1L+sum(a[fl$last]), nrow(b)))
+        for(i in 1:nrow(b))
+          res[,,i] = t(pscore(theta,b=b[i,],a=a,first = fl$first, last = fl$last))
+      } else
+      {
+        res = t(pscore(theta,b=b,a=a,first = fl$first, last = fl$last))
+      }
+      res
     }
     class(out) = append('pmf_func',class(out))
   }

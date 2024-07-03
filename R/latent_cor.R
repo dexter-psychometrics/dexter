@@ -49,10 +49,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   {
     stop("a matrix datasrc is not yet implemented for this function")
   }
-  # to do: this is a bit tricky, we will often need to merge over persons, e.g. if booklets are administered
-  # per subject. But if the same person makes multiple tests for the same subject, this is not good.
-  # Still have to decide on a solution
-  # why not check which is the case?
+  # merge_within_persons might also be user set. But TRUE will be the most useful in nearly all cases
   
   respData = get_resp_data(dataSrc, qtpredicate, env=env, extra_columns=item_property,
                            merge_within_persons=TRUE)

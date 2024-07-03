@@ -255,7 +255,7 @@ vec mixture_prior::as_vec()
 }
   
   
-// to do: lit nakijken op typfout (alles werkt dus typfout lijkt er niet)
+
 void mixture_prior::upd_normal(dqrng::xoshiro256plus& lrng, const vec& pv)
 {
 	const int n = pv.n_elem;

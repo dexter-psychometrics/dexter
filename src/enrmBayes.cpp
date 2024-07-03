@@ -80,7 +80,7 @@ Rcpp::List calibrate_Bayes_chains(const arma::ivec& a, const arma::ivec& first, 
 		
 		// working variables
 		vec y(max_cat, fill::zeros), z(nbk, fill::zeros);
-		vec bklambda(bkscoretab.n_elem, fill::ones);	// to do: onmogelijke scores?
+		vec bklambda(bkscoretab.n_elem, fill::zeros);	
 		
 		vec pi_k(max_bscore+1, fill::zeros), g(max_bscore+1), gw(max_bscore+1);
 	
@@ -112,7 +112,8 @@ Rcpp::List calibrate_Bayes_chains(const arma::ivec& a, const arma::ivec& first, 
 					sm = 0;
 					for (int s=0; s<=bmax[k];s++)
 					{
-					  if (g[s]>0){
+					  if (g[s]>0)
+					  {
 						pi_k[s] = rgamma(lrng, bkscoretab[cbmax[k]+s]+prior_nu, 1.0);
 						sm += pi_k[s];
 					  }

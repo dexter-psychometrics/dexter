@@ -36,16 +36,7 @@ test_that('dichotomous elsym_i matches elsym',{
   
   expect_lt(max_rel_diff(e_i$gfull[1:length(g)],g), 1e-14, label='dichotomous elsym_i gfull equal to vanilla')
 
-  
-  # # against dexter
-  # dx = elsym:::add_zero(rev(a),rev(b),fl,fl)
-  # 
-  # dx_e_i = sapply(nit:1, \(i) dexter:::elsym(dx$b,dx$a,dx$bkfirst+1L,dx$bklast+1L,i))
-  # 
-  # # this works
-  # max_rel_diff(dx_e_i,e_i[1:ns,])
-  # max_rel_diff(dx_e_i,e_vnl)
-  
+
   
   lbinom = dexter:::lbnm(ns+3)
   
@@ -96,15 +87,7 @@ test_that('polytomous elsym_i matches elsym',{
 
   expect_lt(max_rel_diff(e_i[1:ns,],e_vnl), 1e-14, label='polytomous elsym_i equal to vanilla')
   
-  # # against dexter
-  # 
-  # dx = elsym:::add_zero(ab$item_score,ab$b,items$first,items$last)
-  # 
-  # dx_e_i = sapply(1:nit, \(i) dexter:::elsym(dx$b,dx$a,dx$bkfirst+1L,dx$bklast+1L,i))
-  # 
-  # #also works
-  # max_rel_diff(dx_e_i,e_vnl)
-  
+
 
   lbinom = dexter:::lbnm(ns+3)
   
@@ -155,15 +138,6 @@ test_that('dichotomous regular and binom hessian are equal',{
   expect_lt(max_rel_diff(ev,ebnm), 5e-15, label='binomial expect equal to regular in dichotomous case')
   
   
-  # dx = elsym:::add_zero(ss$ssIS$item_score,b,bkfirst, bklast)
-  # 
-  # dx_ev = dexter:::E_bkl(dx$b, dx$a, dx$bkfirst, dx$bklast, ss$scoretab$N, ss$booklet$n_scores, ss$booklet$nit, use_mean=FALSE)
-  # dx_ebnm = dexter:::E_bkl(dx$b, dx$a, dx$bkfirst, dx$bklast, ss$scoretab$N, ss$booklet$n_scores, ss$booklet$nit, use_mean=TRUE)
-  # 
-  # # goed
-  # max_rel_diff(ev,dx_ev[-(sort(unique(dx$bkfirst)+1))])
-  # max_rel_diff(ebnm,dx_ebnm[-(sort(unique(dx$bkfirst)+1))])
-  
   nit=nrow(ss$ssI)
   
   ebnm = double(nit)
@@ -184,25 +158,7 @@ test_that('dichotomous regular and binom hessian are equal',{
   expect_true(max_rel_diff(hv,hbnm)< 1e-12, label='binomial hessian approx equal to regular in dichotomous case')
   
   
-  # dx_h = matrix(0,2*nit,2*nit)
-  # dx_e=double(2*nit)
-  # 
-  # dexter:::NR_bkl(dx$b, dx$a, dx$bkfirst, dx$bklast, ss$scoretab$N, ss$booklet$n_scores, ss$booklet$nit, 
-  #        max(2*ss$booklet$nit), dx_e, dx_h, use_mean=FALSE)
-  # 
-  # 
-  # # 1.5e-13, long double etc. it's believable
-  # max_rel_diff(hv,dx_h[-(sort(unique(dx$bkfirst)+1)),-(sort(unique(dx$bkfirst)+1)) ])
-  # 
-  # dx_h = matrix(0,2*nit,2*nit)
-  # dx_e=double(2*nit)
-  # 
-  # dexter:::NR_bkl(dx$b, dx$a, dx$bkfirst, dx$bklast, ss$scoretab$N, ss$booklet$n_scores, ss$booklet$nit, 
-  #                 max(2*ss$booklet$nit), dx_e, dx_h, use_mean=TRUE)
-  # 
-  # # 5e-13 
-  # max_rel_diff(hbnm,dx_h[-(sort(unique(dx$bkfirst)+1)),-(sort(unique(dx$bkfirst)+1)) ])
-  
+
 })  
 
 
@@ -248,17 +204,6 @@ test_that('polytomous regular and binom hessian are equal',{
 
   expect_lt(max_rel_diff(ev,ebnm), 5e-15, label='binomial expect equal to regular in polytomous case')
   
-
-  # dx = elsym:::add_zero(ss$ssIS$item_score,b,bkfirst, bklast)
-  # 
-  # dx_ev = dexter:::E_bkl(dx$b, dx$a, dx$bkfirst, dx$bklast, ss$scoretab$N, ss$booklet$n_scores, ss$booklet$nit, use_mean=FALSE)
-  # dx_ebnm = dexter:::E_bkl(dx$b, dx$a, dx$bkfirst, dx$bklast, ss$scoretab$N, ss$booklet$n_scores, ss$booklet$nit, use_mean=TRUE)
-  # 
-  # # ok
-  # max_rel_diff(dx_ev,dx_ebnm)
-  # max_rel_diff(ev,ebnm)
-  
-
   npar = n_distinct(ss$ssIS$item_id,ss$ssIS$item_score)
   
   ebnm = double(npar)
@@ -275,5 +220,31 @@ test_that('polytomous regular and binom hessian are equal',{
   
   expect_true(max_rel_diff(ev,ebnm)< 5e-15, label='binomial h expect equal to regular in polytomous case')
   expect_true(max_rel_diff(hv,hbnm)< 1e-12, label='binomial hessian approx equal to regular in polytomous case')
+  
+})
+
+test_that('vanilla sstable with normal elsym approx equal to long double version in c',{
+  
+  a=sample(1:2,16,replace=TRUE)
+  b=rnorm(16)
+  
+  tst = dexter:::sstable_nrmC(a,b,0:7,0:7,8:15,8:15)
+  
+  g1 = dexter:::elsymC(b, a, 0:7, 0:7)
+  g2 = dexter:::elsymC(b, a, 8:15, 8:15)
+  g_all = dexter:::elsymC(b, a, 0:15, 0:15)
+  
+  
+  m1 = sum(a[1:8])
+  m2 = sum(a[9:16])
+  
+  m = matrix(0,m1+1,m2+1)
+  
+  for(s1 in 0:m1) 
+    for(s2 in 0:m2)
+      m[s1+1,s2+1] = g1[s1+1]*g2[s2+1]/g_all[s1+s2+1]
+  
+  
+  expect_lt(max(abs(tst-m)/pmax(1,abs(tst))),1e-12, label='sstable two ways')
   
 })

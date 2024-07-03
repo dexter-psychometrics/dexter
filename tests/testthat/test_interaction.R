@@ -15,6 +15,10 @@ test_that('interaction model parameters are stable over simulation',{
   
   simdat = r_score_IM(f, rep(ts$booklet_score,10))
   
+  expect_true(all(rowSums(simdat) == rep(ts$booklet_score,10)),
+              label='IM simulation returns sumscores')
+  
+  
   g = fit_inter(simdat)  
   
   f = coef(f)  

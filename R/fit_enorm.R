@@ -79,7 +79,6 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
     } else
     {
       # transform the fixed params to the b parametrization dexter uses internally
-      # TO DO: check that it is ungrouped
       fixed_params = transform.df.parms(fixed_params, out.format = 'b') 
     }  
     
@@ -551,7 +550,6 @@ calibrate_Bayes = function(ss,  nIter, fixed_params=NULL,
     } else
     {
       # different but slightly underdispersed start locations
-      # to do: check this again, 0 madness
       sample_beta = rmvnorm(nchains,cml$beta, cml$acov.beta/2)
       
       b = apply(sample_beta,1,function(beta){ beta2b(ss$ssIS$item_score,beta,ss$ssI$first, ss$ssI$last)})

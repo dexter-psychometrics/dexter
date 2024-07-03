@@ -4,16 +4,18 @@
 PairDIF_ = function(beta1, beta2, acov.beta1, acov.beta2)
 {
   labs = rownames(beta1)
-  DR = kronecker(beta2,t(beta2),FUN="-")-kronecker(beta1,t(beta1),FUN="-") 
+  beta1=drop(beta1);beta2=drop(beta2)
+  DR = outer(beta2,beta2,FUN='-') - outer(beta1,beta1,FUN='-')
   var1 = diag(acov.beta1)
   var2 = diag(acov.beta2)
-  S = (kronecker(var1,t(var1),FUN="+")-2*acov.beta1)+(kronecker(var2,t(var2),FUN="+")-2*acov.beta2)
+  S = outer(var1,var1,FUN='+') - 2*acov.beta1 + outer(var2,var2,FUN='+') -2*acov.beta2
   diag(S) = 1
   D = DR/sqrt(S)
-  colnames(D) = labs; rownames(D)=labs
-  colnames(DR) = labs; rownames(DR)=labs
+  colnames(D) = rownames(D) = labs
+  colnames(DR) = rownames(DR) = labs
   return(list(D=D, Delta_R=DR))
 }
+
 
 ## produces a statistics for overall-DIF
 # beta1 and beta1 are both mean centered and do not contain the zero category. 
@@ -177,8 +179,12 @@ print.DIF_stats <- function(x, ...)
 #' The statistics are standard normal deviates and colored to distinguish significant from non-significant values.
 #' If there is no DIF, a proportion alpha off the cells will be colored significant by chance alone.
 #'      
+# experimental, currenlty testing, can use some more finetuning
 plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, alpha =.05,...)
 {
+  oldpar = par(no.readonly = TRUE)
+  on.exit({par(oldpar)},add=TRUE)
+  
   if(is.null(itemsX)) itemsX = sort(unique(x$items$item_id))
   if(is.null(itemsY)) itemsY = sort(unique(x$items$item_id))
   
@@ -215,14 +221,7 @@ plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, alpha
   }
   
   max_ = max(x$DIF_pair)
-  default.args = list(main = paste(x$group_labels[1],'vs.',x$group_labels[2]),
-                      axes=FALSE, zlim=c(0,max_),xlab='',ylab='',useRaster=TRUE)
-  
-  oldpar = par(no.readonly = TRUE)
-  on.exit({par(oldpar)},add=TRUE)
-  
-  graphics::layout(matrix(c(1,1,2,0),2,2), widths=c(7,1))
-  
+
   qn = qnorm(1-alpha/2)
   
   breaks = seq(0, qn, .05)
@@ -237,11 +236,15 @@ plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, alpha
   
   # Reverse Y axis
   # yLabels <- rev(yLabels)
-  xLabels <- rev(xLabels)
-  DIF_pair <- DIF_pair[nrow(DIF_pair) : 1,]
+  xLabels = rev(xLabels)
+  DIF_pair = DIF_pair[nrow(DIF_pair) : 1,]
   
-  # Data Map
-  par(mar = c(6,8,2.5,2))
+  mgp = par('mgp')
+  mgp[2] = .6 * mgp[2]
+  par(plt = oldpar$plt-c(0,.08,0,0), mgp=mgp, tck=coalesce(par('tck'),-.01))
+  
+  default.args = list(main = paste(x$group_labels[1],'vs.',x$group_labels[2]),
+                      axes=FALSE, zlim=c(0,max_),xlab='',ylab='',useRaster=TRUE)
   
   user.args = list(...)
   do.call(image,
@@ -250,23 +253,25 @@ plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, alpha
                                          col=col,breaks=breaks),
                          default = default.args))
   
-  cex.axis = coalesce(user.args$cex.axis, 0.6)
+  cex.axis = coalesce(user.args$cex.axis, 0.5)
   axis(1, at=1:length(yLabels), labels=yLabels, las=3, cex.axis=cex.axis, hadj=1,padj=0.5)
   axis(2, at=1:length(xLabels), labels=xLabels, las=1, cex.axis=cex.axis, hadj=1,padj=0.5)
   
   #Color Scale
-  try({
-    par(mar=c(2,2,2.5,2))
-    image(1, seq(0, max(qn,min(20,max_)), by=.05),
+    
+  par(new = TRUE, pty = "m", plt = c(.93,.97,.5,oldpar$plt[4]), err = -1,tck=NA)
+    
+
+  image(1, seq(0, max(qn,min(20,max_)), by=.05),
           matrix(seq(0, max(qn,min(20,max_)), by=.05),nrow=1),
           col=col,
           breaks=breaks,
           xlab="",ylab="",
-          xaxt="n", axes=FALSE)
-    axis(2, at=0:min(20,max_),lwd=0,lwd.ticks=1,las=2,cex.axis=0.8)
-    
-  }, silent=TRUE)
+          xaxt="n",yaxt="n", axes=FALSE)
+
+  axis(2, at=0:min(20,max_),lwd=0,lwd.ticks=1,las=2,cex.axis=coalesce(user.args$cex.axis, 0.5) * 1.4)
+
   
-  graphics::layout(1)
   invisible(NULL)
 }
+

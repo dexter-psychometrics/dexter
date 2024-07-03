@@ -87,7 +87,7 @@ theta_score_distribution = function(b,a,first,last,scoretab)
 ## Get the score distribution of a booklet from fit_enorm
 #  based on a polynomial smoothing of the log-lambda's
 #  Currently only implemented for CML
-# TO DO: Implement for Bayes.
+# to~do: not yet for Bayes
 # Check e.g., plot(0:48,log(lambda),col="green"); lines(0:48,log_l_pr)
 # beta = as.numeric(qr$coefficients)[-1]
 # n.obs is the exact observed score distributions if CML

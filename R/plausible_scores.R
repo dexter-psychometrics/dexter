@@ -18,7 +18,7 @@
 #' @param items vector of item_id's, this specifies the itemset to generate the testscores for. If \code{items} is \code{NULL} 
 #' all items occurring in \code{dataSrc} are used.
 #' @param covariates name or a vector of names of the variables to group the population, used to update the prior.
-#' A covariate must be a discrete person covariate (e.g. not a float) that indicates nominal categories, e.g. gender or school
+#' A covariate must be a discrete person covariate that indicates nominal categories, e.g. gender or school
 #' If dataSrc is a data.frame, it must contain the covariate.
 #' @param keep.observed If responses to one or more of the items have been observed,
 #' the user can choose to keep these observations or generate new ones. 
@@ -104,9 +104,19 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
     bstep = 0L
   }
   
-  
   if(by_item)
   {
+    if(merge_within_persons)
+    {
+      pp = tibble(old_person_id=pv$person_id,booklet_id=pv$booklet_id, person_id=1:nrow(pv))
+      pv$person_id = pp$person_id
+      
+      respData$x = respData$x |> 
+        rename(old_person_id='person_id') |>
+        inner_join(pp,by=c('booklet_id','old_person_id')) |>
+        select(-'old_person_id')
+    }
+    
     pv = droplevels(pv)
     if(is.unsorted(pv$person_id)) pv = arrange(pv,.data$person_id)
 
@@ -141,7 +151,7 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
           mutate(present=coalesce(.data$present,FALSE)) |>
           arrange(.data$item_id) |>
           mutate(cnt=cumsum(as.integer(!.data$present))*np) |>
-          filter(present)
+          filter(.data$present)
           
         m = as.integer(m[unlist(w)])
           
@@ -153,10 +163,18 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
         x[[sprintf('PS%i',i)]][w] = m
       }
     }
+    
     if(!is.null(covariates))
       pv = inner_join(select(pv,all_of(c('person_id',covariates))), x, by='person_id')
     else
       pv = x
+    
+    if(merge_within_persons)
+    {
+      pv = inner_join(pv,pp,by='person_id') |>
+        select(-'person_id') |>
+        mutate(person_id='old_person_id') 
+    }
     
   } else
   {
@@ -207,7 +225,7 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
       }
     }
   }
-  
+
   pv |>
     select(-any_of('booklet_score')) |>
     rename_with(gsub, pattern='^PV(?=\\d+$)',replacement='PS', perl=TRUE)  |>

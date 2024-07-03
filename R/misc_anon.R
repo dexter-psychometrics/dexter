@@ -4,11 +4,6 @@
 # @param setA, setB: two mutually exclusive subsets of items as indexes in first/last
 # @return         a score-by-score matrix of probabilities:
 #                 P(X^A_+=s_a, X^B_+=s_b|X_+=s) where s=s_a+s_b
-
-
-#to do: this has probably changed, does it rely on this?
-# @details        NA's indicate that a total scores was not possible given the weights
-
 # if cIM is not null, the interaction model will be used
 # cIM should be per score
 SSTable = function(b, a, first, last,setA, setB, cIM_score=NULL)

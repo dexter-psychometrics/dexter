@@ -1,28 +1,13 @@
 context('Test profile analysis')
 
 library(dplyr)
-library(DBI)
-library(RSQLite)
-
-RcppArmadillo::armadillo_throttle_cores(1)
-
-verbAggCopy = function(pth = test_path('verbAggression.db'))
-{
-  con = dbConnect(SQLite(), ":memory:")
-  db = open_project(pth)
-  
-  sqliteCopyDatabase(db, con)
-  
-  dbDisconnect(db)
-  return(con)
-}
 
 
 # to do: check for proper number of rows
 
 test_that('profile analysis verb agg',{
 
-  db = verbAggCopy()
+  db = open_project(test_path('verbAggression.db'))
   
   f = fit_enorm(db)
   p = profiles(db, f, 'behavior')
@@ -42,6 +27,17 @@ test_that('profile analysis verb agg',{
   
   # check inputs work with just parms
   pt = profile_tables(f, get_items(db),'situation')
+  
+  r = get_responses(db,columns=c('person_id','item_id','situation','item_score')) |>
+    mutate(p=dense_rank(person_id)%%2) |>
+    filter(!(situation=='Call' & p==1))
+  
+  p = profiles(r,f,'situation') |>
+    mutate(p=dense_rank(person_id)%%2) |>
+    count(p,situation)
+  
+  expect_true(n_distinct(p$n)==1 && sum(p$situation=='Call')==1 && nrow(p)==7,
+              label='profiles, unequal categories correctly handled')
   
 
   f = fit_enorm(db, method='Bayes')

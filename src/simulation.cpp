@@ -89,8 +89,6 @@ arma::imat sampleNRM_itemC(const arma::vec& theta, const arma::vec& b, const arm
 }
 
 
-// TO DO: not tested IM yet
-
 // [[Rcpp::export]]
 arma::imat sampleIMC(const arma::vec& bIM, const arma::vec& cIM, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last,
 					const arma::ivec& scoretab)

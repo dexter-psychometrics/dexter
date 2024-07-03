@@ -11,24 +11,21 @@ information(
   parms,
   items = NULL,
   booklet_id = NULL,
-  parms_draw = c("average", "sample"),
-  by_chain = FALSE
+  parms_draw = c("average", "sample")
 )
 
 expected_score(
   parms,
   items = NULL,
   booklet_id = NULL,
-  parms_draw = c("average", "sample"),
-  by_chain = FALSE
+  parms_draw = c("average", "sample")
 )
 
 r_score(
   parms,
   items = NULL,
   booklet_id = NULL,
-  parms_draw = c("average", "sample"),
-  by_chain = by_chain
+  parms_draw = c("average", "sample")
 )
 
 p_score(
@@ -49,9 +46,6 @@ depending on parametrization, a column named either beta/delta, eta or b}
 \item{parms_draw}{when the item parameters are estimated with method "Bayes" (see: \code{\link{fit_enorm}}), 
 parms_draw specifies whether to use a sample (a different item parameter draw for each output column) or the posterior mean
 of the item draws. Alternatively, it can be an integer specifying a specific draw. It is ignored when parms is not estimated Bayesianly.}
-
-\item{by_chain}{add a separate dimension to the output denoting the chains in the Bayesian simulation. Useful for advanced users 
-to check autocorrelation and mixing on substantive outcome measures. Defaults to FALSE. Ignored if parms is not estimated Bayesianly or parms_draw is an integer.}
 }
 \value{
 Each function returns a new function which accepts a vector of theta's. These return the following values: 
