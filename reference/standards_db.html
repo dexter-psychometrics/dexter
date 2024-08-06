@@ -5,7 +5,7 @@ The 3DC application can be downloaded from 3DC application download page"><!-- m
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -27,7 +27,7 @@ The 3DC application can be downloaded from 3DC application download page"><!-- m
       <ul class="nav navbar-nav"><li>
   <a href="../index.html">
     <span class="fas fa-home fa-lg"></span>
-     
+
   </a>
 </li>
 <li>
@@ -39,7 +39,7 @@ The 3DC application can be downloaded from 3DC application download page"><!-- m
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Vignettes
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
@@ -67,20 +67,20 @@ The 3DC application can be downloaded from 3DC application download page"><!-- m
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/dexter-psychometrics/dexter" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Export a standard setting database for use by the free 3DC application</h1>
-    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/R/standards.R" class="external-link"><code>R/standards.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/R/standards.R" class="external-link"><code>R/standards.R</code></a></small>
     <div class="hidden name"><code>standards_db.Rd</code></div>
     </div>
 
@@ -102,27 +102,29 @@ The 3DC application can be downloaded from <a href="https://www.cito.com/our-exp
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>par.sts</dt>
+
+
+<dl><dt id="arg-par-sts">par.sts<a class="anchor" aria-label="anchor" href="#arg-par-sts"></a></dt>
 <dd><p>an object containing parameters for the 3DC standard setting procedure produced by
 <code><a href="standards_3dc.html">standards_3dc</a></code></p></dd>
 
 
-<dt>file_name</dt>
+<dt id="arg-file-name">file_name<a class="anchor" aria-label="anchor" href="#arg-file-name"></a></dt>
 <dd><p>name of the exported database file</p></dd>
 
 
-<dt>standards</dt>
+<dt id="arg-standards">standards<a class="anchor" aria-label="anchor" href="#arg-standards"></a></dt>
 <dd><p>vector of 1 or more standards. In case there are multiple test forms and
-they should use different performance standards, a list of such vectors. 
+they should use different performance standards, a list of such vectors.
 The names of this list should correspond to the names of the testforms</p></dd>
 
 
-<dt>population</dt>
+<dt id="arg-population">population<a class="anchor" aria-label="anchor" href="#arg-population"></a></dt>
 <dd><p>optional, a data.frame with three columns: `booklet_id`,`booklet_score`,`n` (where n is a count)</p></dd>
 
 
-<dt>group_leader</dt>
-<dd><p>login name of the group leader. The login password will always be `admin` 
+<dt id="arg-group-leader">group_leader<a class="anchor" aria-label="anchor" href="#arg-group-leader"></a></dt>
+<dd><p>login name of the group leader. The login password will always be `admin`
 but can be changed in the 3DC application</p></dd>
 
 </dl></div>
@@ -139,15 +141,15 @@ but can be changed in the 3DC application</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

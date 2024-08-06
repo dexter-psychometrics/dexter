@@ -19,14 +19,13 @@
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../../pkgdown.css" rel="stylesheet">
 <script src="../../pkgdown.js"></script><link href="../../extra.css" rel="stylesheet">
 <meta property="og:title" content="Classical Test Theory with IRT">
-<meta property="og:description" content="dexter">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-article">
       <header><div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -49,7 +48,7 @@
 <li>
   <a href="../../index.html">
     <span class="fas fa-home fa-lg"></span>
-     
+
   </a>
 </li>
 <li>
@@ -61,7 +60,7 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Vignettes
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
@@ -93,7 +92,7 @@
 <li>
   <a href="https://github.com/dexter-psychometrics/dexter" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -104,7 +103,7 @@
 </div>
 <!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
@@ -115,7 +114,7 @@ and Jesse Koops</h4>
             
             <h4 data-toc-skip class="date">2022-02-04</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/vignettes/blog/2022-01-31-CTT_IRT.Rmd" class="external-link"><code>vignettes/blog/2022-01-31-CTT_IRT.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/blog/2022-01-31-CTT_IRT.Rmd" class="external-link"><code>vignettes/blog/2022-01-31-CTT_IRT.Rmd</code></a></small>
       <div class="hidden name"><code>2022-01-31-CTT_IRT.Rmd</code></div>
 
     </div>
@@ -137,18 +136,23 @@ the test score.</li>
 <code><a href="../../reference/information.html">p_score()</a></code>: The distribution of test scores given
 theta.</li>
 </ul>
-<p>where theta, i.e., <span class="math inline">\(\theta\)</span>,
+<p>where theta, i.e.,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>,
 represents student ability. The aim of this blog is to illustrate the
 use of these functions but we commence with a (very) brief overview of
 CTT.</p>
 <div class="section level2">
 <h2 id="classical-test-theory">Classical test theory<a class="anchor" aria-label="anchor" href="#classical-test-theory"></a>
 </h2>
-<p>The test score is assumed to be a discrete random variable <span class="math inline">\(X_+\)</span> where the randomness is due to
-measurement error. The expected score of a test taker with ability <span class="math inline">\(\theta\)</span>, <span class="math inline">\(\mathcal{E}[X_+|\theta]\)</span> is called the
-<em>true score</em>. It may be interpreted as the average score over
-(hypothetical) repeated testing of the same individual or as the average
-score of people with the same ability.</p>
+<p>The test score is assumed to be a discrete random variable
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mo>+</mo></msub><annotation encoding="application/x-tex">X_+</annotation></semantics></math>
+where the randomness is due to measurement error. The expected score of
+a test taker with ability
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\mathcal{E}[X_+|\theta]</annotation></semantics></math>
+is called the <em>true score</em>. It may be interpreted as the average
+score over (hypothetical) repeated testing of the same individual or as
+the average score of people with the same ability.</p>
 <p>The true score is a function of ability and, in IRT parlance, would
 be called the <strong>test characteristic function (TCF)</strong>.
 Obviously, the TCF cannot be observed but, if we assume a Rasch model,
@@ -162,19 +166,21 @@ correct answers.</p>
 <p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAbAAAAFoCAIAAAC5QTk/AAAABmJLR0QA/wD/AP+gvaeTAAAgAElEQVR4nO3deXgTZQLH8YRDBIFFheUSRJt0MZRDVzkSXDwQty1iRSiIN9aMXdEUsFxWASmLUNFmH0QSl6NKV6nHBnebimIRpRWKlat0laTdggrFluvhLKDZP2bs1rZAj3TeTPL9/LFPMw8kP2fDr/POvO+M3ufz6QAAOl0z0QEAIFBQiACgoBABQEEhAoCCQgQABYUIAAoKEQAUFCIAKChEAFBQiACgoBABQEEhAoCCQgQABYUIAAoKEQAUFCIAKChEAFBQiACgoBABQEEhAoCCQgQABYUIAAoKEQAUFCIAKChEAFBQiACgoBABQEEhAoCCQgQABYUIAAoKEQAUFCIAKChEAFBQiACgoBABQEEhAoCCQgQABYUIAAoKEQAUFCIAKChEAFBQiACgoBABQEEhAoCCQgQABYUIAAoKEQAUFCIAKChEAFBQiACgoBABQEEhAoCCQgQABYUIAAoKEQAUFCIAKChEAFC0EB2gfkpKSjIyMnw+n+ggAMRo0aKFJElt27ZtkjdvijdtOhkZGR9++OFtt90mOggAMd59990BAwbceeedTfHmKhWiJElOp7PaxtTUVJvNVt+3GjZs2Msvv+ynXAA05uuvv266N1fjHKIkSQUFBb4aCgsLJUlSIQAA1IUaR4hOp9Pj8dTcnpiYaDQaHQ6HChkA4JK4ygwACjUK0Wq1pqSk1NyekpJiNptVCAAAdaFGITocDpPJpK/BZDLl5OSoEAAA6kIfsHP6wsLCiouLa25v1qzZzz//rH4eAIFg+PDhM2fO1Pa0G71er9PpzGZzWlqa0WiUN1qt1otcUSkqKqq5cdGiRdOnT2+ikAD86NixY0eOHDl48GBZWVl5efnRX50+ffrYsWMVFRWVW44dO3b69OkzZ8689dZbDz/8sMDMahSiJEnylEO73W40Git70G63S5LEVWZAi8rLyw8cOPD9998fOHDghx9+2L9/f2lpaXl5eWX9tWvXrkOHDl26dOnUqVPHjh07dOjQoUOHXr16tWnTpn379q1atepQxeWXX966dWvR/02qDJn1er3H4zEYDNV+9nq9RqOxXgHkI8SAHeYDQebcuXMlJSVer7ekpKSkpGTfvn1y9+3fv79169bdunW75pprunbt2qNHj65du3bt2lXuvk6dOnXo0KFZsya5RBEMQ2YAge/gwYMFBQV79uzxeDzfffedx+PZt29f165dDQbDdddd16tXr+jo6J49e3bp0uWaa65p06aN6Lz+p0YhytNu5KFx1YO7zMxMq9WqQgAANZ09e3b37t3bt2/fvn37jh07CgoKfvnllz59+vTu3dtoNN56663h4eEGg6FVq1aik6pHjUJ0OBwWi8Vut1dduSyv52PaDaCaX375Zffu3Zs2bcrLy9u+fXtRUZHJZOrbt2+fPn1GjhzZp0+fbt26ic4omEpD5prFx7UUQAWnTp3asmXLpk2bvvrqq82bN3fr1u2WW24ZOHDgpEmT+vXr17JlS9EBAwvnEIFg4/P5tm/f/sknn3zyySebN2+OiIi47bbbnnnmmTVr1rRr1050uoBGIQJB4tSpU5988onb7c7MzOzYseNdd901efLkP/3pT+3btxcdTTMoREDbjh075nK5XC7X559/PmTIkFGjRiUlJfXs2VN0Lk2iEAFNOnv2rNvtTk9P/+yzz4YPHz5+/Pi0tDQOBhuJQgQ0Ztu2batWrXrnnXf69u370EMPLV++nB70FwoR0IbTp0+/8847r7/++pEjRx577LGtW7dee+21okMFGwoRCHR79+5dsmTJ6tWrLRbLggULhg8f3kSr4sBuBQLX5s2bx40bd8stt7Rq1Wrbtm3vv//+iBEjaMOmw54FAtFXX3119913jxkzZsiQIcXFxcnJyV26dBEdKvgxZAYCy9dff/3CCy98991306dP/+ijj0JqKbFwHCECgeI///nPmDFjYmJi7r///j179kiSRBuqjEIExDt06FB8fPzQoUMHDBiwZ8+euLi4Fi0YvQlAIQIinT9/funSpSaT6bLLLisqKkpKSgrK+wxqBb+FAGHy8/OtVmu7du0+++yziIgI0XHAESIgwokTJyZPnhwVFTVp0qQNGzbQhgGCQgTU9uWXX/br1++nn37atWvX448/Lj+TEoGAITOgnpMnT06ZMuXjjz92Op1333236DiojkIEVPLtt9+OHz8+PDw8Pz+/Y8eOouOgFgyZgSbn8/nsdvvtt9/+wgsvZGRk0IYBiyNEoGmdPHlSkqSdO3dmZ2ffcMMNouPgYjhCBJpQcXGx2Wxu2bLlli1baMPARyECTWXdunVDhw59+umnV65c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5Z///CdtCFwIhRjkPv7444iIiH379u3cufPxxx8XHQcIaAyZg9bevXunTp26bdu2JUuWREVFiY4DaABHiEHoyJEjL7744s033zxgwIDdu3fThkAdUYhBpaKiYvHixeHh4cXFxd98801SUtLll18uOhSgGQyZg8S5c+fefvvtefPm9evXLzs7u2/fvqITAdpDIWremTNnVqxYsWjRIpPJ9O677w4aNEh0IkCrKEQNO3r06LJly/72t7/179//3XffHTx4sOhEgLZRiJr07bffOp3O1atX33PPPevWrWOADPgFhaglp0+f/vDDD51OZ0lJifwMht///veiQwHBg0LUhs2bN69ateq9994bNGhQQkLCqFGjmjdvLjoUEGwoxIBWVFSUnp6enp7erFmzRx55ZOfOnd27dxcdCghaFGIg2rVrl8vlcrlcpaWl48aN+8c//vHHP/5RdCgg+FGIgeLMmTMbN27897//nZmZ2bJly5iYmCVLlgwaNKhZMybPAyqhEEWqqKjYsmXLhg0bPv/8823btt1yyy1RUVHr1q3jvq2AEBSi2o4cOZKXl5eXl7dx48a8vDyDwXDbbbdNmzZt2LBhbdq0EZ0OCGkUYpM7ceLErl27tm7dKvdgaWnp4MGDzWbz9OnTBw8ezLPugMBBIfrZyZMnv/32292/KiwsPHr0aL9+/QYMGDB8+PDExMSIiAhmzACBiUJsuDNnzpSUlHg8nj179lT+b1lZmdFoNJlMEREREydOvPHGG6+77jrRSQHUCYV4CadOnfrhhx8OHDjw/fffHzhw4MdflZSUHDp0qGfPngaDITw8vG/fvqNHjzYajT179uQAENCokC7EU6dOlZWVlZaWlpeXHzly5OjRo0ePHi0vLy8rK/vpp5/k+jt37lznzp27d+9+zTXXdOnSpVevXkOGDOnevXuvXr26devGnBggmKhUiJIkOZ3OahtTU1NtNltTfNyOHTu2bNly4sSJiooKuebkvquoqDh58uTx48fljc2bN+/UqVPnzp07derU4Ve9evW6+eabO3XqdMMNN3Ts2JErv0DoUKMQ5dsQ+Hy+mtslSXI4HH7/xK+//jo/P/+KK65o1arVVVddFRYWJpddq1at2rZt27Zt28qXfv9oANqlr9lT/v8Mvd7j8RgMhmrbvV6v0Wi8UICwsLDi4uKa25s3b37+/Hn/pwSgBcOHD585c+add97ZFG8euOcQi4qKam5ctGjRoUOH1A8DIBSocU3AarWmpKTU3J6SkmI2m1UIAAB1oUYhOhwOk8mkr8FkMuXk5KgQAADqQqUhs81ma6ILygDgL0yjAwAFhQgAv/JpyrJly0TvMAAitWzZcseOHU3UMGrMQww+er2G95umw+s0nl/T4XXaz39JDJkBQEEhAoCCQgQABYUIAAoKEQAUFGJDmEwm0REaTtPhdRrPr+nwOu3nv6Qgv4gOAHXHESIAKChEAFBQiACgoBABQEEhAoCCQgQABYUIAAoKEQAUFCIAKCjEhvN6vXq9XnSKepNjy7KyskTHqR+LxSInFx2k3jS92ytp9DtfdxRiw9X6sOnAZzQa3W63z+dzu91RUVFer1d0orqSJCkiIsLn81mtVkmSRMepH+3u9qo0+p2vhyZ6NEHQc7vdZrNZcztQjl350mw2y/9KNUGn03k8Hp/P5/F4tLXnNb3bK2n0O18v3NyhgSwWS1pamtFo1PQO1Ov1brc7MjJSdJBL83q9Vfe2Xq/3eDwGg0FsqobR0G6vKji+8xfHkLkh7HZ7bGys6BSNZbfbzWaz5v5Zap1Gd3twfOcvqYXoAJqUkZGRk5Oj0dNAMrvdnpCQEMS/6gOTdnd7EHzn64IjxDqx2+3y9UFJkiRJSkpKEp2oHqqGr9ySkJAgn4mDarS72zX3nW84kScwtanmPtTWCfLU1FSN/v+u0+xFFZ+Wd7tP+9/5uuOiSsNVO82vCXJmjV6OkI9wHQ5H5Q+iE9WVpnd7VVr8ztcL5xBDizyPzGg0Vm7R0OVOh8Oh1+udTqdOp9PWv0lN7/aQwhEiACi4qAIACgoRABQUIgAoKEQAUFCIAKCgEAFAQSECgIJCBAAFhQgACgoRABQUIgAoKEQAUFCIAKCgEAFAQSECgIJCBAAFhQgACgoRABQUIgKRxWLJysqqusXr9er1+lp/APyFQoQ2GAyGas//qdxCM8JfKEQAUFCIECwrK0v/K/mByzKXyyVvtNvtutoOAyu3yI/31Ov1Xq9XkqSqb2K326u+BC6OQoRgUVFRbrfb5/O53W6n0+n1euXtBQUFPp/P5/MlJCRUO59Yjcfj0el0Pp/PYDAkJibKD26WZWRkxMTENGl+BBMKEYL5fD75ke3VHtyelJQk/2C1Wl0uVx3fzWAwmM1muUC9Xm9ubi7Pg0fdUYgQTB75ymr9AyaTqV5vGBsbKxdoZmZmamqqHyIiZFCIEMnr9RqNRo/HI4+Oa/0zhYWF9epEm80mj5ozMjKio6P9ExShgUKESPLpP4PBoNPpql39SE5O1ul0Xq/X6XSGh4df8q0qTz7qdDqr1SpfipHfGagjChEiRUZGms1mebxsMpnMZrNckTqdLiIiQq/XG0jIKpcAAACHSURBVI3G1NTUi58HlM8bGo3GymsvMTExCQkJlWchgTrSX2icAmiXPBLnu4364ggRQSgzM9NqtYpOAe1pIToA4E/ysaFOp+PwEA3AkBkAFAyZAUBBIQKAgkIEAAWFCAAKChEAFBQiACgoRABQUIgAoKAQAUBBIQKAgkIEAAWFCAAKChEAFP8DcirS+dBx8lMAAAAASUVORK5CYII=" title="plot of chunk unnamed-chunk-1" alt="plot of chunk unnamed-chunk-1" style="display: block; margin: auto;"></p>
 <p>The observed scores vary around their average due to
 <strong>measurement error</strong>, formally defined as deviations
-around the true score; <span class="math inline">\(x_+ -
-\mathcal{E}[X_+|\theta]\)</span>. As we can always write <span class="math inline">\(x_+ = \mathcal{E}[X_+|\theta] + \left(x_+ -
-\mathcal{E}[X_+|\theta]\right)\)</span>, we arrive at the famous
-equation: <span class="math display">\[
+around the true score;
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mo>+</mo></msub><mo>−</mo><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">x_+ - \mathcal{E}[X_+|\theta]</annotation></semantics></math>.
+As we can always write
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mo>+</mo></msub><mo>=</mo><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>x</mi><mo>+</mo></msub><mo>−</mo><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">x_+ = \mathcal{E}[X_+|\theta] + \left(x_+ - \mathcal{E}[X_+|\theta]\right)</annotation></semantics></math>,
+we arrive at the famous equation:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">observed score</mtext><mo>=</mo><mtext mathvariant="normal">true score</mtext><mo>+</mo><mtext mathvariant="normal">measurement error</mtext></mrow><annotation encoding="application/x-tex">
 \text{observed score} = \text{true score} + \text{measurement error}
-\]</span> which is merely a tautology, equivalent to a random-effects
-ANOVA model.</p>
+</annotation></semantics></math> which is merely a tautology, equivalent
+to a random-effects ANOVA model.</p>
 <p>The amount of measurement error at a given level of ability is
-captured by the <strong>conditional error variance (CEV)</strong>: <span class="math display">\[\begin{equation}
-Var(X_+|\theta)=\mathcal{E}[\left(X_+ - \mathcal{E}[X_+|\theta]
-\right)^2|\theta]
-\end{equation}\]</span> Like the true score, the CEV is a function of
-ability. Here is a plot.</p>
+captured by the <strong>conditional error variance (CEV)</strong>:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mi>a</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mo>+</mo></msub><mo>−</mo><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\begin{equation}
+Var(X_+|\theta)=\mathcal{E}[\left(X_+ - \mathcal{E}[X_+|\theta] \right)^2|\theta]
+\end{equation}</annotation></semantics></math> Like the true score, the
+CEV is a function of ability. Here is a plot.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">Cond.error.variance</span> <span class="op">=</span> <span class="fu"><a href="../../reference/information.html">information</a></span><span class="op">(</span><span class="va">parms</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/curve.html" class="external-link">curve</a></span><span class="op">(</span><span class="va">Cond.error.variance</span>, from<span class="op">=</span><span class="op">-</span><span class="fl">5</span>,to<span class="op">=</span><span class="fl">5</span>, col<span class="op">=</span><span class="st">"blue"</span>, xlab<span class="op">=</span><span class="st">"ability"</span><span class="op">)</span></span></code></pre></div>
@@ -187,40 +193,42 @@ in a future blog where we explain the difference between estimating a
 true score or an ability.</p>
 <p>What happens in a population of test-takers? Using the <a href="https://en.wikipedia.org/wiki/Law_of_total_expectation" class="external-link">law of
 total expectation</a>, we find that, in a population of test-takers, the
-average of the true scores <span class="math inline">\(\mathcal{E}[\mathcal{E}[X_+|\theta]] =
-\mathcal{E}[X_+]\)</span> is just the average of the scores, as
-measurement errors average to zero. The variance of the test score is
-the sum of true score variance and error variance. Specifically, from
-the <a href="https://en.wikipedia.org/wiki/Law_of_total_variance" class="external-link">law of
-total variance</a> it follows that: <span class="math display">\[
+average of the true scores
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mo>=</mo><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\mathcal{E}[\mathcal{E}[X_+|\theta]] = \mathcal{E}[X_+]</annotation></semantics></math>
+is just the average of the scores, as measurement errors average to
+zero. The variance of the test score is the sum of true score variance
+and error variance. Specifically, from the <a href="https://en.wikipedia.org/wiki/Law_of_total_variance" class="external-link">law of total
+variance</a> it follows that:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mi>a</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>V</mi><mi>a</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>V</mi><mi>a</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
 Var(X_+)=Var(\mathcal{E}[X_+|\theta])+\mathcal{E}[Var(X_+|\theta)]
-\]</span> where <span class="math inline">\(Var(\mathcal{E}[X_+|\theta])\)</span> is the
-true-score variance and <span class="math display">\[\begin{align*}
-\mathcal{E}[Var(X_+|\theta)] &amp; \equiv
-\mathcal{E}(\mathcal{E}[(X_+-\mathcal{E}[X_+|\theta])^{2}|\theta])  \\
-&amp;=\mathcal{E}[(X_+-\mathcal{E}[X_+|\theta])^{2}]
-\end{align*}\]</span> is indeed the variance of the measurement errors,
-sometimes called <strong>the average error variance</strong>. In the
-population of test takers, measurement errors and true scores are
-uncorrelated but not necessarily independent. For one thing, we expect
-measurement error to be smaller for test takers whose true scores lie on
-the upper or lower end of the score range.</p>
+</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mi>a</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Var(\mathcal{E}[X_+|\theta])</annotation></semantics></math>
+is the true-score variance and
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>V</mi><mi>a</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mtd><mtd columnalign="left" style="text-align: left"><mo>≡</mo><mi>ℰ</mi><mo stretchy="false" form="prefix">(</mo><mi>ℰ</mi><mo stretchy="false" form="prefix">[</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mo>+</mo></msub><mo>−</mo><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>X</mi><mo>+</mo></msub><mrow><mo stretchy="true" form="prefix">|</mo><mi>θ</mi><mo stretchy="false" form="postfix">]</mo><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mo stretchy="true" form="postfix">|</mo></mrow><mi>θ</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mo>+</mo></msub><mo>−</mo><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mo stretchy="true" form="postfix">]</mo></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+ \mathcal{E}[Var(X_+|\theta)] &amp; \equiv \mathcal{E}(\mathcal{E}[(X_+-\mathcal{E}[X_+|\theta])^{2}|\theta])  \\
+ &amp;=\mathcal{E}[(X_+-\mathcal{E}[X_+|\theta])^{2}]
+\end{align*}</annotation></semantics></math> is indeed the variance of
+the measurement errors, sometimes called <strong>the average error
+variance</strong>. In the population of test takers, measurement errors
+and true scores are uncorrelated but not necessarily independent. For
+one thing, we expect measurement error to be smaller for test takers
+whose true scores lie on the upper or lower end of the score range.</p>
 <p>Last, but not least, the proportion true-score variance in the
-population is the <strong>reliability</strong>. That is, <span class="math display">\[
+population is the <strong>reliability</strong>. That is,
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>rel</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>≡</mo><mfrac><mrow><mo>Var</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mo>Var</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mo>=</mo><mn>1</mn><mo>−</mo><mfrac><mrow><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><mo>Var</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow><mrow><mo>Var</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><mi>V</mi><mi>a</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">
 \operatorname{rel}(X_+)  
   \equiv\frac{\operatorname{Var}(\mathcal{E}[X_+|\theta])}{\operatorname{Var}(X_+)}
 =1-\frac{\mathcal{E}[\operatorname{Var}(X_+|\theta)]}{\operatorname{Var}(\mathcal{E}[X_+|\theta])+\mathcal{E
 }[Var(X_+|\theta)]}
-\]</span> defined if <span class="math inline">\(\operatorname{Var}(X_+)&gt;0\)</span>. Note that,
-since <span class="math inline">\(Var(X_+) \geq
-Var(\mathcal{E}[X_+|\theta])\)</span>, <span class="math inline">\(0\leq
-\operatorname{rel}(X_+)\leq 1\)</span>. Reliability is the correlation
-between two administrations of the same test to samples from the same
-population (see <span class="citation">Bechger et al. (2003)</span>) and
-is widely used as a measure of consistency and an index for test
-quality. In the parlance of ANOVA it would be called the intra-class
-correlation (see <span class="citation">Snijders and Bosker
-(2011)</span>, 3.5).</p>
+</annotation></semantics></math> defined if
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>Var</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\operatorname{Var}(X_+)&gt;0</annotation></semantics></math>.
+Note that, since
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mi>a</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>≥</mo><mi>V</mi><mi>a</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>ℰ</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Var(X_+) \geq Var(\mathcal{E}[X_+|\theta])</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>≤</mo><mo>rel</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mo>+</mo></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>≤</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">0\leq \operatorname{rel}(X_+)\leq 1</annotation></semantics></math>.
+Reliability is the correlation between two administrations of the same
+test to samples from the same population (see <span class="citation">Bechger et al. (2003)</span>) and is widely used as a
+measure of consistency and an index for test quality. In the parlance of
+ANOVA it would be called the intra-class correlation (see <span class="citation">Snijders and Bosker (2011)</span>, 3.5).</p>
 </div>
 <div class="section level2">
 <h2 id="numerical-integration">Numerical Integration<a class="anchor" aria-label="anchor" href="#numerical-integration"></a>
@@ -262,19 +270,22 @@ just the expected information, in this case equal to
 <h2 id="the-consistency-of-classifications">The Consistency of Classifications<a class="anchor" aria-label="anchor" href="#the-consistency-of-classifications"></a>
 </h2>
 <p>Now for something new. Consider an exam that students fail if their
-test score is below a pass-fail score <span class="math inline">\(c\)</span>, and pass otherwise. Let us consider
-the probability that a person with the same ability obtains the same
-result over two exchangeable replications. Let <span class="math inline">\(I=(X_+\geq c)\)</span> be an indicator of passing.
-Then, the probability of a consistent outcome over two exchangeable
-replications of the exam is: <span class="math display">\[\begin{align*}
-p(\text{Consistent}|\theta) &amp;= p(I=1,I^*=1|\theta) +
-p(I=0,I^*=0|\theta) \\
-&amp;=\left(\sum_{s\geq c} p(X_+ =s|\theta)\right)^2 + \left(\sum_{s&lt;
-c} p(X_+ =s|\theta)\right)^2
-\end{align*}\]</span> In our 2003 article, we have called this the
-<strong>test-characteristic decision function</strong>. Here is how to
-compute this function using dexter’s function <strong>p_score</strong>,
-which calculates the test score distribution given ability.</p>
+test score is below a pass-fail score
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>c</mi><annotation encoding="application/x-tex">c</annotation></semantics></math>,
+and pass otherwise. Let us consider the probability that a person with
+the same ability obtains the same result over two exchangeable
+replications. Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>I</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">I=(X_+\geq c)</annotation></semantics></math>
+be an indicator of passing. Then, the probability of a consistent
+outcome over two exchangeable replications of the exam is:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>p</mi><mrow><mo stretchy="true" form="prefix">(</mo><mtext mathvariant="normal">Consistent</mtext><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mi>p</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>I</mi><mo>=</mo><mn>1</mn><mo>,</mo><msup><mi>I</mi><mo>*</mo></msup><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>p</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>I</mi><mo>=</mo><mn>0</mn><mo>,</mo><msup><mi>I</mi><mo>*</mo></msup><mo>=</mo><mn>0</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><munder><mo>∑</mo><mrow><mi>s</mi><mo>≥</mo><mi>c</mi></mrow></munder><mi>p</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mo>+</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><munder><mo>∑</mo><mrow><mi>s</mi><mo>&lt;</mo><mi>c</mi></mrow></munder><mi>p</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+p(\text{Consistent}|\theta) &amp;= p(I=1,I^*=1|\theta) + p(I=0,I^*=0|\theta) \\
+&amp;=\left(\sum_{s\geq c} p(X_+ =s|\theta)\right)^2 + \left(\sum_{s&lt; c} p(X_+ =s|\theta)\right)^2
+\end{align*}</annotation></semantics></math> In our 2003 article, we
+have called this the <strong>test-characteristic decision
+function</strong>. Here is how to compute this function using dexter’s
+function <strong>p_score</strong>, which calculates the test score
+distribution given ability.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">TCDF</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">parms</span>, <span class="va">c</span><span class="op">)</span></span>
 <span><span class="op">{</span></span>
@@ -334,9 +345,7 @@ Introduction to Basic and Advanced Multilevel Modeling</em>. sage.
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
-        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
-    </nav>
-</div>
+      </div>
 
 </div>
 
@@ -349,16 +358,16 @@ Introduction to Basic and Advanced Multilevel Modeling</em>. sage.
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer>
 </div>
 
-  
 
 
-  
+
+
 
   </body>
 </html>

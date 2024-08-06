@@ -19,14 +19,13 @@
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <meta property="og:title" content="Plausible Values in Dexter">
-<meta property="og:description" content="dexter">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-article">
       <header><div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -49,7 +48,7 @@
 <li>
   <a href="../index.html">
     <span class="fas fa-home fa-lg"></span>
-     
+
   </a>
 </li>
 <li>
@@ -61,7 +60,7 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Vignettes
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
@@ -93,7 +92,7 @@
 <li>
   <a href="https://github.com/dexter-psychometrics/dexter" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -104,7 +103,7 @@
 </div>
 <!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
@@ -113,9 +112,9 @@
                         <h4 data-toc-skip class="author">Timo Bechger,
 Jesse Koops and Ivailo Partchev</h4>
             
-            <h4 data-toc-skip class="date">2024-07-03</h4>
+            <h4 data-toc-skip class="date">2024-08-06</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/vignettes/Plausible_Values.Rmd" class="external-link"><code>vignettes/Plausible_Values.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/Plausible_Values.Rmd" class="external-link"><code>vignettes/Plausible_Values.Rmd</code></a></small>
       <div class="hidden name"><code>Plausible_Values.Rmd</code></div>
 
     </div>
@@ -140,18 +139,14 @@ we repeat this until we hit an ability that produces the same expected
 test score as the one observed for the person. This becomes the
 plausible value for the person.</p>
 <p>In the simple case where the test consists of e.g. 20 dichotomous
-Rasch items with difficulty <span class="math inline">\(\delta\)</span>,
-the following algorithm would produce one plausible value <span class="math inline">\(\theta\)</span> for a respondent with a test score
-<span class="math inline">\(x_+=10\)</span>.</p>
+Rasch items with difficulty
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>δ</mi><annotation encoding="application/x-tex">\delta</annotation></semantics></math>,
+the following algorithm would produce one plausible value
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>
+for a respondent with a test score
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mo>+</mo></msub><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">x_+=10</annotation></semantics></math>.</p>
 <p style="background-color:#f7f7f7;line-height:1.5;padding:1em;">
-<span class="math inline">\(y_+:=-1\)</span><br><span class="math inline">\(\mathbf{while}\ x_+ \neq y_+\
-\mathbf{do}:\)</span><br><span class="math inline">\(\quad
-y_+:=0\)</span><br><span class="math inline">\(\quad \mathbf{draw}\
-\theta \sim \mathcal{N}(0,1)\)</span><br><span class="math inline">\(\quad \mathbf{for}\ i \ \mathbf{in}\
-1:length(\mathbf{\delta}):\)</span><br><span class="math inline">\(\qquad \mathbf{draw}\ u \sim
-logistic(0,1)\)</span><br><span class="math inline">\(\qquad
-\mathbf{if}\ u \le \theta-\delta_i:\)</span><br><span class="math inline">\(\qquad \quad y_+ := y_+ + 1\)</span>
-</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mo>+</mo></msub><mo>:=</mo><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">y_+:=-1</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi>𝐰</mi><mi>𝐡</mi><mi>𝐢</mi><mi>𝐥</mi><mi>𝐞</mi></mrow><mspace width="0.222em"></mspace><msub><mi>x</mi><mo>+</mo></msub><mo>≠</mo><msub><mi>y</mi><mo>+</mo></msub><mspace width="0.222em"></mspace><mrow><mi>𝐝</mi><mi>𝐨</mi></mrow><mo>:</mo></mrow><annotation encoding="application/x-tex">\mathbf{while}\ x_+ \neq y_+\ \mathbf{do}:</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="1.0em"></mspace><msub><mi>y</mi><mo>+</mo></msub><mo>:=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\quad y_+:=0</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="1.0em"></mspace><mrow><mi>𝐝</mi><mi>𝐫</mi><mi>𝐚</mi><mi>𝐰</mi></mrow><mspace width="0.222em"></mspace><mi>θ</mi><mo>∼</mo><mi>𝒩</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\quad \mathbf{draw}\ \theta \sim \mathcal{N}(0,1)</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="1.0em"></mspace><mrow><mi>𝐟</mi><mi>𝐨</mi><mi>𝐫</mi></mrow><mspace width="0.222em"></mspace><mi>i</mi><mspace width="0.222em"></mspace><mrow><mi>𝐢</mi><mi>𝐧</mi></mrow><mspace width="0.222em"></mspace><mn>1</mn><mo>:</mo><mi>l</mi><mi>e</mi><mi>n</mi><mi>g</mi><mi>t</mi><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝛅</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>:</mo></mrow><annotation encoding="application/x-tex">\quad \mathbf{for}\ i \ \mathbf{in}\ 1:length(\mathbf{\delta}):</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="2.0em"></mspace><mrow><mi>𝐝</mi><mi>𝐫</mi><mi>𝐚</mi><mi>𝐰</mi></mrow><mspace width="0.222em"></mspace><mi>u</mi><mo>∼</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>i</mi><mi>s</mi><mi>t</mi><mi>i</mi><mi>c</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\qquad \mathbf{draw}\ u \sim logistic(0,1)</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="2.0em"></mspace><mrow><mi>𝐢</mi><mi>𝐟</mi></mrow><mspace width="0.222em"></mspace><mi>u</mi><mo>≤</mo><mi>θ</mi><mo>−</mo><msub><mi>δ</mi><mi>i</mi></msub><mo>:</mo></mrow><annotation encoding="application/x-tex">\qquad \mathbf{if}\ u \le \theta-\delta_i:</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="2.0em"></mspace><mspace width="1.0em"></mspace><msub><mi>y</mi><mo>+</mo></msub><mo>:=</mo><msub><mi>y</mi><mo>+</mo></msub><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\qquad \quad y_+ := y_+ + 1</annotation></semantics></math></p>
 <p>The algorithm used by dexter is equivalent to the above in the
 dichotomous case but it can handle polytomous items as well. The
 user-level function is called <code>plausible_values</code>, and takes
@@ -361,16 +356,16 @@ Annals of Statistics</em> 12 (4): 1151–72.
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer>
 </div>
 
-  
 
 
-  
+
+
 
   </body>
 </html>

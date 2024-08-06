@@ -3,7 +3,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -25,7 +25,7 @@
       <ul class="nav navbar-nav"><li>
   <a href="../index.html">
     <span class="fas fa-home fa-lg"></span>
-     
+
   </a>
 </li>
 <li>
@@ -37,7 +37,7 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Vignettes
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
@@ -65,20 +65,20 @@
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/dexter-psychometrics/dexter" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Selecting data</h1>
-    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/R/data_selection.R" class="external-link"><code>R/data_selection.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/R/data_selection.R" class="external-link"><code>R/data_selection.R</code></a></small>
     <div class="hidden name"><code>get_responses.Rd</code></div>
     </div>
 
@@ -96,38 +96,38 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>dataSrc</dt>
+
+
+<dl><dt id="arg-datasrc">dataSrc<a class="anchor" aria-label="anchor" href="#arg-datasrc"></a></dt>
 <dd><p>a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score</p></dd>
 
 
-<dt>predicate</dt>
+<dt id="arg-predicate">predicate<a class="anchor" aria-label="anchor" href="#arg-predicate"></a></dt>
 <dd><p>an expression to select data on</p></dd>
 
 
-<dt>columns</dt>
+<dt id="arg-columns">columns<a class="anchor" aria-label="anchor" href="#arg-columns"></a></dt>
 <dd><p>the columns you wish to select, can include any column in the project, see: <code><a href="get_variables.html">get_variables</a></code></p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>a data.frame of responses</p>
+    <p>a data.frame of responses</p>
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>Many functions in Dexter accept a data source and a predicate. Predicates are extremely flexible 
+    <p>Many functions in Dexter accept a data source and a predicate. Predicates are extremely flexible
 but they have a few limitations because they work on the individual response level. It is therefore not possible
-for example, to remove complete person cases from an analysis based on responses to a single item 
+for example, to remove complete person cases from an analysis based on responses to a single item
 by using just a predicate expression.</p>
-<p>For such cases, Dexter supports selecting the data and manipulating it before passing it back to a Dexter function 
+<p>For such cases, Dexter supports selecting the data and manipulating it before passing it back to a Dexter function
 or possibly doing something else with it. The following example will hopefully clarify this.</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co"># goal: fit the extended nominal response model using only persons </span></span></span>
 <span class="r-in"><span><span class="co"># without any missing responses</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
@@ -146,7 +146,7 @@ or possibly doing something else with it. The following example will hopefully c
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">correct</span> <span class="op">=</span> <span class="fu"><a href="fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="op">}</span><span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }# }</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -161,15 +161,15 @@ or possibly doing something else with it. The following example will hopefully c
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

@@ -3,7 +3,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -25,7 +25,7 @@
       <ul class="nav navbar-nav"><li>
   <a href="../index.html">
     <span class="fas fa-home fa-lg"></span>
-     
+
   </a>
 </li>
 <li>
@@ -37,7 +37,7 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Vignettes
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
@@ -65,20 +65,20 @@
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/dexter-psychometrics/dexter" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Estimate the Interaction and the Rasch model</h1>
-    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/R/interaction_model.R" class="external-link"><code>R/interaction_model.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/R/interaction_model.R" class="external-link"><code>R/interaction_model.R</code></a></small>
     <div class="hidden name"><code>fit_inter.Rd</code></div>
     </div>
 
@@ -92,26 +92,26 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>dataSrc</dt>
+
+
+<dl><dt id="arg-datasrc">dataSrc<a class="anchor" aria-label="anchor" href="#arg-datasrc"></a></dt>
 <dd><p>a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score</p></dd>
 
 
-<dt>predicate</dt>
+<dt id="arg-predicate">predicate<a class="anchor" aria-label="anchor" href="#arg-predicate"></a></dt>
 <dd><p>An optional expression to subset data, if NULL all data is used</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>An object of class <code>rim</code> holding results
+    <p>An object of class <code>rim</code> holding results
 for the Rasch model and the interaction model.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
     <p>Unlike the Rasch model, the interaction model cannot be computed
 concurrently for a whole design of test forms. This function therefore fits the
-Rasch model and the interaction model on complete data. 
+Rasch model and the interaction model on complete data.
 This typically consist of responses to items in one booklet but can also consist of
 the intersection (common items) in two or more booklets. If the intersection is empty
 (no common items for all persons), the function will exit with an error message.</p>
@@ -124,7 +124,6 @@ the intersection (common items) in two or more booklets. If the intersection is 
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span> <span class="fu">RcppArmadillo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RcppArmadillo/man/armadillo_throttle_cores.html" class="external-link">armadillo_throttle_cores</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="st">":memory:"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="add_booklet.html">add_booklet</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrData</span>, <span class="st">"agg"</span><span class="op">)</span></span></span>
@@ -149,7 +148,6 @@ the intersection (common items) in two or more booklets. If the intersection is 
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="close_project.html">close_project</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span> <span class="fu">RcppArmadillo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RcppArmadillo/man/armadillo_throttle_cores.html" class="external-link">armadillo_reset_cores</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
@@ -165,15 +163,15 @@ the intersection (common items) in two or more booklets. If the intersection is 
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

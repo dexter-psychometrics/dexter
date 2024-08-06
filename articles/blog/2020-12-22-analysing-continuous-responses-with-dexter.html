@@ -19,14 +19,13 @@
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../../pkgdown.css" rel="stylesheet">
 <script src="../../pkgdown.js"></script><link href="../../extra.css" rel="stylesheet">
 <meta property="og:title" content="Analyzing continuous responses with dexter">
-<meta property="og:description" content="dexter">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-article">
       <header><div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -49,7 +48,7 @@
 <li>
   <a href="../../index.html">
     <span class="fas fa-home fa-lg"></span>
-     
+
   </a>
 </li>
 <li>
@@ -61,7 +60,7 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Vignettes
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
@@ -93,7 +92,7 @@
 <li>
   <a href="https://github.com/dexter-psychometrics/dexter" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -104,7 +103,7 @@
 </div>
 <!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
@@ -115,7 +114,7 @@ and Ivailo Partchev</h4>
             
             <h4 data-toc-skip class="date">2020-12-22</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/vignettes/blog/2020-12-22-analysing-continuous-responses-with-dexter.Rmd" class="external-link"><code>vignettes/blog/2020-12-22-analysing-continuous-responses-with-dexter.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/blog/2020-12-22-analysing-continuous-responses-with-dexter.Rmd" class="external-link"><code>vignettes/blog/2020-12-22-analysing-continuous-responses-with-dexter.Rmd</code></a></small>
       <div class="hidden name"><code>2020-12-22-analysing-continuous-responses-with-dexter.Rmd</code></div>
 
     </div>
@@ -153,31 +152,41 @@ to responses that can be considered as continuous.</p>
 <p>The Rasch model for continuous responses must have been proposed many
 times in more or less obvious forms. As represented, for example, in
 <span class="citation">Verhelst (2019)</span>:</p>
-<p><span class="math display">\[
-f(x_i|\theta)
-=\frac{\exp(x_i[\theta-\delta_i])}{\int^1_0 \exp(s(\theta-\delta_i)) ds}
-\]</span></p>
-<p>where <span class="math inline">\(x_i\)</span> is the (continuous)
-response to item <span class="math inline">\(i\)</span>, <span class="math inline">\(\theta\)</span> is the latent ability, and <span class="math inline">\(\delta_i\)</span> is an item difficulty parameter.
-The similarity with the conventional Rasch model is obvious, except that
-we are now predicting a density rather than a probability. The
-assumption of local independence plays just as important a role, i.e.,
-we can multiply over items to get at the likelihood for the entire
-response pattern. The integral in the denominator has a closed form:</p>
-<p><span class="math display">\[\begin{equation*}
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>x</mi><mi>i</mi></msub><mrow><mo stretchy="true" form="prefix">[</mo><mi>θ</mi><mo>−</mo><msub><mi>δ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><msubsup><mo>∫</mo><mn>0</mn><mn>1</mn></msubsup><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>s</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo>−</mo><msub><mi>δ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mi>d</mi><mi>s</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+f(x_i|\theta) 
+=\frac{\exp(x_i[\theta-\delta_i])}{\int^1_0 \exp(s(\theta-\delta_i)) ds} 
+</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mi>i</mi></msub><annotation encoding="application/x-tex">x_i</annotation></semantics></math>
+is the (continuous) response to item
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>
+is the latent ability, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\delta_i</annotation></semantics></math>
+is an item difficulty parameter. The similarity with the conventional
+Rasch model is obvious, except that we are now predicting a density
+rather than a probability. The assumption of local independence plays
+just as important a role, i.e., we can multiply over items to get at the
+likelihood for the entire response pattern. The integral in the
+denominator has a closed form:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mo>∫</mo><mn>0</mn><mn>1</mn></msubsup><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>s</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo>−</mo><msub><mi>δ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mi>d</mi><mi>s</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mfrac><mrow><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo>−</mo><msub><mi>δ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mn>1</mn></mrow><mrow><mi>θ</mi><mo>−</mo><msub><mi>δ</mi><mi>i</mi></msub></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mrow><mi>θ</mi><mo>≠</mo><msub><mi>δ</mi><mi>i</mi></msub></mrow></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mn>1</mn></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mrow><mi>θ</mi><mo>=</mo><msub><mi>δ</mi><mi>i</mi></msub></mrow></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">\begin{equation*}
 \int^1_0 \exp(s(\theta-\delta_i)) ds
-=
+= 
 \begin{cases}
-\frac{\exp(\theta-\delta_i)-1}{\theta-\delta_i} &amp; \text{if $\theta
-\neq \delta_i$} \\
+\frac{\exp(\theta-\delta_i)-1}{\theta-\delta_i} &amp; \text{if $\theta \neq \delta_i$} \\
 1 &amp; \text{if $\theta = \delta_i$}
 \end{cases}
-\end{equation*}\]</span></p>
+\end{equation*}</annotation></semantics></math></p>
 <p>The model – we shall call it henceforth the continuous Rasch model,
 or CRM – is an exponential family model; like the Rasch model, it has
 the property that the person and item sum scores are sufficient
-statistics for the model parameters: the student ability, <span class="math inline">\(\theta\)</span>, and the item difficulty, <span class="math inline">\(\delta_i\)</span>. Models discussed in <span class="citation">Maris and Maas (2012)</span> and <span class="citation">Deonovic et al. (2020)</span> can be shown to have the
-same structure.</p>
+statistics for the model parameters: the student ability,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>,
+and the item difficulty,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\delta_i</annotation></semantics></math>.
+Models discussed in <span class="citation">Maris and Maas (2012)</span>
+and <span class="citation">Deonovic et al. (2020)</span> can be shown to
+have the same structure.</p>
 <p>In this blog, we capitalize on new insights in <span class="citation">Deonovic et al. (2020)</span> and <span class="citation">Maris (2020)</span> to demonstrate how the CRM can be
 used for any type of continuous responses. We show how to plot the
 density, the probability function, and the expectation under the CRM,
@@ -211,7 +220,8 @@ future).</p>
 <span>  <span class="va">dm</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">dm</span><span class="op">)</span><span class="op">]</span> <span class="op">=</span> <span class="fl">0.5</span></span>
 <span>  <span class="va">dm</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>The following graph shows them for various choices of <span class="math inline">\(\eta_i=\theta-\delta_i\)</span>:</p>
+<p>The following graph shows them for various choices of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>η</mi><mi>i</mi></msub><mo>=</mo><mi>θ</mi><mo>−</mo><msub><mi>δ</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\eta_i=\theta-\delta_i</annotation></semantics></math>:</p>
 <p><img src="data:image/png;base64,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"></p>
 <p>Note that the expected score is monotone increasing in student
 ability, as it should be.</p>
@@ -221,21 +231,24 @@ ability, as it should be.</p>
 </h2>
 <p>Simulated data conforming to the CRM can be generated by inversion
 sampling. Specifically,</p>
-<p><span class="math display">\[
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>≤</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mfrac><mrow><msup><mi>e</mi><mrow><mi>x</mi><msub><mi>η</mi><mi>i</mi></msub></mrow></msup><mo>−</mo><mn>1</mn></mrow><mrow><msup><mi>e</mi><msub><mi>η</mi><mi>i</mi></msub></msup><mo>−</mo><mn>1</mn></mrow></mfrac></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mrow><msub><mi>η</mi><mi>i</mi></msub><mo>≠</mo><mn>0</mn></mrow></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mi>x</mi></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mrow><msub><mi>η</mi><mi>i</mi></msub><mo>≠</mo><mn>0</mn></mrow></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">
 P(x_i \leq x) = \begin{cases}
 \frac{e^{x\eta_i}-1}{e^{\eta_i}-1} &amp; \text{if $\eta_i \neq 0$}\\
 x &amp; \text{if $\eta_i \neq 0$}
 \end{cases}
-\]</span> where <span class="math inline">\(x \in [0,1]\)</span>. This
-means that if we sample <span class="math inline">\(u\)</span> from a
-uniform distribution, <span class="math display">\[
-u^* =
+</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>∈</mo><mrow><mo stretchy="true" form="prefix">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">x \in [0,1]</annotation></semantics></math>.
+This means that if we sample
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+from a uniform distribution,
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>u</mi><mo>*</mo></msup><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mfrac><mn>1</mn><mi>η</mi></mfrac><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>e</mi><mi>η</mi></msup><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mrow><mi>η</mi><mo>≠</mo><mn>0</mn></mrow></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mi>u</mi></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mrow><mi>η</mi><mo>≠</mo><mn>0</mn></mrow></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">
+u^* = 
 \begin{cases}
-\frac{1}{\eta} \log\left(u(e^\eta - 1) + 1\right) &amp; \text{if $\eta
-\neq 0$}\\
+\frac{1}{\eta} \log\left(u(e^\eta - 1) + 1\right) &amp; \text{if $\eta \neq 0$}\\
 u &amp; \text{if $\eta \neq 0$}
 \end{cases}
-\]</span> is an item response sampled from the CRM.</p>
+</annotation></semantics></math> is an item response sampled from the
+CRM.</p>
 <p>Sampling from the CRM can be thus done with a single line of
 code:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -263,37 +276,50 @@ persons answering to 100 items.</p>
 <p>At the time of writing, <strong>dexter</strong> has no provision to
 deal with continuous responses. Instead, we use the suggestion by <span class="citation">Deonovic et al. (2020)</span> to analyze binary
 responses derived from the continuous ones. How does this work?</p>
-<p>With <span class="math inline">\(x_i\)</span> an observed continuous
-response, define two new variables:</p>
-<p><span class="math display">\[
+<p>With
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mi>i</mi></msub><annotation encoding="application/x-tex">x_i</annotation></semantics></math>
+an observed continuous response, define two new variables:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>y</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>&gt;</mo><mn>0.5</mn><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>x</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><mn>0.5</mn></mtd><mtd columnalign="left" style="text-align: left"><mrow><mspace width="0.333em"></mspace><mtext mathvariant="normal"> if </mtext><mspace width="0.333em"></mspace></mrow><msub><mi>y</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><mo>=</mo><mn>1</mn></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><msub><mi>x</mi><mi>i</mi></msub></mtd><mtd columnalign="left" style="text-align: left"><mrow><mspace width="0.333em"></mspace><mtext mathvariant="normal"> if </mtext><mspace width="0.333em"></mspace></mrow><msub><mi>y</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><mo>=</mo><mn>0</mn></mtd></mtr></mtable></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{align}
-y_{i1}&amp;=(x_i&gt;0.5)  \\
-x_{i1}&amp;=
-\begin{cases}
+ y_{i1}&amp;=(x_i&gt;0.5)  \\
+ x_{i1}&amp;=
+ \begin{cases}
   x_i-0.5 &amp; \text{ if } y_{i1}=1 \\
   x_i &amp; \text{ if } y_{i1}=0
-\end{cases}
+ \end{cases} 
 \end{align}
-\]</span></p>
+</annotation></semantics></math></p>
 <p>These are conditionally independent sources of information on ability
 from which the original observations can be reconstructed; that is,
-given <span class="math inline">\(\theta\)</span>, <span class="math inline">\(Y_{i1}\)</span> is independent of <span class="math inline">\(X_{i1}\)</span>. Moreover, it is easy to show that
-the implied measurement model for <span class="math inline">\(Y_{i1}\)</span> is the Rasch model:</p>
-<p><span class="math display">\[
-p(Y_{i1}=1|\theta)=p(X_i&gt;0.5|\theta)
-=
-\frac{\exp(0.5(\theta-\delta_i))}
+given
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Y</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><annotation encoding="application/x-tex">Y_{i1}</annotation></semantics></math>
+is independent of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><annotation encoding="application/x-tex">X_{i1}</annotation></semantics></math>.
+Moreover, it is easy to show that the implied measurement model for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Y</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><annotation encoding="application/x-tex">Y_{i1}</annotation></semantics></math>
+is the Rasch model:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Y</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>p</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mo>&gt;</mo><mn>0.5</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>0.5</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo>−</mo><msub><mi>δ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mn>1</mn><mo>+</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>0.5</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo>−</mo><msub><mi>δ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+ p(Y_{i1}=1|\theta)=p(X_i&gt;0.5|\theta)
+ =
+ \frac{\exp(0.5(\theta-\delta_i))}
       {1+\exp(0.5(\theta-\delta_i))}
-\]</span></p>
-<p>where the discrimination is equal to 0.5. The other variable, <span class="math inline">\(X_{i1}\)</span>, is continuous and has the
-following distribution over the interval 0 to <span class="math inline">\(1/2\)</span>:</p>
-<p><span class="math display">\[\begin{equation}
-f(x_{i1}|\theta)
-=
-\frac{(\theta-\delta_i)\exp(x_{i1}(\theta-\delta_i))}{\exp(0.5(\theta-\delta_i))-1}
-\end{equation}\]</span></p>
-<p>Thus, both <span class="math inline">\(X_{i1}\)</span> and <span class="math inline">\(X_i\)</span> follow a CRM but the former has a
-different range for the values of the continuous response.</p>
+</annotation></semantics></math></p>
+<p>where the discrimination is equal to 0.5. The other variable,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><annotation encoding="application/x-tex">X_{i1}</annotation></semantics></math>,
+is continuous and has the following distribution over the interval 0 to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><mn>2</mn></mrow><annotation encoding="application/x-tex">1/2</annotation></semantics></math>:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>x</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo>−</mo><msub><mi>δ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>x</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo>−</mo><msub><mi>δ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>0.5</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo>−</mo><msub><mi>δ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mn>1</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\begin{equation}
+ f(x_{i1}|\theta)
+ =
+ \frac{(\theta-\delta_i)\exp(x_{i1}(\theta-\delta_i))}{\exp(0.5(\theta-\delta_i))-1}
+\end{equation}</annotation></semantics></math></p>
+<p>Thus, both
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><annotation encoding="application/x-tex">X_{i1}</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mi>i</mi></msub><annotation encoding="application/x-tex">X_i</annotation></semantics></math>
+follow a CRM but the former has a different range for the values of the
+continuous response.</p>
 <p>The proposal is to analyze the constructed dichotomous responses
 instead of the original continuous responses. The following code makes
 these responses and fits the Rasch model to them:</p>
@@ -312,40 +338,60 @@ difficulties that have been used to generate the data.</p>
 <div class="section level2">
 <h2 id="dyadic-expansion">Dyadic expansion<a class="anchor" aria-label="anchor" href="#dyadic-expansion"></a>
 </h2>
-<p>We can continue the process and split up <span class="math inline">\(x_{i1}\)</span> into two new variables, <span class="math inline">\(y_{i2}\)</span> and <span class="math inline">\(x_{i2}\)</span>, then split up <span class="math inline">\(x_{i2}\)</span>, and so on. In this way, we
-recursively transform the continuous response intto a set of
-conditionally independent Rasch response variables, <span class="math inline">\(y_{i1}, y_{i2}, \dots\)</span>. <span class="citation">Deonovic et al. (2020)</span> note that this
-corresponds to the dyadic expansion of <span class="math inline">\(x_i\)</span>; that is,</p>
-<p><span class="math display">\[
+<p>We can continue the process and split up
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><annotation encoding="application/x-tex">x_{i1}</annotation></semantics></math>
+into two new variables,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>i</mi><mn>2</mn></mrow></msub><annotation encoding="application/x-tex">y_{i2}</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mrow><mi>i</mi><mn>2</mn></mrow></msub><annotation encoding="application/x-tex">x_{i2}</annotation></semantics></math>,
+then split up
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mrow><mi>i</mi><mn>2</mn></mrow></msub><annotation encoding="application/x-tex">x_{i2}</annotation></semantics></math>,
+and so on. In this way, we recursively transform the continuous response
+intto a set of conditionally independent Rasch response variables,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><mo>,</mo><msub><mi>y</mi><mrow><mi>i</mi><mn>2</mn></mrow></msub><mo>,</mo><mi>…</mi></mrow><annotation encoding="application/x-tex">y_{i1}, y_{i2}, \dots</annotation></semantics></math>.
+<span class="citation">Deonovic et al. (2020)</span> note that this
+corresponds to the dyadic expansion of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mi>i</mi></msub><annotation encoding="application/x-tex">x_i</annotation></semantics></math>;
+that is,</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mi>i</mi></msub><mo>=</mo><mfrac><msub><mi>y</mi><mrow><mi>i</mi><mn>1</mn></mrow></msub><msup><mn>2</mn><mn>1</mn></msup></mfrac><mo>+</mo><mfrac><msub><mi>y</mi><mrow><mi>i</mi><mn>2</mn></mrow></msub><msup><mn>2</mn><mn>2</mn></msup></mfrac><mo>+</mo><mfrac><msub><mi>y</mi><mrow><mi>i</mi><mn>3</mn></mrow></msub><msup><mn>2</mn><mn>3</mn></msup></mfrac><mo>+</mo><mi>.</mi><mi>.</mi></mrow><annotation encoding="application/x-tex">
 x_i = \frac{y_{i1}}{2^1} + \frac{y_{i2}}{2^2} + \frac{y_{i3}}{2^3} + ..
-\]</span></p>
+</annotation></semantics></math></p>
 <p>The discrimination will halve in every step of the recursion, which
 means that each new item provides (four times) less information about
 ability than its predecessor. More specifically, the information
-function of the dyadic expansion of order <span class="math inline">\(d\)</span> can be defined as:</p>
-<p><span class="math display">\[
+function of the dyadic expansion of order
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math>
+can be defined as:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>I</mi><mi>i</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>d</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>d</mi></munderover><msub><mi>I</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
 I^{(d)}_i(\theta) = \sum^d_{j=1} I_{ij}(\theta)
-\]</span> where <span class="math display">\[
+</annotation></semantics></math> where
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>I</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mn>1</mn><msup><mn>2</mn><mrow><mn>2</mn><mi>j</mi></mrow></msup></mfrac><msub><mi>π</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>π</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
 I_{ij}(\theta) = \frac{1}{2^{2j}} \pi_{ij}(\theta)(1-\pi_{ij}(\theta))
-\]</span> is the information function of the <span class="math inline">\(j\)</span>-th Rasch item, with</p>
-<p><span class="math display">\[
-\pi_{ij}(\theta) =
-\frac{\exp\left(\frac{1}{2^j}(\theta-\delta_i)\right)}{1+\exp\left(\frac{1}{2^j}(\theta-\delta_i)\right)}
-\]</span></p>
-<p>If <span class="math inline">\(\theta=\delta_i\)</span>, we find
-that:</p>
-<p><span class="math display">\[
-I^{(d)}_i(\theta) = \frac{1}{4}\left(\frac{1}{4}+\frac{1}{16}
-+\frac{1}{64}+....\right)
+</annotation></semantics></math> is the information function of the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>-th
+Rasch item, with</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>π</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mn>1</mn><msup><mn>2</mn><mi>j</mi></msup></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo>−</mo><msub><mi>δ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mn>1</mn><mo>+</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mn>1</mn><msup><mn>2</mn><mi>j</mi></msup></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo>−</mo><msub><mi>δ</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+\pi_{ij}(\theta) = \frac{\exp\left(\frac{1}{2^j}(\theta-\delta_i)\right)}{1+\exp\left(\frac{1}{2^j}(\theta-\delta_i)\right)}
+</annotation></semantics></math></p>
+<p>If
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi><mo>=</mo><msub><mi>δ</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\theta=\delta_i</annotation></semantics></math>,
+we find that:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>I</mi><mi>i</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>d</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mn>1</mn><mn>4</mn></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mn>1</mn><mn>4</mn></mfrac><mo>+</mo><mfrac><mn>1</mn><mn>16</mn></mfrac><mo>+</mo><mfrac><mn>1</mn><mn>64</mn></mfrac><mo>+</mo><mi>.</mi><mi>.</mi><mi>.</mi><mi>.</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mn>1</mn><mn>4</mn></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>0</mn></mrow><mo accent="false">∞</mo></munderover><msup><mn>4</mn><mrow><mo>−</mo><mi>i</mi></mrow></msup><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mn>1</mn><mn>12</mn></mfrac></mrow><annotation encoding="application/x-tex">
+I^{(d)}_i(\theta) = \frac{1}{4}\left(\frac{1}{4}+\frac{1}{16} +\frac{1}{64}+....\right) 
 = \frac{1}{4}\left(\sum^{\infty}_{i=0} 4^{-i} -1\right) = \frac{1}{12}
-\]</span></p>
+</annotation></semantics></math></p>
 <p>It follows that the information provided by the first binary
-response, <span class="math inline">\(1/16\)</span>, is already <span class="math inline">\(75\)</span> percent of what can be achieved under
-the CRM. We illustrate this with the next plot. Adding a second one
-would raise this to <span class="math inline">\(93.75\)</span> percent,
-a third to <span class="math inline">\(98.44\)</span> percent, etc. This
-suggests that three dichotomous items will suffice to capture most of
-the information in the continuous responses.</p>
+response,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><mn>16</mn></mrow><annotation encoding="application/x-tex">1/16</annotation></semantics></math>,
+is already
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>75</mn><annotation encoding="application/x-tex">75</annotation></semantics></math>
+percent of what can be achieved under the CRM. We illustrate this with
+the next plot. Adding a second one would raise this to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>93.75</mn><annotation encoding="application/x-tex">93.75</annotation></semantics></math>
+percent, a third to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>98.44</mn><annotation encoding="application/x-tex">98.44</annotation></semantics></math>
+percent, etc. This suggests that three dichotomous items will suffice to
+capture most of the information in the continuous responses.</p>
 <p><img src="data:image/png;base64,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"></p>
 <p>The current version of <strong>dexter</strong> does not allow
 different items to share the same difficulty parameter, such that data
@@ -423,9 +469,7 @@ Veldkamp and Cor Sluijter, 135–60. New York City, New York: Springer.
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
-        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
-    </nav>
-</div>
+      </div>
 
 </div>
 
@@ -438,16 +482,16 @@ Veldkamp and Cor Sluijter, 135–60. New York City, New York: Springer.
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer>
 </div>
 
-  
 
 
-  
+
+
 
   </body>
 </html>

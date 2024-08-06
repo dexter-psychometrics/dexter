@@ -19,14 +19,13 @@
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../../pkgdown.css" rel="stylesheet">
 <script src="../../pkgdown.js"></script><link href="../../extra.css" rel="stylesheet">
 <meta property="og:title" content="Simulating data from the interaction model">
-<meta property="og:description" content="dexter">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-article">
       <header><div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -49,7 +48,7 @@
 <li>
   <a href="../../index.html">
     <span class="fas fa-home fa-lg"></span>
-     
+
   </a>
 </li>
 <li>
@@ -61,7 +60,7 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Vignettes
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
@@ -93,7 +92,7 @@
 <li>
   <a href="https://github.com/dexter-psychometrics/dexter" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -104,7 +103,7 @@
 </div>
 <!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
@@ -115,7 +114,7 @@ Norman Verhelst * Ivailo Partchev</h4>
             
             <h4 data-toc-skip class="date">2022-04-05</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/vignettes/blog/2022-04-05-simulating-data-from-the-interaction-model.Rmd" class="external-link"><code>vignettes/blog/2022-04-05-simulating-data-from-the-interaction-model.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/blog/2022-04-05-simulating-data-from-the-interaction-model.Rmd" class="external-link"><code>vignettes/blog/2022-04-05-simulating-data-from-the-interaction-model.Rmd</code></a></small>
       <div class="hidden name"><code>2022-04-05-simulating-data-from-the-interaction-model.Rmd</code></div>
 
     </div>
@@ -158,11 +157,14 @@ properties in various practical situations. When devising a strategy to
 simulate from the model, the third aspect seems the most promising.</p>
 <p>The interaction model can be expressed as a generalization of the
 Rasch model where item difficulty is a linear function of the
-test-score: <span class="math display">\[\begin{align*}
-P(\mathbf{X}=\mathbf{x}|\theta)
+test-score:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐗</mi><mo>=</mo><mi>𝐱</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mtd><mtd columnalign="left" style="text-align: left"><mo>∝</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mi>r</mi><mo>−</mo><munder><mo>∑</mo><mi>i</mi></munder><msub><mi>δ</mi><mrow><mi>r</mi><mi>i</mi></mrow></msub><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align*}
+P(\mathbf{X}=\mathbf{x}|\theta) 
 &amp;\propto \exp(\theta r - \sum_i \delta_{ri} x_i)
-\end{align*}\]</span> where <span class="math inline">\(\delta_{ri}=\delta_i-r\sigma_i\)</span> for any
-possible sum score <span class="math inline">\(r\)</span>.</p>
+\end{align*}</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mrow><mi>r</mi><mi>i</mi></mrow></msub><mo>=</mo><msub><mi>δ</mi><mi>i</mi></msub><mo>−</mo><mi>r</mi><msub><mi>σ</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\delta_{ri}=\delta_i-r\sigma_i</annotation></semantics></math>
+for any possible sum score
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>.</p>
 <p>As an illustration, let us simulate data from an interaction model
 and use these to estimate a Rasch model separately for persons with the
 same test score (provided there are enough of them):</p>
@@ -186,13 +188,16 @@ one-liner:</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Logistic.html" class="external-link">rlogis</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">delta</span><span class="op">)</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span> <span class="op">&lt;=</span> <span class="op">(</span><span class="va">theta</span><span class="op">-</span><span class="va">delta</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
 <p>To simulate responses from the interaction model, we can apply this
-at each distinct test score <span class="math inline">\(r\)</span> with
-score-specific item difficulties <span class="math inline">\(\delta_{ri}=\delta_i-r\sigma_i\)</span> rather
-than simply <span class="math inline">\(\delta_i\)</span>. But this is
-not all, as the responses conditional on a given test-score are not
-independent. The two algorithms presented here differ in how they tackle
-this dependency: one samples item parameters directly while the other
-one relies on a simple rejection algorithm.</p>
+at each distinct test score
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>
+with score-specific item difficulties
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>δ</mi><mrow><mi>r</mi><mi>i</mi></mrow></msub><mo>=</mo><msub><mi>δ</mi><mi>i</mi></msub><mo>−</mo><mi>r</mi><msub><mi>σ</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\delta_{ri}=\delta_i-r\sigma_i</annotation></semantics></math>
+rather than simply
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>δ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\delta_i</annotation></semantics></math>.
+But this is not all, as the responses conditional on a given test-score
+are not independent. The two algorithms presented here differ in how
+they tackle this dependency: one samples item parameters directly while
+the other one relies on a simple rejection algorithm.</p>
 </div>
 <div class="section level2">
 <h2 id="algorithm-a-rejection-sampling">Algorithm A: rejection sampling<a class="anchor" aria-label="anchor" href="#algorithm-a-rejection-sampling"></a>
@@ -249,45 +254,72 @@ response pattern matches the target sum score. For the aficionados, our
 approached by simulating them sequentially and adjusting the probability
 after each draw, much as we would take samples from an urn without
 replacement. An algorithm can be constructed based on the observation
-that at any sum score <span class="math inline">\(r\)</span>, the
-probability that item <span class="math inline">\(i\)</span> is answered
-correctly can be computed as <span class="math display">\[P(X_i=1|r) =
-\frac{b_{ri}\gamma_{r-1}(\mathbf{b}_{r}[-i])}{\gamma_{r}(\mathbf{b}_{r})}\]</span>
-where <span class="math inline">\(b_{ri} = \exp(-\delta_{ri}) =
-\exp[-(\delta_i-\sigma_ir )]\)</span>, <span class="math inline">\(\mathbf{b}_{r}[-i]\)</span> is the vector of item
-parameters without the <span class="math inline">\(i\)</span>th entry,
-and <span class="math inline">\(\gamma_{s}(\mathbf{b})\)</span> the
-<em>elementary symmetric function</em> of <span class="math inline">\(\mathbf{b}\)</span> of order <span class="math inline">\(s\)</span>. Note the use of an R-like notation to
-express dropping the <span class="math inline">\(i\)</span>-th
+that at any sum score
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>,
+the probability that item
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+is answered correctly can be computed as
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mrow><mi>r</mi><mi>i</mi></mrow></msub><msub><mi>γ</mi><mrow><mi>r</mi><mo>−</mo><mn>1</mn></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝐛</mi><mi>r</mi></msub><mrow><mo stretchy="true" form="prefix">[</mo><mo>−</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><msub><mi>γ</mi><mi>r</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝐛</mi><mi>r</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">P(X_i=1|r) = \frac{b_{ri}\gamma_{r-1}(\mathbf{b}_{r}[-i])}{\gamma_{r}(\mathbf{b}_{r})}</annotation></semantics></math>
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>b</mi><mrow><mi>r</mi><mi>i</mi></mrow></msub><mo>=</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mo>−</mo><msub><mi>δ</mi><mrow><mi>r</mi><mi>i</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">[</mo><mo>−</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>δ</mi><mi>i</mi></msub><mo>−</mo><msub><mi>σ</mi><mi>i</mi></msub><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">b_{ri} = \exp(-\delta_{ri}) = \exp[-(\delta_i-\sigma_ir )]</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐛</mi><mi>r</mi></msub><mrow><mo stretchy="true" form="prefix">[</mo><mo>−</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\mathbf{b}_{r}[-i]</annotation></semantics></math>
+is the vector of item parameters without the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>th
+entry, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mi>s</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\gamma_{s}(\mathbf{b})</annotation></semantics></math>
+the <em>elementary symmetric function</em> of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐛</mi><annotation encoding="application/x-tex">\mathbf{b}</annotation></semantics></math>
+of order
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>.
+Note the use of an R-like notation to express dropping the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>-th
 element.</p>
 <p>This may be a bit subtle, so we illustrate what happens with a small
 example. Suppose that we have a test of three items. If the test score
 is 0 or 3, there is nothing to do because there is only one possible
-response pattern in each case. Suppose <span class="math inline">\(x_+=2\)</span>, and let us start by simulating the
-response to the third item. This is a Bernoulli experiment with the
-probability of success given by <span class="math display">\[
-P(X_3=1|X_+ = 2, \boldsymbol{\delta}_2) =
-\frac{b_{23}(b_{21}+b_{22})}{b_{21}b_{22}+b_{21}b_{23}+b_{22}b_{23}}
-\]</span> with the ESF written out. If the experiment fails, then we are
-done because, with <span class="math inline">\(x_+=2\)</span>, the
-responses to the first two items must be correct. If it succeeds, we are
-left with a test of two items and a sum score of 1. To simulate the
+response pattern in each case. Suppose
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mo>+</mo></msub><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">x_+=2</annotation></semantics></math>,
+and let us start by simulating the response to the third item. This is a
+Bernoulli experiment with the probability of success given by
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mn>3</mn></msub><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><msub><mi>X</mi><mo>+</mo></msub><mo>=</mo><mn>2</mn><mo>,</mo><msub><mi>𝛅</mi><mn>2</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mn>23</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>b</mi><mn>21</mn></msub><mo>+</mo><msub><mi>b</mi><mn>22</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><msub><mi>b</mi><mn>21</mn></msub><msub><mi>b</mi><mn>22</mn></msub><mo>+</mo><msub><mi>b</mi><mn>21</mn></msub><msub><mi>b</mi><mn>23</mn></msub><mo>+</mo><msub><mi>b</mi><mn>22</mn></msub><msub><mi>b</mi><mn>23</mn></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+P(X_3=1|X_+ = 2, \boldsymbol{\delta}_2) = \frac{b_{23}(b_{21}+b_{22})}{b_{21}b_{22}+b_{21}b_{23}+b_{22}b_{23}}
+</annotation></semantics></math> with the ESF written out. If the
+experiment fails, then we are done because, with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mo>+</mo></msub><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">x_+=2</annotation></semantics></math>,
+the responses to the first two items must be correct. If it succeeds, we
+are left with a test of two items and a sum score of 1. To simulate the
 response to item 2, we perform another Bernoulli experiment with a
-probability of success <span class="math display">\[
-P(X_2=1|X_+ = 1, \boldsymbol{\delta}_2) =
-\frac{b_{22}b_{21}}{b_{21}+b_{22}}.
-\]</span> Regardless of the outcome, the answer to the first item is now
-also determined because the sum score must be 2. The case of <span class="math inline">\(x_+=1\)</span> is handled in a similar fashion,
-and don’t forget to replace <span class="math inline">\(\boldsymbol{\delta}_2\)</span> with <span class="math inline">\(\boldsymbol{\delta}_1\)</span> because we are
-simulating from the interaction model, remember?</p>
+probability of success
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mn>2</mn></msub><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><msub><mi>X</mi><mo>+</mo></msub><mo>=</mo><mn>1</mn><mo>,</mo><msub><mi>𝛅</mi><mn>2</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><msub><mi>b</mi><mn>22</mn></msub><msub><mi>b</mi><mn>21</mn></msub></mrow><mrow><msub><mi>b</mi><mn>21</mn></msub><mo>+</mo><msub><mi>b</mi><mn>22</mn></msub></mrow></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(X_2=1|X_+ = 1, \boldsymbol{\delta}_2) = \frac{b_{22}b_{21}}{b_{21}+b_{22}}.
+</annotation></semantics></math> Regardless of the outcome, the answer
+to the first item is now also determined because the sum score must be
+2. The case of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mo>+</mo></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">x_+=1</annotation></semantics></math>
+is handled in a similar fashion, and don’t forget to replace
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝛅</mi><mn>2</mn></msub><annotation encoding="application/x-tex">\boldsymbol{\delta}_2</annotation></semantics></math>
+with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝛅</mi><mn>1</mn></msub><annotation encoding="application/x-tex">\boldsymbol{\delta}_1</annotation></semantics></math>
+because we are simulating from the interaction model, remember?</p>
 <p>The computational burden with Algorithm B is in the calculation of
 the elementary symmetric functions. What is minimally required is a
-<span class="math inline">\(n+1\)</span> by <span class="math inline">\(n\)</span> matrix <span class="math inline">\(\mathbf{G}_{x_+}\)</span> whose columns contain
-the elementary functions for <span class="math inline">\(\mathbf{b}_{x_+}[1], \mathbf{b}_{x_+}[1:2], \dots,
-\mathbf{b}_{x_+}[1:n]\)</span>. Since we need <span class="math inline">\(\mathbf{G}_{x_+}\)</span> for all possible
-test-scores <span class="math inline">\(x_+\)</span>, we make a three
-way array <span class="math inline">\(\mathbf{G}\)</span>: test-scores
-by number of test-scores by number of items. The entries of <span class="math inline">\(\mathbf{G}\)</span> are: <span class="math display">\[
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n+1</annotation></semantics></math>
+by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+matrix
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐆</mi><msub><mi>x</mi><mo>+</mo></msub></msub><annotation encoding="application/x-tex">\mathbf{G}_{x_+}</annotation></semantics></math>
+whose columns contain the elementary functions for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>𝐛</mi><msub><mi>x</mi><mo>+</mo></msub></msub><mrow><mo stretchy="true" form="prefix">[</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><msub><mi>𝐛</mi><msub><mi>x</mi><mo>+</mo></msub></msub><mrow><mo stretchy="true" form="prefix">[</mo><mn>1</mn><mo>:</mo><mn>2</mn><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><mi>…</mi><mo>,</mo><msub><mi>𝐛</mi><msub><mi>x</mi><mo>+</mo></msub></msub><mrow><mo stretchy="true" form="prefix">[</mo><mn>1</mn><mo>:</mo><mi>n</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\mathbf{b}_{x_+}[1], \mathbf{b}_{x_+}[1:2], \dots, \mathbf{b}_{x_+}[1:n]</annotation></semantics></math>.
+Since we need
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐆</mi><msub><mi>x</mi><mo>+</mo></msub></msub><annotation encoding="application/x-tex">\mathbf{G}_{x_+}</annotation></semantics></math>
+for all possible test-scores
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mo>+</mo></msub><annotation encoding="application/x-tex">x_+</annotation></semantics></math>,
+we make a three way array
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐆</mi><annotation encoding="application/x-tex">\mathbf{G}</annotation></semantics></math>:
+test-scores by number of test-scores by number of items. The entries of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐆</mi><annotation encoding="application/x-tex">\mathbf{G}</annotation></semantics></math>
+are:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>g</mi><mrow><mi>r</mi><mi>s</mi><mi>i</mi></mrow></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><msub><mi>γ</mi><mi>s</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝐛</mi><mi>r</mi></msub><mrow><mo stretchy="true" form="prefix">[</mo><mn>1</mn><mo>:</mo><mi>i</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mrow><mi>s</mi><mo>≤</mo><mi>i</mi></mrow></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mn>0</mn></mtd><mtd columnalign="left" style="text-align: left"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><mrow><mi>s</mi><mo>&gt;</mo><mi>i</mi></mrow></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">
 g_{rsi} =
 \left\{
 \begin{array}{cl}
@@ -295,10 +327,21 @@ g_{rsi} =
 0 &amp; \text{if $s&gt;i$}
 \end{array}
 \right.
-\]</span></p>
-<p>where the first two indices <span class="math inline">\(r\)</span>
-and <span class="math inline">\(s\)</span> run from zero to <span class="math inline">\(n\)</span>, and the third index <span class="math inline">\(i\)</span> runs from <span class="math inline">\(1\)</span> to <span class="math inline">\(n\)</span>. The elementary symmetric functions are
-calculated using the sum-algorithm. Here is the necessary code in R:</p>
+</annotation></semantics></math></p>
+<p>where the first two indices
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+run from zero to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>,
+and the third index
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+runs from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>
+to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>.
+The elementary symmetric functions are calculated using the
+sum-algorithm. Here is the necessary code in R:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">elsymRM</span> <span class="op">&lt;-</span><span class="kw">function</span><span class="op">(</span><span class="va">b</span><span class="op">)</span></span>
 <span><span class="op">{</span></span>
@@ -365,10 +408,12 @@ itself:</p>
 <span>  <span class="op">}</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>Note that both <span class="math inline">\(\mathbf{b}\)</span> and
-<span class="math inline">\(\mathbf{G}\)</span> are pre-calculated
-outside of the loop over persons. Note further that we break as soon as
-we know all remaining responses.</p>
+<p>Note that both
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐛</mi><annotation encoding="application/x-tex">\mathbf{b}</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐆</mi><annotation encoding="application/x-tex">\mathbf{G}</annotation></semantics></math>
+are pre-calculated outside of the loop over persons. Note further that
+we break as soon as we know all remaining responses.</p>
 </div>
 <div class="section level2">
 <h2 id="comparing-the-two-algorithms">Comparing the two algorithms<a class="anchor" aria-label="anchor" href="#comparing-the-two-algorithms"></a>
@@ -393,7 +438,12 @@ but still a monster in your backyard. We have used the sum-algorithm,
 which is perfectly reliable for tests of reasonable length, say up to
 100 items. In the interaction model the item difficulties can become
 large quite rapidly such that, for longer tests, it may be compromised
-by numeric overflow. For example, with <span class="math inline">\(150\)</span> items and <span class="math inline">\(x_+\)</span> equal to <span class="math inline">\(145\)</span>:</p>
+by numeric overflow. For example, with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>150</mn><annotation encoding="application/x-tex">150</annotation></semantics></math>
+items and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mo>+</mo></msub><annotation encoding="application/x-tex">x_+</annotation></semantics></math>
+equal to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>145</mn><annotation encoding="application/x-tex">145</annotation></semantics></math>:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">delta</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">150</span>,<span class="op">-</span><span class="fl">0.5</span>,<span class="fl">1.5</span><span class="op">)</span></span>
 <span><span class="va">sigma</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">150</span>,<span class="op">-</span><span class="fl">0.5</span>,<span class="fl">0.5</span><span class="op">)</span></span>
@@ -436,22 +486,30 @@ implausible, and everyone knows the <code>rnorm</code> function in R
 (<span class="citation">R Development Core Team (2005)</span>).</p>
 <p>To get samples from a discrete distribution of sum scores starting
 with samples from a continuous distribution and a set of item
-parameters, we may consider that, since <span class="math display">\[
+parameters, we may consider that, since
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>x</mi><mo>+</mo></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>∫</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>x</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>d</mi><mi>θ</mi></mrow><annotation encoding="application/x-tex">
 P(x_+) = \int P(x_+|\theta) f(\theta) d\theta
-\]</span> we can sample <span class="math inline">\(\theta\)</span> from
-<span class="math inline">\(f(\theta)\)</span> and subsequently sample
-<span class="math inline">\(x_+\)</span> from <span class="math inline">\(P(x_+|\theta)\)</span>.</p>
-<p>What is <span class="math inline">\(P(x_+|\theta)\)</span>? We find
-it if we write <span class="math display">\[
-P(\mathbf{x}|\theta) = \frac{e^{x_+\theta}\prod_i b^{x_i}_{x_+i}}{\sum_s
-e^{s\theta} \gamma_s(\mathbf{b}_s)}
-=\frac{\prod_i b^{x_i}_{x_+i}}{\gamma_{x_+}(\mathbf{b}_{x_+})}
-\frac{e^{x_+\theta}\gamma_{x_+}(\mathbf{b}_{x_+})}{\sum_s e^{s\theta}
-\gamma_s(\mathbf{b}_s)} = P(\mathbf{x}|x_+)P(x_+|\theta)
-\]</span> Thus, <span class="math display">\[
+</annotation></semantics></math> we can sample
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>
+from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(\theta)</annotation></semantics></math>
+and subsequently sample
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mo>+</mo></msub><annotation encoding="application/x-tex">x_+</annotation></semantics></math>
+from
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>x</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(x_+|\theta)</annotation></semantics></math>.</p>
+<p>What is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>x</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(x_+|\theta)</annotation></semantics></math>?
+We find it if we write
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><msup><mi>e</mi><mrow><msub><mi>x</mi><mo>+</mo></msub><mi>θ</mi></mrow></msup><munder><mo>∏</mo><mi>i</mi></munder><msubsup><mi>b</mi><mrow><msub><mi>x</mi><mo>+</mo></msub><mi>i</mi></mrow><msub><mi>x</mi><mi>i</mi></msub></msubsup></mrow><mrow><munder><mo>∑</mo><mi>s</mi></munder><msup><mi>e</mi><mrow><mi>s</mi><mi>θ</mi></mrow></msup><msub><mi>γ</mi><mi>s</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝐛</mi><mi>s</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mo>=</mo><mfrac><mrow><munder><mo>∏</mo><mi>i</mi></munder><msubsup><mi>b</mi><mrow><msub><mi>x</mi><mo>+</mo></msub><mi>i</mi></mrow><msub><mi>x</mi><mi>i</mi></msub></msubsup></mrow><mrow><msub><mi>γ</mi><msub><mi>x</mi><mo>+</mo></msub></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝐛</mi><msub><mi>x</mi><mo>+</mo></msub></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mfrac><mrow><msup><mi>e</mi><mrow><msub><mi>x</mi><mo>+</mo></msub><mi>θ</mi></mrow></msup><msub><mi>γ</mi><msub><mi>x</mi><mo>+</mo></msub></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝐛</mi><msub><mi>x</mi><mo>+</mo></msub></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><munder><mo>∑</mo><mi>s</mi></munder><msup><mi>e</mi><mrow><mi>s</mi><mi>θ</mi></mrow></msup><msub><mi>γ</mi><mi>s</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝐛</mi><mi>s</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mo>=</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐱</mi><mo stretchy="false" form="prefix">|</mo><msub><mi>x</mi><mo>+</mo></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>x</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
+P(\mathbf{x}|\theta) = \frac{e^{x_+\theta}\prod_i b^{x_i}_{x_+i}}{\sum_s e^{s\theta} \gamma_s(\mathbf{b}_s)}
+=\frac{\prod_i b^{x_i}_{x_+i}}{\gamma_{x_+}(\mathbf{b}_{x_+})} \frac{e^{x_+\theta}\gamma_{x_+}(\mathbf{b}_{x_+})}{\sum_s e^{s\theta} \gamma_s(\mathbf{b}_s)} = P(\mathbf{x}|x_+)P(x_+|\theta)
+</annotation></semantics></math> Thus,
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>x</mi><mo>+</mo></msub><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∝</mo><msup><mi>e</mi><mrow><msub><mi>x</mi><mo>+</mo></msub><mi>θ</mi></mrow></msup><msub><mi>γ</mi><msub><mi>x</mi><mo>+</mo></msub></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>𝐛</mi><msub><mi>x</mi><mo>+</mo></msub></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">
 P(x_+|\theta) \propto e^{x_+\theta}\gamma_{x_+}(\mathbf{b}_{x_+})
-\]</span> Conveniently, we have already computed the elementary
-symmetric functions and saved them in the matrix, <span class="math inline">\(\mathbf{G}\)</span>, so:</p>
+</annotation></semantics></math> Conveniently, we have already computed
+the elementary symmetric functions and saved them in the matrix,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐆</mi><annotation encoding="application/x-tex">\mathbf{G}</annotation></semantics></math>,
+so:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sample_scores</span> <span class="op">&lt;-</span><span class="kw">function</span><span class="op">(</span><span class="va">theta</span>, <span class="va">G</span><span class="op">)</span></span>
 <span><span class="op">{</span></span>
@@ -524,9 +582,7 @@ Statistical Computing. <a href="https://www.R-project.org" class="external-link"
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
-        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
-    </nav>
-</div>
+      </div>
 
 </div>
 
@@ -539,16 +595,16 @@ Statistical Computing. <a href="https://www.R-project.org" class="external-link"
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer>
 </div>
 
-  
 
 
-  
+
+
 
   </body>
 </html>

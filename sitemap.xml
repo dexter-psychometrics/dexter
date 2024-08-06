@@ -1,345 +1,117 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>/articles/DIF_vignette.html</loc>
-  </url>
-  <url>
-    <loc>/articles/Equating.html</loc>
-  </url>
-  <url>
-    <loc>/articles/Plausible_Values.html</loc>
-  </url>
-  <url>
-    <loc>/articles/Test_Individual_differences.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2017-12-13-hello.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2018-02-09-dexter-is-1.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2018-02-25-item-total-regressions-in-dexter.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2018-05-25-equating-a-pass-fail-score-with-dexter.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2018-06-11-comparing-parameter-estimates-from-dexter.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2018-07-13-dextermst.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2018-08-07-distractor-plots-in-dexter.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2018-08-21-dexter-0-8-1-submitted.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2018-08-21-dexter-meets-pisa-1.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2018-08-31-dexter-meets-pisa-the-market-basket-approach.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2018-09-22-100.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2018-09-24-the-scoring-game.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2018-10-15-random-variation-and-power-in-profile-plots.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2018-11-03-dexter-0-8-3-on-cran.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2018-11-05-test-and-item-information-functions-in-dexter.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2019-01-01-happy-2019.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2019-01-03-dexter-0-8-4-is-out.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2019-04-26-dexter-0-8-5-on-cran.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2019-05-11-visualising-differential-item-pair-functioning-the-lazy-cook-way.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2019-05-12-aspects-of-the-aspects-ratio.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2019-05-14-issues-with-dbplyr-and-how-to-resolve.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2019-05-15-my-perennial-slide-1.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2019-06-27-120-100-100.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2019-08-26-dexter-is-1-again.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2019-11-23-fyi.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2020-01-01-happy-new-year.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2020-01-15-my-more-or-less-coherent-views-on-model-fit.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2020-03-06-local-in-dependence-and-polytomization.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2020-05-15-calculating-the-score-distribution-giving-ability.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2020-05-27-the-information-game.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2020-06-09-round-about-svd.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2020-11-23-hot-on-the-trail-of-warm.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2020-12-22-analysing-continuous-responses-with-dexter.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2020-12-22-happy-new-year.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2021-01-14-and-have-you-seen-the-rasch-sampler.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2021-02-15-140.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2021-12-24-happy-2022.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2022-01-31-CTT_IRT.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2022-02-02-standard-errors-in-survey.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2022-03-26-simulate_with_dexter.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2022-03-31-dexterMML.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2022-04-05-simulating-data-from-the-interaction-model.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2022-06-16-a_linux_rant.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2022-06-20-Woes_with_2PL.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2022-11-03-Minorization.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2022-12-31-happy-2023.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2023-05-20-dexter-paper.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/2024-01-03-happy-2024.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/about.html</loc>
-  </url>
-  <url>
-    <loc>/articles/blog/index.html</loc>
-  </url>
-  <url>
-    <loc>/articles/dexter.html</loc>
-  </url>
-  <url>
-    <loc>/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>/articles/profile-plots.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/DIF.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ability.html</loc>
-  </url>
-  <url>
-    <loc>/reference/add_booklet.html</loc>
-  </url>
-  <url>
-    <loc>/reference/add_item_properties.html</loc>
-  </url>
-  <url>
-    <loc>/reference/add_person_properties.html</loc>
-  </url>
-  <url>
-    <loc>/reference/close_project.html</loc>
-  </url>
-  <url>
-    <loc>/reference/coef.p2pass.html</loc>
-  </url>
-  <url>
-    <loc>/reference/coef.prms.html</loc>
-  </url>
-  <url>
-    <loc>/reference/design_info.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dexter-package.html</loc>
-  </url>
-  <url>
-    <loc>/reference/distractor_plot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fit_domains.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fit_enorm.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fit_inter.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_booklets.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_design.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_items.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_persons.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_resp_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_responses.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_rules.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_testscores.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_variables.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/individual_differences.html</loc>
-  </url>
-  <url>
-    <loc>/reference/information.html</loc>
-  </url>
-  <url>
-    <loc>/reference/keys_to_rules.html</loc>
-  </url>
-  <url>
-    <loc>/reference/latent_cor.html</loc>
-  </url>
-  <url>
-    <loc>/reference/open_project.html</loc>
-  </url>
-  <url>
-    <loc>/reference/plausible_scores.html</loc>
-  </url>
-  <url>
-    <loc>/reference/plausible_values.html</loc>
-  </url>
-  <url>
-    <loc>/reference/plot.DIF_stats.html</loc>
-  </url>
-  <url>
-    <loc>/reference/plot.p2pass.html</loc>
-  </url>
-  <url>
-    <loc>/reference/plot.prms.html</loc>
-  </url>
-  <url>
-    <loc>/reference/plot.rim.html</loc>
-  </url>
-  <url>
-    <loc>/reference/probability_to_pass.html</loc>
-  </url>
-  <url>
-    <loc>/reference/profile_plot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/profiles.html</loc>
-  </url>
-  <url>
-    <loc>/reference/r_score_IM.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ratedData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ratedDataProperties.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ratedDataRules.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_oplm_par.html</loc>
-  </url>
-  <url>
-    <loc>/reference/standards_3dc.html</loc>
-  </url>
-  <url>
-    <loc>/reference/standards_db.html</loc>
-  </url>
-  <url>
-    <loc>/reference/start_new_project.html</loc>
-  </url>
-  <url>
-    <loc>/reference/start_new_project_from_oplm.html</loc>
-  </url>
-  <url>
-    <loc>/reference/tia_tables.html</loc>
-  </url>
-  <url>
-    <loc>/reference/touch_rules.html</loc>
-  </url>
-  <url>
-    <loc>/reference/verbAggrData.html</loc>
-  </url>
-  <url>
-    <loc>/reference/verbAggrProperties.html</loc>
-  </url>
-  <url>
-    <loc>/reference/verbAggrRules.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/LICENSE-text.html</loc></url>
+<url><loc>/articles/DIF_vignette.html</loc></url>
+<url><loc>/articles/Equating.html</loc></url>
+<url><loc>/articles/Plausible_Values.html</loc></url>
+<url><loc>/articles/Test_Individual_differences.html</loc></url>
+<url><loc>/articles/blog/2017-12-13-hello.html</loc></url>
+<url><loc>/articles/blog/2018-02-09-dexter-is-1.html</loc></url>
+<url><loc>/articles/blog/2018-02-25-item-total-regressions-in-dexter.html</loc></url>
+<url><loc>/articles/blog/2018-05-25-equating-a-pass-fail-score-with-dexter.html</loc></url>
+<url><loc>/articles/blog/2018-06-11-comparing-parameter-estimates-from-dexter.html</loc></url>
+<url><loc>/articles/blog/2018-07-13-dextermst.html</loc></url>
+<url><loc>/articles/blog/2018-08-07-distractor-plots-in-dexter.html</loc></url>
+<url><loc>/articles/blog/2018-08-21-dexter-0-8-1-submitted.html</loc></url>
+<url><loc>/articles/blog/2018-08-21-dexter-meets-pisa-1.html</loc></url>
+<url><loc>/articles/blog/2018-08-31-dexter-meets-pisa-the-market-basket-approach.html</loc></url>
+<url><loc>/articles/blog/2018-09-22-100.html</loc></url>
+<url><loc>/articles/blog/2018-09-24-the-scoring-game.html</loc></url>
+<url><loc>/articles/blog/2018-10-15-random-variation-and-power-in-profile-plots.html</loc></url>
+<url><loc>/articles/blog/2018-11-03-dexter-0-8-3-on-cran.html</loc></url>
+<url><loc>/articles/blog/2018-11-05-test-and-item-information-functions-in-dexter.html</loc></url>
+<url><loc>/articles/blog/2019-01-01-happy-2019.html</loc></url>
+<url><loc>/articles/blog/2019-01-03-dexter-0-8-4-is-out.html</loc></url>
+<url><loc>/articles/blog/2019-04-26-dexter-0-8-5-on-cran.html</loc></url>
+<url><loc>/articles/blog/2019-05-11-visualising-differential-item-pair-functioning-the-lazy-cook-way.html</loc></url>
+<url><loc>/articles/blog/2019-05-12-aspects-of-the-aspects-ratio.html</loc></url>
+<url><loc>/articles/blog/2019-05-14-issues-with-dbplyr-and-how-to-resolve.html</loc></url>
+<url><loc>/articles/blog/2019-05-15-my-perennial-slide-1.html</loc></url>
+<url><loc>/articles/blog/2019-06-27-120-100-100.html</loc></url>
+<url><loc>/articles/blog/2019-08-26-dexter-is-1-again.html</loc></url>
+<url><loc>/articles/blog/2019-11-23-fyi.html</loc></url>
+<url><loc>/articles/blog/2020-01-01-happy-new-year.html</loc></url>
+<url><loc>/articles/blog/2020-01-15-my-more-or-less-coherent-views-on-model-fit.html</loc></url>
+<url><loc>/articles/blog/2020-03-06-local-in-dependence-and-polytomization.html</loc></url>
+<url><loc>/articles/blog/2020-05-15-calculating-the-score-distribution-giving-ability.html</loc></url>
+<url><loc>/articles/blog/2020-05-27-the-information-game.html</loc></url>
+<url><loc>/articles/blog/2020-06-09-round-about-svd.html</loc></url>
+<url><loc>/articles/blog/2020-11-23-hot-on-the-trail-of-warm.html</loc></url>
+<url><loc>/articles/blog/2020-12-22-analysing-continuous-responses-with-dexter.html</loc></url>
+<url><loc>/articles/blog/2020-12-22-happy-new-year.html</loc></url>
+<url><loc>/articles/blog/2021-01-14-and-have-you-seen-the-rasch-sampler.html</loc></url>
+<url><loc>/articles/blog/2021-02-15-140.html</loc></url>
+<url><loc>/articles/blog/2021-12-24-happy-2022.html</loc></url>
+<url><loc>/articles/blog/2022-01-31-CTT_IRT.html</loc></url>
+<url><loc>/articles/blog/2022-02-02-standard-errors-in-survey.html</loc></url>
+<url><loc>/articles/blog/2022-03-26-simulate_with_dexter.html</loc></url>
+<url><loc>/articles/blog/2022-03-31-dexterMML.html</loc></url>
+<url><loc>/articles/blog/2022-04-05-simulating-data-from-the-interaction-model.html</loc></url>
+<url><loc>/articles/blog/2022-06-16-a_linux_rant.html</loc></url>
+<url><loc>/articles/blog/2022-06-20-Woes_with_2PL.html</loc></url>
+<url><loc>/articles/blog/2022-11-03-Minorization.html</loc></url>
+<url><loc>/articles/blog/2022-12-31-happy-2023.html</loc></url>
+<url><loc>/articles/blog/2023-05-20-dexter-paper.html</loc></url>
+<url><loc>/articles/blog/2024-01-03-happy-2024.html</loc></url>
+<url><loc>/articles/blog/about.html</loc></url>
+<url><loc>/articles/blog/index.html</loc></url>
+<url><loc>/articles/dexter.html</loc></url>
+<url><loc>/articles/index.html</loc></url>
+<url><loc>/articles/profile-plots.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/news/index.html</loc></url>
+<url><loc>/reference/DIF.html</loc></url>
+<url><loc>/reference/ability.html</loc></url>
+<url><loc>/reference/add_booklet.html</loc></url>
+<url><loc>/reference/add_item_properties.html</loc></url>
+<url><loc>/reference/add_person_properties.html</loc></url>
+<url><loc>/reference/close_project.html</loc></url>
+<url><loc>/reference/coef.p2pass.html</loc></url>
+<url><loc>/reference/coef.prms.html</loc></url>
+<url><loc>/reference/design_info.html</loc></url>
+<url><loc>/reference/dexter-package.html</loc></url>
+<url><loc>/reference/distractor_plot.html</loc></url>
+<url><loc>/reference/fit_domains.html</loc></url>
+<url><loc>/reference/fit_enorm.html</loc></url>
+<url><loc>/reference/fit_inter.html</loc></url>
+<url><loc>/reference/get_booklets.html</loc></url>
+<url><loc>/reference/get_design.html</loc></url>
+<url><loc>/reference/get_items.html</loc></url>
+<url><loc>/reference/get_persons.html</loc></url>
+<url><loc>/reference/get_resp_data.html</loc></url>
+<url><loc>/reference/get_responses.html</loc></url>
+<url><loc>/reference/get_rules.html</loc></url>
+<url><loc>/reference/get_testscores.html</loc></url>
+<url><loc>/reference/get_variables.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/individual_differences.html</loc></url>
+<url><loc>/reference/information.html</loc></url>
+<url><loc>/reference/keys_to_rules.html</loc></url>
+<url><loc>/reference/latent_cor.html</loc></url>
+<url><loc>/reference/open_project.html</loc></url>
+<url><loc>/reference/plausible_scores.html</loc></url>
+<url><loc>/reference/plausible_values.html</loc></url>
+<url><loc>/reference/plot.DIF_stats.html</loc></url>
+<url><loc>/reference/plot.p2pass.html</loc></url>
+<url><loc>/reference/plot.prms.html</loc></url>
+<url><loc>/reference/plot.rim.html</loc></url>
+<url><loc>/reference/probability_to_pass.html</loc></url>
+<url><loc>/reference/profile_plot.html</loc></url>
+<url><loc>/reference/profiles.html</loc></url>
+<url><loc>/reference/r_score_IM.html</loc></url>
+<url><loc>/reference/ratedData.html</loc></url>
+<url><loc>/reference/ratedDataProperties.html</loc></url>
+<url><loc>/reference/ratedDataRules.html</loc></url>
+<url><loc>/reference/read_oplm_par.html</loc></url>
+<url><loc>/reference/standards_3dc.html</loc></url>
+<url><loc>/reference/standards_db.html</loc></url>
+<url><loc>/reference/start_new_project.html</loc></url>
+<url><loc>/reference/start_new_project_from_oplm.html</loc></url>
+<url><loc>/reference/tia_tables.html</loc></url>
+<url><loc>/reference/touch_rules.html</loc></url>
+<url><loc>/reference/verbAggrData.html</loc></url>
+<url><loc>/reference/verbAggrProperties.html</loc></url>
+<url><loc>/reference/verbAggrRules.html</loc></url>
 </urlset>
+

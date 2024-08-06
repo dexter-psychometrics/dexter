@@ -4,7 +4,7 @@ so far by booklet and position in the booklet"><!-- mathjax --><script src="http
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -26,7 +26,7 @@ so far by booklet and position in the booklet"><!-- mathjax --><script src="http
       <ul class="nav navbar-nav"><li>
   <a href="../index.html">
     <span class="fas fa-home fa-lg"></span>
-     
+
   </a>
 </li>
 <li>
@@ -38,7 +38,7 @@ so far by booklet and position in the booklet"><!-- mathjax --><script src="http
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Vignettes
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
@@ -66,20 +66,20 @@ so far by booklet and position in the booklet"><!-- mathjax --><script src="http
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/dexter-psychometrics/dexter" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Test design</h1>
-    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/R/dexter.R" class="external-link"><code>R/dexter.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/R/dexter.R" class="external-link"><code>R/dexter.R</code></a></small>
     <div class="hidden name"><code>get_design.Rd</code></div>
     </div>
 
@@ -100,33 +100,33 @@ so far by booklet and position in the booklet</p>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>dataSrc</dt>
+
+
+<dl><dt id="arg-datasrc">dataSrc<a class="anchor" aria-label="anchor" href="#arg-datasrc"></a></dt>
 <dd><p>a dexter database or any object form which a design can be inferred</p></dd>
 
 
-<dt>format</dt>
+<dt id="arg-format">format<a class="anchor" aria-label="anchor" href="#arg-format"></a></dt>
 <dd><p>return format, see below</p></dd>
 
 
-<dt>rows</dt>
+<dt id="arg-rows">rows<a class="anchor" aria-label="anchor" href="#arg-rows"></a></dt>
 <dd><p>variable that defines the rows, ignored if format='long'</p></dd>
 
 
-<dt>columns</dt>
+<dt id="arg-columns">columns<a class="anchor" aria-label="anchor" href="#arg-columns"></a></dt>
 <dd><p>variable that defines the columns, ignored if format='long'</p></dd>
 
 
-<dt>fill</dt>
+<dt id="arg-fill">fill<a class="anchor" aria-label="anchor" href="#arg-fill"></a></dt>
 <dd><p>If set, missing values will be replaced with this value, ignored if format='long'</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>A data.frame with the design. The contents depend on the rows, columns and format parameters
+    <p>A data.frame with the design. The contents depend on the rows, columns and format parameters
  if <code>format</code> is <code>'long'</code> a data.frame with columns: booklet_id, item_id, item_position (if available)
- if <code>format</code> is <code>'wide'</code> a data.frame with the rows defined by the <code>rows</code> parameter and 
+ if <code>format</code> is <code>'wide'</code> a data.frame with the rows defined by the <code>rows</code> parameter and
  the columns by the <code>columns</code> parameter, with the remaining variable (i.e. item_id, booklet_id or item_position)
  making up the cells</p>
     </div>
@@ -143,15 +143,15 @@ so far by booklet and position in the booklet</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

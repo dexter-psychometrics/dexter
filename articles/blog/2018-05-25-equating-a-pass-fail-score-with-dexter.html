@@ -19,14 +19,13 @@
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../../pkgdown.css" rel="stylesheet">
 <script src="../../pkgdown.js"></script><link href="../../extra.css" rel="stylesheet">
 <meta property="og:title" content="Equating a pass-fail score with dexter">
-<meta property="og:description" content="dexter">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-article">
       <header><div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -49,7 +48,7 @@
 <li>
   <a href="../../index.html">
     <span class="fas fa-home fa-lg"></span>
-     
+
   </a>
 </li>
 <li>
@@ -61,7 +60,7 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Vignettes
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
@@ -93,7 +92,7 @@
 <li>
   <a href="https://github.com/dexter-psychometrics/dexter" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul>
@@ -104,7 +103,7 @@
 </div>
 <!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
@@ -115,7 +114,7 @@ Bechger</h4>
             
             <h4 data-toc-skip class="date">2018-05-25</h4>
       
-      <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/vignettes/blog/2018-05-25-equating-a-pass-fail-score-with-dexter.Rmd" class="external-link"><code>vignettes/blog/2018-05-25-equating-a-pass-fail-score-with-dexter.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/blog/2018-05-25-equating-a-pass-fail-score-with-dexter.Rmd" class="external-link"><code>vignettes/blog/2018-05-25-equating-a-pass-fail-score-with-dexter.Rmd</code></a></small>
       <div class="hidden name"><code>2018-05-25-equating-a-pass-fail-score-with-dexter.Rmd</code></div>
 
     </div>
@@ -313,13 +312,19 @@ who pass the reference test. We show this as a plot.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ou_e</span>, what<span class="op">=</span><span class="st">"equating"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="data:image/png;base64,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" title="plot of chunk unnamed-chunk-9" alt="plot of chunk unnamed-chunk-9" style="display: block; margin: auto;"></p>
 <p>Let the scores on the reference and new test be written,
-respectively, as <span class="math inline">\(R_+\)</span> and <span class="math inline">\(N_+\)</span>, and let <span class="math inline">\(\mathbf{x}\)</span> denote the available data. We
-calculate <span class="math inline">\(P(R_+ \geq c|N_+ = s,
-\mathbf{x})\)</span>, the probability that a person with a score of
-<span class="math inline">\(s\)</span> on the target test will pass.
-Simply stated, we calculate this probability by averaging over what
-could have happened on the basis of the available data. A technical
-appendix explains a bit more.</p>
+respectively, as
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mo>+</mo></msub><annotation encoding="application/x-tex">R_+</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>N</mi><mo>+</mo></msub><annotation encoding="application/x-tex">N_+</annotation></semantics></math>,
+and let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐱</mi><annotation encoding="application/x-tex">\mathbf{x}</annotation></semantics></math>
+denote the available data. We calculate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo>,</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(R_+ \geq c|N_+ = s, \mathbf{x})</annotation></semantics></math>,
+the probability that a person with a score of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+on the target test will pass. Simply stated, we calculate this
+probability by averaging over what could have happened on the basis of
+the available data. A technical appendix explains a bit more.</p>
 <p>A little extra in the plot are the horizontal red lines. These refer
 to the traditional ability-based pass-fail score obtained as follows:
 First, estimate an ability for each score on the reference and the new
@@ -335,10 +340,11 @@ propose here is more informative.</p>
 <h3 id="sensitivity-and-specificity">Sensitivity and specificity<a class="anchor" aria-label="anchor" href="#sensitivity-and-specificity"></a>
 </h3>
 <p>Having the probability to pass and the proportion of respondents,
-<span class="math inline">\(P(N_+ = s)\)</span>, for all possible scores
-<span class="math inline">\(s\)</span>, we can calculate sensitivity and
-specificity and plot them for each possible pass-fail score on the
-target test:</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(N_+ = s)</annotation></semantics></math>,
+for all possible scores
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>,
+we can calculate sensitivity and specificity and plot them for each
+possible pass-fail score on the target test:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ou_e</span>, what<span class="op">=</span><span class="st">'sens/spec'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="data:image/png;base64,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" title="plot of chunk unnamed-chunk-10" alt="plot of chunk unnamed-chunk-10" style="display: block; margin: auto;"></p>
@@ -368,49 +374,58 @@ welcome.</p>
 <h3 id="technical-appendix">Technical Appendix<a class="anchor" aria-label="anchor" href="#technical-appendix"></a>
 </h3>
 <p>Let us consider how we determine the probability to pass the
-reference test given a score <span class="math inline">\(N_+=s\)</span>
-on the target test. This probability can be defined as:<br><span class="math display">\[
+reference test given a score
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi></mrow><annotation encoding="application/x-tex">N_+=s</annotation></semantics></math>
+on the target test. This probability can be defined as:<br><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo>,</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mo>∫</mo><mrow><mi>𝐛</mi><mo>,</mo><mi>θ</mi></mrow></msub><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="false" form="prefix">|</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="false" form="prefix">|</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>d</mi><mi>𝐛</mi><mi>d</mi><mi>θ</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">
 P(R_+ \geq c|N_+ = s, \mathbf{x})
-      = \int_{\mathbf{b},\theta}
-             P(R_+ \geq c|\theta,\mathbf{b})
+      = \int_{\mathbf{b},\theta} 
+             P(R_+ \geq c|\theta,\mathbf{b}) 
              f(\theta|N_+ = s, \mathbf{b}) f(\mathbf{b}|\mathbf{x})
       d\mathbf{b} d\theta,
-\]</span></p>
-<p>where <span class="math inline">\(Y_+\)</span> denotes the score on
-the reference test, with pass-fail score <span class="math inline">\(c\)</span>, <span class="math inline">\(\theta\)</span> denotes ability and <span class="math inline">\(\mathbf{b}\)</span> is the vector of item
-parameters. The integrand has three parts:</p>
+</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Y</mi><mo>+</mo></msub><annotation encoding="application/x-tex">Y_+</annotation></semantics></math>
+denotes the score on the reference test, with pass-fail score
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>c</mi><annotation encoding="application/x-tex">c</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>
+denotes ability and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐛</mi><annotation encoding="application/x-tex">\mathbf{b}</annotation></semantics></math>
+is the vector of item parameters. The integrand has three parts:</p>
 <ul>
 <li>
-<span class="math inline">\(f(\mathbf{b}|\mathbf{x})\)</span>: The
-posterior of the item parameters, given all data <span class="math inline">\(\mathbf{x}\)</span>.</li>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="false" form="prefix">|</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(\mathbf{b}|\mathbf{x})</annotation></semantics></math>:
+The posterior of the item parameters, given all data
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐱</mi><annotation encoding="application/x-tex">\mathbf{x}</annotation></semantics></math>.</li>
 <li>
-<span class="math inline">\(f(\theta|N_+ = s, \mathbf{b})\)</span>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="false" form="prefix">|</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(\theta|N_+ = s, \mathbf{b})</annotation></semantics></math>:
 The posterior of ability given the score on the new test.</li>
 <li>
-<span class="math inline">\(P(R_+ \geq
-c|\theta,\mathbf{b})\)</span>: The probability to pass given ability
-equal to <span class="math display">\[
-P(R_+ \geq c|\theta,\mathbf{b})
-= \sum_{s \geq c} P(R_+ = s |\theta, \mathbf{b})
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(R_+ \geq c|\theta,\mathbf{b})</annotation></semantics></math>:
+The probability to pass given ability equal to
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munder><mo>∑</mo><mrow><mi>s</mi><mo>≥</mo><mi>c</mi></mrow></munder><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munder><mo>∑</mo><mrow><mi>s</mi><mo>≥</mo><mi>c</mi></mrow></munder><mfrac><mrow><msub><mi>γ</mi><mi>s</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow><msup><mi>e</mi><mrow><mi>s</mi><mi>θ</mi></mrow></msup></mrow><mrow><munder><mo>∑</mo><mi>h</mi></munder><msub><mi>γ</mi><mi>h</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow><msup><mi>e</mi><mrow><mi>h</mi><mi>θ</mi></mrow></msup></mrow></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">
+P(R_+ \geq c|\theta,\mathbf{b}) 
+= \sum_{s \geq c} P(R_+ = s |\theta, \mathbf{b}) 
 = \sum_{s \geq c} \frac{\gamma_s(\mathbf{b}) e^{s \theta}}
                      {\sum_h \gamma_h(\mathbf{b}) e^{h \theta}},
-\]</span> with <span class="math inline">\(\gamma_s(\mathbf{b})\)</span>
+</annotation></semantics></math> with
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mi>s</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\gamma_s(\mathbf{b})</annotation></semantics></math>
 the elementary symmetric function of order s.</li>
 </ul>
 <p>To calculate a Monte-Carlo estimate, repeat:</p>
 <ul>
-<li>sample item parameters <span class="math inline">\(\mathbf{b}^* \sim
-f(\mathbf{b}|\mathbf{x})\)</span>
+<li>sample item parameters
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>𝐛</mi><mo>*</mo></msup><mo>∼</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="false" form="prefix">|</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathbf{b}^* \sim f(\mathbf{b}|\mathbf{x})</annotation></semantics></math>
 </li>
-<li>sample a plausible value <span class="math inline">\(\theta^* \sim
-f(\theta|N_+ = s, \mathbf{b}^*)\)</span>
+<li>sample a plausible value
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>θ</mi><mo>*</mo></msup><mo>∼</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="false" form="prefix">|</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo>,</mo><msup><mi>𝐛</mi><mo>*</mo></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\theta^* \sim f(\theta|N_+ = s, \mathbf{b}^*)</annotation></semantics></math>
 </li>
-<li>calculate <span class="math inline">\(P(R_+ \geq
-c|\theta^*,\mathbf{b}^*)\)</span>
+<li>calculate
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><msup><mi>θ</mi><mo>*</mo></msup><mo>,</mo><msup><mi>𝐛</mi><mo>*</mo></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(R_+ \geq c|\theta^*,\mathbf{b}^*)</annotation></semantics></math>
 </li>
 </ul>
 <p>We do this as often as we can afford (currently, five hundred times),
-and we take the average as an estimate of <span class="math inline">\(P(R_+ \geq c|\theta^*,\mathbf{b}^*)\)</span>.</p>
+and we take the average as an estimate of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><msup><mi>θ</mi><mo>*</mo></msup><mo>,</mo><msup><mi>𝐛</mi><mo>*</mo></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(R_+ \geq c|\theta^*,\mathbf{b}^*)</annotation></semantics></math>.</p>
 <p>Sensitivity and specificity are calculated from the score
 distribution on the new-test and the probability to pass. The following
 code shows how:</p>
@@ -443,9 +458,7 @@ Lawrence Erlbaum Associates, Inc.
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
 
-        <nav id="toc" data-toggle="toc"><h2 data-toc-skip>Contents</h2>
-    </nav>
-</div>
+      </div>
 
 </div>
 
@@ -458,16 +471,16 @@ Lawrence Erlbaum Associates, Inc.
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer>
 </div>
 
-  
 
 
-  
+
+
 
   </body>
 </html>

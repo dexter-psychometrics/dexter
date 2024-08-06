@@ -3,7 +3,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -25,7 +25,7 @@
       <ul class="nav navbar-nav"><li>
   <a href="../index.html">
     <span class="fas fa-home fa-lg"></span>
-     
+
   </a>
 </li>
 <li>
@@ -37,7 +37,7 @@
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Vignettes
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
@@ -65,20 +65,20 @@
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/dexter-psychometrics/dexter" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Profile plot</h1>
-    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/R/plots.R" class="external-link"><code>R/plots.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/R/plots.R" class="external-link"><code>R/plots.R</code></a></small>
     <div class="hidden name"><code>profile_plot.Rd</code></div>
     </div>
 
@@ -102,67 +102,68 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>dataSrc</dt>
-<dd><p>a connection to a dexter database or a data.frame with columns: 
+
+
+<dl><dt id="arg-datasrc">dataSrc<a class="anchor" aria-label="anchor" href="#arg-datasrc"></a></dt>
+<dd><p>a connection to a dexter database or a data.frame with columns:
 person_id, item_id, item_score and the item_property and the covariate of interest.</p></dd>
 
 
-<dt>item_property</dt>
-<dd><p>The name of the item property defining the domains. 
+<dt id="arg-item-property">item_property<a class="anchor" aria-label="anchor" href="#arg-item-property"></a></dt>
+<dd><p>The name of the item property defining the domains.
 The item property should have exactly two distinct values in your data</p></dd>
 
 
-<dt>covariate</dt>
-<dd><p>name of the person property used to create the groups. 
+<dt id="arg-covariate">covariate<a class="anchor" aria-label="anchor" href="#arg-covariate"></a></dt>
+<dd><p>name of the person property used to create the groups.
 There will be one line for each distinct value.</p></dd>
 
 
-<dt>predicate</dt>
+<dt id="arg-predicate">predicate<a class="anchor" aria-label="anchor" href="#arg-predicate"></a></dt>
 <dd><p>An optional expression to filter data, if NULL all data is used</p></dd>
 
 
-<dt>model</dt>
-<dd><p>"IM" (default) or "RM" where "IM" is the interaction model and 
-"RM" the Rasch model. The interaction model is the default as it fits 
+<dt id="arg-model">model<a class="anchor" aria-label="anchor" href="#arg-model"></a></dt>
+<dd><p>"IM" (default) or "RM" where "IM" is the interaction model and
+"RM" the Rasch model. The interaction model is the default as it fits
 the data better or at least as good as the Rasch model.</p></dd>
 
 
-<dt>x</dt>
+<dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>Which category of the item_property to draw on the x axis, if NULL, one is chosen automatically</p></dd>
 
 
-<dt>col</dt>
+<dt id="arg-col">col<a class="anchor" aria-label="anchor" href="#arg-col"></a></dt>
 <dd><p>vector of colors to use for plotting</p></dd>
 
 
-<dt>col.diagonal</dt>
+<dt id="arg-col-diagonal">col.diagonal<a class="anchor" aria-label="anchor" href="#arg-col-diagonal"></a></dt>
 <dd><p>color of the diagonal lines representing the testscores</p></dd>
 
 
-<dt>...</dt>
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>further graphical arguments to plot. Graphical parameters for the legend can be postfixed with <code>.legend</code></p></dd>
 
 </dl></div>
     <div id="details">
     <h2>Details</h2>
-    <p>Profile plots can be used to investigate whether two (or more) groups of respondents 
-attain the same test score in the same way. The user must provide a  
-(meaningful) classification of the items in two non-overlapping subsets such that 
-the test score is the sum of the scores on the subsets. 
-The plot shows the probabilities to obtain 
-any combinations of subset scores with thin gray lines indicating the combinations 
-that give the same test score. The thick lines connect the most likely 
+    <p>Profile plots can be used to investigate whether two (or more) groups of respondents
+attain the same test score in the same way. The user must provide a
+(meaningful) classification of the items in two non-overlapping subsets such that
+the test score is the sum of the scores on the subsets.
+The plot shows the probabilities to obtain
+any combinations of subset scores with thin gray lines indicating the combinations
+that give the same test score. The thick lines connect the most likely
 combination for each test score in each group.
-When applied to educational test data, the plots can be used to detect differences in the 
-relative difficulty of (sets of) items for respondents that belong to different 
-groups and are matched on the test score. This provides a content-driven way to 
+When applied to educational test data, the plots can be used to detect differences in the
+relative difficulty of (sets of) items for respondents that belong to different
+groups and are matched on the test score. This provides a content-driven way to
 investigate differential item functioning.</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span> <span class="fu">RcppArmadillo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RcppArmadillo/man/armadillo_throttle_cores.html" class="external-link">armadillo_throttle_cores</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="st">":memory:"</span>, </span></span>
 <span class="r-in"><span>                         person_properties<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>gender<span class="op">=</span><span class="st">"unknown"</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -188,7 +189,6 @@ investigate differential item functioning.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="close_project.html">close_project</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span> <span class="fu">RcppArmadillo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RcppArmadillo/man/armadillo_throttle_cores.html" class="external-link">armadillo_reset_cores</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
@@ -204,15 +204,15 @@ investigate differential item functioning.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

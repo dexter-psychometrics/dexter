@@ -4,7 +4,7 @@ at item and test level"><!-- mathjax --><script src="https://cdnjs.cloudflare.co
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -26,7 +26,7 @@ at item and test level"><!-- mathjax --><script src="https://cdnjs.cloudflare.co
       <ul class="nav navbar-nav"><li>
   <a href="../index.html">
     <span class="fas fa-home fa-lg"></span>
-     
+
   </a>
 </li>
 <li>
@@ -38,7 +38,7 @@ at item and test level"><!-- mathjax --><script src="https://cdnjs.cloudflare.co
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Vignettes
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
@@ -66,20 +66,20 @@ at item and test level"><!-- mathjax --><script src="https://cdnjs.cloudflare.co
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/dexter-psychometrics/dexter" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Simple test-item analysis</h1>
-    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/HEAD/R/tia.R" class="external-link"><code>R/tia.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/R/tia.R" class="external-link"><code>R/tia.R</code></a></small>
     <div class="hidden name"><code>tia_tables.Rd</code></div>
     </div>
 
@@ -100,44 +100,44 @@ at item and test level</p>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>dataSrc</dt>
+
+
+<dl><dt id="arg-datasrc">dataSrc<a class="anchor" aria-label="anchor" href="#arg-datasrc"></a></dt>
 <dd><p>a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score</p></dd>
 
 
-<dt>predicate</dt>
+<dt id="arg-predicate">predicate<a class="anchor" aria-label="anchor" href="#arg-predicate"></a></dt>
 <dd><p>An optional expression to subset data, if NULL all data is used</p></dd>
 
 
-<dt>type</dt>
-<dd><p>How to present the item level statistics: <code>raw</code> for each test booklet 
+<dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
+<dd><p>How to present the item level statistics: <code>raw</code> for each test booklet
 separately, <code>averaged</code> booklets are ignored, with the exception of rit and rir which are averaged over the test booklets,
-with the number of persons as weights, or <code>compared</code>, in which case the pvalues, 
-correlations with the sum score (rit), and correlations with the rest score (rit) are 
+with the number of persons as weights, or <code>compared</code>, in which case the pvalues,
+correlations with the sum score (rit), and correlations with the rest score (rit) are
 shown in separate tables and compared across booklets</p></dd>
 
 
-<dt>max_scores</dt>
-<dd><p>use the observed maximum item score or the theoretical maximum item score 
+<dt id="arg-max-scores">max_scores<a class="anchor" aria-label="anchor" href="#arg-max-scores"></a></dt>
+<dd><p>use the observed maximum item score or the theoretical maximum item score
 according to the scoring rules in the database to determine pvalues and maximum scores</p></dd>
 
 
-<dt>distractor</dt>
+<dt id="arg-distractor">distractor<a class="anchor" aria-label="anchor" href="#arg-distractor"></a></dt>
 <dd><p>add a tia for distractors, only useful for selected response (MC) items</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>A list containing:</p>
+    <p>A list containing:</p>
 <dl><dt>booklets</dt>
 <dd><p>a data.frame of statistics at booklet level</p></dd>
- 
+
 <dt>items</dt>
 <dd><p>a data.frame (or list if type='compared') of statistics at item level</p></dd>
 
 <dt>distractors</dt>
-<dd><p>a data.frame of statistics at the response level (if distractor==TRUE), i.e. 
+<dd><p>a data.frame of statistics at the response level (if distractor==TRUE), i.e.
 rvalue (pvalue for response) and rar (rest-alternative correlation)</p></dd>
 
 </dl></div>
@@ -154,15 +154,15 @@ rvalue (pvalue for response) and rar (rest-alternative correlation)</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 
