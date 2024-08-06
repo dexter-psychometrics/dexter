@@ -5,7 +5,7 @@
 #include "shared.h"
 #include "myomp.h"
 
-#define ELSYM_USE_LD false
+#define ELSYM_USE_LD true
 
 #if ELSYM_USE_LD
 #define ELS_VEC ldvec

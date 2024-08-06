@@ -214,6 +214,7 @@ condMoments = function(mu, sigma, y.ind, x.ind=NULL, x.value )
     for (i in 1:nP) cMu[i] = mu[y.ind] + CDinv %*% (x.value[i,] - mu[x.ind])
   }
   cVar = B - CDinv %*% t(C)
+  #if(any(cVar<=0)) browser()
   return(list(mu=cMu, sigma=cVar))
 }
 

@@ -5,8 +5,19 @@ library(dplyr)
 
 RcppArmadillo::armadillo_throttle_cores(1)
 
+verbAggCopy = function(pth = test_path('verbAggression.db'))
+{
+  con = DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+  db = open_project(pth)
+  
+  RSQLite::sqliteCopyDatabase(db, con)
+  
+  DBI::dbDisconnect(db)
+  return(con)
+}
+
 test_that('populations work',{
-  db = open_project(test_path('verbAggression.db'))
+  db = verbAggCopy()
   
   #artificially create two overlapping booklets
   f2 = fit_enorm(db, (gender=='Male' & item_position<=16) | 
@@ -26,6 +37,18 @@ test_that('populations work',{
   test = inner_join(abl,pv,by='person_id')
   
   expect_gt(cor(test$PV1,test$theta), .9,'verb agg correlation ability and plausible value should be larger than .9')
+  
+  
+  # see if sanity checks work
+  p=get_persons(db) |>
+    select(person_id) |>
+    mutate(x1=rnorm(n()),x2 = sample(rnorm(3),n(),replace=TRUE))
+  
+  add_person_properties(db,p)
+  
+  expect_warning(plausible_values(db, f2, predicate=startsWith(item_id,'S1'), covariates='x1'),regexp='ignoring covariates',ignore.case=TRUE)
+  expect_warning(plausible_values(db, f2, predicate=startsWith(item_id,'S1'), covariates='x2'),regexp='decimal',ignore.case=TRUE)
+  #to do: what happens if one group? SHould we have a message or not?
   
   dbDisconnect(db)
 })

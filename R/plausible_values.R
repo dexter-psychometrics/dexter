@@ -325,6 +325,18 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
       group_by_at(covariates) |>
       mutate(pop__ = group_number()) |>
       ungroup() 
+    
+    # sanity check: we need categorical variables
+    tly = table(respData$x$pop__)
+
+    if(min(tly)<=2 || max(tly)<=5)
+    {
+      warning("Ignoring covariates in plausible value computation because some categories have size <=2 or all categories have size <=5.\nAre you sure all covariates are nominal variables?")
+      respData$x = select(respData$x, -"pop__") 
+    } else if(any(sapply(respData$x[,covariates,drop=FALSE], function(v) is.double(v) && any(v %% 1!=0))))
+    {
+      warning("One or more of your covariates contain decimal numbers, this is rarely a good idea.\nAre you sure all covariates are nominal variables?")
+    }
   } 
   
   # join design with the params
