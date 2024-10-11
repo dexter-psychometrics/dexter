@@ -176,7 +176,7 @@ S*(\theta) &= x_+ -E[X_+|\theta] + \frac{J(\theta)}{2I(\theta)}\\
 \end{align*}
 This leads to a very simple function.
 
-```{r}
+```{r, eval=FALSE, message=FALSE}
 Warm_Rasch = function(test_score, delta)
 {
   Sw = function(theta) 
@@ -255,8 +255,6 @@ Warm = function(test_score, parms)
   if(!inherits(parms,'data.frame'))
     parms = coef(parms)
 
-  nit = n_distinct(parms$item_id)
-  
   weighted_score = function(theta)
   {  
     s = parms |>
@@ -266,7 +264,7 @@ Warm = function(test_score, parms)
       mutate(P = P/(sum(P)+1)) |> #normalize
       summarise(E = sum(a*P),
                 I = sum(a^2*P) - E^2,
-                J = sum(a^3*P) - 3 * sum(E) * sum(a^2*P) + 2 * sum(E)^3) |>
+                J = sum(a^3*P) - 3 * E * sum(a^2*P) + 2 * E^3) |>
       summarise(E=sum(E), I=sum(I), J=sum(J))
     
     test_score - s$E + s$J/(2*s$I)

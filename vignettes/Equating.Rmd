@@ -58,7 +58,7 @@ where TP, FP, FN, and TN are all counts. There is one ideal situation in which F
 
 * True positive rate (TPR, sensitivity): The proportion of positives that are correctly identified as such, or TP/(TP+FN)
 * True negative rate (TNR, specificity): The proportion of negatives that are correctly identified as such, or TN/(TN+FP)
-* False positive rate (FNR) = 1 - specificity = FP/(TN+FP)
+* False positive rate (FPR) = 1 - specificity = FP/(TN+FP)
 
 What we can try to do is select the threshold for the test in such a way that the resulting table gets as close to the optimum as possible (not forgetting that the subjective cost of the two kinds of erroneous predictions may differ). The _receiver operating characteristic curve (ROC curve)_ (@Swets96) 
 is a graphical representations of the trade-offs between the TPR (one possible measure of benefit) and FPR (one possible measure of costs) resulting from all possible choices of such a threshold. The optimal choice would then be the one corresponding to the point on the curve that comes closest to the upper left corner (perfect prediction). An example ROC curve is shown on the left hand plot below.
@@ -119,15 +119,17 @@ We use the verbal aggression data with the first 14 items assumed to be the refe
 
 As a start, we produce a scatter plot of the scores:
 
-```{r echo=FALSE, message=FALSE, results='hide', fig.align='center', fig.height=4, fig.width=4}
+```{r echo=TRUE,  results='hide', fig.align='center', fig.height=4, fig.width=4}
 library(dexter)
+
 db = start_new_project(verbAggrRules, ":memory:")
 add_booklet(db, verbAggrData, "data")
+
 ts = get_testscores(db, item_position<15) |>
   inner_join(get_testscores(db, item_position>=15), by='person_id') |>
   rename(ref_test= 'booklet_score.y', new_test = 'booklet_score.x')
-#plot(ts$new_test, ts$ref_test, ylab="ref. test score", xlab="new test score", cex=0.8, pch=16)
-#abline(h=10, lty=2, col="green")
+
+
 ggplot(ts, aes(x = new_test, y = ref_test)) +
   geom_count(show.legend = F) +
   geom_hline(yintercept = 10, colour = 'green') +

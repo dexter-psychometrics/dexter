@@ -6,6 +6,8 @@ bibliography: dexter.bib
 slug: analysing-continuous-responses-with-dexter
 categories: []
 tags: []
+editor_options: 
+  chunk_output_type: console
 ---
 
 When we apply IRT to score tests, we most often use a model to map patterns of TRUE/FALSE responses onto a real-valued latent variable, the great advantage being that responses to different test forms can be represented on the same latent variable relatively easy. When all observed responses are continuous, most psychometricians will probably think first of factor analysis, structural equations and friends. Yet the world of IRT is more densely populated with continuous responses than anticipated.
@@ -202,15 +204,18 @@ f = fit_enorm(Z)
 
 Let us see whether we recover the parameters:
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE}
 par(mfrow=c(1,2))
 
-plot(delta-mean(delta), 2*f$est$beta,
+library(dplyr)
+
+plot(delta-mean(delta), 2*coef(f)$beta,
      xlab=TeX("True $\\delta_i$"), 
      ylab=TeX("2 $\\times$ estimated $\\delta_i$"))
 abline(a=0,b=1,lty=2,col="gray")
 
-ab=ability(Z,f)
+ab=ability(Z,f) |> arrange(as.integer(person_id))
+
 plot(theta-mean(delta), 2*ab$theta,
      xlab=TeX("True $\\theta$"), 
      ylab=TeX("2 $\\times$ estimated $\\theta$"))
