@@ -210,6 +210,7 @@ blurb_info = function(fns, n_lines=10)
 }
 
 
+
 make_blog_index = function()
 {
   fn = list.files('vignettes/blog',pattern='.Rmd$',full.names=FALSE)
@@ -219,13 +220,15 @@ make_blog_index = function()
     mutate(rdmore = if_else(abbreviated,sprintf('[read more...](%s)',href),'')) %>%
     mutate(txt = sprintf('\n## [%s](%s)\n<p class="blog-authors">%s</p><p>\n%s\n</p>%s',
                          title,href,author,blurb,rdmore)) %>%
-    arrange(desc(filename)) %>%
-    pull(txt)
+    arrange(desc(filename)) 
+  
+  
+
   
   style = 'img{max-width:8cm;max-height:8cm;display:block;}\n#refs{display:none;}\nsmall.dont-index{display:none;}\np.blog-authors{font-style:italic}'
   pream = 'title: Dexterities\nbibliography: dexter.bib'
   
-  cat(sprintf('---\n%s\n---\n\n<style>\n%s\n</style>\n\n%s', pream, style, paste(content,collapse='\n')),
+  cat(sprintf('---\n%s\n---\n\n<style>\n%s\n</style>\n\n%s', pream, style, paste(content$txt,collapse='\n')),
       file='vignettes/blog/index.Rmd')
 }
 

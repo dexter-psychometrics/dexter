@@ -244,37 +244,32 @@ $$
 J_i(\theta) = \sum_j a^3_{ij} P_{ij}(\theta) - 3\left(\sum_j a^2_{ij}P_{ij}(\theta)\right)\left(\sum_h a_{ih}P_{ih}(\theta)\right) +2\left(\sum_j a_{ij} P_{ij}(\theta)\right)^3
 $$
 
-All we need can be written in terms of sums $M_{ri} = \sum_j a^r_{ij}P_{ij}(\theta)$, for $r \in \{1,2,3\}$. which inspired the following function to calculate the Warm estimate using a **parms** object produced by **fit_enorm**.
+All we need can be written in terms of sums $M_{ri} = \sum_j a^r_{ij}P_{ij}(\theta)$, for $r \in \{1,2,3\}$. which inspired the following function to calculate the Warm estimate using a **parms** object or data.frame of item parameters.
 
 ```{r}
+library(dplyr)
+
+
 Warm = function(test_score, parms)
 {
-  a = parms$inputs$ssIS$item_score
-  b = parms$est$b
-  first = parms$inputs$ssI$first
-  last = parms$inputs$ssI$last
-  if (!(test_score %in% (0:sum(a[last])))) error("wrong test score")
+  if(!inherits(parms,'data.frame'))
+    parms = coef(parms)
+
+  nit = n_distinct(parms$item_id)
   
   weighted_score = function(theta)
   {  
-    nI=length(first)
-    I = J = matrix(0,nI, length(theta))
-    E = rep(0,length(theta))
-    for (i in 1:nI)
-    {
-      Fij = b[first[i]:last[i]]*exp(a[first[i]:last[i]]*theta)
-      Pi = Fij/sum(Fij)
-      M1 = Pi*a[first[i]:last[i]]
-      M2 = M1*a[first[i]:last[i]]
-      M3 = M2*a[first[i]:last[i]]
-      M1 = sum(M1)
-      M2 = sum(M2)
-      M3 = sum(M3)
-      E = E + M1
-      I[i,] = M2 - M1^2
-      J[i,] = M3 - 3*M1*M2 + 2*M1^3
-    }
-    test_score - E + sum(J)/(2*sum(I))
+    s = parms |>
+      rename(a = 'item_score') |>
+      group_by(item_id) |>
+      mutate(P = exp(a*theta - cumsum(beta*(a-lag(a,default=0))))) |>
+      mutate(P = P/(sum(P)+1)) |> #normalize
+      summarise(E = sum(a*P),
+                I = sum(a^2*P) - E^2,
+                J = sum(a^3*P) - 3 * sum(E) * sum(a^2*P) + 2 * sum(E)^3) |>
+      summarise(E=sum(E), I=sum(I), J=sum(J))
+    
+    test_score - s$E + s$J/(2*s$I)
   }
   uniroot(weighted_score, interval=c(-10,10))$root
 }
