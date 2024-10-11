@@ -191,7 +191,7 @@ page</a> lists at least 13 of them. We will mention only three:</p>
 that are correctly identified as such, or TP/(TP+FN)</li>
 <li>True negative rate (TNR, specificity): The proportion of negatives
 that are correctly identified as such, or TN/(TN+FP)</li>
-<li>False positive rate (FNR) = 1 - specificity = FP/(TN+FP)</li>
+<li>False positive rate (FPR) = 1 - specificity = FP/(TN+FP)</li>
 </ul>
 <p>What we can try to do is select the threshold for the test in such a
 way that the resulting table gets as close to the optimum as possible
@@ -238,11 +238,28 @@ quite arbitrary, of course – the test is not intended to measure
 educational achievement, and we are certainly not handing out diplomas
 for verbal aggressiveness.</p>
 <p>As a start, we produce a scatter plot of the scores:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dexter-psychometrics.github.io/dexter/" class="external-link">dexter</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="../reference/start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="st">":memory:"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/add_booklet.html">add_booklet</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrData</span>, <span class="st">"data"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ts</span> <span class="op">=</span> <span class="fu"><a href="../reference/get_testscores.html">get_testscores</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">item_position</span><span class="op">&lt;</span><span class="fl">15</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">inner_join</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_testscores.html">get_testscores</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">item_position</span><span class="op">&gt;=</span><span class="fl">15</span><span class="op">)</span>, by<span class="op">=</span><span class="st">'person_id'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>ref_test<span class="op">=</span> <span class="st">'booklet_score.y'</span>, new_test <span class="op">=</span> <span class="st">'booklet_score.x'</span><span class="op">)</span></span>
+<span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">ts</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">new_test</span>, y <span class="op">=</span> <span class="va">ref_test</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_count</span><span class="op">(</span>show.legend <span class="op">=</span> <span class="cn">F</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">10</span>, colour <span class="op">=</span> <span class="st">'green'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>y <span class="op">=</span> <span class="st">'ref. test score'</span>, x <span class="op">=</span> <span class="st">'target test score'</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>panel.background <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>        axis.line <span class="op">=</span> <span class="fu">element_line</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Equating_files/figure-html/unnamed-chunk-2-1.png" width="384" style="display: block; margin: auto;"></p>
 <p>The proportion of respondents who pass the reference test gradually
 increases with the score on the new test; below, it is plotted in
 red:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">prob_pass</span> <span class="op">=</span> <span class="va">tp</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">29</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">28</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="va">prob_pass</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">ts</span><span class="op">$</span><span class="va">ref_test</span><span class="op">[</span><span class="va">ts</span><span class="op">$</span><span class="va">new_test</span><span class="op">==</span><span class="va">i</span><span class="op">]</span><span class="op">&gt;=</span><span class="fl">10</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">ts</span><span class="op">$</span><span class="va">new_test</span><span class="op">==</span><span class="va">i</span><span class="op">)</span></span>
@@ -259,7 +276,7 @@ can save ourselves the trouble of administering a new test.</p>
 straightforward to determine the sensitivity and specificity of the new
 test for each pass-fail score:</p>
 <!-- to do: might decide against showing some of this code, pictures themselves are important for the story, not the code-->
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">specificity</span> <span class="op">=</span> <span class="va">sensitivity</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">29</span><span class="op">)</span></span>
 <span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">28</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="va">sensitivity</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">ts</span><span class="op">$</span><span class="va">ref_test</span><span class="op">[</span><span class="va">ts</span><span class="op">$</span><span class="va">new_test</span><span class="op">&gt;=</span><span class="va">i</span><span class="op">]</span><span class="op">&gt;=</span><span class="fl">10</span><span class="op">)</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">ts</span><span class="op">$</span><span class="va">ref_test</span><span class="op">&gt;=</span><span class="fl">10</span><span class="op">)</span></span>
@@ -277,7 +294,7 @@ passing score would actually pass the reference test.</p>
 <p>As candidates are classified into two classes, we can readily show
 the trade-off between sensitivity and specificity with the ROC
 curve:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fl">1</span><span class="op">-</span><span class="va">specificity</span>, <span class="va">sensitivity</span>, col<span class="op">=</span><span class="st">"green"</span>, xlim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"l"</span>,bty<span class="op">=</span><span class="st">'l'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/text.html" class="external-link">text</a></span><span class="op">(</span><span class="fl">1</span><span class="op">-</span><span class="va">specificity</span>, <span class="va">sensitivity</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">28</span><span class="op">)</span>, cex<span class="op">=</span><span class="fl">0.7</span>, offset <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,lty<span class="op">=</span><span class="fl">2</span>, col<span class="op">=</span><span class="st">"grey"</span><span class="op">)</span></span></code></pre></div>
@@ -306,7 +323,7 @@ booklets. We assume that the pass-fail limit for the reference test is
 <p>As a start, we use the function <code>probability_to_pass</code> to
 estimate, for each score on the target test, the proportion of persons
 who pass the reference test. We show this as a plot.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p_sm</span> <span class="op">=</span> <span class="fu"><a href="../reference/fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db_sm</span>, method<span class="op">=</span><span class="st">'Bayes'</span>, nDraws <span class="op">=</span> <span class="fl">5000</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ou_e</span> <span class="op">=</span> <span class="fu"><a href="../reference/probability_to_pass.html">probability_to_pass</a></span><span class="op">(</span><span class="va">db_sm</span>, <span class="va">p_sm</span>,</span>
@@ -351,7 +368,7 @@ for all possible scores
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>,
 we can calculate sensitivity and specificity and plot them for each
 possible pass-fail score on the target test:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ou_e</span>, what<span class="op">=</span><span class="st">'sens/spec'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Equating_files/figure-html/unnamed-chunk-11-1.png" width="384" style="display: block; margin: auto;"></p>
 <p>If sensitivity and specificity are equally important, the plot
@@ -435,7 +452,7 @@ and we take the average as an estimate of
 <p>Sensitivity and specificity are calculated from the score
 distribution on the new-test and the probability to pass. The following
 code shows how:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span>  <span class="va">p_pass_given_s</span> <span class="op">=</span> <span class="va">out</span><span class="op">$</span><span class="va">probability_to_pass</span></span>
 <span>  <span class="va">ps</span> <span class="op">=</span> <span class="va">ou_e</span><span class="op">$</span><span class="va">pnew</span></span>
 <span>  <span class="va">tp</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">p_pass_given_s</span><span class="op">*</span><span class="va">ps</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cumsum.html" class="external-link">cumsum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rev.html" class="external-link">rev</a></span><span class="op">(</span><span class="va">ps</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
