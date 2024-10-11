@@ -1,5 +1,5 @@
 pandoc: 3.1.11
-pkgdown: 2.1.0
+pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   blog/2017-12-13-hello: blog/2017-12-13-hello.html
@@ -58,4 +58,4 @@ articles:
   Plausible_Values: Plausible_Values.html
   profile-plots: profile-plots.html
   Test_Individual_differences: Test_Individual_differences.html
-last_built: 2024-08-06T13:15Z
+last_built: 2024-10-11T07:19Z
