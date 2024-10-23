@@ -2,7 +2,13 @@
 #' Fit the extended nominal response model
 #'
 #' Fits an Extended NOminal Response Model (ENORM) using conditional maximum likelihood (CML)
-#' or a Gibbs sampler for Bayesian estimation.
+#' or a Gibbs sampler for Bayesian estimation. 
+#' 
+#' @details
+#' 
+#' The eNRM is a slight generalization of the PCM and/or the OPLM. It
+#' reduces to the Rach model for dichotomous items when all itemscores are 0 or 1, is equal to the PCM for polytomous items if all
+#' itemscores up to the maximum score occur, otherwise is equal to the oplm if all itemscores have an equal common divisor larger than 1.
 #'
 #'
 #' @param dataSrc a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score
@@ -17,13 +23,7 @@
 #' using function \code{coef} or used directly as input for other Dexter functions.
 #' @details
 #' To support some flexibility in fixing parameters, fixed_params can be a dexter prms object or a data.frame.
-#' If a data.frame, it should contain the columns item_id, item_score and a difficulty parameter. Three types of parameters are supported:
-#' \describe{
-#' \item{delta/beta}{ thresholds between subsequent item categories }
-#' \item{eta}{item-category parameters} 
-#' \item{b}{exp(-eta)}
-#' }
-#' Each type corresponds to a different parametrization of the model. 
+#' If a data.frame, it should contain the columns item_id, item_score and a difficulty parameter
 #' 
 #' @references 
 #' Maris, G., Bechger, T.M. and San-Martin, E. (2015) A Gibbs sampler for the (extended) marginal Rasch model. 

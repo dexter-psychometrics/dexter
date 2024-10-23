@@ -18,8 +18,8 @@ plausible_values(
 \arguments{
 \item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}
 
-\item{parms}{An object returned by function \code{fit_enorm} containing parameter estimates. If parms are provided, item parameters are considered known. 
-If parms = NULL, they will be estimated Bayesianly.}
+\item{parms}{An object returned by function \code{fit_enorm} containing parameter estimates or a data.frame with columns item_id, item_score and, 
+beta. If parms are provided, item parameters are considered known. If parms is NULL, they will be estimated Bayesianly.}
 
 \item{predicate}{an expression to filter data. If missing, the function will use 
 all data in dataSrc}

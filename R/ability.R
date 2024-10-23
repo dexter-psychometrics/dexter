@@ -7,7 +7,7 @@
 #'
 #' @param dataSrc a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score
 #' @param parms object produced by \code{\link{fit_enorm}} or a data.frame with columns item_id, item_score and, 
-#' depending on parametrization, a column named either beta/delta, eta or b
+#' beta
 #' @param predicate An optional expression to subset data, if NULL all data is used
 #' @param design A data.frame with columns item_id and optionally booklet_id. If the column booklet_id is not included, the score 
 #' transformation table will be based on all items found in the design. If design is NULL

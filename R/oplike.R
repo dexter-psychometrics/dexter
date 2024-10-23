@@ -337,7 +337,10 @@ oplm_r2c =  function(x)
   if(inherits(y, "try-error"))
     y = sapply(x,intToUtf8)
   
-  trimws(y)
+  z = try({trimws(y)}, silent=TRUE)
+  if(inherits(z, "try-error"))
+    return(y)
+  z
 }
 
 readSCR = function (scrfile) 

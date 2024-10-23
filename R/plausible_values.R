@@ -172,8 +172,8 @@ pv_chain = function(x, design, b, a, nPV,
 #'
 #'
 #' @param dataSrc a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score
-#' @param parms An object returned by function \code{fit_enorm} containing parameter estimates. If parms are provided, item parameters are considered known. 
-#' If parms = NULL, they will be estimated Bayesianly.
+#' @param parms An object returned by function \code{fit_enorm} containing parameter estimates or a data.frame with columns item_id, item_score and, 
+#' beta. If parms are provided, item parameters are considered known. If parms is NULL, they will be estimated Bayesianly.
 #' @param predicate an expression to filter data. If missing, the function will use 
 #' all data in dataSrc
 #' @param covariates name or a vector of names of the variables to group the populations used to improve the prior.

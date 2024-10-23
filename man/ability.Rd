@@ -31,7 +31,7 @@ ability_tables(
 \item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}
 
 \item{parms}{object produced by \code{\link{fit_enorm}} or a data.frame with columns item_id, item_score and, 
-depending on parametrization, a column named either beta/delta, eta or b}
+beta}
 
 \item{predicate}{An optional expression to subset data, if NULL all data is used}
 
