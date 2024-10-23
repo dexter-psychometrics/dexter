@@ -136,18 +136,11 @@ using function <code>coef</code> or used directly as input for other Dexter func
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>To support some flexibility in fixing parameters, fixed_params can be a dexter prms object or a data.frame.
-If a data.frame, it should contain the columns item_id, item_score and a difficulty parameter. Three types of parameters are supported:</p><dl><dt>delta/beta</dt>
-<dd><p>thresholds between subsequent item categories</p></dd>
-
-<dt>eta</dt>
-<dd><p>item-category parameters</p></dd>
-
-<dt>b</dt>
-<dd><p>exp(-eta)</p></dd>
-
-
-</dl><p>Each type corresponds to a different parametrization of the model.</p>
+    <p>The eNRM is a slight generalization of the PCM and/or the OPLM. It
+reduces to the Rach model for dichotomous items when all itemscores are 0 or 1, is equal to the PCM for polytomous items if all
+itemscores up to the maximum score occur, otherwise is equal to the oplm if all itemscores have an equal common divisor larger than 1.</p>
+<p>To support some flexibility in fixing parameters, fixed_params can be a dexter prms object or a data.frame.
+If a data.frame, it should contain the columns item_id, item_score and a difficulty parameter</p>
     </div>
     <div id="references">
     <h2>References</h2>
