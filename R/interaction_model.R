@@ -6,7 +6,7 @@
 #'
 #' @param dataSrc a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score
 #' @param predicate An optional expression to subset data, if NULL all data is used
-#' @return An object of class \code{rim} holding results
+#' @return An object of class \code{inter} holding results
 #' for the Rasch model and the interaction model.
 #' @details Unlike the Rasch model, the interaction model cannot be computed
 #' concurrently for a whole design of test forms. This function therefore fits the
@@ -15,7 +15,7 @@
 #' the intersection (common items) in two or more booklets. If the intersection is empty
 #' (no common items for all persons), the function will exit with an error message.
 #'
-#' @seealso \code{\link{plot.rim}}, \code{\link{fit_domains}}
+#' @seealso \code{\link{plot.inter}}, \code{\link{fit_domains}}
 #'
 #' @examples
 #' 
@@ -62,7 +62,7 @@ fit_inter_ = function(dataSrc, qtpredicate = NULL, env=NULL, regs=TRUE)
   
   ss$design=respData$design
   output = list(est = est, inputs = ss)
-  class(output) = append("rim", class(output))
+  class(output) = append("inter", class(output))
   output
 }
 
@@ -83,7 +83,7 @@ fit_inter_ = function(dataSrc, qtpredicate = NULL, env=NULL, regs=TRUE)
 #' of response categories. This function represents scores on subtests as 
 #' super-items and analyses these as normal items.
 #'
-#' @seealso \code{\link{plot.rim}}, \code{\link{fit_inter}}, \code{\link{add_item_properties}}
+#' @seealso \code{\link{plot.inter}}, \code{\link{fit_inter}}, \code{\link{add_item_properties}}
 #'
 #' @examples
 #' 
@@ -113,30 +113,48 @@ fit_domains = function(dataSrc, item_property, predicate = NULL)
 
 
 
-print.rim <- function(x, ...){
+print.inter = function(x, ...){
   res = paste0('Parameters for the Rasch and Interaction Model', 
                '\n\n# use plot() for plotting the Rasch and Interaction Model or coef() for retreiving the parameters\n')
   cat(res)
   invisible(res)
 }
 
-
-coef.rim = function(object, ...) 
+#' Extract interaction model parameters
+#' 
+#' @param object an object returend by the function \code{\link{fit_inter}}
+#' @param what whicch coefficients to return. Defaults to \code{items} (the item parameters), can also be \code{scoreprob}
+#' for the probability of each item score per booklet score.
+#' 
+coef.inter = function(object, what=c("items","scoreprob"), ...) 
 {
   x = object
-  first = x$inputs$ssI$first
-  last  = x$inputs$ssI$last
-  report_RM = toOPLM(x$inputs$ssIS$item_score, x$est$bRM, first, last)
-  report_IM = toOPLM(x$inputs$ssIS$item_score, x$est$bIM, first, last)
-  
-  IS = tibble(item_id = x$inputs$ssIS$item_id, item_score = x$inputs$ssIS$item_score,
-              beta_rasch = as.vector(report_RM$beta), beta_IM = as.vector(report_IM$beta))
-  I = tibble(item_id = x$inputs$ssI$item_id, sigma = log(x$est$cIM), SE_sigma= x$est$se.sigma, fit_IM=x$est$fit.stats)
-  
-  inner_join(IS,I,by='item_id') |> 
-	  arrange(.data$item_id, .data$item_score) |> 
-    mutate(item_id=as.character(.data$item_id)) |>
-	  df_format()
+  what = match.arg(what)
+  if(what == 'items')
+  {
+    first = x$inputs$ssI$first
+    last  = x$inputs$ssI$last
+    report_RM = toOPLM(x$inputs$ssIS$item_score, x$est$bRM, first, last)
+    report_IM = toOPLM(x$inputs$ssIS$item_score, x$est$bIM, first, last)
+    
+    IS = tibble(item_id = x$inputs$ssIS$item_id, item_score = x$inputs$ssIS$item_score,
+                beta_rasch = as.vector(report_RM$beta), beta_IM = as.vector(report_IM$beta))
+    I = tibble(item_id = x$inputs$ssI$item_id, sigma = log(x$est$cIM), SE_sigma= x$est$se.sigma, fit_IM=x$est$fit.stats)
+    
+    inner_join(IS,I,by='item_id') |> 
+  	  arrange(.data$item_id, .data$item_score) |> 
+      mutate(item_id=as.character(.data$item_id)) |>
+  	  df_format()
+  } else
+  {
+    z = x$est$ctrIM
+
+    tibble(item_id = rep(as.character(x$inputs$ssIS$item_id),ncol(z)), 
+           item_score = rep(x$inputs$ssIS$item_score,ncol(z)),
+           booklet_score = rep(0:(ns-1),each=nrow(z)),
+           p = as.double(z)) |>
+      df_format()
+  }
 }
 
 
@@ -303,7 +321,7 @@ r_score_IM = function(m, scores)
   
   if(inherits(m,'data.frame'))
   {
-    stop('input `m` must be of class "rim"')
+    stop('input `m` must be of class "inter"')
     # this does not yet work
     if('beta_IM' %in% colnames(m) && !'beta' %in% colnames(m))
       m$beta = m$beta_IM
@@ -316,7 +334,7 @@ r_score_IM = function(m, scores)
     last = prms$items$last
     cIM = m$sigma
     
-  } else if(inherits(m,'rim'))
+  } else if(inherits(m,'inter'))
   {
     first = m$inputs$ssI$first
     last = m$inputs$ssI$last
@@ -324,7 +342,7 @@ r_score_IM = function(m, scores)
     bIM = m$est$bIM
     cIM = m$est$cIM
   } 
-  else stop('input `m` must be of class "rim"')
+  else stop('input `m` must be of class "inter"')
  
   maxs = sum(a[last])
   

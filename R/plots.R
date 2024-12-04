@@ -666,9 +666,9 @@ plot.enorm = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci
 #' Customization of title and subtitle can be done by using the arguments main and sub.
 #' These arguments can contain references to the variables item_id (if overlay=FALSE) or model (if overlay=TRUE)
 #' by prefixing them with a dollar sign, e.g. plot(m, main='item: $item_id')
-#' @method plot rim
+#' @method plot inter
 #'
-plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
+plot.inter = function(x, items=NULL, summate=TRUE, overlay=FALSE,
                     curtains=10, show.observed=TRUE, ...){
   allItems = as.character(x$inputs$ssI$item_id)
   if(!is.null(items))

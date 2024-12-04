@@ -12,7 +12,7 @@ fit_inter(dataSrc, predicate = NULL)
 \item{predicate}{An optional expression to subset data, if NULL all data is used}
 }
 \value{
-An object of class \code{rim} holding results
+An object of class \code{inter} holding results
 for the Rasch model and the interaction model.
 }
 \description{
@@ -42,5 +42,5 @@ close_project(db)
 
 }
 \seealso{
-\code{\link{plot.rim}}, \code{\link{fit_domains}}
+\code{\link{plot.inter}}, \code{\link{fit_domains}}
 }

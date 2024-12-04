@@ -42,5 +42,5 @@ close_project(db)
 
 }
 \seealso{
-\code{\link{plot.rim}}, \code{\link{fit_inter}}, \code{\link{add_item_properties}}
+\code{\link{plot.inter}}, \code{\link{fit_inter}}, \code{\link{add_item_properties}}
 }

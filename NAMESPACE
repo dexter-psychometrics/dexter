@@ -89,8 +89,8 @@ export(fit_inter)
 export(fit_domains)
 export(r_score_IM)
 
-S3method(print,rim)
-S3method(coef,rim)
+S3method(print,inter)
+S3method(coef,inter)
 
 #profile_analysis.R
 export(profiles)
@@ -100,7 +100,7 @@ export(profile_tables)
 export(profile_plot)
 export(distractor_plot)
 S3method(plot,enorm)
-S3method(plot,rim)
+S3method(plot,inter)
 
 S3method(plot,prms)
 
