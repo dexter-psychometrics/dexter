@@ -18,7 +18,7 @@ fit_enorm(
 
 \item{predicate}{An optional expression to subset data, if NULL all data is used}
 
-\item{fixed_params}{Optionally, a prms object from a previous analysis or 
+\item{fixed_params}{Optionally, an \code{enorm} object from a previous analysis or 
 a data.frame with parameters, see details.}
 
 \item{method}{If CML, the estimation method will be Conditional Maximum Likelihood;
@@ -29,7 +29,7 @@ otherwise, a Gibbs sampler will be used to produce a sample from the posterior}
 \item{merge_within_persons}{whether to merge different booklets administered to the same person, enabling linking over persons as well as booklets.}
 }
 \value{
-An object of type \code{prms}. The prms object can be cast to a data.frame of item parameters 
+An object of type \code{enorm}. The enorm object can be cast to a data.frame of item parameters 
 using function \code{coef} or used directly as input for other Dexter functions.
 }
 \description{
@@ -41,8 +41,8 @@ The eNRM is a slight generalization of the PCM and/or the OPLM. It
 reduces to the Rach model for dichotomous items when all itemscores are 0 or 1, is equal to the PCM for polytomous items if all
 itemscores up to the maximum score occur, otherwise is equal to the oplm if all itemscores have an equal common divisor larger than 1.
 
-To support some flexibility in fixing parameters, fixed_params can be a dexter prms object or a data.frame.
-If a data.frame, it should contain the columns item_id, item_score and a difficulty parameter
+To support some flexibility in fixing parameters, fixed_params can be a dexter enorm object or a data.frame.
+If a data.frame, it should contain the columns item_id, item_score and a difficulty parameter beta
 }
 \references{
 Maris, G., Bechger, T.M. and San-Martin, E. (2015) A Gibbs sampler for the (extended) marginal Rasch model. 
@@ -53,6 +53,6 @@ incomplete designs. In Research for Practical Issues and Solutions in Computeriz
 Routledge, London.
 }
 \seealso{
-functions that accept a prms object as input: \code{\link{ability}}, \code{\link{plausible_values}}, 
-\code{\link{plot.prms}}, and \code{\link{plausible_scores}}
+functions that accept an \code{enorm} object as input: \code{\link{ability}}, \code{\link{plausible_values}}, 
+\code{\link{plot.enorm}}, and \code{\link{plausible_scores}}
 }

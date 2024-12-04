@@ -71,7 +71,7 @@ ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), 
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
   
-  if(inherits(parms,'prms'))
+  if(inherits(parms,'enorm') || inherits(parms,'prms'))
   {
     parms_check = parms$inputs$ssIS[,c('item_id','item_score')]
   } else if(inherits(parms,'data.frame'))

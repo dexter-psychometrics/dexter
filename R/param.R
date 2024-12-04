@@ -37,7 +37,7 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'), by_c
     parms = coef(parms)
   }
   
-  if(inherits(parms,'prms'))
+  if(inherits(parms,'enorm') || inherits(parms,'prms'))
   {
     method = parms$inputs$method
     a = parms$inputs$ssIS$item_score

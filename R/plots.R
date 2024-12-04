@@ -467,6 +467,13 @@ profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, mod
 }
 
 
+plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci = .95, 
+                      add=FALSE, col = 'black', col.model='grey80', ...)
+{
+  plot.enorm(x, item_id=item_id, dataSrc=dataSrc, predicate=predicate, nbins=nbins, ci = ci, 
+             add=add, col = col, col.model=col.model, ...)
+  
+}
 
 #' Plot for the extended nominal Response model
 #' 
@@ -494,9 +501,9 @@ profile_plot = function(dataSrc, item_property, covariate, predicate = NULL, mod
 #' intervals denote the uncertainty about the predicted pvalues within the ability groups for the 
 #' sample size in dataSrc (if not NULL) or the original data on which the model was fit.
 #' 
-#' @method plot prms
+#' @method plot enorm
 #' 
-plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci = .95, 
+plot.enorm = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci = .95, 
                      add=FALSE, col = 'black', col.model='grey80', ...)
 {
   check_num(nbins,'integer',.length=1, .min=2)
@@ -697,7 +704,7 @@ plot.rim = function(x, items=NULL, summate=TRUE, overlay=FALSE,
     #
     z = zRM[row.names(zRM) %in% items,]
     items = row.names(z)
-    maxy = max(z[1,ncol(z)])
+    maxy = max(z[,ncol(z)])
     
     plot.args = merge_arglists(user.args,
                                default=list(main="$model model",xlab="Test score",

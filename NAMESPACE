@@ -54,7 +54,9 @@ export(fit_enorm)
 
 S3method(print,prms)
 S3method(coef,prms)
-S3method(logLik,prms)
+S3method(print,enorm)
+S3method(coef,enorm)
+S3method(logLik,enorm)
 
 #latent_cor.R
 export(latent_cor)
@@ -97,8 +99,10 @@ export(profile_tables)
 #plots.R
 export(profile_plot)
 export(distractor_plot)
-S3method(plot,prms)
+S3method(plot,enorm)
 S3method(plot,rim)
+
+S3method(plot,prms)
 
 #dif.R
 export(DIF)

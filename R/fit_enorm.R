@@ -13,17 +13,17 @@
 #'
 #' @param dataSrc a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score
 #' @param predicate An optional expression to subset data, if NULL all data is used
-#' @param fixed_params Optionally, a prms object from a previous analysis or 
+#' @param fixed_params Optionally, an \code{enorm} object from a previous analysis or 
 #' a data.frame with parameters, see details.
 #' @param method If CML, the estimation method will be Conditional Maximum Likelihood;
 #' otherwise, a Gibbs sampler will be used to produce a sample from the posterior
 #' @param nDraws Number of Gibbs samples when estimation method is Bayes. 
 #' @param merge_within_persons whether to merge different booklets administered to the same person, enabling linking over persons as well as booklets.
-#' @return An object of type \code{prms}. The prms object can be cast to a data.frame of item parameters 
+#' @return An object of type \code{enorm}. The enorm object can be cast to a data.frame of item parameters 
 #' using function \code{coef} or used directly as input for other Dexter functions.
 #' @details
-#' To support some flexibility in fixing parameters, fixed_params can be a dexter prms object or a data.frame.
-#' If a data.frame, it should contain the columns item_id, item_score and a difficulty parameter
+#' To support some flexibility in fixing parameters, fixed_params can be a dexter enorm object or a data.frame.
+#' If a data.frame, it should contain the columns item_id, item_score and a difficulty parameter beta
 #' 
 #' @references 
 #' Maris, G., Bechger, T.M. and San-Martin, E. (2015) A Gibbs sampler for the (extended) marginal Rasch model. 
@@ -33,8 +33,8 @@
 #' incomplete designs. In Research for Practical Issues and Solutions in Computerized Multistage Testing.
 #' Routledge, London. 
 #' 
-#' @seealso functions that accept a prms object as input: \code{\link{ability}}, \code{\link{plausible_values}}, 
-#' \code{\link{plot.prms}}, and \code{\link{plausible_scores}}
+#' @seealso functions that accept an \code{enorm} object as input: \code{\link{ability}}, \code{\link{plausible_values}}, 
+#' \code{\link{plot.enorm}}, and \code{\link{plausible_scores}}
 #'
 fit_enorm = function(dataSrc, predicate = NULL, fixed_params = NULL, method=c("CML", "Bayes"), 
                      nDraws=1000, merge_within_persons=FALSE)
@@ -68,7 +68,7 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
   ## maybe use simplify parms?
   if(!is.null(fixed_params))
   {
-    if(inherits(fixed_params,'prms'))
+    if(inherits(fixed_params,'enorm') || inherits(fixed_params,'prms'))
     {
       if(inherits(fixed_params,"mst_enorm"))
       {
@@ -134,12 +134,13 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
   ss$method = method
   output = list(est=result, inputs=ss,abl_tables = list(mle = mle))
   
-  class(output) = append('prms', class(output)) 
+  class(output) = append('enorm', class(output)) 
   output
 }
 
+print.prms = function(x,...) print.enorm(x,...)
 
-print.prms = function(x, ...){
+print.enorm = function(x, ...){
   p = paste0( 'Parameters for the Extended Nominal Response Model\n\n',
               'Method: ', x$inputs$method, ', ',
               ifelse(x$inputs$method == 'CML',
@@ -151,6 +152,12 @@ print.prms = function(x, ...){
   
   cat(p)
   invisible(x)
+}
+
+
+coef.prms = function(object, hpd = 0.95, what=c('items','var','posterior'), ...)
+{
+  coef.enorm(object, hpd = hpd, what=what, ...)
 }
 
 #' extract enorm item parameters
@@ -191,7 +198,7 @@ print.prms = function(x, ...){
 #' For dichotomous items and for all polytomous items where \eqn{a_j-a_{j-1}} is constant, the formulation is equal to the OPLM.
 #' 
 #' 
-coef.prms = function(object, hpd = 0.95, what=c('items','var','posterior'), ...)
+coef.enorm = function(object, hpd = 0.95, what=c('items','var','posterior'), ...)
 {
   x = object
   what = match.arg(what)
@@ -246,28 +253,6 @@ coef.prms = function(object, hpd = 0.95, what=c('items','var','posterior'), ...)
   }
 }
 
-# have not found useful methods yet for the many parameters we typically have
-# as.array.prms = function(x,...)
-# {
-#   #dimensions: iteration,chain,parameter
-#   if(x$inputs$method!="Bayes")
-#     stop('This method is only defined for Bayesian estimation')
-#   
-#   s = drop(x$est$chain_start)
-#   s = mapply(s,c(s[-1]-1,nrow(beta)),FUN=':')
-#   mn = min(sapply(s,length))
-#   s = lapply(s,function(i) i[1:mn])
-#   
-#   out = array(0,
-#               dim=c(mn,length(s), ncol(x$est$beta)), 
-#               dimnames=list(iteration=1:mn, chain=seq_along(s), item_score=paste(x$inputs$ssIS$item_id, x$inputs$ssIS$item_score)))
-#   for(i in seq_along(s))
-#   {
-#     out[,i,] = x$est$beta[s[[i]],]
-#   }
-#   out
-# 
-# }
 
 # returns log likelihood, or vector of log likelihoods if bayes
 logL = function(parms, mean_gibbs=FALSE)
@@ -309,7 +294,7 @@ logL = function(parms, mean_gibbs=FALSE)
   }
 }
 
-logLik.prms = function(object,...)
+logLik.enorm = function(object,...)
 {
   ll = logL(object)
   

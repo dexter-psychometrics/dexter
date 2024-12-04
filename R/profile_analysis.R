@@ -115,7 +115,7 @@ profiles = function(dataSrc, parms, item_property, predicate=NULL, merge_within_
   check_dataSrc(dataSrc)
   check_string(item_property)
   
-  if(inherits(parms,'prms'))
+  if(inherits(parms,'enorm') || inherits(parms,'prms'))
     parms_check = coef(parms)[,c('item_id','item_score')]
   else
     parms_check = parms[,c('item_id','item_score')]
@@ -173,7 +173,7 @@ profiles = function(dataSrc, parms, item_property, predicate=NULL, merge_within_
 # Expected profile on subsets A given total score on all items in m
 # A is a vector of lists containing mutually exclusive subsets
 # subsets defined by the indices of items
-# prms is produced by fit_inter
+# parameters produced by fit_inter
 # output is list of profiles for each total score. For score s take E_RM[[s+1]]
 
 # first and last are reduced to only the items occurring in A

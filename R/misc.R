@@ -343,8 +343,8 @@ check_parms = function(x, name = deparse(substitute(x)), nullable=FALSE)
 {
   if(nullable && is.null(x))
     return(NULL)
-  if(!inherits(x,'prms'))
-    stop_(name,' must be an object of type `prms`')
+  if(!(inherits(x,'enorm') || inherits(x,'prms')))
+    stop_(name,' must be an object of type `enorm`')
 }
 
 check_list = function(x, name = deparse(substitute(x)), nullable=FALSE)
