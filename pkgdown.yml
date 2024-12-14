@@ -50,6 +50,7 @@ articles:
   blog/2022-12-31-happy-2023: blog/2022-12-31-happy-2023.html
   blog/2023-05-20-dexter-paper: blog/2023-05-20-dexter-paper.html
   blog/2024-01-03-happy-2024: blog/2024-01-03-happy-2024.html
+  blog/2024-12-12-extend-dif-plots: blog/2024-12-12-extend-dif-plots.html
   blog/about: blog/about.html
   dexter: dexter.html
   DIF_vignette: DIF_vignette.html
@@ -58,4 +59,4 @@ articles:
   Plausible_Values: Plausible_Values.html
   profile-plots: profile-plots.html
   Test_Individual_differences: Test_Individual_differences.html
-last_built: 2024-10-23T12:28Z
+last_built: 2024-12-14T22:02Z
