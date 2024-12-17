@@ -64,7 +64,7 @@ reference:
   - title: internal
     contents:
       - coef.p2pass
-      - coef.prms
+      - coef.enorm
       - dexter-package
 
 navbar:
