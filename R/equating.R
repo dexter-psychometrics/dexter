@@ -107,14 +107,11 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
     }
     iter_set = round(seq(1, n_bayes, n_bayes/nDraws))
     iter_set  = iter_set + (n_bayes - iter_set[nDraws])
-    ref_theta = sapply(iter_set, function(iter)
-    {
-      theta_MLE(ref_parms$b[iter,],ref_parms$a, ref_parms$design$first, ref_parms$design$last)$theta[pass_fail+1]
-    })
-    
+    ref_theta = ML_theta(pass_fail, t(ref_parms$b[iter_set,]),ref_parms$a,ref_parms$design$first, ref_parms$design$last)
+
   } else
   {
-    ref_theta = theta_MLE(ref_parms$b,ref_parms$a, ref_parms$design$first, ref_parms$design$last)$theta[pass_fail+1]
+    ref_theta = ML_theta(pass_fail,ref_parms$b,ref_parms$a, ref_parms$design$first, ref_parms$design$last)
   }
   
   max_cores = get_ncores(desired = 32L, maintain_free = 1L)
@@ -147,10 +144,15 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
       eq_score = rep(-1L, length(iter_set))
       tel = 1
       # start values
-      spv = matrix(theta_EAP_GH(colMeans(target_parms$b),target_parms$a,dsg$first, dsg$last, mu=new_mu, sigma=new_sigma)$theta,ncol=1)
+      spv = theta_eap_c(quadpoints$nodes * new_sigma + new_mu, quadpoints$weights,
+                        matrix(colMeans(target_parms$b),ncol=1),target_parms$a,
+                        dsg$first0, dsg$last0, nrow(dsg))$theta
+      if(!is.matrix(spv))
+        spv = matrix(spv,ncol=1)
+      
       for(iter in iter_set)
       {
-        eq_score[tel] = min(which(theta_MLE(target_parms$b[iter,],target_parms$a, dsg$first, dsg$last)$theta >= ref_theta[tel])) - 1
+        eq_score[tel] = equated_score(target_parms$b[iter,],target_parms$a, dsg$first, dsg$last, ref_theta[tel])
 
         PV_sve(target_parms$b[iter,],target_parms$a, dsg$first0, dsg$last0, bcni,cbk, scores, cmu, new_sigma,spv, niter=30L, max_cores=max_cores)
         
@@ -161,10 +163,15 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
       }
     } else
     {
-      eq_score = min(which(theta_MLE(target_parms$b,target_parms$a,dsg$first, dsg$last)$theta >= ref_theta))-1 
+      eq_score = equated_score(target_parms$b,target_parms$a, dsg$first, dsg$last, ref_theta)
       
       # start values
-      spv = matrix(theta_EAP_GH(target_parms$b,target_parms$a,dsg$first, dsg$last, mu=new_mu, sigma=new_sigma)$theta,ncol=1)
+      spv = theta_eap_c(quadpoints$nodes * new_sigma + new_mu, quadpoints$weights,
+                        matrix(target_parms$b,ncol=1),target_parms$a,
+                        dsg$first0, dsg$last0, nrow(dsg))$theta
+      
+      if(!is.matrix(spv))
+        spv = matrix(spv,ncol=1)
       
       for (iter in 1:nDraws)
       {
@@ -200,6 +207,12 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
   out
 }
 
+# one booklet
+equated_score = function(b,a,first,last, ref_theta)
+{
+  est = theta_wmle_c(matrix(b,ncol=1), a, first-1L,last-1L,length(first), FALSE)
+  min(which(drop(est$theta) >= ref_theta)) - 1L
+}
 
 
 

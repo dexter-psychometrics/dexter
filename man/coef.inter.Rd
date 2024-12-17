@@ -9,8 +9,10 @@
 \arguments{
 \item{object}{an object returend by the function \code{\link{fit_inter}}}
 
-\item{what}{whicch coefficients to return. Defaults to \code{items} (the item parameters), can also be \code{scoreprob}
+\item{what}{which coefficients to return. Defaults to \code{items} (the item parameters), can also be \code{scoreprob}
 for the probability of each item score per booklet score.}
+
+\item{...}{further arguments to coef are ignored}
 }
 \description{
 Extract interaction model parameters

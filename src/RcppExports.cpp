@@ -11,94 +11,87 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// Escore_C
-arma::vec Escore_C(const arma::vec& theta, const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last);
-RcppExport SEXP _dexter_Escore_C(SEXP thetaSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP) {
+// ML_theta_c
+arma::vec ML_theta_c(const double score, const arma::mat& b, const arma::ivec& a, arma::ivec& first, arma::ivec& last);
+RcppExport SEXP _dexter_ML_theta_c(SEXP scoreSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const double >::type score(scoreSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type b(bSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< arma::ivec& >::type first(firstSEXP);
+    Rcpp::traits::input_parameter< arma::ivec& >::type last(lastSEXP);
+    rcpp_result_gen = Rcpp::wrap(ML_theta_c(score, b, a, first, last));
+    return rcpp_result_gen;
+END_RCPP
+}
+// deriv_theta_c
+Rcpp::List deriv_theta_c(const arma::vec& theta, const arma::mat& b, const arma::ivec& a, arma::ivec& first, arma::ivec& last, const int n_cores);
+RcppExport SEXP _dexter_deriv_theta_c(SEXP thetaSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP n_coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::vec& >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type b(bSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
-    rcpp_result_gen = Rcpp::wrap(Escore_C(theta, b, a, first, last));
+    Rcpp::traits::input_parameter< arma::ivec& >::type first(firstSEXP);
+    Rcpp::traits::input_parameter< arma::ivec& >::type last(lastSEXP);
+    Rcpp::traits::input_parameter< const int >::type n_cores(n_coresSEXP);
+    rcpp_result_gen = Rcpp::wrap(deriv_theta_c(theta, b, a, first, last, n_cores));
     return rcpp_result_gen;
 END_RCPP
 }
-// theta_mle_sec
-arma::vec theta_mle_sec(const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last);
-RcppExport SEXP _dexter_theta_mle_sec(SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP) {
+// theta_wmle_c
+Rcpp::List theta_wmle_c(const arma::mat& b, const arma::ivec& a, arma::ivec& first, arma::ivec& last, const arma::ivec& bk_nit, const bool WLE, const int n_cores);
+RcppExport SEXP _dexter_theta_wmle_c(SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP bk_nitSEXP, SEXP WLESEXP, SEXP n_coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type b(bSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
-    rcpp_result_gen = Rcpp::wrap(theta_mle_sec(b, a, first, last));
+    Rcpp::traits::input_parameter< arma::ivec& >::type first(firstSEXP);
+    Rcpp::traits::input_parameter< arma::ivec& >::type last(lastSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type bk_nit(bk_nitSEXP);
+    Rcpp::traits::input_parameter< const bool >::type WLE(WLESEXP);
+    Rcpp::traits::input_parameter< const int >::type n_cores(n_coresSEXP);
+    rcpp_result_gen = Rcpp::wrap(theta_wmle_c(b, a, first, last, bk_nit, WLE, n_cores));
     return rcpp_result_gen;
 END_RCPP
 }
-// escore_wle
-double escore_wle(const double theta, const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const int nI, const int max_a);
-RcppExport SEXP _dexter_escore_wle(SEXP thetaSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP nISEXP, SEXP max_aSEXP) {
+// theta_jeap_c
+Rcpp::List theta_jeap_c(const arma::vec& grid, const arma::mat& b, const arma::ivec& a, arma::ivec& first, arma::ivec& last, const arma::ivec& bk_nit, const int n_cores);
+RcppExport SEXP _dexter_theta_jeap_c(SEXP gridSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP bk_nitSEXP, SEXP n_coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const double >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type grid(gridSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type b(bSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
-    Rcpp::traits::input_parameter< const int >::type nI(nISEXP);
-    Rcpp::traits::input_parameter< const int >::type max_a(max_aSEXP);
-    rcpp_result_gen = Rcpp::wrap(escore_wle(theta, b, a, first, last, nI, max_a));
+    Rcpp::traits::input_parameter< arma::ivec& >::type first(firstSEXP);
+    Rcpp::traits::input_parameter< arma::ivec& >::type last(lastSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type bk_nit(bk_nitSEXP);
+    Rcpp::traits::input_parameter< const int >::type n_cores(n_coresSEXP);
+    rcpp_result_gen = Rcpp::wrap(theta_jeap_c(grid, b, a, first, last, bk_nit, n_cores));
     return rcpp_result_gen;
 END_RCPP
 }
-// theta_wle_sec
-arma::vec theta_wle_sec(const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last);
-RcppExport SEXP _dexter_theta_wle_sec(SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP) {
+// theta_eap_c
+Rcpp::List theta_eap_c(const arma::vec& grid, const arma::vec& weights, const arma::mat& b, const arma::ivec& a, arma::ivec& first, arma::ivec& last, const arma::ivec& bk_nit, const int n_cores);
+RcppExport SEXP _dexter_theta_eap_c(SEXP gridSEXP, SEXP weightsSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP bk_nitSEXP, SEXP n_coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
-    rcpp_result_gen = Rcpp::wrap(theta_wle_sec(b, a, first, last));
-    return rcpp_result_gen;
-END_RCPP
-}
-// theta_EAP_GH_c
-Rcpp::List theta_EAP_GH_c(const arma::mat& p_score, const arma::vec& theta, const arma::vec& weights);
-RcppExport SEXP _dexter_theta_EAP_GH_c(SEXP p_scoreSEXP, SEXP thetaSEXP, SEXP weightsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type p_score(p_scoreSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type grid(gridSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type weights(weightsSEXP);
-    rcpp_result_gen = Rcpp::wrap(theta_EAP_GH_c(p_score, theta, weights));
-    return rcpp_result_gen;
-END_RCPP
-}
-// IJ_c
-void IJ_c(const arma::vec& theta, const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, arma::mat& I, arma::mat& J, arma::vec& logFi);
-RcppExport SEXP _dexter_IJ_c(SEXP thetaSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP ISEXP, SEXP JSEXP, SEXP logFiSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type b(bSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type I(ISEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type J(JSEXP);
-    Rcpp::traits::input_parameter< arma::vec& >::type logFi(logFiSEXP);
-    IJ_c(theta, b, a, first, last, I, J, logFi);
-    return R_NilValue;
+    Rcpp::traits::input_parameter< arma::ivec& >::type first(firstSEXP);
+    Rcpp::traits::input_parameter< arma::ivec& >::type last(lastSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type bk_nit(bk_nitSEXP);
+    Rcpp::traits::input_parameter< const int >::type n_cores(n_coresSEXP);
+    rcpp_result_gen = Rcpp::wrap(theta_eap_c(grid, weights, b, a, first, last, bk_nit, n_cores));
+    return rcpp_result_gen;
 END_RCPP
 }
 // fast_factor
@@ -718,7 +711,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // sampleIMC
-arma::imat sampleIMC(const arma::vec& bIM, const arma::vec& cIM, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const arma::ivec& scoretab);
+arma::imat sampleIMC(const arma::vec& bIM, const arma::vec& cIM, const arma::ivec& a, arma::ivec& first, arma::ivec& last, const arma::ivec& scoretab);
 RcppExport SEXP _dexter_sampleIMC(SEXP bIMSEXP, SEXP cIMSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP scoretabSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -726,8 +719,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type bIM(bIMSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type cIM(cIMSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
+    Rcpp::traits::input_parameter< arma::ivec& >::type first(firstSEXP);
+    Rcpp::traits::input_parameter< arma::ivec& >::type last(lastSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type scoretab(scoretabSEXP);
     rcpp_result_gen = Rcpp::wrap(sampleIMC(bIM, cIM, a, first, last, scoretab));
     return rcpp_result_gen;
@@ -735,12 +728,11 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_dexter_Escore_C", (DL_FUNC) &_dexter_Escore_C, 5},
-    {"_dexter_theta_mle_sec", (DL_FUNC) &_dexter_theta_mle_sec, 4},
-    {"_dexter_escore_wle", (DL_FUNC) &_dexter_escore_wle, 7},
-    {"_dexter_theta_wle_sec", (DL_FUNC) &_dexter_theta_wle_sec, 4},
-    {"_dexter_theta_EAP_GH_c", (DL_FUNC) &_dexter_theta_EAP_GH_c, 3},
-    {"_dexter_IJ_c", (DL_FUNC) &_dexter_IJ_c, 8},
+    {"_dexter_ML_theta_c", (DL_FUNC) &_dexter_ML_theta_c, 5},
+    {"_dexter_deriv_theta_c", (DL_FUNC) &_dexter_deriv_theta_c, 6},
+    {"_dexter_theta_wmle_c", (DL_FUNC) &_dexter_theta_wmle_c, 7},
+    {"_dexter_theta_jeap_c", (DL_FUNC) &_dexter_theta_jeap_c, 7},
+    {"_dexter_theta_eap_c", (DL_FUNC) &_dexter_theta_eap_c, 8},
     {"_dexter_fast_factor", (DL_FUNC) &_dexter_fast_factor, 2},
     {"_dexter_fast_factor_lev", (DL_FUNC) &_dexter_fast_factor_lev, 3},
     {"_dexter_fill_resp_matrix", (DL_FUNC) &_dexter_fill_resp_matrix, 4},

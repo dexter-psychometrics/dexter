@@ -6,8 +6,6 @@ library(dplyr)
 
 RcppArmadillo::armadillo_throttle_cores(1)
 
-# is ok, testthat checkjes er omheen
-# er zit een kans element in fit_enorm 
 
 test_that('multiple b',{
   db = open_project(test_path('verbAggression.db'))

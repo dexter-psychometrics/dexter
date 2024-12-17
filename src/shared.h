@@ -1,5 +1,5 @@
-#ifndef DX_SHARED_
-#define DX_SHARED_
+#ifndef DEXTER_SHARED_
+#define DEXTER_SHARED_
 
 #include <vector>
 #include <stdexcept>
@@ -19,6 +19,8 @@ inline int QRT(const int v){ return v*v*v*v; };
 arma::mat mat_init(const arma::mat& orig);
 
 arma::vec vec_init(const arma::vec& orig);
+
+arma::ivec ivec2_iter(const arma::ivec& v);
 
 
 #pragma omp declare reduction( + : arma::mat : omp_out += omp_in ) \

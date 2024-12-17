@@ -550,16 +550,9 @@ plot.enorm = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci
       stop('unknown item',call.=FALSE)
     }
     
-    x$abl_tables = list()
-    
-    x$abl_tables$mle =  suppressWarnings({inner_join(respData$design, x$inputs$ssI,by='item_id')}) |>
-      group_by(.data$booklet_id) |>
-      do({
-        est = theta_MLE(b=x$est$b, a=x$inputs$ssIS$item_score, first=.$first, last=.$last, se=FALSE)
-        theta = est$theta[2:(length(est$theta)-1)]
-        tibble(booklet_score=1:length(theta), theta = theta)
-      }) |>
-      ungroup() 
+    x$abl_tables = list(mle = filter(ability_tables(x,design=respData$design, method='MLE',parms_draw='average'),is.finite(.data$theta)) )
+    if(!is.factor(x$abl_tables$mle$booklet_id))
+      x$abl_tables$mle$booklet_id = factor(x$abl_tables$mle$booklet_id,levels=levels(respData$design$booklet_id))
     
     x$inputs$plt = get_sufStats_nrm(respData, check_sanity=FALSE)$plt
   }

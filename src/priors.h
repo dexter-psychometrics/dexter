@@ -1,5 +1,5 @@
-#ifndef DX_PRIORS_
-#define DX_PRIORS_
+#ifndef DEXTER_PRIORS_
+#define DEXTER_PRIORS_
 
 #include <RcppArmadillo.h>
 #include <xoshiro.h>

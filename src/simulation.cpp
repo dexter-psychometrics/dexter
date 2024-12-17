@@ -1,4 +1,5 @@
 #include <RcppArmadillo.h>
+#include "shared.h"
 #include "ability.h"
 
 using namespace arma;
@@ -89,8 +90,9 @@ arma::imat sampleNRM_itemC(const arma::vec& theta, const arma::vec& b, const arm
 }
 
 
+
 // [[Rcpp::export]]
-arma::imat sampleIMC(const arma::vec& bIM, const arma::vec& cIM, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last,
+arma::imat sampleIMC(const arma::vec& bIM, const arma::vec& cIM, const arma::ivec& a, arma::ivec& first, arma::ivec& last,
 					const arma::ivec& scoretab)
 {
 	// scoretab must already be based on the sample and must include 0 scores even for impossible
@@ -98,12 +100,16 @@ arma::imat sampleIMC(const arma::vec& bIM, const arma::vec& cIM, const arma::ive
 	const int max_score = scoretab.n_elem - 1;
 	const int maxA = max(a(conv_to<uvec>::from(last))); 
 	const int nP = accu(scoretab);
-	const int maxsec = 200;
+	const int maxiter = 200;
 	const double acc = 1e-8;
 	
-	double u, xl, fl, f, dx, theta = -2;
+	double u, theta = -2;
+	double E,I,J;
 	int score, k, pi;
 	
+	
+	
+	vec wmem(maxA+1);
 	vec logb = log(bIM), logc = log(cIM);
 	
 	vec b(&bIM[0], bIM.n_elem);
@@ -128,24 +134,10 @@ arma::imat sampleIMC(const arma::vec& bIM, const arma::vec& cIM, const arma::ive
 			for (int j=first[i]; j<=last[i]; j++) 
 				b[j] = exp(logb[j] + s * a[j] * logc[i]);
 		
-		// derive theta
-		xl = theta + 0.5;
-		fl = Escore_single(xl, b, a, first, last, nit, maxA);
-		f = Escore_single(theta, b, a, first, last, nit, maxA);
-		// using secant
-		for(int iter=0; iter<maxsec; iter++)
-		{
-			dx = (xl-theta) * (f-s)/(f-fl);
-			xl = theta;
-			fl = f;
-			theta += dx;
-			f = Escore_single(theta, b, a, first, last, nit, maxA);
-			if(std::abs(dx) < acc)
-				break;
-		}
+		theta = as_scalar(ML_theta_c((double)s, b, a, first, last));
 		
 		for(int i=1; i<=maxA; i++)
-			lookup[i] = exp(i*theta);
+			lookup[i] = std::exp(i*theta);
 				
 		pi = cs_scoretab[s];
 		// sample
@@ -175,7 +167,9 @@ arma::imat sampleIMC(const arma::vec& bIM, const arma::vec& cIM, const arma::ive
 			if(score == s)
 				pi++;	
 		}
+		theta += 0.1;
 	}
 
 	return out;
 }
+

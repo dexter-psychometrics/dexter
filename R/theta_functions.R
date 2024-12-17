@@ -120,8 +120,16 @@ theta_function = function(parms, items=NULL, booklet=NULL, parms_draw=c('average
   } else fl = parms$items
   a = parms$a
   b = parms$b
-  multiple_b = !is.null(dim(b)) && ncol(b)>1
-
+  multiple_b=is.matrix(b) && nrow(b)>1 && ncol(b)>1
+  if(multiple_b)
+  {
+    b=t(b)
+    n_cores = get_ncores(min(ncol(b),20),1L)
+  }  else
+  { 
+    b = matrix(b,ncol=1)  
+    n_cores=1L
+  }
   rm(parms)
 
   #output
@@ -134,19 +142,7 @@ theta_function = function(parms, items=NULL, booklet=NULL, parms_draw=c('average
       if(any(is.na(theta) | is.nan(theta)))
         stop('theta may not contain nan/NA values')  
       
-      w = is.finite(theta)
-      if(multiple_b)
-      {
-        res = matrix(0,nrow = length(theta), ncol=nrow(b))
-        for(i in 1:nrow(b))
-          res[w,i] = IJ_(b[i,],a,fl$first, fl$last, theta[is.finite(theta)])$I
-      } else
-      {
-        res = double(length(theta))
-        res[w] = IJ_(b,a,fl$first, fl$last, theta[is.finite(theta)])$I
-      }
-      
-      # extremely large values overflow to NaN, recover as 0
+      res = drop(deriv_theta_c(theta,b,a,fl$first0, fl$last0, n_cores=n_cores)$I)
       res[is.nan(res)] = 0
       res
     }
@@ -161,27 +157,11 @@ theta_function = function(parms, items=NULL, booklet=NULL, parms_draw=c('average
       if(any(is.na(theta) | is.nan(theta))) 
         stop('theta may not contain nan/NA values') 
       
+      res = deriv_theta_c(theta,b,a,fl$first0, fl$last0,n_cores=n_cores)$E
       w = is.finite(theta)
-      if(multiple_b)
-      {
-        res = matrix(0,nrow = length(theta), ncol=nrow(b))
-        for(i in 1:nrow(b))
-          res[w,i] = E_score(theta[w],  
-                           b=b[i,], a=a, 
-                           first=fl$first, last=fl$last)
-        res[!w & theta > 0,] = max_score
-      } else
-      {
-        res = double(length(theta))
-      
-        res[w] = E_score(theta[w],b=b, a=a, first=fl$first, last=fl$last)
-        res[!w & theta > 0] = max_score
-      }
-      
-      
-      # extremely large values of theta overflow to NaN (small values undeflow to zero, which is fine)
+      res[!w & theta > 0,] = max_score
       res[is.nan(res)] = max_score
-      res
+      drop(res)
     }
     class(out) = append('exp_func',class(out))
   } else if(what=='sim')
@@ -190,13 +170,13 @@ theta_function = function(parms, items=NULL, booklet=NULL, parms_draw=c('average
     {
       if(multiple_b)
       {
-        res = array(0,dim=c(length(theta), nrow(fl), nrow(b)))
+        res = array(0,dim=c(length(theta), nrow(fl), ncol(b)))
         colnames(res) = fl$item_id
-        for(i in 1:nrow(b))
-          res[,,i] = rscore_item(theta,b=b[i,],a=a,first = fl$first, last = fl$last)
+        for(i in 1:ncol(b))
+          res[,,i] = rscore_item(theta,b=b[,i],a=a,first = fl$first, last = fl$last)
       } else
       {
-        res = rscore_item(theta,b=b,a=a,first = fl$first, last = fl$last)
+        res = rscore_item(theta,b=drop(b),a=a,first = fl$first, last = fl$last)
         colnames(res) = fl$item_id
       }
       res
@@ -212,12 +192,12 @@ theta_function = function(parms, items=NULL, booklet=NULL, parms_draw=c('average
       
       if(multiple_b)
       {
-        res = array(0,dim=c(length(theta), 1L+sum(a[fl$last]), nrow(b)))
-        for(i in 1:nrow(b))
-          res[,,i] = t(pscore(theta,b=b[i,],a=a,first = fl$first, last = fl$last))
+        res = array(0,dim=c(length(theta), 1L+sum(a[fl$last]), ncol(b)))
+        for(i in 1:ncol(b))
+          res[,,i] = t(pscore(theta,b=b[,i],a=a,first = fl$first, last = fl$last))
       } else
       {
-        res = t(pscore(theta,b=b,a=a,first = fl$first, last = fl$last))
+        res = t(pscore(theta,b=drop(b),a=a,first = fl$first, last = fl$last))
       }
       res
     }

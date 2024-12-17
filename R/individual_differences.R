@@ -48,7 +48,9 @@ individual_differences = function(dataSrc, predicate = NULL)
   lambda = parms$est$lambda$lambda
   observed_smooth = suppressWarnings({ENORM2ScoreDist(b,a,lambda,first,last)$n.smooth})
 
-  theta.est = theta_score_distribution(b,a,first,last,observed)
+  theta.est = ML_theta(weighted.mean(parms$inputs$scoretab$booklet_score,parms$inputs$scoretab$N),
+                       b,a,first,last)
+  #theta.est = theta_score_distribution(b,a,first,last,observed)
   expected = pscore(theta.est,b,a,first,last)[,1,drop=TRUE]
   chi = chisq.test(x=observed,p=expected,simulate.p.value = TRUE)
   
@@ -61,26 +63,29 @@ individual_differences = function(dataSrc, predicate = NULL)
   outpt
 }
 
-# Estimate a single ability for a whole score distribution.
-# when testing for overdispersion
-theta_score_distribution = function(b,a,first,last,scoretab)
-{
-  ms.a = sum(a[last])
-  theta = 0
-  np = sum(scoretab)
-  escore = -1
-  score = ((0:ms.a) %*% scoretab)[1,1,drop=TRUE]
-  
-  first0 = as.integer(first-1L)
-  last0 = as.integer(last-1L)
-  
-  while (abs(escore-score)>1e-6)
-  {
-    escore = np * Escore_C(theta,b,a,first0,last0)
-    theta = theta + log(score/escore)
-  }
-  return(theta)
-}
+# MLE for mean score
+# theta_score_distribution = function(b,a,first,last,scoretab)
+# {
+#   max_score = sum(a[last])
+#   mean_score = weighted.mean(0:max_score,scoretab)
+# 
+#   first0 = as.integer(first-1L)
+#   last0 = as.integer(last-1L)
+#   b = matrix(b,ncol=1)
+#   
+#   theta = 0
+#   d  = deriv_theta_c(0,b,a,first0,last0)
+# 
+#   while(abs(mean_score-d$E)>1e-8)
+#   {
+#     E = d$E - mean_score
+#     # hadley's method
+#     theta = theta-(2*E*d$I)/(2*d$I^2 - E*d$J)
+#     d  = deriv_theta_c(theta,b,a,first0,last0)
+#   }
+# 
+#   return(theta)
+# }
 
 
 

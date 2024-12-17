@@ -121,15 +121,14 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
     result = calibrate_Bayes(ss, nIter=nDraws, fixed_params=fixed_params)
   } 
   
-  mle = ss$design |> 
-    group_by(.data$booklet_id) |>
-    do({
-      est = theta_MLE(b=if.else(method=="Bayes",colMeans(result$b), result$b), 
-                      a=ss$ssIS$item_score, .$first, .$last, se=FALSE)
-      theta = est$theta[2:(length(est$theta)-1)]
-      tibble(booklet_score=1:length(theta), theta = theta)
-    }) |>
-    ungroup() 
+  est_mle = theta_wmle_c(b=matrix(if.else(method=="Bayes",colMeans(result$b), result$b),ncol=1),
+                     a=ss$ssIS$item_score,
+                     first=ss$design$first-1L, last = ss$design$last-1L,bk_nit = ss$booklet$nit, WLE=FALSE, n_cores=1L)
+
+  mle = tibble(booklet_id=ss$booklet$booklet_id[est_mle$booklet], 
+         booklet_score=drop(est_mle$booklet_score),
+         theta=drop(est_mle$theta)) |>
+    filter(is.finite(.data$theta))
   
   ss$method = method
   output = list(est=result, inputs=ss,abl_tables = list(mle = mle))

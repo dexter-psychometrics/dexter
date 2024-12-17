@@ -5,6 +5,7 @@
 #include "myomp.h"
 #include "priors.h"
 #include "progress.h"
+#include "shared.h"
 
 using namespace arma;
 
@@ -16,16 +17,6 @@ using Rcpp::Named;
 int omp_ncores()
 {
 	return omp_get_max_threads();
-}
-
-// to do: move to shared since it is useful elsewhere
-ivec cum_iter_ivec(const ivec& v)
-{
-	const int n = v.n_elem;
-	ivec out(n+1);
-	out[0] = 0;
-	out.tail(n) = cumsum(v);
-	return out;
 }
 
 
@@ -47,9 +38,9 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 	dqrng::uniform_distribution prl_runif(0, 1);
 	dqrng::normal_distribution prl_rnorm(0, 1);
 	
-	ivec scoretab_cnp = cum_iter_ivec(scoretab_np);
+	ivec scoretab_cnp = ivec2_iter(scoretab_np);
 	
-	ivec scoretab_cnscores = cum_iter_ivec(scoretab_nscores);
+	ivec scoretab_cnscores = ivec2_iter(scoretab_nscores);
 	
 	const ivec cscoretab = cumsum(const_scoretab); // not for iteration, so no zero added at the front	
 	
@@ -225,7 +216,7 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 		bstep = std::max(1u, bmat.n_cols/chain_iter);	
 	}
 	
-	ivec gscoretab_cnscores = cum_iter_ivec(gscoretab_nscores);
+	ivec gscoretab_cnscores = ivec2_iter(gscoretab_nscores);
 	
 #pragma omp parallel num_threads(max_cores)
 	{	
@@ -373,7 +364,7 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 	// tested that shuffle is correctly within bk-score and does actually shuffle
 	
 	// define gcscoretab
-	ivec gcscoretab = cum_iter_ivec(gscoretab);	
+	ivec gcscoretab = ivec2_iter(gscoretab);	
 
 	
 // this seems to be seed safe, but might not be depending on what else is going on on the computer

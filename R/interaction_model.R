@@ -123,8 +123,9 @@ print.inter = function(x, ...){
 #' Extract interaction model parameters
 #' 
 #' @param object an object returend by the function \code{\link{fit_inter}}
-#' @param what whicch coefficients to return. Defaults to \code{items} (the item parameters), can also be \code{scoreprob}
+#' @param what which coefficients to return. Defaults to \code{items} (the item parameters), can also be \code{scoreprob}
 #' for the probability of each item score per booklet score.
+#' @param ... further arguments to coef are ignored
 #' 
 coef.inter = function(object, what=c("items","scoreprob"), ...) 
 {
@@ -151,7 +152,7 @@ coef.inter = function(object, what=c("items","scoreprob"), ...)
 
     tibble(item_id = rep(as.character(x$inputs$ssIS$item_id),ncol(z)), 
            item_score = rep(x$inputs$ssIS$item_score,ncol(z)),
-           booklet_score = rep(0:(ns-1),each=nrow(z)),
+           booklet_score = rep(x$inputs$scoretab$booklet_score,each=nrow(z)),
            p = as.double(z)) |>
       df_format()
   }
@@ -317,22 +318,21 @@ calibrate_rim = function(ss, regs=FALSE) {
 #' 
 r_score_IM = function(m, scores)
 {
-  
-  
+
   if(inherits(m,'data.frame'))
   {
     stop('input `m` must be of class "inter"')
     # this does not yet work
-    if('beta_IM' %in% colnames(m) && !'beta' %in% colnames(m))
-      m$beta = m$beta_IM
-    m = arrange(m,.data$item_id, .data$item_score)
-    prms = simplify_parms(m)
-
-    a = prms$a
-    bIM = prms$b
-    first = prms$items$first
-    last = prms$items$last
-    cIM = m$sigma
+    # if('beta_IM' %in% colnames(m) && !'beta' %in% colnames(m))
+    #   m$beta = m$beta_IM
+    # m = arrange(m,.data$item_id, .data$item_score)
+    # prms = simplify_parms(m)
+    # 
+    # a = prms$a
+    # bIM = prms$b
+    # first = prms$items$first
+    # last = prms$items$last
+    # cIM = m$sigma
     
   } else if(inherits(m,'inter'))
   {
@@ -354,9 +354,8 @@ r_score_IM = function(m, scores)
   
   
   scoretab = score_tab_single(scores, maxs)
-  
   s = sampleIMC(bIM,cIM,a,as.integer(first-1L), as.integer(last-1L), scoretab)
-
+  
   if(scoretab[1]>0)
     s[1:scoretab[1],] = 0
   

@@ -1,301 +1,409 @@
 #include <RcppArmadillo.h>
 #include "ability.h"
+#include "myomp.h"
+#include "shared.h"
+#include "elsym.h"
+
+
 
 using namespace arma;
 
+using Rcpp::Named;
 
 
-
-/*****
-* vectorized version of Escore
-*
-* optimized with max_a
-*****/
-
-// [[Rcpp::export]]
-arma::vec Escore_C(const arma::vec& theta, const arma::vec& b, const arma::ivec& a, 
-				 const arma::ivec& first, const arma::ivec& last)
+// PA is working memory vector of length max_A + 1
+template<bool LOGLIK>
+void deriv_theta(const double theta, const vec& b, const ivec& a, int* first, int* last, const int nit, const int max_a, vec& PA, double& E, double& I, double &J)
 {
-	const int nI = first.n_elem;
-	const int maxA = max(a(conv_to<uvec>::from(last))); 
-	const int m = theta.n_elem;  
-
-	double denom, num;
-	vec lookup(maxA+1);
+	double M,M1,M2,M3,psum;
 	
-	vec score(m, fill::zeros);
-
-	lookup[0] = 1;
-	  
-	for(int p=0; p<m; p++)
+	E=0; I=0; J=0;
+	
+	for(int score=1; score<=max_a; score++)
+		PA[score] = std::exp(score * theta);
+	
+	for(int i=0;i<nit;i++)
 	{
-		for(int i=1; i <= maxA; i++)
-		{
-			lookup[i] = std::exp(i*theta[p]);
-		}
-	  
-		for (int i=0; i<nI; i++)
-		{
-			num = 0;
-			denom = 1;
-			for (int j=first[i];j<=last[i];j++) 
-			{
-			  num    +=a[j]*b[j]*lookup[a[j]];
-			  denom  +=     b[j]*lookup[a[j]];
-			}
-			score[p]+=num/denom;
-		}
-	}
-	return score;
-}
-
-
-
-
-// non vectorized for use in  theta_mle
-double Escore_single(const double theta, const vec& b, const ivec& a, const ivec& first,  const ivec& last, const int n, const int max_a)
-{
-
-  double denom, num;
-  vec lookup(max_a+1);
-  double score = 0;
-
-  lookup[0] = 1.0;
-  
-
-  for(int i=1; i <= max_a; i++)
-  {
-    lookup[i] = std::exp(i*theta);
-  }
-  
-  for (int i=0; i<n; i++)
-  {
-    num = 0;
-    denom = 1;
-    for (int j=first[i];j<=last[i];j++) 
-    {
-      num    +=a[j]*b[j]*lookup[a[j]];
-	  denom  +=     b[j]*lookup[a[j]];
-    }
-    score+=num/denom;
-  }
-  return score;
-}
-
-
-
-
-// Secant method used to find MLE of theta 
-// [[Rcpp::export]]
-arma::vec theta_mle_sec(const arma::vec& b, const arma::ivec& a, 
-						const arma::ivec& first, const arma::ivec& last)
-{
-	const int n = first.n_elem;
-	const int maxA = max(a(conv_to<uvec>::from(last))); 
-	const int max_score = accu(a(conv_to<uvec>::from(last)));
-	
-	vec theta(max_score-1);
-	
-	double xl = 0, rts = -1.3;
-	double fl = Escore_single(xl, b, a, first, last, n, maxA),
-		   f = Escore_single(rts, b, a, first, last, n, maxA);
-	
-	double dx;
-	
-	const int max_iter = 200;
-	const double acc = 1e-8; // this might be a little too small but it seems to work
-
-	// secant	
-	for(int s=1; s<max_score; s++)
-	{
-		for(int iter=0; iter<max_iter; iter++)
-		{
-			dx = (xl-rts) * (f-s)/(f-fl);
-			xl = rts;
-			fl = f;
-			rts += std::copysign(std::min(std::abs(dx),0.5), dx); // steps larger than 0.5 on the theta scale are useless and can cause overflow in escore
-			// this limit could cause a pingpong effect, although it is unlikely
-			f = Escore_single(rts, b, a, first, last, n, maxA);
-			
-			if(std::abs(dx) < acc)
-				break;
-		} 
-		theta[s-1] = rts;
-		rts += 0.1; // give rts a nudge, otherwise (f-s)/(f-fl) can overflow since f-fl is often very small
-		f = Escore_single(rts, b, a, first, last, n, maxA);
-	}
-	return theta;
-}
-
-
-// [[Rcpp::export]]
-double escore_wle(const double theta, const arma::vec& b, const arma::ivec& a, const arma::ivec& first,  const arma::ivec& last, const int nI, const int max_a)
-{
-	const int max_ncat = max(last - first) + 1;
-	
-	std::vector<long double> Fij(max_ncat);
-	
-	long double I=0,J=0,colsm,M1,M2,M3,M;
-
-
-	for(int i=0;i<nI;i++)
-	{
-		colsm = 1;	
-		for(int j = first[i],k=0; j<=last[i]; j++, k++)
-		{
-			Fij[k] = b[j] * std::exp(a[j] * theta);
-			colsm += Fij[k];
-		}
+		psum = 1;	// adaptation for omitting 0 cat
+		for(int j = *(first+i); j<=*(last+i); j++)
+			psum  += b[j] * PA[a[j]];
 
 		M1=0; M2=0; M3=0;
-		for(int j=first[i], k=0; j<=last[i];j++, k++)
+		for(int j=*(first+i); j<=*(last+i); j++)
 		{
-			M = Fij[k]/colsm;	
+			M = b[j] * PA[a[j]]/psum;	
 			M1 += a[j] * M;
-			M2 += (a[j] * a[j]) * M;
-			M3 += (a[j] * a[j] * a[j]) * M;			
+			M2 += SQR(a[j]) * M;
+			M3 += CUB(a[j]) * M;			
 		}
-			
+		if(LOGLIK)
+		{
+			E += std::log(psum);
+		} else
+		{
+			E += M1;
+		}			
 		I += M2 - M1*M1;
 		J += M3 - M1*(3.0*M2 - 2.0*M1*M1);
-	}
-	
-	return Escore_single(theta, b, a, first, last, nI, max_a) - (J/(2*I));
-}
-
-
-
-// Secant method used to find W-MLE of theta
-// gives an error for non-monotonicity 
-// [[Rcpp::export]]
-arma::vec theta_wle_sec(const arma::vec& b, const arma::ivec& a, 
-						const arma::ivec& first, const arma::ivec& last)
-{
-	const int n = first.n_elem;
-	const int maxA = max(a(conv_to<uvec>::from(last))); 
-	const int max_score = accu(a(conv_to<uvec>::from(last)));
-	
-	vec theta(max_score+1);
-	
-	double xl = 0, rts = -1.3;
-	double fl = escore_wle(xl, b, a, first, last, n, maxA),
-		   f = escore_wle(rts, b, a, first, last, n, maxA);
-	
-	double dx;
-	
-	const int max_iter = 200;
-	const double acc = 1e-8; // this might be a little too small but it seems to work
-
-	// secant	
-	for(int s=0; s<=max_score; s++)
-	{
-		for(int iter=0; iter<max_iter; iter++)
-		{
-			// protection against non-monotonicity
-			if((xl > rts) != (fl > f))
-			{
-				//printf("score: %i\nxl: %f > rts: %f\nfl: %f > f %f\n", s, xl, rts, fl, f);
-				//fflush(stdout);
-				Rcpp::stop("Warm WLE estimates do not converge");
-			}
-			
-			dx = (xl-rts) * (f-s)/(f-fl);
-			xl = rts;
-			fl = f;
-			//rts += dx;
-			rts += std::copysign(std::min(std::abs(dx),0.5), dx); 
-			f = escore_wle(rts, b, a, first, last, n, maxA);						
-			if(std::abs(dx) < acc)
-				break;
-			
-		} 
-		theta[s] = rts;
-		rts += 0.1; // give rts a nudge, otherwise (f-s)/(f-fl) can overflow since f-fl is often very small
-		f = escore_wle(rts, b, a, first, last, n, maxA);
-	}
-	return theta;
-}
-
-// this does not seem to depend on parametrisation
-
-//only reason for this to be in c is extended precision type
-// [[Rcpp::export]]
-Rcpp::List theta_EAP_GH_c(const arma::mat& p_score, const arma::vec& theta, const arma::vec& weights)
-{
-	const int ns = p_score.n_cols, nt=p_score.n_rows;
-	long double sumw,m,var;
-	std::vector<long double> w(nt);
-	vec eap(ns), se(ns);
-	for(int s=0; s<ns; s++)
-	{
-		sumw=0;
-		for(int t=0; t<nt; t++)
-		{
-			w[t] = p_score.at(t,s) * weights[t];
-			sumw += w[t]; 
-		}
-		m=0; var=0;
-		for(int t=0; t<nt; t++)	m += theta[t] * w[t]/sumw;
-		for(int t=0; t<nt; t++)	var += (theta[t] - m) * (theta[t] - m) * w[t]/sumw;
-		eap[s] = m;
-		se[s] = std::sqrt(var);
-	}
-	return Rcpp::List::create(Rcpp::Named("theta") = eap, Rcpp::Named("se") = se);
-}
-
-
-/*
-* output: I, J, logFi assumed to be initialized to zero by caller
-*
-* probably still not an optimal implementation but close
-*/
-// [[Rcpp::export]]
-void IJ_c(const arma::vec& theta, const arma::vec& b, const arma::ivec& a, 
-		  const arma::ivec& first, const arma::ivec& last, 
-		  arma::mat& I, arma::mat& J,  arma::vec& logFi)
-{
-	const int nI = first.n_elem;
-	const int nT = theta.n_elem;	
-	const int max_ncat = max(last - first) + 1;
-	
-	mat Fij(nT, max_ncat);
-	double M,M1,M2,M3,colsm;
-
-	const ivec a2 = a % a;
-	const ivec a3 = a2 % a;	
-	
-	for(int i=0;i<nI;i++)
-	{
-		for(int k=0;k<nT;k++)
-		{
-			for(int j = first[i]; j<=last[i]; j++)
-			{
-				Fij.at(k, j-first[i]) = b[j] * std::exp(a[j] * theta[k]);
-			}
-		}
-
-		for(int j=0;j<nT;j++)
-		{
-			colsm = 1;	// adaptation for omitting 0 cat
-			for(int q=0;q<=last[i] - first[i];q++)
-			{
-				colsm  += Fij.at(j,q);
-			}
-			logFi[j] += log(colsm);
-			
-			M1=0;M2=0;M3=0;
-			for(int k=first[i]; k<=last[i];k++)
-			{
-				M = Fij.at(j, k-first[i])/colsm;	
-				M1 += a[k] * M;
-				M2 += a2[k] * M;
-				M3 += a3[k] * M;			
-			}
-			
-			I.at(j,i) = M2 - M1*M1;
-			J.at(j,i) = M3 - M1*(3.0*M2 - 2.0*M1*M1);
-		}
-
 	} 
 }
 
+// MLE theta for a single score on an itemset (does not have to be an integer)
+// [[Rcpp::export]]
+arma::vec ML_theta_c(const double score, const arma::mat& b, const arma::ivec& a, arma::ivec& first, arma::ivec& last)
+{
+	const int nit = first.n_elem, ndraws=b.n_cols, maxiter=200;
+	const double acc = 1e-8;
+	int max_a = 0;
+	for(int i=0;i<nit;i++)
+		max_a = std::max(max_a,a[last[i]]);
+	
+	vec wmem(max_a + 1), out_theta(ndraws);
+	double E,I,J, theta=0;
+	
+	for(int draw=0;draw<ndraws;draw++)
+	{
+		deriv_theta<false>(theta, b.col(draw), a, first.memptr(), last.memptr(), nit, max_a, wmem, E, I, J);
+		
+		for(int iter=0; iter<maxiter; iter++)
+		{
+			E -= score;
+			theta -= (2*E*I)/(2*SQR(I)-E*J);
+			if(std::abs(E) < acc)
+				break;
+			deriv_theta<false>(theta, b.col(draw), a, first.memptr(), last.memptr(), nit, max_a, wmem, E, I, J);
+		}
+		out_theta[draw] = theta;	
+	}
+	return out_theta;
+}
+
+		
+
+
+// [[Rcpp::export]]
+Rcpp::List deriv_theta_c(const arma::vec& theta, const arma::mat& b, const arma::ivec& a, arma::ivec& first, arma::ivec& last, const int n_cores=1)
+{
+	const int nit = first.n_elem, nt = theta.n_elem, ndraws=b.n_cols;
+	int max_a = 0;
+	for(int i=0;i<nit;i++)
+		max_a = std::max(max_a,a[last[i]]);
+	
+	
+	mat E(nt,ndraws), I(nt,ndraws), J(nt,ndraws);
+
+#pragma omp parallel num_threads(n_cores)	
+{
+	vec wmem(max_a + 1);
+#pragma omp for	
+	for(int draw=0;draw<ndraws;draw++)
+	{
+		for(int t=0; t<nt; t++)
+			deriv_theta<false>(theta[t], b.col(draw), a, first.memptr(), last.memptr(), nit, max_a, wmem, E.at(t,draw), I.at(t,draw), J.at(t,draw));
+	}
+}
+	return Rcpp::List::create(Named("E")=E, Named("I")=I, Named("J")=J);
+}
+
+template<bool WLE>
+double Escore_bk(const double theta, const vec& b, const ivec& a, int* first,  int* last, const int nit, const int max_a, vec& PA)
+{
+	double E,I,J;
+	
+	deriv_theta<false>(theta, b, a, first, last, nit, max_a, PA, E, I, J);
+	
+	if(WLE)
+		E -= J/(2*I);
+	
+	return E;
+}
+
+
+Rcpp::List theta_output(mat& theta, mat& se, const ivec& max_score, const ivec& bk_start, const int nbk, const bool add_inf=false)
+{
+	const int ndraws=theta.n_cols, nscores=theta.n_rows;
+	
+	ivec scores(nscores), booklet(nscores);	
+	
+	for(int bk=0;bk<nbk;bk++)
+	{
+		for(int s=0;s<=max_score[bk];s++)
+		{
+			scores[s+bk_start[bk]] = s;
+			booklet[s+bk_start[bk]] = bk+1; // R-indexed
+		}
+	}
+	
+	if(ndraws>1)
+	{
+		se.col(0) = sqrt(ndraws/(ndraws-1) * var(theta,0,1) + mean(square(se),1));		
+		theta.col(0) = mean(theta,1);		
+	} 
+	
+	if(add_inf)
+	{
+		for(int bk=0;bk<nbk;bk++)
+		{
+			theta.at(bk_start[bk]) = -1 * datum::inf;
+			theta.at(bk_start[bk] + max_score[bk],0) = datum::inf;
+			se.at(bk_start[bk],0) = NA_REAL;
+			se.at(bk_start[bk] + max_score[bk], 0)  = NA_REAL;
+		}
+	}
+	return Rcpp::List::create(Named("booklet") = booklet, Named("booklet_score") = scores, Named("theta") = theta.col(0), Named("se")=se.col(0));
+}
+
+
+
+template<bool WLE>
+Rcpp::List theta_wmle(const arma::mat& b, const arma::ivec& a, 
+						arma::ivec& first, arma::ivec& last,
+						const arma::ivec& bk_nit, const int n_cores=1)
+{
+	const int max_iter = 200;
+	const double acc = 1e-8;
+	const int ndraws = b.n_cols;
+	
+	const int nbk = bk_nit.n_elem;
+	const ivec bk_cnit = ivec2_iter(bk_nit);
+	
+	ivec max_score(nbk,fill::zeros), max_A(nbk,fill::zeros);;
+	
+	for(int bk=0; bk<nbk; bk++)
+	{
+		for(int i=bk_cnit[bk]; i<bk_cnit[bk+1]; i++)
+		{
+			max_score[bk] += a[last[i]];
+			max_A[bk] = std::max(max_A[bk], a[last[i]]);
+		}
+	}
+	const double max_max_A = max(max_A);
+	
+	const ivec bk_start = ivec2_iter(max_score+1);
+	const int nscores = accu(max_score) + nbk;
+	
+	mat theta(nscores, ndraws, fill::zeros), se(nscores, ndraws, fill::zeros);
+	
+	// mle: for(int s=1; s<max_score[bk]; s++)
+	// wle: for(int s=0; s<=max_score[bk]; s++)
+	const int score_start = WLE ? 0 : 1;
+	const int score_end = WLE ? 1 : 0;
+
+	
+#pragma omp parallel num_threads(n_cores)		
+{
+	double xl, rts, fl, f, dx;
+	int *first_ptr, *last_ptr;
+	
+	double E,I,J;
+	vec wmem(max_max_A+1);
+	
+#pragma omp for
+	for(int draw=0; draw<ndraws; draw++)
+	{
+		for(int bk=0; bk<nbk; bk++)
+		{
+			xl = 0;
+			rts = -1.3;
+			
+			first_ptr = first.memptr() + bk_cnit[bk];
+			last_ptr = last.memptr() + bk_cnit[bk];
+			
+			fl = Escore_bk<WLE>(xl, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], max_A[bk], wmem);
+			f = Escore_bk<WLE>(rts, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], max_A[bk], wmem);	
+
+			// secant				
+			for(int s=score_start; s<max_score[bk]+score_end; s++)
+			{
+				for(int iter=0; iter<max_iter; iter++)
+				{
+					dx = (xl-rts) * (f-s)/(f-fl);
+					xl = rts;
+					fl = f;
+					rts += std::copysign(std::min(std::abs(dx),0.5), dx); // steps larger than 0.5 on the theta scale are useless and can cause overflow in escore
+					// this limit could cause a pingpong effect, although it is unlikely
+					f = Escore_bk<WLE>(rts, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], max_A[bk], wmem);
+					
+					if(std::abs(dx) < acc)
+						break;
+				} 
+				theta.at(s+bk_start[bk],draw) = rts;
+				
+				deriv_theta<false>(rts, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], max_A[bk], wmem, E,I, J);
+				
+				if(WLE)
+					se.at(s+bk_start[bk],draw) = std::sqrt( (I+SQR(J/(2*I)))/SQR(I) );
+				else
+					se.at(s+bk_start[bk],draw) = 1/std::sqrt(I);
+				
+				rts += 0.1; // give rts a nudge, otherwise (f-s)/(f-fl) can overflow since f-fl is often very small
+				f = Escore_bk<WLE>(rts, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk],  max_A[bk], wmem);
+			}
+		}
+	}
+}
+
+	return theta_output(theta, se, max_score, bk_start, nbk, !WLE);
+}
+
+// [[Rcpp::export]]
+Rcpp::List theta_wmle_c(const arma::mat& b, const arma::ivec& a, 
+						arma::ivec& first, arma::ivec& last,
+						const arma::ivec& bk_nit, const bool WLE,
+						const int n_cores=1)
+{
+	if(WLE)
+		return theta_wmle<true>(b, a, first, last, bk_nit, n_cores);
+	else
+		return theta_wmle<false>(b, a, first, last, bk_nit, n_cores);
+}
+
+
+
+// eap jeffreys with a grid method
+
+// [[Rcpp::export]]
+Rcpp::List theta_jeap_c(const arma::vec& grid, const arma::mat& b, const arma::ivec& a, arma::ivec& first, arma::ivec& last,  const arma::ivec& bk_nit, const int n_cores=1)
+{
+	// constants
+	const int nt = grid.n_elem, nbk = bk_nit.n_elem, ndraws = b.n_cols;
+
+	const ivec bk_cnit = ivec2_iter(bk_nit);	
+	
+	ivec max_score(nbk,fill::zeros), max_A(nbk,fill::zeros);
+	
+	for(int bk=0; bk<nbk; bk++)
+	{
+		for(int i=bk_cnit[bk]; i<bk_cnit[bk+1]; i++)
+		{
+			max_score[bk] += a[last[i]];
+			max_A[bk] = std::max(max_A[bk], a[last[i]]);
+		}
+	}
+	
+	const ivec bk_start = ivec2_iter(max_score+1);
+	
+	const int nscores = accu(max_score) + nbk;
+	
+	//output vars
+	mat theta(nscores,ndraws,fill::zeros), se(nscores,ndraws,fill::zeros);	
+	
+#pragma omp parallel num_threads(n_cores)		
+{	
+	// working variables
+	int *first_ptr, *last_ptr;
+	double E,I,J;
+	long double w, sum_w, sum_theta;
+	vec wmem(max(max_A)+1);
+	vec prior(nt,fill::zeros), lfi(nt,fill::zeros);
+	
+#pragma omp for
+	for(int draw=0; draw<ndraws; draw++)
+	{	
+		for(int bk=0; bk<nbk; bk++)
+		{
+			first_ptr = first.memptr() + bk_cnit[bk];
+			last_ptr = last.memptr() + bk_cnit[bk];
+		
+			for(int t=0;t<nt;t++)
+				deriv_theta<true>(grid[t], b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], max_A[bk], wmem, lfi[t], prior[t], J);			
+
+			prior = sqrt(prior);
+			
+			for(int s=0; s<=max_score[bk]; s++)
+			{
+				sum_w=0, sum_theta=0;
+				for(int t=0;t<nt;t++)
+				{
+					w = prior[t] * std::exp(s * grid[t] - lfi[t]);
+					sum_w += w;
+					sum_theta += w * grid[t];
+				}
+				theta.at(bk_start[bk]+s, draw) = sum_theta/sum_w;
+				deriv_theta<false>(theta.at(bk_start[bk]+s, draw), b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], max_A[bk], wmem, E, I, J);	
+				se.at(bk_start[bk]+s, draw) = std::sqrt( (I+SQR(J/(2*I))) /SQR(I));
+			}
+		}
+	}
+}
+	return theta_output(theta, se, max_score, bk_start, nbk, false);
+
+}
+
+// eap normal with a grid
+
+double logsumexp(const vec& v)
+{
+	const double m = max(v);
+	return m + std::log(accu(exp(v-m)));
+}
+
+
+// [[Rcpp::export]]
+Rcpp::List theta_eap_c(const arma::vec& grid, const arma::vec& weights, const arma::mat& b, const arma::ivec& a, arma::ivec& first, arma::ivec& last,  const arma::ivec& bk_nit, const int n_cores=1)
+{
+	// constants
+	const int nt = grid.n_elem, nbk = bk_nit.n_elem, ndraws = b.n_cols;
+
+	const ivec bk_cnit = ivec2_iter(bk_nit);	
+	
+	ivec max_score(nbk,fill::zeros);
+	
+	for(int bk=0; bk<nbk; bk++)
+		for(int i=bk_cnit(bk); i<bk_cnit(bk+1); i++)
+			max_score[bk] += a[last[i]];
+
+	const ivec bk_start = ivec2_iter(max_score+1);
+	
+	const int nscores = accu(max_score) + nbk, max_max_score = max(max_score);
+	
+	//output vars
+	mat theta(nscores,ndraws,fill::zeros), se(nscores,ndraws,fill::zeros);		
+	
+	
+#pragma omp parallel num_threads(n_cores)		
+{	
+	// working variables
+	int *first_ptr, *last_ptr;
+	long double sumw, m;
+	vec g(max_max_score+1), gw(max_max_score+1), w(nt);
+	mat ps(max_max_score+1, nt);
+	
+	
+#pragma omp for
+	for(int draw=0; draw<ndraws; draw++)
+	{		
+		for(int bk=0; bk<nbk; bk++)
+		{
+			first_ptr = first.memptr() + bk_cnit(bk);
+			last_ptr = last.memptr() + bk_cnit(bk);
+			elsym(b.col(draw), a, first_ptr, last_ptr, bk_nit(bk), g, gw);
+			g = log(g);
+
+			for(int t=0; t<nt; t++)
+			{
+				for(int s=0; s<=max_score[bk]; s++)
+					ps.at(s,t) = g[s] + s * grid[t];
+				ps.col(t).head(max_score[bk]+1) -= logsumexp(ps.col(t).head(max_score[bk]+1));
+			}
+			ps = exp(ps); // probability score s 
+
+			for(int s=0; s<=max_score[bk]; s++)
+			{
+				sumw=0;
+				for(int t=0; t<nt; t++)
+				{
+					w[t] = ps.at(s,t) * weights[t];
+					sumw += w[t]; 
+				}
+				w/=sumw;
+				
+				m = accu(grid % w);
+				theta.at(bk_start[bk]+s, draw) = m;
+				se.at(bk_start[bk]+s, draw) = std::sqrt(accu(square(grid-m) % w));	
+			}			
+		}
+	}
+}	
+	return theta_output(theta, se, max_score, bk_start, nbk, false);
+}	

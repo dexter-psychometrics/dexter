@@ -1,6 +1,5 @@
 
 
-
 #' Estimate abilities
 #'
 #' Computes estimates of ability for persons or for booklet scores
@@ -17,7 +16,9 @@
 #' @param prior    If an EAP estimate is produced one can choose a normal prior or
 #'                 Jeffreys prior; i.e., a prior proportional to the square root of test information.
 #' @param parms_draw When parms is Bayesian, parms_draw can be the index of the posterior sample of the item 
-#' parameters that will be used for generating abilities. If parms_draw='average', the posterior mean is used. 
+#' parameters that will be used for generating abilities. If parms_draw='sample' ability estimates are estimated over all draws and averaged. Rubin's rule is used to combine the imputaiton variance and sampling variance. 
+#' If parms_draw='average', 
+#' the posterior mean of the item parameters is used. 
 #' @param mu Mean of the normal prior
 #' @param sigma Standard deviation of the normal prior
 #' @param merge_within_persons for persons who were administered multiple booklets, 
@@ -62,7 +63,7 @@
 #' Psychometrika, 54(3), 427-450. 
 #' 
 ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), prior=c("normal", "Jeffreys"), 
-                   parms_draw='average', mu=0, sigma=4, merge_within_persons=FALSE)
+                   parms_draw='sample', mu=0, sigma=4, merge_within_persons=FALSE)
 {
   check_dataSrc(dataSrc)
 
@@ -100,7 +101,7 @@ ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), 
 
 #' @rdname ability
 ability_tables = function(parms, design = NULL, method = c("MLE","EAP","WLE"), prior=c("normal", "Jeffreys"), 
-                          parms_draw = 'average', mu=0, sigma=4)
+                              parms_draw = c('sample','average'), mu=0, sigma=4)
 {
   method = match.arg(method)
   prior = match.arg(prior) 
@@ -113,116 +114,53 @@ ability_tables = function(parms, design = NULL, method = c("MLE","EAP","WLE"), p
     check_num(sigma, .length=1, .min=0)
   }
   
-  if (method=="EAP" && prior=="Jeffreys") method="jEAP"
-  
   simple_parms = simplify_parms(parms, design, parms_draw) 
   b = simple_parms$b
   a = simple_parms$a
   
-  estimate = switch(method, 
-                    'MLE'  = function(.){ theta_MLE(b, a, .$first, .$last, se=TRUE) }, 
-                    'EAP'  = function(.){ theta_EAP_GH(b, a, .$first, .$last, mu=mu, sigma=sigma) },
-                    'jEAP' = function(.){ theta_jEAP(b, a, .$first, .$last, se=TRUE) },
-                    'WLE' = function(.){ theta_WLE(b, a, .$first, .$last, se=TRUE) })
+  if(!is.matrix(b))
+  {
+    b = matrix(b, ncol=1)
+    n_cores=1
+  } else
+  {
+    b = t(b) # column per draw instead of row
+    n_cores = get_ncores(min(20,ncol(b)),1)
+  }
+  
+  bk_nit = count(simple_parms$design, .data$booklet_id) |>
+    arrange(.data$booklet_id)
   
   
-  # under the assumption that we always get theta's for the vector 0:max_test_score 
-  simple_parms$design |> 
-    group_by(.data$booklet_id) |>
-    do({
-      est = estimate(.)
-      tibble(booklet_score=0:(length(est$theta)-1), theta = est$theta,se=est$se)
-    }) |>
-    ungroup() |>
+  
+  # add test for simple parms, design must be sorted by booklet (and 
+  # booklet must be a factor, otherwise we run into local issues)
+  if(method %in% c('MLE','WLE'))
+  {
+    est = theta_wmle_c(b,a,simple_parms$design$first0, simple_parms$design$last0, bk_nit$n, (method=='WLE'), n_cores=n_cores)
+    
+  } else if(method == "EAP" && prior == "Jeffreys")
+  {
+    grid = seq(-6,6,length.out=101)
+    est = theta_jeap_c(grid, b,a,simple_parms$design$first0, simple_parms$design$last0, bk_nit$n, n_cores=n_cores)
+    
+  } else if(method == 'EAP')
+  {
+    nodes = quadpoints$nodes * sigma + mu
+    weights = quadpoints$weights
+    
+    est = theta_eap_c(nodes, weights,b,a,simple_parms$design$first0, simple_parms$design$last0, bk_nit$n, n_cores=n_cores)
+    
+  } else stop('unknown method')
+  
+  tibble(booklet_id=bk_nit$booklet_id[est$booklet], 
+         booklet_score=drop(est$booklet_score),
+         theta=drop(est$theta),
+         se=drop(est$se)) |>
     mutate_if(is.factor, as.character) |>
     df_format()
 }
 
-
-# Computes likelihood and test information for internal use
-#
-# For a vector of thetas it returns:
-# l = a matrix (nbr of response cats * length of theta) of the likelihood or log-likelihood if log=TRUE
-# I = a vector of the information function computed at each theta = sum(P'^2/PQ)
-# J = a vector of the derivative of the information function at each theta
-#
-# The vector theta can be a set of quadrature points or estimates to compute their SE
-#
-# Note: can not deal with Inf or NA values in theta
-IJ_ = function(b, a, first, last, theta, log=FALSE)
-{
-  nI = length(first)
-  nT = length(theta)
-  I = matrix(0, nT, nI)
-  J = matrix(0, nT, nI)
-  logFi = double(nT)
-  
-  a = as.integer(a)
-  
-  IJ_c(theta, b, a, as.integer(first-1L), as.integer(last-1L), I, J,logFi)
-  
-  scores = 0:sum(a[last])
-  
-  l = sweep(outer(scores,theta), 2, logFi, '-')
-  if (!log) l = exp(l)
-  return(list(I=rowSums(I), J=rowSums(J), l=l))
-}
-
-
-
-theta_MLE = function(b,a,first,last, se=FALSE)
-{
-  a = as.integer(a)
-  theta = theta_mle_sec(b, a, as.integer(first-1L), as.integer(last-1L))[,1,drop=TRUE]
-  
-  sem = NULL
-  if (se)
-  {
-    # use r indexed first last for IJ
-    f = IJ_(b,a,first,last, theta)
-    sem = c(NA, 1/sqrt(f$I), NA)
-  }
-  
-  return(list(theta = c(-Inf,theta,Inf), se=sem))
-}
-
-theta_WLE = function(b,a,first,last, se=FALSE)
-{
-  a = as.integer(a)
-  theta = theta_wle_sec(b, a, as.integer(first-1L), as.integer(last-1L))[,1,drop=TRUE]
-  
-  sem = NULL
-  if (se)
-  {
-    # use r indexed first last for IJ
-    f = IJ_(b,a,first,last, theta)
-    sem =sqrt((f$I+(f$J/(2*f$I))^2)/f$I^2)
-  }
-  
-  return(list(theta = theta, se=sem))
-}
-
-
-
-
-## EAP using Jeffrey's prior: aka propto sqrt(information)
-# Uses a weighted average to integrate over a grid defined by:
-# grid_from, grid_to and grid_length.
-theta_jEAP = function(b, a, first,last, se=FALSE, grid_from=-6, grid_to=6, grid_length=101) 
-{
-  theta_grid = seq(grid_from, grid_to, length=grid_length)
-  f = IJ_(b,a,first,last,theta_grid)
-  prior=sqrt(f$I)
-  w = sweep(f$l, 2, prior, '*')
-  theta = apply(w, 1, function(x) weighted.mean(theta_grid, w=x))
-  sem=rep(NA,length(theta))
-  if (se)
-  {
-    f = IJ_(b,a,first,last, theta)
-    sem =sqrt((f$I+(f$J/(2*f$I))^2)/f$I^2)
-  }
-  return(list(theta=theta,se=sem))
-}
 
 # Expected distribution given a vector theta
 # return matrix, ncol=length(theta), nrow=nscores
@@ -235,15 +173,6 @@ pscore = function(theta, b, a, first, last)
   exp(sweep(p,2,apply(p,2,logsumexp),`-`))
 }
 
-# Expected scores given one or more ability values theta
-E_score = function(theta,b,a,first,last)
-{
-  first = as.integer(first-1L)
-  last = as.integer(last-1L)
-  a = as.integer(a)
-  
-  Escore_C(theta, b, a, first, last)[,1,drop=TRUE]
-}
 
 rscore_item = function(theta,b,a,first,last)
 {
@@ -254,13 +183,13 @@ rscore_item = function(theta,b,a,first,last)
 }
 
 
-# se is always returned (arg se is ignored)
-theta_EAP_GH = function(b, a, first,last, se=TRUE, mu=0, sigma=4)
+# MLE of theta for one score in one booklet which does not have to be an integer
+# b must be a vector or a matrix with the draws as columns
+ML_theta = function(score,b,a,first,last)
 {
-  nodes = quadpoints$nodes * sigma + mu
-  weights = quadpoints$weights
-  ps = t(pscore(nodes,b,a,first,last))
-  lapply(theta_EAP_GH_c(ps,nodes,weights), drop)
+  if(!is.matrix(b)) b = matrix(b,ncol=1)
+  ML_theta_c(as.numeric(score), b, as.integer(a), as.integer(first-1L), as.integer(last-1L))
 }
+
 
 
