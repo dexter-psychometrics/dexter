@@ -68,8 +68,9 @@
 <url><loc>/reference/add_item_properties.html</loc></url>
 <url><loc>/reference/add_person_properties.html</loc></url>
 <url><loc>/reference/close_project.html</loc></url>
+<url><loc>/reference/coef.enorm.html</loc></url>
+<url><loc>/reference/coef.inter.html</loc></url>
 <url><loc>/reference/coef.p2pass.html</loc></url>
-<url><loc>/reference/coef.prms.html</loc></url>
 <url><loc>/reference/design_info.html</loc></url>
 <url><loc>/reference/dexter-package.html</loc></url>
 <url><loc>/reference/distractor_plot.html</loc></url>
@@ -94,9 +95,9 @@
 <url><loc>/reference/plausible_scores.html</loc></url>
 <url><loc>/reference/plausible_values.html</loc></url>
 <url><loc>/reference/plot.DIF_stats.html</loc></url>
+<url><loc>/reference/plot.enorm.html</loc></url>
+<url><loc>/reference/plot.inter.html</loc></url>
 <url><loc>/reference/plot.p2pass.html</loc></url>
-<url><loc>/reference/plot.prms.html</loc></url>
-<url><loc>/reference/plot.rim.html</loc></url>
 <url><loc>/reference/probability_to_pass.html</loc></url>
 <url><loc>/reference/profile_plot.html</loc></url>
 <url><loc>/reference/profiles.html</loc></url>

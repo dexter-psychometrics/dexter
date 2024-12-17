@@ -18,7 +18,7 @@ or a Gibbs sampler for Bayesian estimation."><!-- mathjax --><script src="https:
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dexter</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.5.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.6.0</span>
       </span>
     </div>
 
@@ -112,7 +112,7 @@ or a Gibbs sampler for Bayesian estimation.</p>
 
 
 <dt id="arg-fixed-params">fixed_params<a class="anchor" aria-label="anchor" href="#arg-fixed-params"></a></dt>
-<dd><p>Optionally, a prms object from a previous analysis or
+<dd><p>Optionally, an <code>enorm</code> object from a previous analysis or
 a data.frame with parameters, see details.</p></dd>
 
 
@@ -131,7 +131,7 @@ otherwise, a Gibbs sampler will be used to produce a sample from the posterior</
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of type <code>prms</code>. The prms object can be cast to a data.frame of item parameters
+    <p>An object of type <code>enorm</code>. The enorm object can be cast to a data.frame of item parameters
 using function <code>coef</code> or used directly as input for other Dexter functions.</p>
     </div>
     <div id="details">
@@ -139,8 +139,8 @@ using function <code>coef</code> or used directly as input for other Dexter func
     <p>The eNRM is a slight generalization of the PCM and/or the OPLM. It
 reduces to the Rach model for dichotomous items when all itemscores are 0 or 1, is equal to the PCM for polytomous items if all
 itemscores up to the maximum score occur, otherwise is equal to the oplm if all itemscores have an equal common divisor larger than 1.</p>
-<p>To support some flexibility in fixing parameters, fixed_params can be a dexter prms object or a data.frame.
-If a data.frame, it should contain the columns item_id, item_score and a difficulty parameter</p>
+<p>To support some flexibility in fixing parameters, fixed_params can be a dexter enorm object or a data.frame.
+If a data.frame, it should contain the columns item_id, item_score and a difficulty parameter beta</p>
     </div>
     <div id="references">
     <h2>References</h2>
@@ -152,8 +152,8 @@ Routledge, London.</p>
     </div>
     <div id="see-also">
     <h2>See also</h2>
-    <div class="dont-index"><p>functions that accept a prms object as input: <code><a href="ability.html">ability</a></code>, <code><a href="plausible_values.html">plausible_values</a></code>,
-<code><a href="plot.prms.html">plot.prms</a></code>, and <code><a href="plausible_scores.html">plausible_scores</a></code></p></div>
+    <div class="dont-index"><p>functions that accept an <code>enorm</code> object as input: <code><a href="ability.html">ability</a></code>, <code><a href="plausible_values.html">plausible_values</a></code>,
+<code><a href="plot.enorm.html">plot.enorm</a></code>, and <code><a href="plausible_scores.html">plausible_scores</a></code></p></div>
     </div>
 
   </div>
