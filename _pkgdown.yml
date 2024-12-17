@@ -28,13 +28,13 @@ reference:
       - distractor_plot
       - fit_inter
       - fit_domains
-      - plot.rim
+      - plot.inter
       - r_score_IM
   - title: Item Response Theory
     desc: model and predict
     contents:
       - fit_enorm
-      - plot.prms
+      - plot.enorm
       - information
       - ability
       - plausible_values
