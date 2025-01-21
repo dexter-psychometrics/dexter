@@ -112,7 +112,7 @@
                         <h4 data-toc-skip class="author">Ivailo
 Partchev, Jesse Koops, Timo Bechger, Gunter Maris</h4>
             
-            <h4 data-toc-skip class="date">2025-01-05</h4>
+            <h4 data-toc-skip class="date">2025-01-21</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/dexter.Rmd" class="external-link"><code>vignettes/dexter.Rmd</code></a></small>
       <div class="hidden name"><code>dexter.Rmd</code></div>
@@ -151,11 +151,8 @@ frame containing, in any order, three columns named <em>exactly</em>
 <code>item_id</code>, <code>response</code>, and
 <code>item_score</code>. An example is provided with the package:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Error in get(paste0(generic, ".", class), envir = get_method_env()) : </span></span>
-<span><span class="co">##   object 'type_sum.accel' not found</span></span></code></pre>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dexter-psychometrics.github.io/dexter/" class="external-link">dexter</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dexter-psychometrics.github.io/dexter/" class="external-link">dexter</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##        item_id response item_score</span></span>
 <span><span class="co">## 1  S1WantCurse        0          0</span></span>
@@ -191,7 +188,7 @@ assigned scores. Any responses found in the data but not in the scoring
 rules will automatically be assigned a score of 0.</p>
 <p>With the scoring rules defined, a new <strong>dexter</strong> project
 is created with:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">db</span> <span class="op">=</span> <span class="fu"><a href="../reference/start_new_project.html">start_new_project</a></span><span class="op">(</span><span class="va">verbAggrRules</span>, <span class="st">"verbAggression.db"</span>, person_properties<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>gender<span class="op">=</span><span class="st">"unknown"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>The first argument is the data frame with the scoring rules, the
 second is an optional name for the data base defaulting to ‘dexter.db’,
@@ -209,7 +206,7 @@ the user to read data in this shape from a variety of formats: text
 files, Excel worksheets, SPSS binary files, etc. Once that the data for
 a test form (booklet) has been made available to R as a data frame, it
 can be added to the data base. For our verbal aggression data:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/add_booklet.html">add_booklet</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrData</span>, <span class="st">"agg"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## $items</span></span>
 <span><span class="co">##  [1] "S1DoCurse"   "S1DoScold"   "S1DoShout"   "S1WantCurse" "S1WantScold"</span></span>
@@ -248,14 +245,14 @@ aggression data is organized in a design where three kinds of behaviour
 are considered in two modes with regard to four different frustrating
 situations that can be blamed on the self or on others. We input these
 facets of the design as item properties in the following way:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/add_item_properties.html">add_item_properties</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">verbAggrProperties</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## 4 item properties for 24 items added or updated</span></span></code></pre>
 <p>The first argument is the data base connection created with
 <code>start_new_project</code>, and the second is a data frame with the
 item properties. For our example, the data frame is supplied with the
 package, and it looks like this:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">verbAggrProperties</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##       item_id behavior mode blame situation</span></span>
 <span><span class="co">## 1   S1DoCurse    Curse   Do Other       Bus</span></span>
@@ -268,11 +265,11 @@ package, and it looks like this:</p>
 the scoring rules. Functions like <code>get_booklets</code>,
 <code>get_items</code> and <code>get_persons</code> help users keep
 track of what has been entered in the database:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_booklets.html">get_booklets</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##   booklet_id n_items n_persons booklet_max_score</span></span>
 <span><span class="co">## 1        agg      24       316                48</span></span></code></pre>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_items.html">get_items</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##       item_id behavior mode blame situation</span></span>
 <span><span class="co">## 1   S1DoCurse    Curse   Do Other       Bus</span></span>
@@ -281,7 +278,7 @@ track of what has been entered in the database:</p>
 <span><span class="co">## 4 S1WantCurse    Curse Want Other       Bus</span></span>
 <span><span class="co">## 5 S1WantScold    Scold Want Other       Bus</span></span>
 <span><span class="co">## 6 S1WantShout    Shout Want Other       Bus</span></span></code></pre>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/get_persons.html">get_persons</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Rows: 316</span></span>
@@ -297,13 +294,13 @@ this vignette, we concentrate on command language.</p>
 largely drawn from the tool chest of classical test theory. We call it
 TIA, short for ‘test and item analysis’. The statistics are produced
 with function <code>tia_tables</code> and saved in an object:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tt</span> <span class="op">=</span> <span class="fu"><a href="../reference/tia_tables.html">tia_tables</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></code></pre></div>
 <p>At the test (form) level, we have some basic information for each
 booklet: the number of persons and the number of items, coefficient
 alpha, the average p-value and the average correlation between item
 scores and total scores:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tt</span><span class="op">$</span><span class="va">booklets</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -343,7 +340,7 @@ correlation of each item with the total score and the rest score for the
 booklets. This table can be shown in a variety of ways: for each booklet
 separately, averaged across booklets, or in a format that facilitates
 comparisons of items between booklets:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tt</span><span class="op">$</span><span class="va">items</span></span></code></pre></div>
 <table style="width:100%;" class="table">
 <colgroup>
@@ -642,7 +639,7 @@ particularly useful to detect issues with multiple choice items due to
 wrong keys or, simply, sub-optimal item writing. Our example data is not
 cognitive, so the distractor plots resemble the trace lines of partial
 credit items:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/distractor_plot.html">distractor_plot</a></span><span class="op">(</span><span class="va">db</span>, <span class="st">'S1DoShout'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="dexter_files/figure-html/unnamed-chunk-13-1.png" width="576" style="display: block; margin: auto;"></p>
 <p>In addition, <strong>dexter</strong> provides a new diagnostic tool
@@ -667,7 +664,7 @@ the case of dichotomous data).</p>
 <p>The interaction model can be fit for any booklet in the test with
 function <code>fit_inter</code>; results are best appreciated in
 graphical form:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">m</span> <span class="op">=</span> <span class="fu"><a href="../reference/fit_inter.html">fit_inter</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">booklet_id</span><span class="op">==</span><span class="st">'agg'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">"S1DoScold"</span>, show.observed<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="dexter_files/figure-html/unnamed-chunk-14-1.png" width="576" style="display: block; margin: auto;"></p>
@@ -686,14 +683,14 @@ detailed discussion of the item-total regressions may be found on <a href="https
 blog</a>.</p>
 <p>We can show the response category probabilities instead of the
 expected item score:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">m</span>, <span class="st">'S1DoCurse'</span>, summate<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="dexter_files/figure-html/unnamed-chunk-15-1.png" width="576" style="display: block; margin: auto;"></p>
 <p>On the other hand, we can represent scores on subtests as super-items
 and analyse these as normal items (function <code>fit_domains</code>).
 For example, treating the four frustrating situations in the verbal
 aggression example as domains, we get:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">mSit</span> <span class="op">=</span> <span class="fu"><a href="../reference/fit_domains.html">fit_domains</a></span><span class="op">(</span><span class="va">db</span>, item_property<span class="op">=</span> <span class="st">"situation"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mSit</span><span class="op">)</span></span></code></pre></div>
 <p><img src="dexter_files/figure-html/unnamed-chunk-16-1.png" width="576" style="display: block; margin: auto;"></p>
@@ -702,16 +699,16 @@ sure that there are no obvious issues, that item quality is acceptable,
 and the model we intend to use for calibration fits the data reasonably
 well. The actual estimation of the calibration model, over all booklets
 concurrently, is done with function <code>fit_enorm</code>:</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">parms</span> <span class="op">=</span> <span class="fu"><a href="../reference/fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></code></pre></div>
 <p>The default estimation method is conditional maximum likelihood
 (CML). The alternative is to use a Gibbs sampler (Bayesian
 Calibration).</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">parms_gibbs</span> <span class="op">=</span> <span class="fu"><a href="../reference/fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db</span>, method<span class="op">=</span><span class="st">'Bayes'</span><span class="op">)</span></span></code></pre></div>
 <p>The function returns a parameters object, which has <code>plot</code>
 and <code>coef</code> methods.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">parms_gibbs</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
@@ -790,12 +787,12 @@ estimation of either the item parameters or the person parameters
 enables the user to consider various sources of uncertainty.</p>
 <p>Plausible values are most often used for characterizing and comparing
 populations. For the verbal aggression example, we get:</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pv</span> <span class="op">=</span> <span class="fu"><a href="../reference/plausible_values.html">plausible_values</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">parms</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/density.html" class="external-link">density</a></span><span class="op">(</span><span class="va">pv</span><span class="op">$</span><span class="va">PV1</span><span class="op">)</span>, bty<span class="op">=</span><span class="st">'l'</span>, main<span class="op">=</span><span class="st">'verbal aggression'</span>, xlab<span class="op">=</span><span class="st">'plausible value'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="dexter_files/figure-html/unnamed-chunk-21-1.png" width="576" style="display: block; margin: auto;"></p>
 <p>For a direct comparison on gender:</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pv</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">pv</span>, <span class="fu"><a href="../reference/get_persons.html">get_persons</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span><span class="va">PV1</span><span class="op">~</span><span class="va">gender</span>, data<span class="op">=</span><span class="va">pv</span>, border<span class="op">=</span><span class="st">'black'</span><span class="op">)</span></span></code></pre></div>
@@ -811,7 +808,7 @@ Maris 2015)</span>, and a hypothesis-driven one, the profile plot. There
 is a separate vignette for either. In our verbal aggression example, we
 can explore visually the hypothesis that men and women differ in the
 mode of behaviour (do or want to do):</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/profile_plot.html">profile_plot</a></span><span class="op">(</span><span class="va">db</span>, item_property<span class="op">=</span><span class="st">'mode'</span>, covariate<span class="op">=</span><span class="st">'gender'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="dexter_files/figure-html/unnamed-chunk-23-1.png" width="480" style="display: block; margin: auto;"></p>
 <p>The results are striking: at any level of overall aggression, women
@@ -827,7 +824,7 @@ which to subset the data. An obvious use is to exclude, in a flexible
 way, some data from analysis. As subsetting can be applied to the
 functions independently, we can, e.g., estimate a model on one subset of
 examinees and apply it to another.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/close_project.html">close_project</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">RcppArmadillo</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RcppArmadillo/man/armadillo_throttle_cores.html" class="external-link">armadillo_reset_cores</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
