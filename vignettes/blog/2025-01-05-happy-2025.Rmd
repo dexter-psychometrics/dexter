@@ -1,0 +1,12 @@
+---
+title: Happy 2025!
+author: Ivailo Partchev
+date: '2025-01-05'
+slug: happy-2025
+categories: []
+tags: []
+---
+
+![](img/2005.png)
+
+
