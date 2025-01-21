@@ -57,7 +57,7 @@ In **dexter**, item scores are always integers, and the lowest score for each it
 
 With the scoring rules defined, a new **dexter** project is created with:
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, purl=FALSE}
 db = start_new_project(verbAggrRules, "verbAggression.db", person_properties=list(gender="unknown"))
 ```
 
@@ -108,7 +108,7 @@ tt = tia_tables(db)
 
 At the test (form) level, we have some basic information for each booklet: the number of persons and the number of items, coefficient alpha, the average p-value and the average correlation between item scores and total scores: 
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, purl=FALSE}
 tt$booklets
 ```
 
@@ -118,7 +118,7 @@ kable(tt$booklets, digits=3)
 
 At item level, there are the mean scores, the p-values (mean scores rescaled between 0 and 1 for comparability across items), the correlation of each item with the total score and the rest score for the booklets. This table can be shown in a variety of ways: for each booklet separately, averaged across booklets, or in a format that facilitates comparisons of items between booklets:
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, purl=FALSE}
 tt$items
 ```
 
@@ -176,7 +176,7 @@ parms_gibbs = fit_enorm(db, method='Bayes')
 
 The function returns a parameters object, which has `plot` and `coef` methods.
 
-```{r, eval=F}
+```{r, eval=FALSE, purl=FALSE}
 head(coef(parms_gibbs))
 ```
 

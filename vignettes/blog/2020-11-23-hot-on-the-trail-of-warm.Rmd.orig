@@ -13,6 +13,11 @@ categories: []
 tags: []
 ---
 
+```{r}
+library(knitr)
+opts_chunk$set(message=FALSE,warning=FALSE)
+```
+
 _Back in 1989, Thomas A. Warm (1937--2019) published [a paper](https://eric.ed.gov/?id=EJ401718) in Psychometrika that was to have an important influence on practical testing. It described a way to reduce the inherent bias in the maximum likelihood estimate of the person's ability, given the responses and the item parameters. All testing is ultimately about estimating ability, so the paper naturally got a lot of attention._
 
 _We are not aware of any subsequent publications by T.A., although we did find a highly readable [IRT primer](https://apps.dtic.mil/dtic/tr/fulltext/u2/a063072.pdf) on the Internet. Sadly, we also found an [obituary](https://obits.oklahoman.com/obituaries/oklahoman/obituary.aspx?pid=193693805&fhid=4206). It says that he was in the army and that he enjoyed Japanese drumming (who doesn't?), but there is no mention of psychometrics at all. Looking further, we found this picture on LinkedIn:_ 

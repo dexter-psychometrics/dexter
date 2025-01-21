@@ -230,26 +230,7 @@ All we need can be written in terms of sums $M_{ri} = \sum_j a^r_{ij}P_{ij}(\the
 
 ``` r
 library(dplyr)
-```
 
-```
-## 
-## Attaching package: 'dplyr'
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-``` r
 Warm = function(test_score, parms)
 {
   if(!inherits(parms,'data.frame'))

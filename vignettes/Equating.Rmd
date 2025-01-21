@@ -125,8 +125,8 @@ library(dexter)
 db = start_new_project(verbAggrRules, ":memory:")
 add_booklet(db, verbAggrData, "data")
 
-ts = get_testscores(db, item_position<15) |>
-  inner_join(get_testscores(db, item_position>=15), by='person_id') |>
+ts = get_testscores(db, item_position < 15) |>
+  inner_join(get_testscores(db, item_position >= 15), by='person_id') |>
   rename(ref_test= 'booklet_score.y', new_test = 'booklet_score.x')
 
 
@@ -142,11 +142,15 @@ The proportion of respondents who pass the reference test gradually increases wi
 
 ```{r, fig.align='center', fig.height=5, fig.width=5}
 prob_pass = tp = rep(0,29)
-for (i in seq_along(0:28)){
+
+for (i in seq_along(0:28))
+{
   prob_pass[i] = sum(ts$ref_test[ts$new_test==i]>=10) / sum(ts$new_test==i)
   tp[i] = sum(ts$ref_test[ts$new_test>=i]>=10) / sum(ts$new_test>=i)
 }
-plot(0:28, prob_pass, ylab="Proportion passing the reference test", xlab="New test score", ylim=c(0,1), type = "o", col="red",bty='l')
+
+plot(0:28, prob_pass, ylab="Proportion passing the reference test", xlab="New test score", 
+     ylim=c(0,1), type = "o", col="red",bty='l')
 lines(0:28, tp, type="o", lty=2, col="blue")
 ```
 
@@ -154,20 +158,24 @@ The blue dashed line is the percentage of true positives. Among other things, it
 
 Since the same respondents have taken both tests, it is straightforward to determine the sensitivity and specificity of the new test for each pass-fail score:
 
-<!-- to do: might decide against showing some of this code, pictures themselves are important for the story, not the code-->
+
 ```{r, fig.align='center', fig.height=5, fig.width=5}
 specificity = sensitivity = rep(0, 29)
-for (i in seq_along(0:28)){
+
+for (i in seq_along(0:28))
+{
   sensitivity[i] = sum(ts$ref_test[ts$new_test>=i]>=10)/sum(ts$ref_test>=10)
   specificity[i] = sum(ts$ref_test[ts$new_test<i]<10)/(sum(ts$ref_test[ts$new_test<i]<10)+sum(ts$ref_test[ts$new_test>=i]<10)) 
 }
-plot(0:28, sensitivity, ylab="sensitivity/specificity", xlab="new test score", ylim=c(0,1), type = "o", col="red",bty='l')
+
+plot(0:28, sensitivity, ylab="sensitivity/specificity", xlab="new test score", 
+     ylim=c(0,1), type = "o", col="red",bty='l')
 lines(0:28, specificity, col="green", type="o")
 ```
 
 If sensitivity and specificity are deemed equally important, the plot suggests 14 or 15 as appropriate pass-fail scores. Higher values would make the specificity go up (i.e., less false positives) at the expense of sensitivity; lower values would do the reverse. From the plots made earlier, we see that about half of the persons with a score equal to the passing score would actually pass the reference test.
 
-As candidates are classified into two classes, we can readily show the trade-off between sensitivity and specificity with the ROC curve:
+As candidates are classified into two classes, we can readily show the trade-off between sensitivity and specificity with an ROC curve:
 
 ```{r, fig.align='center', fig.height=5, fig.width=5}
 plot(1-specificity, sensitivity, col="green", xlim=c(0,1), ylim=c(0,1), type="l",bty='l')
@@ -184,73 +192,40 @@ close_project(db)
 
 ## Incomplete Data
 
-It is more involved, but practically more useful, to calculate sensitivity and specificity even though the two tests have not been both administered to the same persons. We first simulate a complete data set with responses to 60 items. Then, we select the first 500 persons and 40 items to represent the reference test, and the remaining 200 persons and items 21 through 60 to represent the target test. Note that the two respondent groups are sampled from two different ability populations and cannot be considered as equivalent.  
+It is more involved, but practically more useful, to calculate sensitivity and specificity when the two tests have not been both administered to the same persons. We will show how this works using dexter. We first simulate a complete data set with responses to 60 items. Then, we select the first 500 persons and 40 items to represent the reference test, and the remaining 200 persons and items 21 through 60 to represent the target test. Note that the two respondent groups are sampled from two different ability populations and cannot be considered as equivalent.  
 
 
-```{r, eval=F, include=F}
-# alternatief voor gesimuleerde data, misschine code laten zien?
-nP = 700
-nI = 60
-theta = c(rnorm(500, 0,2), rnorm(nP-500, 0.5,2))
-delta = runif(nI,-1,1)
-items = sprintf('%02i',1:nI)
+```{r}
+#simulate data
+n_persons = 700
+n_items = 60
 
-sim_func = r_score(data.frame(item_id=items, item_score=1, delta=delta))
+theta = c(rnorm(500, 0,2), rnorm(n_persons-500, 0.5,2))
+items = data.frame(item_id = sprintf('%02i',1:n_items), item_score=1, beta = runif(n_items,-1,1))
 
-data = sim_func(theta)
+data = r_score(items)(theta)
 
+# incomplete design
 data[1:500, 41:60] = NA
-data[501:nP, 1:20] = NA
+data[501:n_persons, 1:20] = NA
+```
 
-ref_items = items[1:40]
-target_items = items[21:60]
+
+## The probability to pass
+
+We assume that the pass-fail limit for the reference test is 23 points. As a start, we use the function `probability_to_pass` to estimate, for each score on the target test, the proportion of persons who pass the reference test. We show this as a plot. 
+
+
+```{r, fig.align='center', results='hide',fig.height=4,fig.width=4}
+ref_items = items$item_id[1:40]
+target_items = items$item_id[21:60]
 
 p = fit_enorm(data, method='Bayes', nDraws = 5000)
 
 pp = probability_to_pass(data, p,
                          ref_items = ref_items, pass_fail = 23,
                          target_booklets = data.frame(item_id=target_items))
-
-
-```
-
-```{r, echo=FALSE, message=FALSE, results='hide'}
-nP = 700
-nI = 60
-theta = c(rnorm(500, 0,2), rnorm(nP-500, 0.5,2))
-delta = runif(nI,-1,1)
-x = 0 + matrix(rlogis(nP*nI, outer(theta, delta, "-")) > 0, nP, nI)
-x1 = as.data.frame(x[1:500, 1:40])
-names(x1) = paste0('i', 1:40)
-x2 = as.data.frame(x[501:nP, 21:60])
-names(x2) = paste0('i', 21:60)
-```
-
-We create a new `dexter` project, and we add the two booklets. We assume that the pass-fail limit for the reference test is 23 points.
-
-```{r, echo=FALSE, message=FALSE, results='hide'}
-rules = data.frame(item_id=rep(paste0('i',1:60), each=2), response=rep(c(0,1),60), item_score=rep(c(0,1),60))
-db_sm = start_new_project(rules, ":memory:")
-add_booklet(db_sm, x=x1, "bk1")
-add_booklet(db_sm, x=x2, "bk2")
-ref_items = paste0("i",1:40)
-new_booklet = "bk2"
-pass_fail = 23
-target_items = colnames(x2)
-```
-
-## The probability to pass
-As a start, we use the function `probability_to_pass` to estimate, for each score on the target test, the proportion of persons who pass the reference test. We show this as a plot. 
-
-
-```{r, message=FALSE, fig.align='center', results='hide',fig.height=4,fig.width=4}
-p_sm = fit_enorm(db_sm, method='Bayes', nDraws = 5000)
-
-ou_e = probability_to_pass(db_sm, p_sm,
-                           ref_items = ref_items, 
-                           target_booklets = tibble(booklet_id="bk2", item_id=target_items), 
-                           pass_fail = pass_fail)
-plot(ou_e, what="equating")
+plot(pp, what="equating")
 ```
 
 Let the scores on the reference and new test be written, respectively, as $R_+$ and $N_+$, and let $\mathbf{x}$ denote the available data. We calculate $P(R_+ \geq c|N_+ = s, \mathbf{x})$, the probability that a person with a score of $s$ on the target test will pass. Simply stated, we calculate this probability by averaging over what could have happened on the basis of all available data. A technical appendix explains a bit more.
@@ -261,14 +236,19 @@ A little extra in the plot are the bars. These refer to the traditional ability-
 Having the probability to pass and the proportion of respondents, $P(N_+ = s)$, for all possible scores $s$, we can calculate sensitivity and specificity and plot them for each possible pass-fail score on the target test:
 
 ```{r, echo=TRUE, fig.align='center', results='hide', fig.height=4, fig.width=4}
-plot(ou_e, what='sens/spec')
+plot(pp, what='sens/spec')
 ```
 
-If sensitivity and specificity are equally important, the plot suggests `r which.min((1-ou_e$est$bk2$prob_to_pass$sensitivity)^2+ (1-ou_e$est$bk2$prob_to_pass$specificity)^2)-1` as a pass-fail score on the new test.
+```{r,include=FALSE}
+score_new = coef(pp) |>
+  mutate(loss = (1-sensitivity)^2 + (1-specificity)^2) |>
+  filter(loss == min(loss)) |>
+  pull(score_new)
+```
+
+If sensitivity and specificity are equally important, the plot suggests `r score_new` as a pass-fail score on the new test.
 
 ```{r, include=FALSE}
-close_project(db_sm)
-
 RcppArmadillo::armadillo_reset_cores()
 ```
 
@@ -310,7 +290,7 @@ We do this as often as we can afford (currently, a thousand times), and we take 
 
 Sensitivity and specificity are calculated from the score distribution on the new-test and the probability to pass. The following code shows how:
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, purl=FALSE}
   p_pass_given_s = out$probability_to_pass
   ps = ou_e$pnew
   tp = rev(cumsum(rev(p_pass_given_s*ps))) / rev(cumsum(rev(ps)))

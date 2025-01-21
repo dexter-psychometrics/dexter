@@ -119,7 +119,7 @@ double Escore_bk(const double theta, const vec& b, const ivec& a, int* first,  i
 }
 
 
-Rcpp::List theta_output(mat& theta, mat& se, const ivec& max_score, const ivec& bk_start, const int nbk, const bool add_inf=false)
+Rcpp::List theta_output(mat& theta, mat& se, const ivec& bk_maxs, const ivec& bk_start, const int nbk, const bool add_inf=false)
 {
 	const int ndraws=theta.n_cols, nscores=theta.n_rows;
 	
@@ -127,7 +127,7 @@ Rcpp::List theta_output(mat& theta, mat& se, const ivec& max_score, const ivec& 
 	
 	for(int bk=0;bk<nbk;bk++)
 	{
-		for(int s=0;s<=max_score[bk];s++)
+		for(int s=0;s<=bk_maxs[bk];s++)
 		{
 			scores[s+bk_start[bk]] = s;
 			booklet[s+bk_start[bk]] = bk+1; // R-indexed
@@ -142,15 +142,15 @@ Rcpp::List theta_output(mat& theta, mat& se, const ivec& max_score, const ivec& 
 	
 	if(add_inf)
 	{
-		for(int bk=0;bk<nbk;bk++)
+		for(int bk=0; bk<nbk; bk++)
 		{
 			theta.at(bk_start[bk]) = -1 * datum::inf;
-			theta.at(bk_start[bk] + max_score[bk],0) = datum::inf;
+			theta.at(bk_start[bk] + bk_maxs[bk],0) = datum::inf;
 			se.at(bk_start[bk],0) = NA_REAL;
-			se.at(bk_start[bk] + max_score[bk], 0)  = NA_REAL;
+			se.at(bk_start[bk] + bk_maxs[bk], 0) = NA_REAL;
 		}
 	}
-	return Rcpp::List::create(Named("booklet") = booklet, Named("booklet_score") = scores, Named("theta") = theta.col(0), Named("se")=se.col(0));
+	return Rcpp::List::create(Named("booklet") = booklet, Named("booklet_score") = scores, Named("theta") = theta.col(0), Named("se") = se.col(0));
 }
 
 
@@ -221,7 +221,7 @@ Rcpp::List theta_wmle(const arma::mat& b, const arma::ivec& a,
 					xl = rts;
 					fl = f;
 					rts += std::copysign(std::min(std::abs(dx),0.5), dx); // steps larger than 0.5 on the theta scale are useless and can cause overflow in escore
-					// this limit could cause a pingpong effect, although it is unlikely
+
 					f = Escore_bk<WLE>(rts, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], max_A[bk], wmem);
 					
 					if(std::abs(dx) < acc)
@@ -270,20 +270,20 @@ Rcpp::List theta_jeap_c(const arma::vec& grid, const arma::mat& b, const arma::i
 
 	const ivec bk_cnit = ivec2_iter(bk_nit);	
 	
-	ivec max_score(nbk,fill::zeros), max_A(nbk,fill::zeros);
+	ivec bk_maxs(nbk,fill::zeros), bk_max_A(nbk,fill::zeros);
 	
 	for(int bk=0; bk<nbk; bk++)
 	{
 		for(int i=bk_cnit[bk]; i<bk_cnit[bk+1]; i++)
 		{
-			max_score[bk] += a[last[i]];
-			max_A[bk] = std::max(max_A[bk], a[last[i]]);
+			bk_maxs[bk] += a[last[i]];
+			bk_max_A[bk] = std::max(bk_max_A[bk], a[last[i]]);
 		}
 	}
 	
-	const ivec bk_start = ivec2_iter(max_score+1);
+	const ivec bk_start = ivec2_iter(bk_maxs+1);
 	
-	const int nscores = accu(max_score) + nbk;
+	const int nscores = accu(bk_maxs) + nbk;
 	
 	//output vars
 	mat theta(nscores,ndraws,fill::zeros), se(nscores,ndraws,fill::zeros);	
@@ -294,8 +294,8 @@ Rcpp::List theta_jeap_c(const arma::vec& grid, const arma::mat& b, const arma::i
 	int *first_ptr, *last_ptr;
 	double E,I,J;
 	long double w, sum_w, sum_theta;
-	vec wmem(max(max_A)+1);
-	vec prior(nt,fill::zeros), lfi(nt,fill::zeros);
+	vec wmem(max(bk_max_A)+1);
+	vec prior(nt,fill::zeros), ll(nt,fill::zeros);
 	
 #pragma omp for
 	for(int draw=0; draw<ndraws; draw++)
@@ -306,27 +306,27 @@ Rcpp::List theta_jeap_c(const arma::vec& grid, const arma::mat& b, const arma::i
 			last_ptr = last.memptr() + bk_cnit[bk];
 		
 			for(int t=0;t<nt;t++)
-				deriv_theta<true>(grid[t], b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], max_A[bk], wmem, lfi[t], prior[t], J);			
+				deriv_theta<true>(grid[t], b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], bk_max_A[bk], wmem, ll[t], prior[t], J);			
 
 			prior = sqrt(prior);
 			
-			for(int s=0; s<=max_score[bk]; s++)
+			for(int s=0; s<=bk_maxs[bk]; s++)
 			{
 				sum_w=0, sum_theta=0;
 				for(int t=0;t<nt;t++)
 				{
-					w = prior[t] * std::exp(s * grid[t] - lfi[t]);
+					w = prior[t] * std::exp(s * grid[t] - ll[t]);
 					sum_w += w;
 					sum_theta += w * grid[t];
 				}
 				theta.at(bk_start[bk]+s, draw) = sum_theta/sum_w;
-				deriv_theta<false>(theta.at(bk_start[bk]+s, draw), b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], max_A[bk], wmem, E, I, J);	
+				deriv_theta<false>(theta.at(bk_start[bk]+s, draw), b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], bk_max_A[bk], wmem, E, I, J);	
 				se.at(bk_start[bk]+s, draw) = std::sqrt( (I+SQR(J/(2*I))) /SQR(I));
 			}
 		}
 	}
 }
-	return theta_output(theta, se, max_score, bk_start, nbk, false);
+	return theta_output(theta, se, bk_maxs, bk_start, nbk, false);
 
 }
 
@@ -347,15 +347,15 @@ Rcpp::List theta_eap_c(const arma::vec& grid, const arma::vec& weights, const ar
 
 	const ivec bk_cnit = ivec2_iter(bk_nit);	
 	
-	ivec max_score(nbk,fill::zeros);
+	ivec bk_maxs(nbk,fill::zeros);
 	
 	for(int bk=0; bk<nbk; bk++)
-		for(int i=bk_cnit(bk); i<bk_cnit(bk+1); i++)
-			max_score[bk] += a[last[i]];
+		for(int i=bk_cnit[bk]; i<bk_cnit[bk+1]; i++)
+			bk_maxs[bk] += a[last[i]];
 
-	const ivec bk_start = ivec2_iter(max_score+1);
+	const ivec bk_start = ivec2_iter(bk_maxs+1);
 	
-	const int nscores = accu(max_score) + nbk, max_max_score = max(max_score);
+	const int nscores = accu(bk_maxs) + nbk, max_score = max(bk_maxs);
 	
 	//output vars
 	mat theta(nscores,ndraws,fill::zeros), se(nscores,ndraws,fill::zeros);		
@@ -366,8 +366,8 @@ Rcpp::List theta_eap_c(const arma::vec& grid, const arma::vec& weights, const ar
 	// working variables
 	int *first_ptr, *last_ptr;
 	long double sumw, m;
-	vec g(max_max_score+1), gw(max_max_score+1), w(nt);
-	mat ps(max_max_score+1, nt);
+	vec g(max_score+1), gw(max_score+1), w(nt);
+	mat ps(max_score+1, nt);
 	
 	
 #pragma omp for
@@ -382,13 +382,13 @@ Rcpp::List theta_eap_c(const arma::vec& grid, const arma::vec& weights, const ar
 
 			for(int t=0; t<nt; t++)
 			{
-				for(int s=0; s<=max_score[bk]; s++)
+				for(int s=0; s<=bk_maxs[bk]; s++)
 					ps.at(s,t) = g[s] + s * grid[t];
-				ps.col(t).head(max_score[bk]+1) -= logsumexp(ps.col(t).head(max_score[bk]+1));
+				ps.col(t).head(bk_maxs[bk]+1) -= logsumexp(ps.col(t).head(bk_maxs[bk]+1));
 			}
 			ps = exp(ps); // probability score s 
 
-			for(int s=0; s<=max_score[bk]; s++)
+			for(int s=0; s<=bk_maxs[bk]; s++)
 			{
 				sumw=0;
 				for(int t=0; t<nt; t++)
@@ -396,7 +396,7 @@ Rcpp::List theta_eap_c(const arma::vec& grid, const arma::vec& weights, const ar
 					w[t] = ps.at(s,t) * weights[t];
 					sumw += w[t]; 
 				}
-				w/=sumw;
+				w /= sumw;
 				
 				m = accu(grid % w);
 				theta.at(bk_start[bk]+s, draw) = m;
@@ -405,5 +405,5 @@ Rcpp::List theta_eap_c(const arma::vec& grid, const arma::vec& weights, const ar
 		}
 	}
 }	
-	return theta_output(theta, se, max_score, bk_start, nbk, false);
+	return theta_output(theta, se, bk_maxs, bk_start, nbk, false);
 }	
