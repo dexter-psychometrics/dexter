@@ -81,6 +81,91 @@ df_format = function(df)
 }
 
 
+get_datatype_info = function(dataSrc, columns)
+{
+  if(is.null(dataSrc)) return(NULL)
+  
+  res = if(is_db(dataSrc) || is.matrix(dataSrc))
+  {
+    lapply(columns, function(colname) list(type='character'))
+  } else
+  {
+    columns = intersect(columns,colnames(dataSrc))
+    
+    lapply(columns,function(colname)
+    {
+      if(is.factor(dataSrc[[colname]]))
+        list(type='factor',levels=levels(dataSrc[[colname]]))
+      else
+        list(type=class(dataSrc[[colname]]))
+    })
+  }
+  names(res) = columns
+  res
+}
+
+
+df_format = function(df, datatype_info=NULL)
+{
+  if(getOption('dexter.use_tibble', FALSE))
+  {
+    df = as_tibble(ungroup(df))
+  } else
+  {
+    df = as.data.frame(df, stringsAsFactors = FALSE)
+  }
+  
+  compatible_factor_levels = function(vec, levels)
+  {
+    # factoring should not lead to NA values
+    if(is.factor(vec))
+      x = levels(vec)
+    else
+      x = unique(as.character(vec))
+    length(setdiff(x, levels)) == 0
+  }
+  
+  vec_equal = function(a,b) length(a)==length(b) && all(a==b)
+  
+  for(name in names(datatype_info))
+  {
+    if(!name %in% colnames(df))
+      next
+    
+    if(datatype_info[[name]]$type == 'factor')
+    {
+      if(is.factor(df[[name]]) && vec_equal(levels(df[[name]]), datatype_info[[name]]$levels))
+        next
+      
+      if(compatible_factor_levels(df[[name]], datatype_info[[name]]$levels))
+        df[[name]] = factor(df[[name]], levels = datatype_info[[name]]$levels)
+      else 
+        df[[name]] = as.character(df[[name]])
+    } else if(datatype_info[[name]]$type == 'integer')
+    {
+      df[[name]] = as.integer(df[[name]])
+    } else if(datatype_info[[name]]$type == 'numeric')
+    {
+      df[[name]] = as.numeric(df[[name]])
+    } else
+    {
+      # catch all
+      df[[name]] = as.character(df[[name]])
+    }
+  }
+  
+  for(name in setdiff(colnames(df),names(datatype_info)))
+  {
+    if(is.factor(df[[name]]))
+      df[[name]] = as.character(df[[name]])
+  }
+  
+  df
+}
+
+
+
+
 
 is.date = function(x) inherits(x, "Date")
 is.time = function(x) inherits(x,'POSIXt')

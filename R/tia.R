@@ -1,6 +1,4 @@
 
-
-############################
 #' Simple test-item analysis
 #'
 #' Show simple Classical Test Analysis statistics
@@ -37,6 +35,8 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
   respData = get_resp_data(dataSrc, qtpredicate, env=env, summarised=FALSE,
                            extra_columns = if(distractor){'response'}else{NULL})
   
+  df_info = get_datatype_info(dataSrc, columns = c('booklet_id','item_id','response'))
+  
   items = get_sufStats_tia(respData) 
   
   if(max_scores=='theoretical' && is_db(dataSrc))
@@ -64,8 +64,7 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
               max_booklet_score = sum(.data$max_score),
               n_persons = max(.data$n_persons)) |>
     ungroup() |>
-    mutate_if(is.factor, as.character) |>
-    df_format()
+    df_format(df_info)
   
   
   # for presentation purposes, the sd of the item score should be divided by n-1
@@ -79,8 +78,7 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
   {
     out$items = select(items, 'booklet_id', 'item_id', 'mean_score', 'sd_score', 
                            'max_score', 'pvalue', 'rit', 'rir', 'n_persons') |>
-      mutate_if(is.factor, as.character) |>
-      df_format()
+      df_format(df_info)
     
   } else if(type=='averaged')
   {
@@ -95,12 +93,12 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
                  rir = weighted.mean(.data$rir, w=.data$n_persons, na.rm=TRUE),
                  n_persons = sum(.data$n_persons)) |>
       ungroup() |>
-      mutate_if(is.factor, as.character) |>
       rename(mean_score = 'w_mean_score') |>
-      df_format()
+      df_format(df_info)
   } else
   {
-    items = mutate_if(items, is.factor, as.character)
+    # type compared
+    items = df_format(items, df_info)
     
     out$items = list(
       pvalue = items |> 
@@ -137,7 +135,6 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
                sqrt(.data$rvalue*(1-.data$rvalue)*(.data$b2mean - .data$bmean^2))) |>
       ungroup() 
     
-    # type==compared makes little sense to me for distractors, so treated same as raw
     if(type=='averaged')
     {
       d = d |>
@@ -149,12 +146,29 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
         ungroup()
     } else
     {
+      # type==compared makes little sense for distractors, so treated same as raw
       d = select(d, 'booklet_id', 'item_id', 'response', 'item_score', 'n', 'rvalue', 'rar','rat')
     }
     
-    out$distractors = d |>
-      mutate_if(is.factor, as.character) |>
-      df_format()
+    # add distractors never chosen
+    if(is_db(dataSrc))
+    {
+      d0 = get_rules(dataSrc) |>
+        semi_join(d, by='item_id') |>
+        anti_join(d, by=c('item_id','response')) |>
+        mutate(n=0L, rvalue=0)
+      
+      if(nrow(d0) > 0 && type=='averaged')
+      {
+        d = bind_rows(d, d0)
+      } else if(nrow(d0) > 0)
+      {
+        d = bind_rows(d, 
+                      inner_join(d0, distinct(d,.data$item_id, .data$booklet_id ), by='item_id'))
+      }
+    }
+    
+    out$distractors = df_format(d, df_info)
   }
   out
 }

@@ -41,6 +41,8 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
   parms_draw = match.arg(parms_draw)
   prior_dist = match.arg(prior_dist)
   
+  df_info = get_datatype_info(dataSrc, columns = c('booklet_id','item_id','person_id',covariates))
+  
   pb = get_prog_bar(nsteps=if(is.null(parms)) 130 else 100, 
                     retrieve_data = is_db(dataSrc))
   on.exit({pb$close()})
@@ -229,6 +231,5 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
   pv |>
     select(-any_of('booklet_score')) |>
     rename_with(gsub, pattern='^PV(?=\\d+$)',replacement='PS', perl=TRUE)  |>
-    mutate_if(is.factor, as.character) |>
-    df_format()
+    df_format(df_info)
 }

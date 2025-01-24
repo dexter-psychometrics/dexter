@@ -72,6 +72,8 @@ ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), 
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
   
+  df_info = get_datatype_info(dataSrc, columns = 'booklet_id')
+  
   if(inherits(parms,'enorm') || inherits(parms,'prms'))
   {
     parms_check = parms$inputs$ssIS[,c('item_id','item_score')]
@@ -93,8 +95,7 @@ ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), 
   respData$x |> 
     inner_join(abl, by = c("booklet_id", "booklet_score")) |> 
     select(any_of(c('booklet_id', 'person_id', 'booklet_score', 'theta', 'se'))) |>
-    mutate_if(is.factor, as.character) |>
-    df_format()
+    df_format(df_info)
 }
 
 
@@ -113,6 +114,8 @@ ability_tables = function(parms, design = NULL, method = c("MLE","EAP","WLE"), p
     check_num(mu, .length=1)
     check_num(sigma, .length=1, .min=0)
   }
+  
+  df_info = get_datatype_info(design, columns = 'booklet_id')
   
   simple_parms = simplify_parms(parms, design, parms_draw) 
   b = simple_parms$b
@@ -157,8 +160,7 @@ ability_tables = function(parms, design = NULL, method = c("MLE","EAP","WLE"), p
          booklet_score=drop(est$booklet_score),
          theta=drop(est$theta),
          se=drop(est$se)) |>
-    mutate_if(is.factor, as.character) |>
-    df_format()
+    df_format(df_info)
 }
 
 

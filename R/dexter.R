@@ -188,6 +188,7 @@ keys_to_rules = function(keys, include_NA_rule = FALSE)
 {
   colnames(keys) = tolower(colnames(keys))
   check_df(keys, c('item_id','noptions','key'))
+  df_info = get_datatype_info(keys, columns = 'item_id')
   keys = mutate_if(keys, is.factor, as.character)
   lwr = FALSE
   
@@ -213,19 +214,19 @@ keys_to_rules = function(keys, include_NA_rule = FALSE)
     r = keys |> 
       group_by(.data$item_id) |> 
       do({
-      y = tibble(response=LETTERS[1:.$noptions[1]], item_score=0)
-      y$item_score[match(.$key[1],LETTERS)] = 1
-      y
-    })
+        y = tibble(response=LETTERS[1:.$noptions[1]], item_score=0L)
+        y$item_score[match(.$key[1],LETTERS)] = 1L
+        y
+      })
   } else {
     if (any(keys$key>keys$noptions)) stop("You have out-of-range keys")
     r = keys |> 
       group_by(.data$item_id) |> 
       do({
-      y = tibble(response=as.character(1:.$noptions[1]), item_score=0)
-      y$item_score[.$key[1]] = 1
-      y
-    })
+        y = tibble(response=as.character(1:.$noptions[1]), item_score=0L)
+        y$item_score[.$key[1]] = 1L
+        y
+      })
   }
   r = ungroup(r)
   if(lwr)
@@ -234,10 +235,10 @@ keys_to_rules = function(keys, include_NA_rule = FALSE)
   }
   
   if(include_NA_rule){
-    r = bind_rows(r, tibble(item_id=unique(r$item_id), response='NA', item_score=0))
+    r = bind_rows(r, tibble(item_id=unique(r$item_id), response='NA', item_score=0L))
   }
-  r$item_score = as.integer(r$item_score)
-  df_format(r)
+
+  df_format(r, df_info)
 }
 
 
@@ -1028,9 +1029,10 @@ get_testscores = function(dataSrc, predicate=NULL)
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
   
+  df_info = get_datatype_info(dataSrc, columns = c('person_id','booklet_id'))
+  
   get_resp_data(dataSrc, qtpredicate, summarised=TRUE, env=env)$x |>
-    mutate_if(is.factor, as.character) |>
-    df_format()
+    df_format(df_info)
 }
 
 
@@ -1057,6 +1059,7 @@ get_design = function(dataSrc,
                        columns = c('item_id','booklet_id','item_position'),
                        fill=NA)
 {
+  df_info = get_datatype_info(dataSrc, columns = c('booklet_id','item_id'))
   
   design = 
     if(is_db(dataSrc))
@@ -1097,11 +1100,11 @@ get_design = function(dataSrc,
       select('item_id','item_position','booklet_id') |>
       pivot_wider(names_from=columns, values_from=val_col, values_fill=fill, names_sort=TRUE) |>
       arrange(all_of(rows)) |>
-      df_format()
+      df_format(df_info)
         
   } else
   {
-    df_format(design)
+    df_format(design,df_info)
   }
 }
 
@@ -1136,7 +1139,6 @@ design_info = function(dataSrc, predicate = NULL)
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
 
-  #check_dataSrc(dataSrc) # removed, prevents design being inputted
 
   # parms objects
   if(inherits(dataSrc,'list') && !is.null(dataSrc$inputs$design))
@@ -1144,6 +1146,8 @@ design_info = function(dataSrc, predicate = NULL)
 
   if(inherits(dataSrc, 'data.frame'))
     colnames(dataSrc) = tolower(colnames(dataSrc))
+  
+  df_info = get_datatype_info(dataSrc, columns = c('booklet_id','item_id'))
   
   if(inherits(dataSrc, 'data.frame') && !('person_id'%in% colnames(dataSrc)))
   {
@@ -1168,8 +1172,7 @@ design_info = function(dataSrc, predicate = NULL)
 
   out$design = out$design |>
     arrange(.data$booklet_id, .data$item_id)  |> 
-    mutate_if(is.factor, as.character) |>
-    df_format()
+    df_format(df_info)
       
     
   if(nrow(out$design) == 0 )
@@ -1184,7 +1187,7 @@ design_info = function(dataSrc, predicate = NULL)
     ungroup() |>
     mutate(testlet = dense_rank(.data$testlet)) |>
     arrange(.data$testlet, .data$item_id) |>
-    df_format()
+    df_format(df_info)
   
   
   # to~do: I don't see why the diagonals should be zero, check in igraph if this matters
@@ -1196,19 +1199,17 @@ design_info = function(dataSrc, predicate = NULL)
   mode(out$adj_matrix$weighted_by_items) = 'integer'
   diag(out$adj_matrix$weighted_by_items) = 0L
   
+  b = distinct(out$design, .data$booklet_id, .keep_all=TRUE)
   
-  b = out$design |> 
-    distinct(.data$booklet_id, .keep_all=TRUE)
   ww = outer(b$n_persons, b$n_persons, "+")
   out$adj_matrix$weighted_by_persons = out$adj_matrix$weighted_by_items * ww    
-
   
   
   out$connected_booklets = tibble(booklet_id = colnames(out$adj_matrix$weighted_by_items), 
                                   group = ds_connected_groups(out$adj_matrix$weighted_by_items)) |> 
-    df_format()
-  out$connected = (max(out$connected_booklets$group) == 1)
+    df_format(df_info)
   
+  out$connected = (max(out$connected_booklets$group) == 1)
   
   out
 }

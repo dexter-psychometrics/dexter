@@ -144,7 +144,6 @@ coef.inter = function(object, what=c("items","scoreprob"), ...)
     
     inner_join(IS,I,by='item_id') |> 
   	  arrange(.data$item_id, .data$item_score) |> 
-      mutate(item_id=as.character(.data$item_id)) |>
   	  df_format()
   } else
   {

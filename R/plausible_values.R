@@ -250,11 +250,12 @@ plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL
   check_dataSrc(dataSrc)
   check_num(nPV, .length=1, .min=1)
   
+  df_info = get_datatype_info(dataSrc, columns = c('booklet_id','person_id',covariates))
+  
   plausible_values_(dataSrc, parms, qtpredicate=qtpredicate, covariates=covariates, nPV=nPV, 
                      parms_draw = parms_draw, env=env,prior_dist = prior_dist ,
                      merge_within_persons=merge_within_persons)$pv |>
-    mutate_if(is.factor, as.character) |>
-    df_format()
+    df_format(df_info)
 }
 
 
@@ -276,6 +277,7 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
     prior_dist = 'normal'
   }
   
+
   pb = get_prog_bar(nsteps=if(is.null(parms)) 120 else 100, 
                     retrieve_data = is_db(dataSrc))
   on.exit({pb$close()})
@@ -327,9 +329,9 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
       ungroup() 
     
     # sanity check: we need categorical variables
-    tly = table(respData$x$pop__)
+    tally = table(respData$x$pop__)
 
-    if(min(tly)<=2 || max(tly)<=5)
+    if(min(tally)<=2 || max(tally)<=5)
     {
       warning("Ignoring covariates in plausible value computation because some categories have size <=2 or all categories have size <=5.\nAre you sure all covariates are nominal variables?")
       respData$x = select(respData$x, -"pop__") 
