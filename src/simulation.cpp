@@ -100,11 +100,9 @@ arma::imat sampleIMC(const arma::vec& bIM, const arma::vec& cIM, const arma::ive
 	const int max_score = scoretab.n_elem - 1;
 	const int maxA = max(a(conv_to<uvec>::from(last))); 
 	const int nP = accu(scoretab);
-	const int maxiter = 200;
-	const double acc = 1e-8;
 	
 	double u, theta = -2;
-	double E,I,J;
+
 	int score, k, pi;
 	
 	
