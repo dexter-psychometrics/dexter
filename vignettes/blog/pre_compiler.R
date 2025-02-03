@@ -222,13 +222,33 @@ make_blog_index = function()
                          title,href,author,blurb,rdmore)) %>%
     arrange(desc(filename)) 
   
+  content2 = content |>
+    filter(abbreviated) |>
+    mutate(txt = sprintf('<li><a href="%s">%s</a></li>',href,title)) |>
+    pull(txt) |>
+    paste(collapse='\n')
+
+  minimal = sprintf('<div class="roll-minimized"><ul>%s</ul></div>',content2)
   
+  style = 'img{max-width:8cm;max-height:8cm;display:block;}
+  #refs{display:none;}\nsmall.dont-index{display:none;}
+  p.blog-authors{font-style:italic}
+  div.roll-minimized{
+    position:absolute;
+    width:35%;
+    left:106%;
+  }
+  /*div.roll-minimized ul{list-style:none;}*/
+  div.roll-minimized li{margin-bottom:6px;}
+  @media (max-width: 992px)
+  {
+    div.roll-minimized{display:none;}
+  }
+  '
+  pream = 'title: Dexterities\nbibliography: dexter.bib'
 
   
-  style = 'img{max-width:8cm;max-height:8cm;display:block;}\n#refs{display:none;}\nsmall.dont-index{display:none;}\np.blog-authors{font-style:italic}'
-  pream = 'title: Dexterities\nbibliography: dexter.bib'
-  
-  cat(sprintf('---\n%s\n---\n\n<style>\n%s\n</style>\n\n%s', pream, style, paste(content$txt,collapse='\n')),
+  cat(sprintf('---\n%s\n---\n\n<style>\n%s\n</style>\n%s\n%s', pream, style, minimal, paste(content$txt,collapse='\n')),
       file='vignettes/blog/index.Rmd')
 }
 
