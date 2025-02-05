@@ -128,7 +128,10 @@ latent_cor2 = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0
   {
     for (d in 1:nd)
     {
-      cons = condMoments(prior$mu, prior$Sigma, d, x.value=pv[,-d]) 
+      cons = condMoments_new(mu = prior$mu, sigma = prior$Sigma, index=d, value=pv) 
+
+      if(any(cons$sigma<0.001))
+        browser()
   
       PV_sve(models[[d]]$b, models[[d]]$a, models[[d]]$design$first0, models[[d]]$design$last0, 					
         models[[d]]$bcni,
@@ -137,7 +140,7 @@ latent_cor2 = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0
         pv,d-1L, 10L)
     }
 
-    prior = update_MVNprior(pv,prior$Sigma)
+    prior = update_MVNprior_new(pv,prior$Sigma)
     
     if (i %in% which.keep){
       mcmc[tel,,] = cov2cor(prior$Sigma)
@@ -156,3 +159,98 @@ latent_cor2 = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0
   res$mcmc = mcmc
   res
 }
+
+# robust for not entirely positive definite matrix V
+update_MVNprior_new = function(pvs,Sigma)
+{
+  m_pv = colMeans(pvs)
+  nP = nrow(pvs)
+  mu = rmvnorm(1, mean=m_pv,sigma=Sigma/nP)
+  
+  S=(t(pvs)-m_pv)%*%t(t(pvs)-m_pv)
+  V = solve(S)
+  
+  Sigma = try({solve(rWishart(1,nP-1,V)[,,1])}, silent=TRUE)
+  if(inherits(Sigma,'try-error'))
+  {
+    V = nearPD(V)
+    Sigma = solve(rWishart(1,nP-1,V)[,,1])
+  }   
+  return(list(mu = mu, Sigma = Sigma))
+}
+
+# mean and variance of Y given values for x
+# cleaned up a bit
+# formula is correct according to https://online.stat.psu.edu/stat505/lesson/6/6.1
+
+# but still near zero/negative variances, use a prior? meaningfull error message?
+
+condMoments_new = function(mu, sigma, index, value )
+{
+  C = sigma[index,-index,drop=FALSE]
+  D = sigma[-index,-index]
+  CDinv = C %*% solve(D)
+  
+  mu_y = apply(value[,-index,drop=FALSE],1, `-`, mu[-index]) |>
+    apply(2,\(x) CDinv %*% x) +
+    mu[index]
+  
+  return(list(mu=mu_y, sigma = sigma[index,index] - CDinv %*% t(C)))
+}
+
+
+# did not want to import the whole matrix package for this function
+# it's quite a dependency
+
+nearPD = function (x,  eig.tol = 1e-06, conv.tol = 1e-07, posd.tol = 1e-08, maxit = 100L) 
+{
+  if (!isSymmetric(x)) {
+    x = (x + t(x))/2 
+  }
+  
+  n = ncol(x)
+  
+  D_S = x
+  D_S[] = 0
+  
+  X = x
+  iter = 0L
+  converged = FALSE
+  conv = Inf
+  while (iter < maxit && !converged) {
+    Y = X
+    
+    R = Y - D_S
+    e = eigen(R)
+    Q = e$vectors
+    d = e$values
+    p = d > eig.tol * d[1]
+    if (!any(p)) 
+      stop("Matrix seems negative semi-definite")
+    Q = Q[, p, drop = FALSE]
+    X = tcrossprod(Q * rep(d[p], each = nrow(Q)), Q)
+    
+    D_S = X - R
+    
+    conv = norm(Y - X, "I")/norm(Y, "I")
+    iter = iter + 1L
+    
+    converged = (conv <= conv.tol)
+  }
+  
+  e = eigen(X, symmetric = TRUE)
+  d = e$values
+  Eps = posd.tol * abs(d[1])
+  if (d[n] < Eps) {
+    d[d < Eps] = Eps
+    
+    Q = e$vectors
+    o.diag = diag(X)
+    X = Q %*% (d * t(Q))
+    D = sqrt(pmax(Eps, o.diag)/diag(X))
+    X[] = D * X * rep(D, each = n)
+  }
+  
+  X
+}
+
