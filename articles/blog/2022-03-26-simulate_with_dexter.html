@@ -210,8 +210,8 @@ item responses, and stack the output:</p>
 <p>Add the two person properties:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">dat</span> <span class="op">=</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="va">dat</span><span class="op">)</span></span>
-<span><span class="va">dat</span><span class="op">$</span><span class="va">gender</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">pop_theta</span><span class="op">$</span><span class="va">gender</span>, <span class="va">pop_theta</span><span class="op">$</span><span class="va">n</span><span class="op">)</span></span>
-<span><span class="va">dat</span><span class="op">$</span><span class="va">school_type</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">pop_theta</span><span class="op">$</span><span class="va">school_type</span>, <span class="va">pop_theta</span><span class="op">$</span><span class="va">n</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">dat</span><span class="op">$</span><span class="va">gender</span> <span class="op">=</span> <span class="va">theta</span><span class="op">$</span><span class="va">gender</span></span>
+<span><span class="va">dat</span><span class="op">$</span><span class="va">school_type</span> <span class="op">=</span> <span class="va">theta</span><span class="op">$</span><span class="va">school_type</span></span></code></pre></div>
 <p>The simulated data is ready now, but we are going to put it in a
 <strong>dexter</strong> database and have some more fun with generating
 an incomplete design. The creation of a <strong>dexter</strong> database

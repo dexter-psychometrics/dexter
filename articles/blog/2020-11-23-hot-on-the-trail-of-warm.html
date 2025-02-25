@@ -121,6 +121,9 @@ Ivailo Partchev (foreword)</h4>
 
     
     
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://yihui.org/knitr/" class="external-link">knitr</a></span><span class="op">)</span></span>
+<span><span class="va">opts_chunk</span><span class="op">$</span><span class="fu">set</span><span class="op">(</span>message<span class="op">=</span><span class="cn">FALSE</span>,warning<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><em>Back in 1989, Thomas A. Warm (1937–2019) published <a href="https://eric.ed.gov/?id=EJ401718" class="external-link">a paper</a> in Psychometrika
 that was to have an important influence on practical testing. It
 described a way to reduce the inherent bias in the maximum likelihood
@@ -487,7 +490,7 @@ S*(\theta) &amp;= x_+ -E[X_+|\theta] + \frac{J(\theta)}{2I(\theta)}\\
 {2\sum_h P_h(\theta)(1-P_h(\theta))}
 \end{align*}</annotation></semantics></math> This leads to a very simple
 function.</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">Warm_Rasch</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">test_score</span>, <span class="va">delta</span><span class="op">)</span></span>
 <span><span class="op">{</span></span>
 <span>  <span class="va">Sw</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">theta</span><span class="op">)</span> </span>
@@ -552,8 +555,9 @@ for
 which inspired the following function to calculate the Warm estimate
 using a <strong>parms</strong> object or data.frame of item
 parameters.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span></span>
 <span></span>
 <span><span class="va">Warm</span> <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">test_score</span>, <span class="va">parms</span><span class="op">)</span></span>
 <span><span class="op">{</span></span>
