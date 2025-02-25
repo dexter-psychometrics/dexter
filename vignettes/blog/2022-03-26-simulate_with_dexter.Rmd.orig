@@ -90,8 +90,8 @@ Add the two person properties:
 
 ```{r}
 dat = as_tibble(dat)
-dat$gender = rep(pop_theta$gender, pop_theta$n)
-dat$school_type = rep(pop_theta$school_type, pop_theta$n)
+dat$gender = theta$gender
+dat$school_type = theta$school_type
 ```
 
 The simulated data is ready now, but we are going to put it in a __dexter__ database and have some more fun with generating an incomplete design. The creation of a __dexter__ database (a.k.a. project) always starts with a set of scoring rules. We shall make some trivial rules, where responses can be only 0 or 1, and will be scored as 0 or 1:

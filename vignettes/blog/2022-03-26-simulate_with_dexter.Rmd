@@ -13,14 +13,14 @@ We are busy people. We spend most of our time analyzing the large-scale national
 Simulating IRT data for a single booklet of Rasch items is quite easy -- it can be done with a single line in plain R:
 
 
-```r
+``` r
 Rasch_data = matrix(as.integer(rlogis(outer(rnorm(500), runif(20,-2,2) ,'-'))>0), 500, 20)
 ```
 
 The __dexter__ way would be:
 
 
-```r
+``` r
 library(dexter)
 library(dplyr)
 items = tibble(item_id = paste0('item', 1:20),
@@ -33,7 +33,7 @@ We just construct a tibble with the item parameters in the expected format, afte
 
 
 
-```r
+``` r
 library(mvtnorm)
 set.seed(42)
 
@@ -52,7 +52,7 @@ pop_theta = tribble(
 The `tribble`, ot transposed tibble, defines the combinations of gender, two Dutch school types, and three domains that will be treated as three highly correlated but distinct abilities. The hypothesized abilities will have a multivariate normal distribution with means varying across domains, sexes, and school types, and standard deviations differing just across school types. The last column has the number of fictional students in each cell. 
 
 
-```r
+``` r
 items = tibble(domain = sample(domains, nit, TRUE),
                item_id = sprintf('item%03i-%s', 1:nit, substring(domain,1,3)),
                item_score = 1,
@@ -62,7 +62,7 @@ items = tibble(domain = sample(domains, nit, TRUE),
 Here we constructed the tibble that defines the items, just as in the initial example. `sprintf` is a much better choice than `paste0` because it produces sortable names: we don't get items 10 through 19 sorted before item 2, for example. Next, define the correlation matrix for the three domains and use the __mvtnorm__ package to generate the abilities:
 
 
-```r
+``` r
 rho = matrix(c(1, .8, .8,
               .8, 1,  .8,
               .8, .8, 1), 
@@ -82,7 +82,7 @@ theta = pop_theta |>
 This happens in a __dplyr__ pipe that groups by gender and school type, effectively calling `rmvnorm` four times and combining the results in a tibble. Now that we have the items and the thetas, call `r_score` three times to generate the simulated item responses, and stack the output:
 
 
-```r
+``` r
 dat = cbind(
   r_score(filter(items, domain=='geometry'))(theta$geometry),
   r_score(filter(items, domain=='algebra'))(theta$algebra),
@@ -93,23 +93,23 @@ dat = cbind(
 Add the two person properties:
 
 
-```r
+``` r
 dat = as_tibble(dat)
-dat$gender = rep(pop_theta$gender, pop_theta$n)
-dat$school_type = rep(pop_theta$school_type, pop_theta$n)
+dat$gender = theta$gender
+dat$school_type = theta$school_type
 ```
 
 The simulated data is ready now, but we are going to put it in a __dexter__ database and have some more fun with generating an incomplete design. The creation of a __dexter__ database (a.k.a. project) always starts with a set of scoring rules. We shall make some trivial rules, where responses can be only 0 or 1, and will be scored as 0 or 1:
 
 
-```r
+``` r
 dummy_rules = tibble(item_id=rep(items$item_id,2), item_score=rep(0:1,each=nit), response=item_score)
 ```
 
 From the rules, we generate an empty database, announcing the two person properties included with the data:
 
 
-```r
+``` r
 db = start_new_project(dummy_rules, 
                        ':memory:', 
                        person_properties=list(gender='<unknown>', school_type='<unknown>'))
@@ -118,7 +118,7 @@ db = start_new_project(dummy_rules,
 Now, let us have an incomplete design, 30 items per booklet. SBO students will get the easier booklet, and BAO students will get the more difficult one. In real life, this would be determined by a pretest with a small sample of students, but we will simply sort items on their true difficulty parameters. The easy booklet will contain all items except the 20 most difficult ones, and the difficult booklets all items except the 20 easiest ones; thus, the two booklets have an overlap of 10 items of average difficulty:
 
 
-```r
+``` r
 items_SBO = arrange(items,beta) |> slice(1:20)  |> pull(item_id)
 items_BAO = arrange(items,beta) |> slice(31:50) |> pull(item_id)
 
@@ -134,7 +134,7 @@ add_booklet(db,
 Finally, we add the domains as an item property:
 
 
-```r
+``` r
 add_item_properties(db, select(items, item_id, domain))
 ```
 
