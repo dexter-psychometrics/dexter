@@ -4,7 +4,15 @@
 \alias{plot.DIF_stats}
 \title{plot method for pairwise DIF statistics}
 \usage{
-\method{plot}{DIF_stats}(x, items = NULL, itemsX = items, itemsY = items, alpha = 0.05, ...)
+\method{plot}{DIF_stats}(
+  x,
+  items = NULL,
+  itemsX = items,
+  itemsY = items,
+  cluster = FALSE,
+  alpha = 0.05,
+  ...
+)
 }
 \arguments{
 \item{x}{object produced by \code{\link{DIF}}}
@@ -15,6 +23,8 @@ If NULL all items are plotted.}
 \item{itemsX}{character vector of item id's for the X axis}
 
 \item{itemsY}{character vector of item id's for the Y axis}
+
+\item{cluster}{arrange items by similarity.}
 
 \item{alpha}{significance level used to color the plot (two sided)}
 
@@ -27,8 +37,4 @@ plot method for pairwise DIF statistics
 Plotting produces an image of the matrix of pairwise DIF statistics. 
 The statistics are standard normal deviates and colored to distinguish significant from non-significant values.
 If there is no DIF, a proportion alpha off the cells will be colored significant by chance alone.
-}
-\references{
-Feskens, R., Fox, J. P., & Zwitser, R. (2019). Differential item functioning in PISA due to mode effects. 
-In Theoretical and Practical Advances in Computer-based Educational Measurement (pp. 231-247). Springer, Cham.
 }

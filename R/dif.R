@@ -168,19 +168,16 @@ print.DIF_stats <- function(x, ...)
 #' @param itemsX character vector of item id's for the X axis
 #' @param itemsY character vector of item id's for the Y axis
 #' @param alpha significance level used to color the plot (two sided)
+#' @param cluster arrange items by similarity.
 #' @param ... further arguments to plot
 #' 
-#' @references
-#' Feskens, R., Fox, J. P., & Zwitser, R. (2019). Differential item functioning in PISA due to mode effects. 
-#' In Theoretical and Practical Advances in Computer-based Educational Measurement (pp. 231-247). Springer, Cham.
 #' 
 #' @details
 #' Plotting produces an image of the matrix of pairwise DIF statistics. 
 #' The statistics are standard normal deviates and colored to distinguish significant from non-significant values.
 #' If there is no DIF, a proportion alpha off the cells will be colored significant by chance alone.
 #'      
-# experimental, currenlty testing, can use some more finetuning
-plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, alpha =.05,...)
+plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, cluster=FALSE, alpha =.05,...)
 {
   oldpar = par(no.readonly = TRUE)
   on.exit({par(oldpar)},add=TRUE)
@@ -193,6 +190,16 @@ plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, alpha
     cat('items not found in DIF object:\n')
     print(setdiff(c(itemsX, itemsY), x$items))
     stop('some of the item_ids you specified are not present in the DIF object')
+  }
+  
+  if (cluster) 
+  {
+    dist = abs(x$Delta_R)
+    ord = hclust(as.dist(dist))$order
+    raw = x$items$item_id
+    clustered = raw[ord]
+    itemsX = raw[match(itemsX,clustered)]
+    itemsY = raw[match(itemsY,clustered)]
   }
   
   x$items = x$items |>

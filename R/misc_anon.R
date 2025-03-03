@@ -225,7 +225,7 @@ weighted_ntile = function(x, weights, nbins)
       arrange(.data$x)
     
     dat$bin = weighted_binning(dat$w,nbins)
-    dat |> arrange(ord) |> pull(bin) |> drop()
+    dat |> arrange(.data$ord) |> pull('bin') |> drop()
   } else
   {
     drop(weighted_binning(weights,nbins))

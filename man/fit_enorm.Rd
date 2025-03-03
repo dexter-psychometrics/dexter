@@ -37,9 +37,9 @@ Fits an Extended NOminal Response Model (ENORM) using conditional maximum likeli
 or a Gibbs sampler for Bayesian estimation.
 }
 \details{
-The eNRM is a slight generalization of the PCM and/or the OPLM. It
+The eNRM is a slight generalization of the PCM and the OPLM. It
 reduces to the Rach model for dichotomous items when all itemscores are 0 or 1, is equal to the PCM for polytomous items if all
-itemscores up to the maximum score occur, otherwise is equal to the oplm if all itemscores have an equal common divisor larger than 1.
+itemscores up to the maximum score occur. It is equal to the oplm if all itemscores have an equal common divisor larger than 1.
 
 To support some flexibility in fixing parameters, fixed_params can be a dexter enorm object or a data.frame.
 If a data.frame, it should contain the columns item_id, item_score and a difficulty parameter beta
@@ -48,7 +48,7 @@ If a data.frame, it should contain the columns item_id, item_score and a difficu
 Maris, G., Bechger, T.M. and San-Martin, E. (2015) A Gibbs sampler for the (extended) marginal Rasch model. 
 Psychometrika. 80(4), 859-879. 
 
-Koops, J. and Bechger, T.M. and Maris, G. (in press); Bayesian inference for multistage and other 
+Koops, J. and Bechger, T.M. and Maris, G. (2024); Bayesian inference for multistage and other 
 incomplete designs. In Research for Practical Issues and Solutions in Computerized Multistage Testing.
 Routledge, London.
 }

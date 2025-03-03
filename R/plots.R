@@ -579,7 +579,7 @@ plot.enorm = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci
   plt = x$inputs$plt |>
     filter(.data$item_id==item_id_) |>
     inner_join(x$abl_tables$mle, by=c('booklet_id','booklet_score')) |>
-    mutate(abgroup = weighted_ntile(.data$theta, .data$N, n = nbins)) |>
+    mutate(abgroup = weighted_ntile(.data$theta, .data$N, nbins = nbins)) |>
     group_by(.data$abgroup) |>
     summarize(gr_theta = weighted.mean(.data$theta,.data$N), avg_score = weighted.mean(.data$meanScore,.data$N), n=sum(.data$N)) |>
     ungroup() |>
