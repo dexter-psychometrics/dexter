@@ -88,16 +88,16 @@ hpdens = function(x, conf=0.95)
 }
 
 
-#########
+
 # This function calculates overall and pointwise confidence envelopes 
 # for a curve based on replicates of the curve evaluated at a number of fixed points.
 # Based on theory by Davison, A.C. and Hinkley, D.V. (1997) Bootstrap Methods and Their Application. 
 # Cambridge University Press. Insprired by code from package boot.
-##
+
 # mat is a matrix with nrow = nr of replications, ncol = nr of points
 # Example: test information for each of ncol ability values is calculated for nrow samples of 
 # item parameters from posterior.
-########
+
 #TO~DO: protect against NA's
 conf_env = function(mat, level = 0.95) 
 {
@@ -156,9 +156,6 @@ conf_env = function(mat, level = 0.95)
 }
 
 
-
-
-
 # equivalent to log(sum(exp(x)))
 # where sum(exp(x)) is potentially infinite in floating point
 logsumexp = function(x)
@@ -166,7 +163,6 @@ logsumexp = function(x)
   m = max(x)
   m + log(sum(exp(x-m)))
 }
-
 
 
 # GH points
@@ -177,7 +173,6 @@ logsumexp = function(x)
 #   arrange(weights) |>
 #   as.list()
 # usethis::use_data(quadpoints, internal = TRUE)
-
 
 
 geo_mean = function(x)
@@ -215,17 +210,28 @@ all_trivial_scores = function(scores)
 
 
 # differs in result from ntile in taking weights and in never putting equal values in different bins
-# take care that if the nbr of distinct values is close to n, this will lead to very unequal sized bins
-weighted_ntile = function(x, weights, n)
+# integer weights only
+weighted_ntile = function(x, weights, nbins)
 {
+  nbins = as.integer(nbins)
+  weights = as.integer(weights)
   
-  dat = tibble(x=x, w=weights, ord=1:length(x)) |>
-    arrange(.data$x) |>
-    mutate(rn=cumsum(.data$w)-.data$w) |>
-    arrange(.data$ord) 
+  if(length(x) <= nbins)
+    return(as.integer(rank(x)))
   
-  as.integer(floor(n * dat$rn/sum(dat$w) + 1))
+  if(is.unsorted(x))
+  {
+    dat = tibble(x=x, w=weights, ord=1:length(x)) |>
+      arrange(.data$x)
+    
+    dat$bin = weighted_binning(dat$w,nbins)
+    dat |> arrange(ord) |> pull(bin) |> drop()
+  } else
+  {
+    drop(weighted_binning(weights,nbins))
+  }
 }
+
 
 weighted_cor = function(x,y,n)
 {

@@ -94,6 +94,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// weighted_binning
+arma::ivec weighted_binning(const arma::ivec& weights, const int nbins);
+RcppExport SEXP _dexter_weighted_binning(SEXP weightsSEXP, SEXP nbinsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::ivec& >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< const int >::type nbins(nbinsSEXP);
+    rcpp_result_gen = Rcpp::wrap(weighted_binning(weights, nbins));
+    return rcpp_result_gen;
+END_RCPP
+}
 // fast_factor
 SEXP fast_factor(SEXP x, bool as_int);
 RcppExport SEXP _dexter_fast_factor(SEXP xSEXP, SEXP as_intSEXP) {
@@ -733,6 +745,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dexter_theta_wmle_c", (DL_FUNC) &_dexter_theta_wmle_c, 7},
     {"_dexter_theta_jeap_c", (DL_FUNC) &_dexter_theta_jeap_c, 7},
     {"_dexter_theta_eap_c", (DL_FUNC) &_dexter_theta_eap_c, 8},
+    {"_dexter_weighted_binning", (DL_FUNC) &_dexter_weighted_binning, 2},
     {"_dexter_fast_factor", (DL_FUNC) &_dexter_fast_factor, 2},
     {"_dexter_fast_factor_lev", (DL_FUNC) &_dexter_fast_factor_lev, 3},
     {"_dexter_fill_resp_matrix", (DL_FUNC) &_dexter_fill_resp_matrix, 4},

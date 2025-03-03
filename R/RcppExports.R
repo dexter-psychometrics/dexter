@@ -21,6 +21,10 @@ theta_eap_c <- function(grid, weights, b, a, first, last, bk_nit, n_cores = 1L) 
     .Call(`_dexter_theta_eap_c`, grid, weights, b, a, first, last, bk_nit, n_cores)
 }
 
+weighted_binning <- function(weights, nbins) {
+    .Call(`_dexter_weighted_binning`, weights, nbins)
+}
+
 fast_factor <- function(x, as_int) {
     .Call(`_dexter_fast_factor`, x, as_int)
 }
