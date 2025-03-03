@@ -88,7 +88,15 @@
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'DIF_stats'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">x</span>, items <span class="op">=</span> <span class="cn">NULL</span>, itemsX <span class="op">=</span> <span class="va">items</span>, itemsY <span class="op">=</span> <span class="va">items</span>, alpha <span class="op">=</span> <span class="fl">0.05</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  items <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  itemsX <span class="op">=</span> <span class="va">items</span>,</span>
+<span>  itemsY <span class="op">=</span> <span class="va">items</span>,</span>
+<span>  cluster <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -112,6 +120,10 @@ If NULL all items are plotted.</p></dd>
 <dd><p>character vector of item id's for the Y axis</p></dd>
 
 
+<dt id="arg-cluster">cluster<a class="anchor" aria-label="anchor" href="#arg-cluster"></a></dt>
+<dd><p>arrange items by similarity.</p></dd>
+
+
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
 <dd><p>significance level used to color the plot (two sided)</p></dd>
 
@@ -125,11 +137,6 @@ If NULL all items are plotted.</p></dd>
     <p>Plotting produces an image of the matrix of pairwise DIF statistics.
 The statistics are standard normal deviates and colored to distinguish significant from non-significant values.
 If there is no DIF, a proportion alpha off the cells will be colored significant by chance alone.</p>
-    </div>
-    <div id="references">
-    <h2>References</h2>
-    <p>Feskens, R., Fox, J. P., &amp; Zwitser, R. (2019). Differential item functioning in PISA due to mode effects.
-In Theoretical and Practical Advances in Computer-based Educational Measurement (pp. 231-247). Springer, Cham.</p>
     </div>
 
   </div>
