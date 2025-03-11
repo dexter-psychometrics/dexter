@@ -6,6 +6,8 @@ imputation and sampling error in the standard errors.
 
 * `information`, `p_score` and `expected_score` can return separate estimates for all parameter draws in case Bayesian estimation of item parameters was used.
 
+* improvement in binning for enrm fit plots
+
 # dexter 1.5.0
 
 * bugfix in `profiles()`: correct domain names when different booklets don't have the same domains

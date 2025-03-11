@@ -126,7 +126,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
     }
   }
   # ignore attenuation if result is invalid
-  if(any(acor>1))
+  if(any(abs(acor)>1))
     acor = cor(pv)
   
   # make everything simple and zero indexed
@@ -151,9 +151,6 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
     for (d in 1:nd)
     {
       cons = condMoments(mu = prior$mu, sigma = prior$Sigma, index=d, value=pv) 
-      
-      if(any(cons$sigma<0.001))
-        browser()
       
       PV_sve(models[[d]]$b, models[[d]]$a, models[[d]]$design$first0, models[[d]]$design$last0, 					
         models[[d]]$bcni,
@@ -204,10 +201,7 @@ update_MVNprior = function(pvs,Sigma)
 }
 
 # mean and variance of Y given values for x
-# cleaned up a bit
-# formula is correct according to https://online.stat.psu.edu/stat505/lesson/6/6.1
-
-# but still near zero/negative variances, use a prior? meaningfull error message?
+# near zero/negative variances can occur,  meaningfull error message?
 
 condMoments = function(mu, sigma, index, value )
 {
@@ -222,7 +216,7 @@ condMoments = function(mu, sigma, index, value )
     mu_y = (CDinv %*% mu_y) + mu[index]
   } else
   {
-    mu_y = apply(mu_y2,\(x) CDinv %*% x) + mu[index]
+    mu_y = apply(mu_y,2,\(x) CDinv %*% x) + mu[index]
   }
 
   return(list(mu=mu_y, sigma = sigma[index,index] - CDinv %*% t(C)))
