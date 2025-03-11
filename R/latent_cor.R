@@ -15,7 +15,7 @@
 #'  value must be between 0 and 1.
 #' @param use Only complete.obs at this time. Respondents who don't have a score for one or more scales are removed.
 #' @return List containing a estimated correlation matrix, the corresponding standard deviations, 
-#' and the lower and upper limits of the highest posterior density interval
+#' and the lower and upper limits of the highest posterior density interval along with the complete mcmc 
 #' @details
 #' This function uses plausible values so results may differ slightly between calls. 
 #' 
@@ -40,10 +40,10 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   pb = get_prog_bar(nDraws, retrieve_data = is_db(dataSrc), lock=TRUE)
   on.exit({pb$close()})
   
-  from = 5
-  by = 2
+  from = 50L
+  by = 2L
   which.keep = seq(from,(from-by)*(from>by)+by*nDraws,by=by)
-  nIter=max(which.keep)
+  nIter = max(which.keep)
   
   if(is.matrix(dataSrc))
   {
@@ -150,7 +150,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   {
     for (d in 1:nd)
     {
-      cons = condMoments_new(mu = prior$mu, sigma = prior$Sigma, index=d, value=pv) 
+      cons = condMoments(mu = prior$mu, sigma = prior$Sigma, index=d, value=pv) 
       
       if(any(cons$sigma<0.001))
         browser()
@@ -162,7 +162,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
         pv,d-1L, 10L)
     }
     
-    prior = update_MVNprior_new(pv,prior$Sigma)
+    prior = update_MVNprior(pv,prior$Sigma)
     
     if (i %in% which.keep){
       mcmc[tel,,] = cov2cor(prior$Sigma)
@@ -183,13 +183,15 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
 }
 
 # robust for not entirely positive definite matrix V
-update_MVNprior_new = function(pvs,Sigma)
+update_MVNprior = function(pvs,Sigma)
 {
   m_pv = colMeans(pvs)
   nP = nrow(pvs)
-  mu = rmvnorm(1, mean=m_pv,sigma=Sigma/nP)
+  mu = rmvnorm(1, mu=m_pv, sigma=Sigma/nP)
   
-  S=(t(pvs)-m_pv)%*%t(t(pvs)-m_pv)
+  pvs = sapply(1:ncol(pvs),\(i) pvs[,i] - m_pv[i])
+  S = t(pvs) %*% pvs
+
   V = solve(S)
   
   Sigma = try({solve(rWishart(1,nP-1,V)[,,1])}, silent=TRUE)
@@ -207,23 +209,29 @@ update_MVNprior_new = function(pvs,Sigma)
 
 # but still near zero/negative variances, use a prior? meaningfull error message?
 
-condMoments_new = function(mu, sigma, index, value )
+condMoments = function(mu, sigma, index, value )
 {
   C = sigma[index,-index,drop=FALSE]
   D = sigma[-index,-index]
   CDinv = C %*% solve(D)
   
-  mu_y = apply(value[,-index,drop=FALSE],1, `-`, mu[-index]) |>
-    apply(2,\(x) CDinv %*% x) +
-    mu[index]
+  mu_y = apply(value[,-index,drop=FALSE],1, `-`, mu[-index])
   
+  if(is.null(dim(mu_y)))
+  {
+    mu_y = (CDinv %*% mu_y) + mu[index]
+  } else
+  {
+    mu_y = apply(mu_y2,\(x) CDinv %*% x) + mu[index]
+  }
+
   return(list(mu=mu_y, sigma = sigma[index,index] - CDinv %*% t(C)))
 }
 
 
-# did not want to import the whole matrix package for this function
-# it's quite a dependency
-
+# somewhat simplified, from the Matrix package
+# Jens Oehlschlägel and Matrix package authors
+# used in edge case in pudate mvn prior
 nearPD = function (x,  eig.tol = 1e-06, conv.tol = 1e-07, posd.tol = 1e-08, maxit = 50L) 
 {
   if (!isSymmetric(x)) {
@@ -276,3 +284,13 @@ nearPD = function (x,  eig.tol = 1e-06, conv.tol = 1e-07, posd.tol = 1e-08, maxi
   X
 }
 
+
+rmvnorm = function(n, mu, sigma)
+{
+  ev = eigen(sigma, symmetric = TRUE)
+  R = t(ev$vectors %*% (t(ev$vectors) * sqrt(pmax(ev$values, 0))))
+  res = matrix(rnorm(n * ncol(sigma)), nrow = n, byrow = TRUE) %*% R
+  res = sweep(res, 2, mu, "+")
+  colnames(res) = names(mu)
+  res
+}
