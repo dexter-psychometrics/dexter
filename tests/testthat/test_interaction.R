@@ -1,4 +1,3 @@
-context('check interaction model')
 
 library(dplyr)
 

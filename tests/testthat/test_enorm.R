@@ -1,4 +1,3 @@
-context('Check fit_enorm')
 
 library(dplyr)
 

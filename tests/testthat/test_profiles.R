@@ -1,4 +1,3 @@
-context('Test profile analysis')
 
 library(dplyr)
 

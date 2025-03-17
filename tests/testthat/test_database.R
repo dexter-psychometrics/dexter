@@ -1,4 +1,3 @@
-context('test database')
 
 library(dplyr)
 library(DBI)

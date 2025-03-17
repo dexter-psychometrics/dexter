@@ -1,4 +1,3 @@
-context('check latent correlations')
 
 library(dplyr)
 library(tidyr)

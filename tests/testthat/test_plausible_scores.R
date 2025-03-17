@@ -1,4 +1,3 @@
-context('test plausible_scores')
 
 library(dplyr)
 

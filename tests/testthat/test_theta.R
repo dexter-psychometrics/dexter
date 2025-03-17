@@ -1,7 +1,4 @@
 
-
-context('theta functions')
-
 library(dplyr)
 
 RcppArmadillo::armadillo_throttle_cores(1)

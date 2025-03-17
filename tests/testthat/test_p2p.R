@@ -1,4 +1,3 @@
-context('check equating')
 
 library(dplyr)
 library(tidyr)

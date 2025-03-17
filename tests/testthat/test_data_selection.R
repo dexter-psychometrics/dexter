@@ -1,4 +1,3 @@
-context('test data selection')
 
 library(dplyr)
 library(DBI)
