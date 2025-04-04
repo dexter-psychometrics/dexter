@@ -131,16 +131,21 @@ otherwise, a Gibbs sampler will be used to produce a sample from the posterior</
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of type <code>enorm</code>. The enorm object can be cast to a data.frame of item parameters
-using function <code>coef</code> or used directly as input for other Dexter functions.</p>
-    </div>
+    <p>An object of type <code>enorm</code>. The following methods are supported:</p><ul><li><p><code><a href="coef.enorm.html">coef</a></code></p></li>
+<li><p><code><a href="plot.enorm.html">plot</a></code></p></li>
+<li><p><code><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></code></p></li>
+</ul><p>In addition, many dexter functions accept an <code>enorm</code> object as input, e.g.</p><ul><li><p><code><a href="ability.html">ability</a></code></p></li>
+<li><p><code><a href="plausible_values.html">plausible_values</a></code></p></li>
+<li><p><code><a href="plausible_scores.html">plausible_scores</a></code></p></li>
+<li><p><code><a href="information.html">expected_score</a></code></p></li>
+</ul></div>
     <div id="details">
     <h2>Details</h2>
-    <p>The eNRM is a slight generalization of the PCM and the OPLM. It
+    <p>The eNRM is a generalization of the PCM and the OPLM. It
 reduces to the Rach model for dichotomous items when all itemscores are 0 or 1, is equal to the PCM for polytomous items if all
 itemscores up to the maximum score occur. It is equal to the oplm if all itemscores have an equal common divisor larger than 1.</p>
 <p>To support some flexibility in fixing parameters, fixed_params can be a dexter enorm object or a data.frame.
-If a data.frame, it should contain the columns item_id, item_score and a difficulty parameter beta</p>
+If it is a data.frame, it should contain the columns item_id, item_score and a difficulty parameter beta</p>
     </div>
     <div id="references">
     <h2>References</h2>
@@ -149,11 +154,6 @@ Psychometrika. 80(4), 859-879.</p>
 <p>Koops, J. and Bechger, T.M. and Maris, G. (2024); Bayesian inference for multistage and other
 incomplete designs. In Research for Practical Issues and Solutions in Computerized Multistage Testing.
 Routledge, London.</p>
-    </div>
-    <div id="see-also">
-    <h2>See also</h2>
-    <div class="dont-index"><p>functions that accept an <code>enorm</code> object as input: <code><a href="ability.html">ability</a></code>, <code><a href="plausible_values.html">plausible_values</a></code>,
-<code><a href="plot.enorm.html">plot.enorm</a></code>, and <code><a href="plausible_scores.html">plausible_scores</a></code></p></div>
     </div>
 
   </div>
