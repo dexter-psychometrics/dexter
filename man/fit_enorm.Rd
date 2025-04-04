@@ -50,7 +50,7 @@ or a Gibbs sampler for Bayesian estimation.
 }
 \details{
 The eNRM is a generalization of the PCM and the OPLM. It
-reduces to the Rach model for dichotomous items when all itemscores are 0 or 1, is equal to the PCM for polytomous items if all
+reduces to the Rasch model for dichotomous items when all itemscores are 0 or 1, is equal to the PCM for polytomous items if all
 itemscores up to the maximum score occur. It is equal to the oplm if all itemscores have an equal common divisor larger than 1.
 
 To support some flexibility in fixing parameters, fixed_params can be a dexter enorm object or a data.frame.

@@ -122,7 +122,7 @@ print.inter = function(x, ...){
 
 #' Extract interaction model parameters
 #' 
-#' @param object an object returend by the function \code{\link{fit_inter}}
+#' @param object an object returned by the function \code{\link{fit_inter}}
 #' @param what which coefficients to return. Defaults to \code{items} (the item parameters), can also be \code{scoreprob}
 #' for the probability of each item score per booklet score.
 #' @param ... further arguments to coef are ignored

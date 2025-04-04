@@ -15,7 +15,7 @@
 #'  value must be between 0 and 1.
 #' @param use Only complete.obs at this time. Respondents who don't have a score for one or more scales are removed.
 #' @return List containing a estimated correlation matrix, the corresponding standard deviations, 
-#' and the lower and upper limits of the highest posterior density interval along with the complete mcmc 
+#' and the lower and upper limits of the highest posterior density interval and the complete mcmc sample
 #' @details
 #' This function uses plausible values so results may differ slightly between calls. 
 #' 

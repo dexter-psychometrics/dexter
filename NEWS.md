@@ -6,7 +6,13 @@ imputation and sampling error in the standard errors.
 
 * `information`, `p_score` and `expected_score` can return separate estimates for all parameter draws in case Bayesian estimation of item parameters was used.
 
-* improvement in binning for enrm fit plots
+* improvement in binning for enorm fit plots
+
+* `tia_tables` distractor information extended with alternative-test correlation (rat), and distractors with frequency 0 added
+
+## small breaking change
+
+* classnames `prms` (returned by fit_enorm) and `rim` (returned by fit_inter) have been changed to `enorm` and `inter`
 
 # dexter 1.5.0
 

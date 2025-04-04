@@ -7,7 +7,7 @@
 \method{coef}{inter}(object, what = c("items", "scoreprob"), ...)
 }
 \arguments{
-\item{object}{an object returend by the function \code{\link{fit_inter}}}
+\item{object}{an object returned by the function \code{\link{fit_inter}}}
 
 \item{what}{which coefficients to return. Defaults to \code{items} (the item parameters), can also be \code{scoreprob}
 for the probability of each item score per booklet score.}
