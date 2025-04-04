@@ -29,20 +29,32 @@ otherwise, a Gibbs sampler will be used to produce a sample from the posterior}
 \item{merge_within_persons}{whether to merge different booklets administered to the same person, enabling linking over persons as well as booklets.}
 }
 \value{
-An object of type \code{enorm}. The enorm object can be cast to a data.frame of item parameters 
-using function \code{coef} or used directly as input for other Dexter functions.
+An object of type \code{enorm}. The following methods are supported:
+\itemize{
+\item \code{\link[=coef.enorm]{coef}}
+\item \code{\link[=plot.enorm]{plot}}
+\item \code{\link[stats]{logLik}}
+}
+
+In addition, many dexter functions accept an \code{enorm} object as input, e.g.
+\itemize{
+\item \code{\link{ability}}
+\item \code{\link{plausible_values}}
+\item \code{\link{plausible_scores}}
+\item \code{\link{expected_score}}
+}
 }
 \description{
 Fits an Extended NOminal Response Model (ENORM) using conditional maximum likelihood (CML)
 or a Gibbs sampler for Bayesian estimation.
 }
 \details{
-The eNRM is a slight generalization of the PCM and the OPLM. It
+The eNRM is a generalization of the PCM and the OPLM. It
 reduces to the Rach model for dichotomous items when all itemscores are 0 or 1, is equal to the PCM for polytomous items if all
 itemscores up to the maximum score occur. It is equal to the oplm if all itemscores have an equal common divisor larger than 1.
 
 To support some flexibility in fixing parameters, fixed_params can be a dexter enorm object or a data.frame.
-If a data.frame, it should contain the columns item_id, item_score and a difficulty parameter beta
+If it is a data.frame, it should contain the columns item_id, item_score and a difficulty parameter beta
 }
 \references{
 Maris, G., Bechger, T.M. and San-Martin, E. (2015) A Gibbs sampler for the (extended) marginal Rasch model. 
@@ -51,8 +63,4 @@ Psychometrika. 80(4), 859-879.
 Koops, J. and Bechger, T.M. and Maris, G. (2024); Bayesian inference for multistage and other 
 incomplete designs. In Research for Practical Issues and Solutions in Computerized Multistage Testing.
 Routledge, London.
-}
-\seealso{
-functions that accept an \code{enorm} object as input: \code{\link{ability}}, \code{\link{plausible_values}}, 
-\code{\link{plot.enorm}}, and \code{\link{plausible_scores}}
 }

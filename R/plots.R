@@ -501,6 +501,32 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
 #' intervals denote the uncertainty about the predicted pvalues within the ability groups for the 
 #' sample size in dataSrc (if not NULL) or the original data on which the model was fit.
 #' 
+#' @examples
+#' \dontshow{ RcppArmadillo::armadillo_throttle_cores(1)}
+#' db = start_new_project(verbAggrRules, ":memory:", 
+#'   person_properties=list(gender=""))
+#' 
+#' add_booklet(db, verbAggrData, "agg")
+#' 
+#' f = fit_enorm(db)
+#' 
+#' plot(f, items="S1DoShout")
+#' 
+#' # side by side for two different groups
+#' # (it is also possible to show two lines in the same plot 
+#' # by specifying add=TRUE as an argument in the second plot)
+#' 
+#' par(mfrow=c(1,2))
+#' 
+#' plot(f,items="S1WantCurse",dataSrc=db, predicate = gender=='Male', 
+#'   main='men - $item_id')
+#' 
+#' plot(f,items="S1WantCurse",dataSrc=db, predicate = gender=='Female', 
+#'   main='women - $item_id')
+#' 
+#' close_project(db)
+#' \dontshow{ RcppArmadillo::armadillo_reset_cores()}
+#' 
 #' @method plot enorm
 #' 
 plot.enorm = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci = .95, 

@@ -32,7 +32,7 @@ value must be between 0 and 1.}
 }
 \value{
 List containing a estimated correlation matrix, the corresponding standard deviations, 
-and the lower and upper limits of the highest posterior density interval
+and the lower and upper limits of the highest posterior density interval along with the complete mcmc
 }
 \description{
 Estimates correlations between latent traits using plausible values as described in Marsman, et al. (2022). 
