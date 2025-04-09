@@ -216,7 +216,6 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
       qua = curtains/200
       qnt = NULL
       if(qua>0 && qua<.5) {
-        #qnt = quantile(rep(bkl_scores$booklet_score, bkl_scores$n), c(qua,1-qua))
         qnt = weighted_quantile(bkl_scores$booklet_score, bkl_scores$n, c(qua,1-qua))
       }
       
@@ -224,7 +223,7 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
       draw_curtains(qnt)
       
       dAll = density(bkl_scores$booklet_score, n = 512, weights = bkl_scores$n/N, adjust=adjust,
-                     from=0,to=max(bkl_scores$booklet_score),warnWbw=FALSE)
+                     from=min(bkl_scores$booklet_score),to=max(bkl_scores$booklet_score),warnWbw=FALSE)
       
       lgnd = y |> 
         group_by(.data$response)  |> 
