@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dexter</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.6.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.6.1</span>
       </span>
     </div>
 
@@ -82,11 +82,21 @@
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="1.6.0" id="dexter-160">dexter 1.6.0<a class="anchor" aria-label="anchor" href="#dexter-160"></a></h2>
+<h2 class="page-header" data-toc-text="1.6.1" id="dexter-161">dexter 1.6.1<a class="anchor" aria-label="anchor" href="#dexter-161"></a></h2>
+<ul><li>bugfix for weird looking <code>distractor_plot</code> when not all booklet scores are observed</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="1.6.0" id="dexter-160">dexter 1.6.0<small>2025-04-07</small><a class="anchor" aria-label="anchor" href="#dexter-160"></a></h2>
 <ul><li><p><code>ability</code> and <code>ability_tables</code>: in case a Bayesian estimation method was used for the item parameters ,argument <code>parms_draw = "sample"</code> now combines imputation and sampling error in the standard errors.</p></li>
 <li><p><code>information</code>, <code>p_score</code> and <code>expected_score</code> can return separate estimates for all parameter draws in case Bayesian estimation of item parameters was used.</p></li>
-<li><p>improvement in binning for enrm fit plots</p></li>
+<li><p>improvement in binning for enorm fit plots</p></li>
+<li><p><code>tia_tables</code> distractor information extended with alternative-test correlation (rat), and distractors with frequency 0 added</p></li>
+</ul><div class="section level3">
+<h3 id="small-breaking-change-1-6-0">small breaking change<a class="anchor" aria-label="anchor" href="#small-breaking-change-1-6-0"></a></h3>
+<ul><li>classnames <code>prms</code> (returned by fit_enorm) and <code>rim</code> (returned by fit_inter) have been changed to <code>enorm</code> and <code>inter</code>
+</li>
 </ul></div>
+</div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.5.0" id="dexter-150">dexter 1.5.0<small>2024-07-05</small><a class="anchor" aria-label="anchor" href="#dexter-150"></a></h2>
 <ul><li><p>bugfix in <code><a href="../reference/profiles.html">profiles()</a></code>: correct domain names when different booklets don’t have the same domains</p></li>
