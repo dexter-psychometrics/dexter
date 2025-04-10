@@ -39,12 +39,26 @@ dbCheck_reserved_colnames = function(nm)
     stop(paste0("'", clash, "' is a reserved variable name in a dexter project"))
   } else if(length(clash) > 1)   
   {
-    stop(paste(paste0("'",clash,"'", collapse=", "),
+    stop_(paste(paste0("'",clash,"'", collapse=", "),
                'are reserved variable names in a dexter project'))
                 
   }
 }
   
+dbCheck_existing_colnames = function(db, nm)
+{
+  fields = lapply(c('dxitems','dxbooklets','dxbooklet_design','dxscoring_rules','dxpersons','dxadministrations','dxresponses'), 
+      dbListFields, conn=db) |>
+    unlist() |>
+    unique()
+  if(any(tolower(nm) %in% tolower(fields)))
+  {
+    stop_(paste('These name(s) are already in use in your project:',
+      paste0("`",intersect(tolower(nm),tolower(fields)),"`", collapse=', ')))
+  }
+}
+
+
 
 dbUniquePersonIds = function(db,n)
 {

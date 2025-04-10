@@ -764,11 +764,11 @@ add_item_properties = function(db, item_properties=NULL, default_values=NULL) {
   {
     if(!is.null(default_values))
     {
-      stopifnot(is.list(default_values))
       names(default_values) = dbValid_colnames(names(default_values))
       
       new_prop_names = setdiff(names(default_values), existing_item_properties)
       dbCheck_reserved_colnames(new_prop_names)
+      dbCheck_existing_colnames(db,new_prop_names)
       
       for(prop_name in new_prop_names)
       {
@@ -800,18 +800,19 @@ add_item_properties = function(db, item_properties=NULL, default_values=NULL) {
       
       new_prop_names = setdiff(colnames(item_properties), existing_item_properties)
       dbCheck_reserved_colnames(new_prop_names)
+      dbCheck_existing_colnames(db,new_prop_names)
       
       for(prop_name in new_prop_names)
       {
         dbExecute(db, 
                 paste0("ALTER TABLE dxitems ADD COLUMN ", 
-                       prop_name, 
+                       sql_quote(prop_name,'"'), 
                        sql_data_type(pull(item_properties, prop_name)),";"))
       }
       pnames = names(item_properties)[names(item_properties)!='item_id']
       
       n = dbExecute_param(db,
-            paste0('UPDATE dxitems SET ',paste0(pnames,'=:',pnames,collapse=', '),
+            paste0('UPDATE dxitems SET ',paste0(sql_quote(pnames,'"'),'=:',pnames,collapse=', '),
                       ' WHERE item_id=:item_id;'),
             item_properties)
       cat(paste(length(pnames), 'item properties for', n, 'items added or updated\n'))
@@ -852,22 +853,27 @@ add_person_properties = function(db, person_properties = NULL, default_values = 
     if(!is.null(default_values))
     {
       names(default_values) = dbValid_colnames(names(default_values))
+      default_values = default_values[!names(default_values ) %in% existing_props] 
       
       dbCheck_reserved_colnames(names(default_values))
+      dbCheck_existing_colnames(db, names(default_values))
   
-      for(prop_name in setdiff(names(default_values), existing_props))
+      for(prop_name in names(default_values))
       {
         dbExecute(db, paste0("ALTER TABLE dxpersons ADD COLUMN ",prop_name, sql_col_def(default_values[[prop_name]], TRUE, db),';'))
       }
       cat(paste(length(setdiff(names(default_values), existing_props)),"new person_properties defined\n"))
-      existing_props = union(existing_props, names(default_values))
+      existing_props = c(existing_props, names(default_values))
     }
+    
     if(!is.null(person_properties))
     {
       person_properties$person_id = as.character(person_properties$person_id)
       colnames(person_properties) = dbValid_colnames(colnames(person_properties))
 
-      dbCheck_reserved_colnames(setdiff(colnames(person_properties), existing_props))
+      new_props = setdiff(colnames(person_properties), existing_props)
+      dbCheck_reserved_colnames(new_props)
+      dbCheck_existing_colnames(db, new_props)
       
       if(inherits(db,'SQLiteConnection'))
       {
@@ -877,17 +883,17 @@ add_person_properties = function(db, person_properties = NULL, default_values = 
       }
       
       
-      lapply(setdiff(colnames(person_properties), existing_props), function(prop_name)
+      lapply(new_props, function(prop_name)
       {
         dbExecute(db, paste0("ALTER TABLE dxpersons ADD COLUMN ",
-                             prop_name, 
+                             sql_quote(prop_name,'"'), 
                              sql_col_def(pull(person_properties, prop_name), FALSE, db),';'))
       })
       
       pnm = setdiff(colnames(person_properties),'person_id')
       
       n = dbExecute_param(db, 
-                    paste('UPDATE dxpersons SET', paste0(pnm, '=:', pnm, collapse = ','),
+                    paste('UPDATE dxpersons SET', paste0(sql_quote(pnm,'"'), '=:', pnm, collapse = ','),
                               'WHERE person_id=:person_id;'),
                     person_properties)
       

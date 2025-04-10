@@ -132,19 +132,21 @@ test_that('adding person and item properties',
   
   expect_error({add_person_properties(db,tibble(a=1,b=2))},'person_id')
   
+  expect_error({add_person_properties(db,tibble(person_id=1,a=1,b=2))},'already in use')
+  
   # person "1" does not exist
-  expect_output({add_person_properties(db,tibble(person_id=1,b=2))}, '0 persons')
+  expect_output({add_person_properties(db,tibble(person_id=1,prop=2))}, '0 persons')
   
   
   
-  expect_output({add_person_properties(db,tibble(person_id=get_persons(db)$person_id[1], gender='unchecked', news='olds'))},
+  expect_output({add_person_properties(db,tibble(person_id=get_persons(db)$person_id[1], gender='unchecked', other_news='olds'))},
                 '2 person properties? for 1 persons? added or updated', perl=TRUE)
   
   persons = get_persons(db)
   
   expect_true(all(persons |> 
                     filter(person_id=='dxP1') |> 
-                    select(gender,news) |> 
+                    select(gender,other_news) |> 
                     unlist() == c("unchecked", "olds" )))
   
   expect_output({add_person_properties(db, default_values = list(x=4L))},

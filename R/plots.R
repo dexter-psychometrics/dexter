@@ -224,7 +224,7 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
       
       dAll = density(bkl_scores$booklet_score, n = 512, weights = bkl_scores$n/N, adjust=adjust,
                      from=min(bkl_scores$booklet_score),to=max(bkl_scores$booklet_score),warnWbw=FALSE)
-      
+      # has to be from=min(booklet_score), otherwise we can get division by 0
       lgnd = y |> 
         group_by(.data$response)  |> 
         do({
