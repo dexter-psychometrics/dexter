@@ -688,21 +688,20 @@ plot.enorm = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci
 #'
 plot.inter = function(x, items=NULL, summate=TRUE, overlay=FALSE,
                     curtains=10, show.observed=TRUE, ...){
-  allItems = as.character(x$inputs$ssI$item_id)
+  all_items = as.character(x$inputs$ssI$item_id)
   if(!is.null(items))
   {
-    if(length(setdiff(items, allItems)) > 0) 
-      stop(paste('item(s):', paste0(setdiff(items, allItems), collapse=', '), 'not found'))
+    if(length(setdiff(items, all_items)) > 0) 
+      stop_(format_plural('Items[s] not found: %s',setdiff(items, all_items)))
   } else
   {
-    items = allItems
+    items = all_items
   }
   user.args = list(...)
   
   qua = curtains/200
   qnt=NULL
   if(qua>0 && qua<.5) {
-    #qnt = quantile(rep(as.integer(x$inputs$scoretab$booklet_score), x$inputs$scoretab$N), c(qua,1-qua))
     qnt = weighted_quantile(x$inputs$scoretab$booklet_score, x$inputs$scoretab$N, c(qua,1-qua))
   }
   

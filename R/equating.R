@@ -40,7 +40,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
   if(inherits(ref_items,'data.frame') && 'item_id' %in% colnames(ref_items))
   {
     if('booklet_id' %in% colnames(ref_items) && n_distinct(ref_items$booklet_id)>1)
-      stop_('ref_itemsshould contain a single booklet')
+      stop_('ref_items should contain a single booklet_id')
     ref_items = ref_items$item_id
   }
   if(is.factor(ref_items)) ref_items = as.character(ref_items)

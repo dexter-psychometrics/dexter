@@ -767,7 +767,6 @@ add_item_properties = function(db, item_properties=NULL, default_values=NULL) {
       names(default_values) = dbValid_colnames(names(default_values))
       
       new_prop_names = setdiff(names(default_values), existing_item_properties)
-      dbCheck_reserved_colnames(new_prop_names)
       dbCheck_existing_colnames(db,new_prop_names)
       
       for(prop_name in new_prop_names)
@@ -799,7 +798,6 @@ add_item_properties = function(db, item_properties=NULL, default_values=NULL) {
         stop('item_properties needs to have a column item_id')
       
       new_prop_names = setdiff(colnames(item_properties), existing_item_properties)
-      dbCheck_reserved_colnames(new_prop_names)
       dbCheck_existing_colnames(db,new_prop_names)
       
       for(prop_name in new_prop_names)
@@ -855,7 +853,6 @@ add_person_properties = function(db, person_properties = NULL, default_values = 
       names(default_values) = dbValid_colnames(names(default_values))
       default_values = default_values[!names(default_values ) %in% existing_props] 
       
-      dbCheck_reserved_colnames(names(default_values))
       dbCheck_existing_colnames(db, names(default_values))
   
       for(prop_name in names(default_values))
@@ -872,7 +869,6 @@ add_person_properties = function(db, person_properties = NULL, default_values = 
       colnames(person_properties) = dbValid_colnames(colnames(person_properties))
 
       new_props = setdiff(colnames(person_properties), existing_props)
-      dbCheck_reserved_colnames(new_props)
       dbCheck_existing_colnames(db, new_props)
       
       if(inherits(db,'SQLiteConnection'))

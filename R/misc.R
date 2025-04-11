@@ -69,17 +69,6 @@ explicit_NA = function(x, replace_NA_with = c('<NA>','.NA.','<<NA>>','__NA__'))
   
 }
 
-df_format = function(df)
-{
-  if(getOption('dexter.use_tibble', FALSE))
-  {
-    as_tibble(ungroup(df))
-  } else
-  {
-    as.data.frame(df, stringsAsFactors = FALSE)
-  }
-}
-
 
 get_datatype_info = function(dataSrc, columns)
 {
@@ -164,9 +153,6 @@ df_format = function(df, datatype_info=NULL)
 }
 
 
-
-
-
 is.date = function(x) inherits(x, "Date")
 is.time = function(x) inherits(x,'POSIXt')
 
@@ -199,6 +185,22 @@ bind_vertical = function(lst)
     matrix(unlist(lst), ncol=1)
 }
 
+# x is a vector, str should include one %s to place the collapsed vector
+# example: str = "%s [is a/are] reserved variable name[s] in a dexter project"
+# first (optional) element in [] is singular, second element is plural
+format_plural = function(str, x, sep=', ', last_sep=' and ', qt="'")
+{
+  len = length(x)
+  str = gsub(x = str, pattern='\\[(?:([^\\]/]+)/)?([^\\]/]+)\\]', 
+    replacement = paste0('\\', 1+(len>1)),  perl=TRUE)
+  
+  x = paste0(qt,x,qt)
+  
+  if(len>=2)
+    x = c(head(x,len-2), paste(tail(x,2), collapse=last_sep))
+  
+  sprintf(str, paste(x,collapse=sep))
+}
 
 
 # format string with named arguments
@@ -412,12 +414,12 @@ check_df = function(x, columns=NULL, n_rows=NULL, name = deparse(substitute(x)),
     return(NULL)
   
   if(!inherits(x, 'data.frame'))
-    stop("Argument'",name, "' must be a data.frame")
+    stop_("Argument'",name, "' must be a data.frame")
   
   missing_col = setdiff(columns, colnames(x))
   
   if(!is.null(columns) && length(missing_col>0))
-    stop('column(s): ', paste0('`', missing_col, '`',collapse=', '),' must be present in ', name)
+    stop_(format_plural(paste('Column[s]: %s must be present in', name), missing_col, qt='`'))
   
   if(!is.null(n_rows) && NROW(x)!=n_rows)
     stop_('argument`', name, '` must have ', n_rows, ' rows')

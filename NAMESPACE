@@ -1,24 +1,23 @@
 useDynLib(dexter, .registration=TRUE)
 importFrom(Rcpp, "evalCpp")
-importFrom(RcppArmadillo, 'armadillo_set_seed')
+importFrom(RcppArmadillo, 'armadillo_throttle_cores')
 import(dplyr, except="sql")
 importFrom(RSQLite, "SQLite")
 importFrom(DBI,"dbExecute", "dbGetQuery","dbDisconnect", "dbConnect", "dbListFields",
             "dbCommit","dbRollback","dbBegin", "dbReadTable", "dbExistsTable", "dbIsValid",
-            "dbSendQuery","dbColumnInfo","dbClearResult") 
+            "dbSendQuery","dbColumnInfo","dbClearResult", "dbListTables") 
 importFrom(rlang,"caller_env",".data","eval_tidy","duplicate","env_has","obj_address")
 importFrom(tidyr, "pivot_longer", "pivot_wider", "fill")
 importFrom(MASS, "lmsreg")
 
-importFrom(stats, "complete.cases", "cor", "quantile","var",
-            "sd", "weighted.mean", "as.formula", "density",
+importFrom(stats, "complete.cases", "cor", "sd", "weighted.mean", "as.formula", "density",
             "cov", "mahalanobis", "model.matrix", "pchisq","rchisq",
             "rgamma", "runif", "setNames", 'rnorm',"chisq.test",
            "smooth.spline", "coef", "lm", "predict", "dnorm", "qnorm",
            "rbeta","rbinom","cov2cor", "rWishart", "as.dist", "hclust")
-importFrom(graphics, "plot", "axis", "image", "layout", "par", "lines", "hist",
+importFrom(graphics, "plot", "axis", "image", "par", "lines", "hist",
            "text","legend","abline","segments","arrows","points", "rect","clip","strheight","strwidth")
-importFrom(grDevices, "rainbow","colorRampPalette","col2rgb","rgb")
+importFrom(grDevices, "colorRampPalette","col2rgb","rgb")
 importFrom(methods, "is", "new")
 importFrom(utils, "str", "head", "person", "tail", "modifyList")
 

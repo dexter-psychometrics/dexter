@@ -28,36 +28,29 @@ dbExists = function(db, query, data=NULL){
   
 } 
 
-dbCheck_reserved_colnames = function(nm)
+dbCheck_reserved_colnames = function(varnames)
 {
-  clash = intersect(tolower(nm), 
+  clash = intersect(tolower(varnames), 
                     c('person_id','item_id','item_position',
                       'response','item_score','booklet_id'))
-  
-  if(length(clash) == 1)
-  {
-    stop(paste0("'", clash, "' is a reserved variable name in a dexter project"))
-  } else if(length(clash) > 1)   
-  {
-    stop_(paste(paste0("'",clash,"'", collapse=", "),
-               'are reserved variable names in a dexter project'))
-                
-  }
-}
-  
-dbCheck_existing_colnames = function(db, nm)
-{
-  fields = lapply(c('dxitems','dxbooklets','dxbooklet_design','dxscoring_rules','dxpersons','dxadministrations','dxresponses'), 
-      dbListFields, conn=db) |>
-    unlist() |>
-    unique()
-  if(any(tolower(nm) %in% tolower(fields)))
-  {
-    stop_(paste('These name(s) are already in use in your project:',
-      paste0("`",intersect(tolower(nm),tolower(fields)),"`", collapse=', ')))
-  }
+  if(length(clash)>0)
+    stop_(format_plural("%s [is a/are] reserved variable name[s] in a dexter project", clash))
 }
 
+dbCheck_existing_colnames = function(db, varnames)
+{
+  varnames = tolower(varnames)
+  
+  fields = lapply(dbListTables(db), dbListFields, conn=db) |>
+    unlist() |>
+    unique() |>
+    tolower()
+  
+  if(any(varnames %in% fields))
+  {
+    stop_(format_plural('These name(s) are already in use in your project:', intersect(varnames, fields)))
+  }
+}
 
 
 dbUniquePersonIds = function(db,n)

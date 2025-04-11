@@ -95,11 +95,10 @@ get_resp_data = function(dataSrc, qtpredicate=NULL,
   }
   if(!is.null(extra_columns))
   {
-      if(is.matrix(dataSrc)) stop("column(s): ", paste(extra_columns,collapse=','), ' not found.')
+      if(is.matrix(dataSrc)) stop_(format_plural('Column[s] %s not found', extra_columns))
+    
       if(inherits(dataSrc,'data.frame') && ! all(extra_columns %in% colnames(dataSrc)))
-      {
-        stop("column(s): ", paste(setdiff(extra_columns,colnames(dataSrc)),collapse=','), ' not found.')
-      }
+        stop_(format_plural('Column[s] %s not found', setdiff(extra_columns,colnames(dataSrc))))
   }
   
   if(raw)
@@ -436,7 +435,7 @@ resp_data.from_df = function(x, extra_columns=NULL, summarised=FALSE,
   {
     cnm = intersect(colnames(x),c('person_id','item_id','item_score','booklet_id'))
     cnm = cnm[sapply(cnm,function(cn) anyNA(x[[cn]]))]
-    stop_(sprintf("column(s) %s in dataSrc contain NA values", paste0('`',cnm,'`',collapse=', ')))
+    stop_(format_plural("Column[s] %s in dataSrc contain[s / ]NA values", cnm, qt='`'))
   }
   
   pointers = lapply(x, obj_address)

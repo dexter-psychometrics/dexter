@@ -148,12 +148,11 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
       if(anyNA(bkl))
       {
         cat('\n')
-        stop(paste0("empty booklet id's at position (", paste0(booklet_position, collapse=', ' ),")"),call.=FALSE)
+        stop_(paste0("empty booklet id's at position (", paste0(booklet_position, collapse=', ' ),")"))
       } else if(min(bkl) < 1 || max(bkl) > scr$nBook)
       {
         cat('\n')
-        stop(paste0("The following booklet_id's in data are not present in the .scr file:\n",
-                    paste(setdiff(bkl, 1:scr$nBook), collapse = ' ')),call.=FALSE)
+        stop_(format_plural("The following booklet_id['s] in data [is/are] not present in the .scr file:\n%s", setdiff(bkl, 1:scr$nBook)))
       }
       
       

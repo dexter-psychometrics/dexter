@@ -193,7 +193,7 @@ standards_db = function(par.sts, file_name, standards, population=NULL, group_le
         unknown_bk = setdiff(population$booklet_id, names(par.sts$est))
         if(length(unknown_bk)>0)
         {
-          stop(paste('Booklets:',paste(unknown_bk,collapse=', '),'listed in `population` were not found in the sts_par object.'))
+          stop_(format_plural('Booklet[s]: %s listed in `population` [was/were] not found in the sts_par object',unknown_bk))
         }
       } else
       {
