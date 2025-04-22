@@ -1,11 +1,17 @@
 
 # dexter 1.6.1
 
-* bugfix for weird looking `distractor_plot` when not all booklet scores are observed
+* Bugfix for weird looking `distractor_plot` when not all booklet scores are observed.
+
+* Names for person and item properties that caused an error because they clash with SQL syntax (like 'group') are now allowed.
+
+* `plot.enorm` now silently returns a single data.frame (with an added column 'item_id') instead of a list of data.frames when multiple items are plotted.
+
+* When plotting multiple items with `plot.enorm` they can optionally be arranged by mean squared difference between the data and the model prediction.
 
 # dexter 1.6.0
 
-* `ability` and `ability_tables`: in case a Bayesian estimation method was used for the item parameters ,argument `parms_draw = "sample"` now combines
+* `ability` and `ability_tables`: in case a Bayesian estimation method was used for the item parameters, argument `parms_draw = "sample"` now combines
 imputation and sampling error in the standard errors.
 
 * `information`, `p_score` and `expected_score` can return separate estimates for all parameter draws in case Bayesian estimation of item parameters was used.

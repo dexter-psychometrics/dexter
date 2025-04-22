@@ -11,6 +11,7 @@
   predicate = NULL,
   nbins = 5,
   ci = 0.95,
+  sort = c("none", "mse-desc", "mse-asc"),
   add = FALSE,
   col = "black",
   col.model = "grey80",
@@ -30,6 +31,9 @@
 
 \item{ci}{confidence interval for the error bars, between 0 and 1. Use 0 to suppress the error bars.
 Default = 0.95 for a 95\% confidence interval}
+
+\item{sort}{for multiple items, sort item_id by mean squared error (i.e. the mean squared distance between the data and the model prediction per plot), 
+either ascending (best to worst) or descending (worst to best). If none (the default) the order of items is not changed}
 
 \item{add}{logical; if TRUE add to an already existing plot}
 
@@ -63,7 +67,7 @@ add_booklet(db, verbAggrData, "agg")
 
 f = fit_enorm(db)
 
-plot(f, items="S1DoShout")
+plot(f, item_id="S1DoShout")
 
 # side by side for two different groups
 # (it is also possible to show two lines in the same plot 
@@ -71,7 +75,7 @@ plot(f, items="S1DoShout")
 
 par(mfrow=c(1,2))
 
-plot(f,items="S1WantCurse",dataSrc=db, predicate = gender=='Male', 
+plot(f,item_id="S1WantCurse",dataSrc=db, predicate = gender=='Male', 
   main='men - $item_id')
 
 plot(f,items="S1WantCurse",dataSrc=db, predicate = gender=='Female', 

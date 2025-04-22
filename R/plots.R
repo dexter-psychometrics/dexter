@@ -474,6 +474,7 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
   
 }
 
+
 #' Plot for the extended nominal Response model
 #' 
 #' The plot shows 'fit' by comparing the expected score based on the model (grey line)
@@ -487,6 +488,8 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
 #' @param nbins number of ability groups
 #' @param ci confidence interval for the error bars, between 0 and 1. Use 0 to suppress the error bars.
 #' Default = 0.95 for a 95\% confidence interval
+#' @param sort for multiple items, sort item_id by mean squared error (i.e. the mean squared distance between the data and the model prediction per plot), 
+#' either ascending (best to worst) or descending (worst to best). If none (the default) the order of items is not changed
 #' @param add logical; if TRUE add to an already existing plot
 #' @param col color for the observed score average
 #' @param col.model color for the expected score based on the model
@@ -509,7 +512,7 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
 #' 
 #' f = fit_enorm(db)
 #' 
-#' plot(f, items="S1DoShout")
+#' plot(f, item_id="S1DoShout")
 #' 
 #' # side by side for two different groups
 #' # (it is also possible to show two lines in the same plot 
@@ -517,7 +520,7 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
 #' 
 #' par(mfrow=c(1,2))
 #' 
-#' plot(f,items="S1WantCurse",dataSrc=db, predicate = gender=='Male', 
+#' plot(f,item_id="S1WantCurse",dataSrc=db, predicate = gender=='Male', 
 #'   main='men - $item_id')
 #' 
 #' plot(f,items="S1WantCurse",dataSrc=db, predicate = gender=='Female', 
@@ -529,8 +532,10 @@ plot.prms = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci 
 #' @method plot enorm
 #' 
 plot.enorm = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci = .95, 
-                     add=FALSE, col = 'black', col.model='grey80', ...)
+  sort=c('none','mse-desc','mse-asc'),add=FALSE, col = 'black', col.model='grey80', ...)
 {
+  # preparation
+  
   check_num(nbins,'integer',.length=1, .min=2)
   dots = list(...)
   
@@ -553,11 +558,14 @@ plot.enorm = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci
       item_id = x$inputs$ssI$item_id
     }
   }
+  
+  item_id = as.character(item_id)
+  
   if(length(setdiff(item_id,x$inputs$ssI$item_id))>0)
   {
     message('The following items were not found in your fit object')
     print(setdiff(item_id,x$inputs$ssI$item_id))
-    stop('unknown item',call.=FALSE)
+    stop_('unknown items')
   }
   
   if(!is.null(dataSrc))
@@ -566,7 +574,7 @@ plot.enorm = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci
     qtpredicate = eval(substitute(quote(predicate)))
     env = caller_env()
     respData = get_resp_data(dataSrc, qtpredicate, env=env, retain_person_id=FALSE,
-                             parms_check=filter(x$inputs$ssIS, .data$item_id %in% local(item_id)))
+      parms_check=filter(x$inputs$ssIS, .data$item_id %in% local(item_id)))
     
     if(length(setdiff(as.character(item_id), levels(respData$design$item_id)))>0)
     {
@@ -583,52 +591,26 @@ plot.enorm = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci
   }
   
   
-  #many plots
-  if(length(item_id) > 1)
-  {
-    out = lapply(item_id, function(itm) do.call(plot, append(list(x=x, item_id=itm, nbins=nbins, ci=ci), dots)))
-    names(out) = as.character(item_id)
-    
-    return(invisible(out))
-  }
-  # for dplyr
-  item_id_ = as.character(item_id)
-  
-  expf = expected_score(x, items = item_id)
-  
-  max_score = x$inputs$ssIS |>
-    filter(.data$item_id == item_id_) |>
-    pull(.data$item_score) |>
-    max()
-  
   plt = x$inputs$plt |>
-    filter(.data$item_id==item_id_) |>
+    filter(.data$item_id %in% .env$item_id) |>
     inner_join(x$abl_tables$mle, by=c('booklet_id','booklet_score')) |>
+    group_by(.data$item_id) |>
     mutate(abgroup = weighted_ntile(.data$theta, .data$N, nbins = nbins)) |>
-    group_by(.data$abgroup) |>
+    group_by(.data$item_id, .data$abgroup) |>
     summarize(gr_theta = weighted.mean(.data$theta,.data$N), avg_score = weighted.mean(.data$meanScore,.data$N), n=sum(.data$N)) |>
-    ungroup() |>
-    mutate(expected_score = expf(.data$gr_theta))
+    mutate(expected_score = expected_score(x, items = .data$item_id[1])(.data$gr_theta)) |>
+    ungroup()
   
-  rng = max(plt$gr_theta) - min(plt$gr_theta)
-  rng = c(min(plt$gr_theta)-.5*rng/nbins,
-          max(plt$gr_theta)+.5*rng/nbins)
+  max_scores = x$inputs$ssIS |>
+    filter(.data$item_id %in% .env$item_id) |>
+    group_by(.data$item_id) |>
+    summarise(max_score=max(.data$item_score))
   
-  plot.args = merge_arglists(dots,
-                             default=list(bty='l',xlab = expression(theta), ylab='score',main=item_id,
-                                          lwd=par('lwd')),
-                             override=list(x = rng,y = c(0,max_score), type="n"))
+  max_scores = split(max_scores$max_score, max_scores$item_id, drop=TRUE)
   
-  plot.args$main = fstr(plot.args$main, list(item_id=item_id))
-  plot.args$sub = fstr(plot.args$sub, list(item_id=item_id))
+  plot_ci = !is.null(ci) && !is.na(ci) && ci !=0
   
-  if(!add) do.call(plot, plot.args)
-  
-  plot(expf,from = rng[1], to=rng[2], col=col.model, add=TRUE,lwd=plot.args$lwd)
-  
-  plt$outlier = FALSE
-  
-  if(!is.null(ci) && !is.na(ci) && ci !=0)
+  if(plot_ci)
   {
     if(ci>1 && ci<100)
       ci = ci/100
@@ -638,24 +620,68 @@ plot.enorm = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci
     
     qnt = abs(qnorm((1-ci)/2))
     
-    I=information(x, items = item_id)
     plt = plt |>
-      mutate(se = sqrt(I(.data$gr_theta)/.data$n),
-             conf_min = pmax(.data$expected_score - qnt*.data$se,0),
-             conf_max = pmin(.data$expected_score + qnt*.data$se,max_score)) |>
-      mutate(outlier = .data$avg_score < .data$conf_min | .data$avg_score > .data$conf_max)
-    
-    suppressWarnings({
-      arrows(plt$gr_theta, plt$conf_min, 
-             plt$gr_theta, plt$conf_max, 
-             lwd=plot.args$lwd,
-             length=0.05, angle=90, code=3, col=col.model)})
-  } 
+      group_by(.data$item_id) |>
+      mutate(se = sqrt(information(x, items = .data$item_id[1])(.data$gr_theta)/.data$n),
+        conf_min = pmax(.data$expected_score - qnt*.data$se,0),
+        conf_max = pmin(.data$expected_score + qnt*.data$se,max_scores[[as.character(.data$item_id[1])]]),
+        outlier = .data$avg_score < .data$conf_min | .data$avg_score > .data$conf_max) |>
+      ungroup()
+  } else
+  {
+    plt$outlier=FALSE
+  }
   
-  lines(plt$gr_theta,plt$avg_score,col=col,lwd=plot.args$lwd)  
-  points(plt$gr_theta, plt$avg_score, 
-         bg = if_else(plt$outlier, qcolors(1), coalesce(plot.args$bg,'transparent')), 
-         pch = coalesce(dots$pch,21), col=col)
+  if('plot' %in% names(dots) && dots$plot == FALSE) return(df_format(plt))
+  
+  plt_items = split(plt, plt$item_id, drop=TRUE)
+  
+  sort = match.arg(sort)
+  if(startsWith(sort,'mse'))
+  {
+    item_id = plt |>
+      group_by(.data$item_id) |>
+      summarise(mse = weighted.mean((.data$avg_score - .data$expected_score)^2, .data$n)) |>
+      ungroup() |>
+      arrange(desc(.data$mse)) |>
+      pull('item_id')
+    
+    if(sort=='mse-asc') item_id = rev(item_id)
+  }
+  
+  for(this_item_id in item_id)
+  {
+    plt_item = plt_items[[this_item_id]]
+    
+    rng = max(plt_item$gr_theta) - min(plt_item$gr_theta)
+    rng = c(min(plt_item$gr_theta)-.5*rng/nbins, max(plt_item$gr_theta)+.5*rng/nbins)
+    
+    plot.args = merge_arglists(dots,
+      default=list(bty='l',xlab = expression(theta), ylab='score',main=this_item_id,
+        lwd=par('lwd')),
+      override=list(x = rng,y = c(0,max_scores[[this_item_id]]), type="n"))
+    
+    plot.args$main = fstr(plot.args$main, list(item_id=this_item_id))
+    plot.args$sub = fstr(plot.args$sub, list(item_id=this_item_id))
+    
+    if(!add) do.call(plot, plot.args)
+    
+    plot(expected_score(x, items = this_item_id),from = rng[1], to=rng[2], col=col.model, add=TRUE,lwd=plot.args$lwd)
+    
+    if(plot_ci)
+    {
+      suppressWarnings({
+        arrows(plt_item$gr_theta, plt_item$conf_min, 
+          plt_item$gr_theta, plt_item$conf_max, 
+          lwd=plot.args$lwd,
+          length=0.05, angle=90, code=3, col=col.model)})
+    }
+    
+    lines(plt_item$gr_theta,plt_item$avg_score,col=col,lwd=plot.args$lwd)  
+    points(plt_item$gr_theta, plt_item$avg_score, 
+      bg = if_else(plt_item$outlier, qcolors(1), coalesce(plot.args$bg,'transparent')), 
+      pch = coalesce(dots$pch,21), col=col)
+  }
   invisible(df_format(plt))
 }
 

@@ -84,11 +84,11 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'), by_c
   } else
   {
     method='CML'
-
+    parms$item_id = as.character(parms$item_id)
     if(!is.null(design)) parms = semi_join(parms,design,by='item_id')
     
     parms = transform.df.parms(parms,'b')
-    parms$item_id = factor(as.character(parms$item_id))
+    parms$item_id = factor(parms$item_id)
     #parms = arrange(parms,.data$item_id,.data$item_score) result is sorted
     a = parms$item_score
     b = parms$b
