@@ -99,6 +99,7 @@ with similar estimated ability.</p>
 <span>  predicate <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nbins <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  ci <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  sort <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"mse-desc"</span>, <span class="st">"mse-asc"</span><span class="op">)</span>,</span>
 <span>  add <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  col <span class="op">=</span> <span class="st">"black"</span>,</span>
 <span>  col.model <span class="op">=</span> <span class="st">"grey80"</span>,</span>
@@ -133,6 +134,11 @@ with similar estimated ability.</p>
 <dt id="arg-ci">ci<a class="anchor" aria-label="anchor" href="#arg-ci"></a></dt>
 <dd><p>confidence interval for the error bars, between 0 and 1. Use 0 to suppress the error bars.
 Default = 0.95 for a 95% confidence interval</p></dd>
+
+
+<dt id="arg-sort">sort<a class="anchor" aria-label="anchor" href="#arg-sort"></a></dt>
+<dd><p>for multiple items, sort item_id by mean squared error (i.e. the mean squared distance between the data and the model prediction per plot),
+either ascending (best to worst) or descending (worst to best). If none (the default) the order of items is not changed</p></dd>
 
 
 <dt id="arg-add">add<a class="anchor" aria-label="anchor" href="#arg-add"></a></dt>
@@ -187,7 +193,7 @@ sample size in dataSrc (if not NULL) or the original data on which the model was
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">f</span> <span class="op">=</span> <span class="fu"><a href="fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">f</span>, items<span class="op">=</span><span class="st">"S1DoShout"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">f</span>, item_id<span class="op">=</span><span class="st">"S1DoShout"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot.enorm-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># side by side for two different groups</span></span></span>
@@ -196,7 +202,7 @@ sample size in dataSrc (if not NULL) or the original data on which the model was
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">f</span>,items<span class="op">=</span><span class="st">"S1WantCurse"</span>,dataSrc<span class="op">=</span><span class="va">db</span>, predicate <span class="op">=</span> <span class="va">gender</span><span class="op">==</span><span class="st">'Male'</span>, </span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">f</span>,item_id<span class="op">=</span><span class="st">"S1WantCurse"</span>,dataSrc<span class="op">=</span><span class="va">db</span>, predicate <span class="op">=</span> <span class="va">gender</span><span class="op">==</span><span class="st">'Male'</span>, </span></span>
 <span class="r-in"><span>  main<span class="op">=</span><span class="st">'men - $item_id'</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">f</span>,items<span class="op">=</span><span class="st">"S1WantCurse"</span>,dataSrc<span class="op">=</span><span class="va">db</span>, predicate <span class="op">=</span> <span class="va">gender</span><span class="op">==</span><span class="st">'Female'</span>, </span></span>
