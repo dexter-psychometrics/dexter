@@ -83,7 +83,8 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.6.1" id="dexter-161">dexter 1.6.1<a class="anchor" aria-label="anchor" href="#dexter-161"></a></h2>
-<ul><li><p>Bugfix for weird looking <code>distractor_plot</code> when not all booklet scores are observed.</p></li>
+<ul><li><p>Bugfix <code>ability_tables</code> did not correctly handle the design argument. This bug was introduced in version 1.6.0</p></li>
+<li><p>Bugfix for weird looking <code>distractor_plot</code> when not all booklet scores are observed.</p></li>
 <li><p>Names for person and item properties that caused an error because they clash with SQL syntax (like ‘group’) are now allowed.</p></li>
 <li><p><code>plot.enorm</code> now silently returns a single data.frame (with an added column ‘item_id’) instead of a list of data.frames when multiple items are plotted.</p></li>
 <li><p>When plotting multiple items with <code>plot.enorm</code> they can optionally be arranged by mean squared difference between the data and the model prediction.</p></li>
