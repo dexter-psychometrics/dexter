@@ -154,7 +154,6 @@ Rcpp::List theta_output(mat& theta, mat& se, const ivec& bk_maxs, const ivec& bk
 }
 
 
-
 template<bool WLE>
 Rcpp::List theta_wmle(const arma::mat& b, const arma::ivec& a, 
 						arma::ivec& first, arma::ivec& last,
@@ -167,25 +166,25 @@ Rcpp::List theta_wmle(const arma::mat& b, const arma::ivec& a,
 	const int nbk = bk_nit.n_elem;
 	const ivec bk_cnit = ivec2_iter(bk_nit);
 	
-	ivec max_score(nbk,fill::zeros), max_A(nbk,fill::zeros);;
+	ivec bk_maxs(nbk,fill::zeros), bk_max_A(nbk,fill::zeros);;
 	
 	for(int bk=0; bk<nbk; bk++)
 	{
 		for(int i=bk_cnit[bk]; i<bk_cnit[bk+1]; i++)
 		{
-			max_score[bk] += a[last[i]];
-			max_A[bk] = std::max(max_A[bk], a[last[i]]);
+			bk_maxs[bk] += a[last[i]];
+			bk_max_A[bk] = std::max(bk_max_A[bk], a[last[i]]);
 		}
 	}
-	const double max_max_A = max(max_A);
+	const double max_A = max(bk_max_A);
 	
-	const ivec bk_start = ivec2_iter(max_score+1);
-	const int nscores = accu(max_score) + nbk;
+	const ivec bk_cnscores = ivec2_iter(bk_maxs+1);
+	const int nscores = accu(bk_maxs) + nbk;
 	
 	mat theta(nscores, ndraws, fill::zeros), se(nscores, ndraws, fill::zeros);
 	
-	// mle: for(int s=1; s<max_score[bk]; s++)
-	// wle: for(int s=0; s<=max_score[bk]; s++)
+	// mle: for(int s=1; s<bk_maxs[bk]; s++)
+	// wle: for(int s=0; s<=bk_maxs[bk]; s++)
 	const int score_start = WLE ? 0 : 1;
 	const int score_end = WLE ? 1 : 0;
 
@@ -196,7 +195,7 @@ Rcpp::List theta_wmle(const arma::mat& b, const arma::ivec& a,
 	int *first_ptr, *last_ptr;
 	
 	double E,I,J;
-	vec wmem(max_max_A+1);
+	vec wmem(max_A+1);
 	
 #pragma omp for
 	for(int draw=0; draw<ndraws; draw++)
@@ -209,11 +208,11 @@ Rcpp::List theta_wmle(const arma::mat& b, const arma::ivec& a,
 			first_ptr = first.memptr() + bk_cnit[bk];
 			last_ptr = last.memptr() + bk_cnit[bk];
 			
-			fl = Escore_bk<WLE>(xl, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], max_A[bk], wmem);
-			f = Escore_bk<WLE>(rts, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], max_A[bk], wmem);	
+			fl = Escore_bk<WLE>(xl, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], bk_max_A[bk], wmem);
+			f = Escore_bk<WLE>(rts, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], bk_max_A[bk], wmem);	
 
 			// secant				
-			for(int s=score_start; s<max_score[bk]+score_end; s++)
+			for(int s=score_start; s<bk_maxs[bk]+score_end; s++)
 			{
 				for(int iter=0; iter<max_iter; iter++)
 				{
@@ -222,28 +221,28 @@ Rcpp::List theta_wmle(const arma::mat& b, const arma::ivec& a,
 					fl = f;
 					rts += std::copysign(std::min(std::abs(dx),0.5), dx); // steps larger than 0.5 on the theta scale are useless and can cause overflow in escore
 
-					f = Escore_bk<WLE>(rts, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], max_A[bk], wmem);
+					f = Escore_bk<WLE>(rts, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], bk_max_A[bk], wmem);
 					
 					if(std::abs(dx) < acc)
 						break;
 				} 
-				theta.at(s+bk_start[bk],draw) = rts;
+				theta.at(s+bk_cnscores[bk],draw) = rts;
 				
-				deriv_theta<false>(rts, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], max_A[bk], wmem, E,I, J);
+				deriv_theta<false>(rts, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], bk_max_A[bk], wmem, E,I, J);
 				
 				if(WLE)
-					se.at(s+bk_start[bk],draw) = std::sqrt( (I+SQR(J/(2*I)))/SQR(I) );
+					se.at(s+bk_cnscores[bk],draw) = std::sqrt( (I+SQR(J/(2*I)))/SQR(I) );
 				else
-					se.at(s+bk_start[bk],draw) = 1/std::sqrt(I);
+					se.at(s+bk_cnscores[bk],draw) = 1/std::sqrt(I);
 				
 				rts += 0.1; // give rts a nudge, otherwise (f-s)/(f-fl) can overflow since f-fl is often very small
-				f = Escore_bk<WLE>(rts, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk],  max_A[bk], wmem);
+				f = Escore_bk<WLE>(rts, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk],  bk_max_A[bk], wmem);
 			}
 		}
 	}
 }
 
-	return theta_output(theta, se, max_score, bk_start, nbk, !WLE);
+	return theta_output(theta, se, bk_maxs, bk_cnscores, nbk, !WLE);
 }
 
 // [[Rcpp::export]]

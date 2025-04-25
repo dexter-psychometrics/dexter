@@ -48,7 +48,7 @@ dbCheck_existing_colnames = function(db, varnames)
   
   if(any(varnames %in% fields))
   {
-    stop_(format_plural('These name(s) are already in use in your project:', intersect(varnames, fields)))
+    stop_(format_plural('These name[s] are already in use in your project: %s', intersect(varnames, fields)))
   }
 }
 

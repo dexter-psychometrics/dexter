@@ -4,7 +4,7 @@ library(dplyr)
 
 test_that('profile analysis verb agg',{
 
-  db = open_project(test_path('verbAggression.db'))
+  db = open_project(test_path('testdata/verbAggression.db'))
   
   f = fit_enorm(db)
   p = profiles(db, f, 'behavior')

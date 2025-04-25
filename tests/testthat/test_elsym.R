@@ -120,8 +120,8 @@ test_that('dichotomous regular and binom hessian are equal',{
   # dat[(1L+as.integer(np/2)):np, 1:as.integer(nit/2)] = NA_integer_
   # ss = elsym:::sufStats_nrm(dexter::get_resp_data(dat))
   # 
-  # save(ss,b,file=test_path('sufstats_dich.RData'))
-  load(test_path('sufstats_dich.RData'))
+  # save(ss,b,file=test_path('testdata/sufstats_dich.RData'))
+  load(test_path('testdata/sufstats_dich.RData'))
   
   lbinom = dexter:::lbnm(max(ss$booklet$max_score)+3)
   
@@ -186,9 +186,9 @@ test_that('polytomous regular and binom hessian are equal',{
   # 
   # ss = elsym:::sufStats_nrm(dexter::get_resp_data(dat))
   # 
-  # save(ss,b,file=test_path('sufstats_poly.RData'))
+  # save(ss,b,file=test_path('testdata/sufstats_poly.RData'))
   
-  load(test_path('sufstats_poly.RData'))
+  load(test_path('testdata/sufstats_poly.RData'))
   
   
   lbinom = dexter:::lbnm(max(ss$booklet$max_score)+3)

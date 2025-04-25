@@ -1,6 +1,8 @@
 
 # dexter 1.6.1
 
+* Bugfix `ability_tables` did not correctly handle the design argument. This bug was introduced in version 1.6.0
+
 * Bugfix for weird looking `distractor_plot` when not all booklet scores are observed.
 
 * Names for person and item properties that caused an error because they clash with SQL syntax (like 'group') are now allowed.

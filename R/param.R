@@ -24,15 +24,22 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'), by_c
   if(!is.null(design))
   {
     design = ungroup(design)
+    design$item_id = as.character(design$item_id)
     if(!('booklet_id' %in% colnames(design)))
       design$booklet_id='all_items'
+    
     design = design[,c('booklet_id','item_id')]
+    if(n_distinct(design$item_id,design$booklet_id) < nrow(design))
+    {
+      warning('Duplicated items are removed in one or more booklets in design')
+      design = distinct(design)
+    }
   }
   
   if(inherits(parms, 'mst_enorm') && !'design' %in% names(parms$inputs))
   {
     if(is.null(design))
-      design = lapply(parms$inputs$bkList,function(bk) tibble(item_id=bk$items)) |>
+      design = lapply(parms$inputs$bkList,function(bk) tibble(item_id=as.character(bk$items))) |>
         bind_rows(.id='booklet_id')
     
     parms = coef(parms)
@@ -129,7 +136,15 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'), by_c
   design$first0 = design$first - 1L
   design$last0 = design$last - 1L
   
-  list(a=a, b=b, design=arrange(design,.data$booklet_id,.data$first), items = fl, method=method, chain_index=chain_index)
+  design = arrange(design, .data$booklet_id,.data$first)
+  
+  booklets = design |>
+    group_by(.data$booklet_id) |>
+    summarise(nit = n(), max_score = sum(a[.data$last]) ) |>
+    ungroup() |>
+    arrange(.data$booklet_id)
+
+  list(a=a, b=b, booklets=booklets, design=design, items = fl, method=method, chain_index=chain_index)
 }
 
 
@@ -201,9 +216,7 @@ transform.df.parms = function(parms.df, out.format = c('b','beta','eta'))
     }
   } 
   
-  parms.df = arrange(parms.df,.data$item_id, .data$item_score)
-  
-  parms.df
+  arrange(parms.df,.data$item_id, .data$item_score)
 }
 
 

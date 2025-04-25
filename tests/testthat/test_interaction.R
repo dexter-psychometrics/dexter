@@ -7,7 +7,7 @@ RcppArmadillo::armadillo_throttle_cores(1)
 test_that('interaction model parameters are stable over simulation',{
   
   set.seed(123)
-  db = open_project(test_path('verbAggression.db'))
+  db = open_project(test_path('testdata/verbAggression.db'))
   f = fit_inter(db)
   ts = get_testscores(db)
   close_project(db)

@@ -576,10 +576,10 @@ plot.enorm = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci
     respData = get_resp_data(dataSrc, qtpredicate, env=env, retain_person_id=FALSE,
       parms_check=filter(x$inputs$ssIS, .data$item_id %in% local(item_id)))
     
-    if(length(setdiff(as.character(item_id), levels(respData$design$item_id)))>0)
+    if(length(setdiff(item_id, levels(respData$design$item_id)))>0)
     {
       message('The following items were not found in dataSrc')
-      print(setdiff(as.character(item_id), levels(x$design$item_id)))
+      print(setdiff(item_id, levels(x$design$item_id)))
       stop('unknown item',call.=FALSE)
     }
     
@@ -649,7 +649,8 @@ plot.enorm = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci
     if(sort=='mse-asc') item_id = rev(item_id)
   }
   
-  for(this_item_id in item_id)
+  for(this_item_id in item_id
+    )
   {
     plt_item = plt_items[[this_item_id]]
     

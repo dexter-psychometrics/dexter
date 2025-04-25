@@ -5,7 +5,7 @@ RcppArmadillo::armadillo_throttle_cores(1)
 
 
 test_that('multiple b',{
-  db = open_project(test_path('verbAggression.db'))
+  db = open_project(test_path('testdata/verbAggression.db'))
   
   ndr = 50
   f = fit_enorm(db,method='Bayes',nDraws=ndr)

@@ -131,32 +131,25 @@ ability_tables = function(parms, design = NULL, method = c("MLE","EAP","WLE"), p
     n_cores = get_ncores(min(20,ncol(b)),1)
   }
   
-  bk_nit = count(simple_parms$design, .data$booklet_id) |>
-    arrange(.data$booklet_id)
-  
-  
-  
-  # add test for simple parms, design must be sorted by booklet (and 
-  # booklet must be a factor, otherwise we run into local issues)
   if(method %in% c('MLE','WLE'))
   {
-    est = theta_wmle_c(b,a,simple_parms$design$first0, simple_parms$design$last0, bk_nit$n, (method=='WLE'), n_cores=n_cores)
+    est = theta_wmle_c(b,a,simple_parms$design$first0, simple_parms$design$last0, simple_parms$booklets$nit, (method=='WLE'), n_cores=n_cores)
     
   } else if(method == "EAP" && prior == "Jeffreys")
   {
     grid = seq(-6,6,length.out=101)
-    est = theta_jeap_c(grid, b,a,simple_parms$design$first0, simple_parms$design$last0, bk_nit$n, n_cores=n_cores)
+    est = theta_jeap_c(grid, b,a,simple_parms$design$first0, simple_parms$design$last0, simple_parms$booklets$nit, n_cores=n_cores)
     
   } else if(method == 'EAP')
   {
     nodes = quadpoints$nodes * sigma + mu
     weights = quadpoints$weights
     
-    est = theta_eap_c(nodes, weights,b,a,simple_parms$design$first0, simple_parms$design$last0, bk_nit$n, n_cores=n_cores)
+    est = theta_eap_c(nodes, weights,b,a,simple_parms$design$first0, simple_parms$design$last0, simple_parms$booklets$nit, n_cores=n_cores)
     
   } else stop('unknown method')
   
-  tibble(booklet_id=bk_nit$booklet_id[est$booklet], 
+  tibble(booklet_id=simple_parms$booklets$booklet_id[est$booklet], 
          booklet_score=drop(est$booklet_score),
          theta=drop(est$theta),
          se=drop(est$se)) |>
