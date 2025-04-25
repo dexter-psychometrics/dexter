@@ -23,6 +23,7 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'), by_c
   
   if(!is.null(design))
   {
+    design = ungroup(design)
     if(!('booklet_id' %in% colnames(design)))
       design$booklet_id='all_items'
     design = design[,c('booklet_id','item_id')]
@@ -72,7 +73,7 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'), by_c
     } else
     {
       old_itm = design$item_id
-      design$item_id = ffactor(as.character(design$item_id), levels=parms$inputs$ssI$item_id)
+      design$item_id = factor(as.character(design$item_id), levels=parms$inputs$ssI$item_id)
       if(anyNA(design$item_id))
       {
         message("the following item_id's in the data or design are not present in your parameters")
@@ -128,7 +129,7 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'), by_c
   design$first0 = design$first - 1L
   design$last0 = design$last - 1L
   
-  list(a=a, b=b, design=design, items = fl, method=method, chain_index=chain_index)
+  list(a=a, b=b, design=arrange(design,.data$booklet_id,.data$first), items = fl, method=method, chain_index=chain_index)
 }
 
 
