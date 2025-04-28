@@ -75,9 +75,11 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
   
   pb$tick()
   
+  ## deal with fixed parameter
+  ## they are reduced to the item id's that occur in the data
   fixed_params = fixed_param2df(fixed_params, respData$design)
-  ## deal with fixed parameters
-  
+
+  ## fixed_params are used for check and to add zero counts for score categories not observed in data
   ss =  get_sufStats_nrm(respData, fixed_params=fixed_params)
   
   if (method=="CML"){

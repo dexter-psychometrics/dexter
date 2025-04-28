@@ -827,8 +827,10 @@ plot.inter = function(x, items=NULL, summate=TRUE, overlay=FALSE,
       # for each item in turn, similar but possibly multiline and coloured
       for (i in items) {
         ssI = filter(x$inputs$ssI, .data$item_id==i)
-        prb = zI[ssI$first : ssI$last, ]
+        prb = zI[ssI$first : ssI$last, ,drop=FALSE]
         
+        # bring zero score back
+        prb = rbind(1-colSums(prb), prb)
         
         pte = lighten(qcolors(nrow(prb)),.6)
         
@@ -846,7 +848,10 @@ plot.inter = function(x, items=NULL, summate=TRUE, overlay=FALSE,
         for (j in 1:nrow(prb)) {
           lines(scores, prb[j,], col=pte[j], lwd=3)
         }
-        prb = zR[ssI$first : ssI$last,]
+        prb = zR[ssI$first : ssI$last,,drop=FALSE]
+        # bring zero score back
+        prb = rbind(1-colSums(prb), prb)
+        
         pte = qcolors(nrow(prb))
         for (j in 1:nrow(prb)) {
           lines(scores, prb[j,], col=pte[j])

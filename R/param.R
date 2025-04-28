@@ -179,7 +179,7 @@ fixed_param2df = function(fixed_params, design)
     # avoid factor warnings and reduce
     fixed_params$item_id = factor(as.character(fixed_params$item_id), levels=levels(design$item_id))
     
-    fixed_params = filter(fixed_params,!is.na(.data$item_id))  |>
+    fixed_params = filter(fixed_params, !is.na(.data$item_id))  |>
       select('item_id','item_score','b') |>
       arrange(.data$item_id,.data$item_score)
 

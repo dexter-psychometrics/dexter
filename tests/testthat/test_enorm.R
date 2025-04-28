@@ -20,6 +20,17 @@ test_that('calibration of verbal aggression dataset matches oplm results, with f
              mutate(difference=abs(beta.x-beta.y)))$difference),
       1e-15)
   
+  x = get_responses(db, columns=c('person_id','item_id','item_score','item_position')) |>
+    mutate(even = as.integer(gsub('\\D+','',person_id)) %% 2 == 0) |>
+    filter((even & item_position<=16) | (!even & item_position>8))
+  
+  ff2 = fit_enorm(x)
+  
+  tst=inner_join(coef(ff),coef(ff2),by=c('item_id','item_score'))
+  
+  expect_true(cor(tst$beta.x,tst$beta.y) > 0.98)
+  
+  
   #calibration with fixed_parameters
   
   # determine which are fixed from the cml file but use the parameters from the par file
