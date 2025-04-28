@@ -1,7 +1,10 @@
 
 possible_scores = function(a, first, last) drop(possible_scores_C(as.integer(a), as.integer(first-1L), as.integer(last-1L)))
 
-get_sufStats_nrm = function(respData, check_sanity=TRUE)
+# to do: design connected and zero score observed may be relaxed in case parameters are fixed.
+# at the moment we keep this more restricted bc. limited time for release
+# fixed_params may have more item scores than data but not more item_id's
+get_sufStats_nrm = function(respData, check_sanity=TRUE, fixed_params=NULL)
 {
     mx = max(respData$x$item_score)
     if(is.na(mx))
@@ -30,7 +33,38 @@ get_sufStats_nrm = function(respData, check_sanity=TRUE)
     class(sufs$ssIS$item_id) = 'factor'
     levels(sufs$ssIS$item_id) = levels(respData$x$item_id)
     
-    #sum is necessary oin case 0 cat is missing
+    if(check_sanity && !is.null(fixed_params))
+    {
+      # check for missing categories in fixed_params
+      missing_cat = sufs$ssIS |> 
+        filter(.data$item_score>0) |>
+        semi_join(fixed_params, by='item_id') |>
+        left_join(fixed_params |> mutate(is_fixed=1L), by=c('item_id','item_score')) |>
+        filter(is.na(.data$is_fixed)) 
+      
+      if(nrow(missing_cat) > 0)
+      {
+        cat(paste('Some score categories are fixed while some are not, for the same item.',
+          'Dexter does not know how to deal with that.\nThe following score categories are missing:\n'))
+        missing_cat |> 
+          select('item_id', 'item_score') |>
+          arrange(.data$item_id, .data$item_score) |>
+          as.data.frame() |>
+          print()
+        stop('missing score categories for fixed items, see output')
+      }
+    }
+    
+    if(!is.null(fixed_params))
+    {
+      # it can be that more categories are fixed than occur in the data
+      sufs$ssIS = sufs$ssIS |> 
+        full_join(select(fixed_params,'item_id','item_score'), by=c('item_id','item_score')) |>
+        mutate(sufI = coalesce(.data$sufI, 0L)) |>
+        arrange(.data$item_id, .data$item_score)
+    }
+    
+    #sum is necessary in case 0 cat is missing
     n_all = sufs$ssIS |>
       group_by(.data$item_id) |>
       summarise(n_rsp = sum(.data$sufI), n0=sum(.data$sufI[.data$item_score==0])) |>

@@ -93,11 +93,14 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'), by_c
   {
     method='CML'
     parms$item_id = as.character(parms$item_id)
+    # to do: Assumption that caller is not interested in other items when a design is specified
+    # but this is not done when parms is not a df
+    # all such uses atmo are indeed correct in both cases and it does speed things up... maybe use an extra argument?
     if(!is.null(design)) parms = semi_join(parms,design,by='item_id')
     
     parms = transform.df.parms(parms,'b')
     parms$item_id = factor(parms$item_id)
-    #parms = arrange(parms,.data$item_id,.data$item_score) result is sorted
+    # transform.df result is guaranteed sorted
     a = parms$item_score
     b = parms$b
     
@@ -146,6 +149,44 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'), by_c
 
   list(a=a, b=b, booklets=booklets, design=design, items = fl, method=method, chain_index=chain_index)
 }
+
+# item_id is returned as a factor with the same levels as deign$item_id
+fixed_param2df = function(fixed_params, design)
+{
+  if(!is.null(fixed_params))
+  {
+    if(inherits(fixed_params,'enorm') || inherits(fixed_params,'prms'))
+    {
+      if(inherits(fixed_params,"mst_enorm"))
+      {
+        fixed_params$inputs = fixed_params$mst_inputs
+        fixed_params$est$b = fixed_params$mst_est$b
+        fixed_params$est$a = fixed_params$mst_est$a
+      }
+      
+      if (fixed_params$inputs$method!="CML")
+        message("Posterior means are taken as values for fixed parameters")
+      
+      fixed_params = fixed_params$inputs$ssIS
+      fixed_params$b = if.else(fixed_params$inputs$method=="CML", fixed_params$est$b, colMeans(fixed_params$est$b))
+      
+    } else
+    {
+      # transform the fixed params to the b parametrization dexter uses internally
+      fixed_params = transform.df.parms(fixed_params, out.format = 'b') 
+    }  
+    
+    # avoid factor warnings and reduce
+    fixed_params$item_id = factor(as.character(fixed_params$item_id), levels=levels(design$item_id))
+    
+    fixed_params = filter(fixed_params,!is.na(.data$item_id))  |>
+      select('item_id','item_score','b') |>
+      arrange(.data$item_id,.data$item_score)
+
+  }
+  fixed_params
+}
+
 
 
 transform.df.parms = function(parms.df, out.format = c('b','beta','eta'))
@@ -215,7 +256,7 @@ transform.df.parms = function(parms.df, out.format = c('b','beta','eta'))
       stop_(sprintf('transformation %s -> %s not implemented', in.format, out.format))
     }
   } 
-  
+  # must be sorted!
   arrange(parms.df,.data$item_id, .data$item_score)
 }
 

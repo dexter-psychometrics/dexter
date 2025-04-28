@@ -4,16 +4,6 @@ library(dplyr)
 
 RcppArmadillo::armadillo_throttle_cores(1)
 
-verbAggCopy = function(pth = test_path('testdata/verbAggression.db'))
-{
-  con = DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  db = open_project(pth)
-  
-  RSQLite::sqliteCopyDatabase(db, con)
-  
-  DBI::dbDisconnect(db)
-  return(con)
-}
 
 test_that('populations work',{
   db = verbAggCopy()
@@ -29,6 +19,19 @@ test_that('populations work',{
   
   expect_true(mean(pv[pv$gender=='Male',]$PV1) > mean(pv[pv$gender=='Female',]$PV1))
   
+  expect_true(df_join_equal(get_testscores(db), select(pv,'person_id','booklet_id','booklet_score'), join_by='person_id'))
+  
+  # see that designs are not mangled
+  x = get_responses(db, predicate=(gender=='Male' & item_position>=16) | 
+                                  (gender=='Female' & item_position<8), 
+    columns=c('person_id','item_id','item_score','gender')) |>
+    rename(booklet_id='gender')
+  
+  
+  pv2 = plausible_values(x, f2)
+  
+  expect_true(df_join_equal(get_testscores(x), select(pv2,'person_id','booklet_id','booklet_score'), join_by='person_id'))
+  expect_true(mean(pv2[pv2$booklet_id=='Male',]$PV1) > mean(pv2[pv2$booklet_id=='Female',]$PV1))
   
   
   abl = ability(db,f2,method='WLE')
@@ -47,8 +50,7 @@ test_that('populations work',{
   
   expect_warning(plausible_values(db, f2, predicate=startsWith(item_id,'S1'), covariates='x1'),regexp='ignoring covariates',ignore.case=TRUE)
   expect_warning(plausible_values(db, f2, predicate=startsWith(item_id,'S1'), covariates='x2'),regexp='decimal',ignore.case=TRUE)
-  #to do: what happens if one group? SHould we have a message or not?
-  
+
   dbDisconnect(db)
 })
   

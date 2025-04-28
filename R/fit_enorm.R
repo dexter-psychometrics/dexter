@@ -74,57 +74,11 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
                            merge_within_persons = merge_within_persons)
   
   pb$tick()
-  ss =  get_sufStats_nrm(respData)
   
+  fixed_params = fixed_param2df(fixed_params, respData$design)
   ## deal with fixed parameters
-  ## maybe use simplify parms?
-  if(!is.null(fixed_params))
-  {
-    if(inherits(fixed_params,'enorm') || inherits(fixed_params,'prms'))
-    {
-      if(inherits(fixed_params,"mst_enorm"))
-      {
-        m = x$inputs$method
-        x$inputs = x$mst_inputs
-        x$inputs$method = m
-        x$est$b = x$mst_est$b
-        x$est$a = x$mst_est$a
-      }
-      
-      if (fixed_params$inputs$method!="CML")
-        message("Posterior means are taken as values for fixed parameters")
-      
-      fixed_params = fixed_params$inputs$ssIS
-      fixed_params$b = if.else(fixed_params$inputs$method=="CML", fixed_params$est$b, colMeans(fixed_params$est$b))
-      
-    } else
-    {
-      # transform the fixed params to the b parametrization dexter uses internally
-      fixed_params = transform.df.parms(fixed_params, out.format = 'b') 
-    }  
-    
-    # avoid factor warnings and reduce
-    fixed_params$item_id = factor(as.character(fixed_params$item_id), levels=levels(ss$design$item_id))
-    fixed_params = filter(fixed_params,!is.na(.data$item_id)) 
-    
-    # check for missing categories in fixed_params
-    missing_cat = ss$ssIS |> 
-      semi_join(fixed_params, by='item_id') |>
-      left_join(fixed_params, by=c('item_id','item_score')) |>
-      filter(is.na(.data$b)) 
-    
-    if(nrow(missing_cat) > 0)
-    {
-      cat(paste('Some score categories are fixed while some are not, for the same item.',
-                'Dexter does not know how to deal with that.\nThe following score categories are missing:\n'))
-      missing_cat |> 
-        select('item_id', 'item_score') |>
-        arrange(.data$item_id, .data$item_score) |>
-        as.data.frame() |>
-        print()
-      stop('missing score categories for fixed items, see output')
-    }
-  }
+  
+  ss =  get_sufStats_nrm(respData, fixed_params=fixed_params)
   
   if (method=="CML"){
     result = calibrate_CML(ss=ss, fixed_params=fixed_params)

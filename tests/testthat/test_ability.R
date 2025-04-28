@@ -1,8 +1,7 @@
 
 
-library(dplyr)
-
 RcppArmadillo::armadillo_throttle_cores(1)
+
 
 test_that('inconsistencies between data and parms are handled correctly',{
 
@@ -62,7 +61,7 @@ test_that('verbAgg abilities', {
   expect_true(all(r >= .99), info='high correlation ability estimates one booklet')
   expect_true(all(r[upper.tri(r)] < 1), info='different ability methods are different')
   
-
+  
   dbDisconnect(db)
   
 })
@@ -71,10 +70,8 @@ test_that('ability WLE compared to Norman theta', {
   
   load(test_path('testdata/theta.RData'))
   # test against theta-unweighted
-  # at the same time, the sorting of booklets caused a problem in 1.6.0
-  # that will give cause an error here if it were to occur again
-  # randomize the order
-  a = ability_tables(item_param, design=design[sample(nrow(design)),], method='WLE')
+
+    a = ability_tables(item_param, design=design[sample(nrow(design)),], method='WLE')
   
   tst = inner_join(a,os_theta, by=c('booklet_id','booklet_score'))
   
@@ -84,8 +81,43 @@ test_that('ability WLE compared to Norman theta', {
   # small differences multiply in the se, so < 1e6 is enough
   expect_lt(max(abs(tst$se.x-tst$se.y)), 1e-6, label='se wle equal to theta norman, difference')
   
-
 })
+
+test_that('designs are handled correctly', {
+  set.seed(123)
+  items = tibble(item_id=1:20, ncat=sample(1:3,20,replace=TRUE)) |>
+    group_by(item_id) |>
+    do({
+      tibble(item_score = cumsum(sample(1:3,.$ncat[1], replace=TRUE)),
+             beta = sort(rnorm(.$ncat)))
+    }) |>
+    ungroup()
+  
+  nit = sample(10:20,3)
+  design = tibble(booklet_id=factor(rep(letters[1:3],nit),levels=letters), item_id=unlist(sapply(nit,sample,x=1:20)))
+  
+  a1 = ability_tables(items,design=design, method='WLE')
+  
+  #make sure one category does not occur to see if it is correctly handled
+  items2 = items |>
+    add_count(item_id) |>
+    arrange(desc(n), desc(item_score)) |>
+    slice(-1)
+
+  dat = r_score(items2)(rnorm(300)) 
+  
+  f = fit_enorm(dat,fixed_param=items)
+  
+  a2 = ability_tables(f,design=design, method='WLE')
+  
+  a3 = ability_tables(coef(f),design=design, method='WLE')
+  
+  expect_true(df_join_equal(a1,a2,a3,join_by=c('booklet_id','booklet_score')))
+  
+
+  
+})
+
 
 
 RcppArmadillo::armadillo_reset_cores()
