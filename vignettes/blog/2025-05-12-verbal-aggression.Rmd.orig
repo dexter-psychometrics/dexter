@@ -1,0 +1,271 @@
+---
+title: "Verbal aggression for profit and fun"
+author: Ivailo Partchev
+bibliography: dexter.bib
+date: '2025-05-12'
+slug: verbal-aggression-for-profit-and-fun
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+Young psychometricians often cast a curious, if not envious, glance towards what is now called machine learning. The feeling is mutual: machine learning people, especially those dealing with two-way problems (recommender systems...), have found inspiration in psychometric techniques such as the factor model or the Rasch model.
+
+In what follows, I will apply some of my favourite (and not so favourite) multivariate techniques to the now famous verbal aggression data set. There will be relatively more interest in the items than in the persons, although both matter in our discipline. I will show how to get similar results with different techniques, and utterly different results with the same technique.
+
+The verbal aggression data (@VanData) is included with __dexter__. It is not a cognitive test. 24 items have been produced by the Cartesian product of three facets: 
+
+* Four embarrassing situations likely to produce an angry reaction. Two of these are caused by others: 'A bus fails to stop for me'; 'I miss a train because a clerk gave me faulty information', and two by self: 'The grocery store closes just as I am about to enter'; 'The operator disconnects me when I had used up my last 10 cents for a call'
+* The type, or intensity, of the verbal aggressive behaviour: curse, scold, or shout
+* The mode: actually engage in the behaviour or just want to.
+
+For each of the resulting 24 items, the respondents answered with 'no', 'perhaps', or 'yes'.
+
+Start with loading a few R packages.
+
+__dexter__ (@most-recent-dexter) Obviously, everyone needs this one.
+
+```{r}
+library(dexter)
+```
+
+__pheatmap__ (@pheatmap) Produces elegant heatmaps with lots of configurable options
+
+```{r}
+library(pheatmap)
+```
+
+__ComplexHeatmap__  (@ComplexHeatmap) Inspired by pheatmap, this is the heavy artillery of heatmaps, developed with genetic applications in mind and available from bioconductor. 
+
+```{r}
+library(ComplexHeatmap)
+```
+
+__biclustermd__ (@biclustermd) There are many packages for biclustering nowadays, but this one won me for two reasons: it can work with missing data, and (mercifully) it only supports one clustering algorithm, so we don't face the dilemma which one to use. I have not studied it in detail yet but I feel that it is related to K-means: one specifies the desired number of clusters, and the algorithm optimizes within-cluster variance.
+
+```{r}
+library(biclustermd)
+```
+
+__seriation__ (@seriation) Provides solutions to the problem of optimally ordering a data set, for a variety of data formats. The vignette is worth reading (@seriation-paper).
+
+```{r}
+library(seriation)
+```
+
+I have written a number of fairly trivial functions using these packages:
+
+```{r}
+c2d = function(x){sqrt(2*(1-x))}
+
+nice = function(x) {
+  circlize::colorRamp2(c(min(x), 0, max(x)), c("#343292", "#fffec3", "#aa162a"))
+}
+
+ser = function(x) {
+  o = seriate(x, method = "PCA")
+  y = x[o[[1]], o[[2]]]
+  pheatmap(y, cluster_rows=F, cluster_cols=F)
+}
+
+xw = function(x,w){
+  x = scale(x, center=TRUE, scale=FALSE)
+  n = length(w)
+  m = max(w)
+  s = svd(x, m, m)
+  if(n==1) {
+    z = tcrossprod(s$u[,w] * s$d[w], s$v[,w])
+  } else {
+    z = tcrossprod(s$u[,w] %*% diag(s$d[w]), s$v[,w])
+  }
+  attr(z, "dimnames") = attr(x,"dimnames")
+  return(z)
+}
+
+c123 = function(x, arr=NULL) {
+  if(is.null(arr)) arr='comp1'
+  x = scale(x, center=TRUE, scale=FALSE)
+  ryb = nice(x)
+  s = svd(x, 3, 3)
+  d = tcrossprod(s$u[,1] * s$d[1], s$v[,1])
+  attr(d, "dimnames") = attr(x,"dimnames")
+  h1 = Heatmap(d, name="comp1", col = ryb, column_title = "Component 1")
+  d = tcrossprod(s$u[,2] * s$d[2], s$v[,2])
+  attr(d, "dimnames") = attr(x,"dimnames")
+  h2 = Heatmap(d, name="comp2", col = ryb, column_title = "Component 2")
+  d = tcrossprod(s$u[,3] * s$d[3], s$v[,3])
+  attr(d, "dimnames") = attr(x,"dimnames")
+  h3 = Heatmap(d, name="comp3", col = ryb, column_title = "Component 3")
+  ht_list = h1 + h2 + h3
+  draw(ht_list, main_heatmap = arr)
+}
+
+dar = function(x,w,...){
+  x = scale(x, center=TRUE, scale=FALSE)
+  n = length(w)
+  mx = max(w)
+  s = svd(x, mx, mx)
+  if(n==1) {
+    m = tcrossprod(s$u[,w] * s$d[w], s$v[,w])
+  } else {
+    m = tcrossprod(s$u[,w] %*% diag(s$d[w]), s$v[,w])
+  }
+  attr(m, "dimnames") = attr(x,"dimnames")
+  ryb = nice(x)
+  ht1 = Heatmap(x, name = "data", col = ryb, 
+                row_title = "Data", column_title = "Data", ...)
+  ht2 = Heatmap(m, name = "approximation", col = ryb,
+                row_title = "Approximation", column_title = "Approximation", ...)
+  ht3 = Heatmap(x-m, name = "residuals", col = ryb,
+                row_title = "Residuals", column_title = "Residuals", ...)
+  ht1 + ht2 + ht3
+}
+```
+
+## Principal components analysis
+
+Originally I was asked about clustering. This is fine as long as we mean searching for structure in a broader sense. As I will show a bit later, the traditional cluster analysis as implemented in function `hclust` will not be particularly helpful in our case. My go-to technique when confronting a new and unfamiliar data set would be principal component analysis (PCA, @jolliffe2002principal). 
+
+PCA is, basically, the singular value decomposition (@Eckart1936) of the column-centered data matrix. We can compute it with `data |>  scale(center=T, scale=F) |> svd()` but I will use R's dedicated function:
+
+```{r, fig.dim = c(9, 9)}
+va = verbAggrData[,-(1:2)]
+va |> princomp() |> biplot()
+```
+
+I know that everyone knows what is going on here, but still... The biplot (@greenacre) is a geometric interpretation of the SVD; presently, we shall see some alternative interpretations. It shows both the items and the persons, which is very nice. It is an optimal rotation and projection onto a plane, where the first new dimension is the one capturing the largest variance, the second, orthogonal to the first one, captures the second largest variance etc. What gets projected is the data cloud along with the original multivariate coordinate system.
+
+Concentrating upon the arrows that represent the items, we notice that they all point more or less in the same direction: to the east. This is because they all measure the same thing, verbal aggression, so naturally they are correlated. The second dimension helps us discover three relatively homogeneous bunches of items. It does not take long to realise that they consist of the curse items, scold items, and shout items, correspondingly.
+
+## Hierarchical cluster analysis
+
+Cluster analysis (@hartigan75) is a popular unsupervised technique for finding structure in multivariate data. If I don't find it particularly useful in our case, it is mainly for two reasons: (i) it is decidedly one-way, concentrating only on the persons (or, if we transpose the data matrix, only on the items), and (ii) it consists of a vast number of algorithms that can produce dramatically different results, without clear guidance which one should be preferred in a given situation. This is in sharp contrast with PCA, where we use basically one, theoretically well underpinned method, and we more or less know how to interpret results.
+
+To cluster the persons in the verbal aggression example, we can type the following:
+
+```{r, fig.dim = c(9, 9)}
+va |> dist() |> hclust() |> plot()
+```
+
+Kind of nice, but we are more interested in the items. Besides, the default clustering method in `hclust` is complete linkage -- but see what happens if I choose single linkage instead:
+
+```{r, fig.dim = c(9, 9)}
+va |> dist() |> hclust(method='single') |> plot()
+```
+
+What is the difference between single linkage and complete linkage? It looks fairly innocent and has to do with the way we compute distances. While the distance from a point to another point is a straightforward idea, the distance from a point to a cluster of points allows for various options. We may prefer the distance to the closest member of the cluster (single linkage), the distance to the most remote member (complete linkage), the distance to the centroid, etc. Each choice can lead to vastly different conclusions, and it is known that certain methods do best in certain artificial examples, but there is not so much guidance as to which one will be best in a real-life situation. 
+
+To do a cluster analysis of the items, all we need to do is transpose the data matrix:
+
+```{r, fig.dim = c(9, 9)}
+va |> t() |> dist() |> hclust() |> plot()
+```
+
+Everybody can interpret the dendrogram, but I am not sure a dendrogram is what I need in the first place. We will try to do better.
+
+## Multidimensional scaling
+
+Multidimensional scaling (@borg2007modern) was originally intended to analyse the matrix of dissimilarities between objects (in our example, the persons) but we can easily apply it to the items by computing their correlation matrix and transforming the correlations to distances:
+
+```{r, fig.dim = c(9, 9)}
+mds = va |> cor() |> c2d() |> cmdscale()
+plot(mds, type='n', asp=1)
+text(mds, attr(mds,"dimnames")[[1]])
+```
+
+Note that the plot needs a fixed aspect ratio of 1:1 because the display is a map and cannot suffer distortion. The technique is related to PCA but we do get some new insights: the first dimension distinguishes between shout, scold and curse items, and the second opposes "do" to "want".
+
+## Heatmaps
+
+Heatmaps are popular graphical representations of two-way data with a long history (@Wilkinson2009May). The data matrix is shown as a matrix of little squares (pixels for larger data sets) with values represented on a colour scale. The rows and columns can be clustered, which usually improves interpretability. Compare the clustered and unclustered heatmaps for the verbal aggression data:
+
+```{r,fig.dim = c(9, 9)}
+pheatmap(va)
+pheatmap(va, cluster_rows = F, cluster_cols = F)
+```
+
+## Components and heatmaps
+
+In the PCA biplot, the components from the SVD decomposition were interpreted graphically. There are at least three alternative interpretations: as factors, processes, and networks (@skillicorn2007understanding). We will not deal with factor analysis as it is way too familiar for psychometricians; instead, we will focus on the process interpretation.
+
+Anyone who has seen a colour inkjet printer at work has a good idea of processes. The machine sprays, on top of each other, a yellow image, a cyan image, a magenta image, and finally a black image. Each of these contains a recognisable but incomplete version of the photo, but only combining all four brings it to life. SVD is widely used in image processing. The first component, the one "explaining" the largest part of the variance, may look very crude -- but it is not wrong or misleading in any way, perhaps just insufficient. By superimposing the second, third, fourth... component, the approximation constantly improves. Some components may be left out on purpose in an attempt to "denoise" the image.
+
+We do not deal with images but long practical experience has brought some knowledge about the meaning of components in certain situations. I we were looking at fish, the first component would characterise their overall size while the second one would charactrise shape: elongated like anchovies or more rounded like bream. I test data, the first component measures overall ability, the second might deal with test domains, and the third might capture what we like to call DIF (I said, might).
+
+To visualise, here is a reconstruction of the verbal aggression data using the first five components. We see the original data, the reconstruction, and the residuals. To emphasize the image analogy, clustering has been disabled.
+
+```{r,fig.dim = c(12, 9)}
+dar(va, 1:5, cluster_rows=F, cluster_columns=F)
+```
+
+Looking at the first three components is even more illuminating:
+
+```{r,fig.dim = c(12, 9)}
+c123(va)
+```
+
+The last two graphs have been produced with the ComplexHeatmap package (@ComplexHeatmap). It can coordinate several heatmaps, imposing a common colour scheme for all components. This is an advantage as we can get an idea of their relative importance. On the other hand, the row clustering of one heatmap (the first one by default, but we can choose another) is imposed on the others, which may not be optimal for interpretation. Hence, I will postpone the interpretation to the next section. 
+
+## Seriated heatmaps of the SVD components
+
+I used the cluster analysis of the rows and columns in a heatmap mainly as a way to order the display in a meaningful way. This is valid, widely used, and falls under the more general problem of _seriation_:  "to arrange all objects in a set in a linear order given available data and some loss or merit function in order to reveal structural information" (@seriation_paper). The R package __seriation__ (@seriation) provides a rich array of techniques to sequence data in various formats, and the default method for our case is "PCA". In what follows, we shall be applying principal components analysis to the principal components of our data!
+
+#### The first component
+
+```{r,fig.dim = c(12, 9)}
+va |> xw(1) |> ser()
+```
+
+Free of the distracting dendrograms, we can concentrate on the ordering of the items. Not surprisingly for a first component, it reflects an overall ordering in terms of the general extent of aggression. All three facets capture this in one way or another -- obviously, curse-scold-shout and "want" vs "do", but the different locus of control in the four situations (me to blame vs others to blame) provides quite different justification for an angry reaction. The first component finds an optimum compromise between the three facets.
+
+#### The second component
+
+```{r,fig.dim = c(12, 9)}
+va |> xw(2) |> ser()
+```
+
+The items are now ordered by curse - scold - shout.
+
+#### The third component
+
+```{r,fig.dim = c(12, 9)}
+va |> xw(3) |> ser()
+```
+
+The third component mainly differentiates between "want" and "do" items. This display is remindful of what we could produce with the `DIF` function in dexter.
+
+## Biclustering 
+
+It seems that biclustering, or the simultaneous grouping of the rows and columns of a data matrix in order to identify homogeneous subsets, has been suggested by Hartigan quite a long time ago. However, it only attracted massive attention when applied to gene expression data. These are highly specialised applications where the number of variables typically exceeds the number of observations, and where enormous interest may lie with a tiny dense cluster that might hold the key to the genetic origin of some horrible condition. A good overview is provided by @Castanho2024Jul. From there we see that biclustering is not immune to the problem with ordinary clustering I mentioned before: too many different algorithms, too little guidance on how to choose the most appropriate one.
+
+We already did some kind of biclustering with the clustered heatmaps. For further illustration, I have selected the biclustermd package (@biclustermd). It produced results that seem closer to what we need in our example, supports only one clustering method (@Li2020Feb), and has the additional advantage that it can also work with data sets containing missing values. 
+
+Remembering the results from the DIF analysis by gender, I produced the following result with 2 row clusters and 3 column clusters:
+
+```{r,fig.dim = c(9, 9)}
+row.names(va)= 1:nrow(va)
+bca = biclustermd(va, 2, 3)
+autoplot(bca) + scale_fill_distiller()
+```
+
+We can also apply biclustering to one of the SVD components, for example the third one:
+
+```{r,fig.dim = c(9, 9)}
+bca = biclustermd(xw(va,3), 2, 2)
+autoplot(bca) + scale_fill_distiller()
+```
+
+Unfortunately, the default display does not show the item labels, but we do have a way to check cluster membership. It's a deja vu:
+
+```{r}
+col.names(bca)
+```
+
+## Conclusion
+
+Our short and hopefully not too boring excursion into multivariate analysis has come to an end. To an extent, we have been playing the old game of using classification methods to learn what we already know. It will not be so easy with completely unfamiliar data. However, the fact that we can detect the essential structure of the data in a consistent way between different methods is reassuring.
+
+## References
