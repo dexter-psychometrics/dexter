@@ -1,5 +1,5 @@
 pandoc: 3.1.11
-pkgdown: 2.1.1
+pkgdown: 2.1.2
 pkgdown_sha: ~
 articles:
   blog/2017-12-13-hello: blog/2017-12-13-hello.html
@@ -53,6 +53,7 @@ articles:
   blog/2024-12-12-extend-dif-plots: blog/2024-12-12-extend-dif-plots.html
   blog/2025-01-05-happy-2025: blog/2025-01-05-happy-2025.html
   blog/2025-02-10-correction-dif-plots: blog/2025-02-10-correction-dif-plots.html
+  blog/2025-05-12-verbal-aggression: blog/2025-05-12-verbal-aggression.html
   blog/about: blog/about.html
   dexter: dexter.html
   DIF_vignette: DIF_vignette.html
@@ -61,4 +62,4 @@ articles:
   Plausible_Values: Plausible_Values.html
   profile-plots: profile-plots.html
   Test_Individual_differences: Test_Individual_differences.html
-last_built: 2025-04-28T11:13Z
+last_built: 2025-05-12T21:21Z
