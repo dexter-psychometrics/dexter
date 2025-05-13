@@ -130,16 +130,17 @@ df_format = function(df, datatype_info=NULL)
         df[[name]] = factor(df[[name]], levels = datatype_info[[name]]$levels)
       else 
         df[[name]] = as.character(df[[name]])
-    } else if(datatype_info[[name]]$type == 'integer')
-    {
-      df[[name]] = as.integer(df[[name]])
-    } else if(datatype_info[[name]]$type == 'numeric')
-    {
-      df[[name]] = as.numeric(df[[name]])
     } else
-    {
-      # catch all
+    {  
       df[[name]] = as.character(df[[name]])
+      if(datatype_info[[name]]$type == 'integer')
+      {
+        df[[name]] = as.integer(df[[name]])
+      } else if(datatype_info[[name]]$type == 'numeric')
+      {
+        
+        df[[name]] = as.numeric(df[[name]])
+      } 
     }
   }
   

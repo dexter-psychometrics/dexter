@@ -1,4 +1,8 @@
 
+# dexter 1.6.2
+
+* Bugfix when person_id or booklet_id are numeric, the outputted values were altered in ability, plausible values and plausible scores. 
+
 # dexter 1.6.1
 
 * Bugfix `ability_tables` did not correctly handle the design argument. This bug was introduced in version 1.6.0

@@ -266,6 +266,35 @@ test_that('empty levels are resolved',{
   expect_equal_respData(r1,r2)
 })
    
+test_that('reconstruct output vartypes',{
+  
+  test = tibble(
+    a = factor(letters[1:10], levels=rev(letters)),
+    b = rnorm(10),
+    c = 2L * 15:6,
+    d = rev(letters[6:15]),
+    e = as.double(21:30))
+  
+  info = dexter:::get_datatype_info(test, columns=colnames(test)) 
+  
+  out_char = dexter:::df_format(mutate(test, across(everything(),factor))) |>
+    as_tibble()
+  
+
+  expect_identical(mutate(test, across(everything(), as.character)),out_char,label='out format defaults to character')
+  
+  
+  out = dexter:::df_format(mutate(test, across(everything(),factor)), datatype_info=info) |>
+    as_tibble()
+  
+  # doubles are never correctly preserved, unless they are integer like
+  # # to do: should we even allow doubles as id's?
+  expect_equal(test,out, label='vartypes are correctly preserved')
+  
+  
+  
+})
+
 
 test_that('sql translation',
 {

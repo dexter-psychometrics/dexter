@@ -11,7 +11,7 @@ ability(
   predicate = NULL,
   method = c("MLE", "EAP", "WLE"),
   prior = c("normal", "Jeffreys"),
-  parms_draw = "sample",
+  parms_draw = c("sample", "average"),
   mu = 0,
   sigma = 4,
   merge_within_persons = FALSE

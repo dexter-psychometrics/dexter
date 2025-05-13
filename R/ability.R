@@ -63,10 +63,11 @@
 #' Psychometrika, 54(3), 427-450. 
 #' 
 ability = function(dataSrc, parms, predicate=NULL, method=c("MLE","EAP","WLE"), prior=c("normal", "Jeffreys"), 
-                   parms_draw='sample', mu=0, sigma=4, merge_within_persons=FALSE)
+                   parms_draw=c('sample','average'), mu=0, sigma=4, merge_within_persons=FALSE)
 {
   check_dataSrc(dataSrc)
-
+  if(is.numeric(parms_draw)) check_num(parms_draw,.length=1)
+  else parms_draw = match.arg(parms_draw)
   method = match.arg(method)
   prior = match.arg(prior) 
   qtpredicate = eval(substitute(quote(predicate)))
