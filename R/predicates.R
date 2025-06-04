@@ -374,7 +374,7 @@ sql_cast = function(e, type, variant)
 translate_sql_lang = function(call, variant)
 {
   name = as.character(call[[1]])
-  
+
   if(name == '=')
     stop('assignment')
   
@@ -393,9 +393,6 @@ translate_sql_lang = function(call, variant)
   if(name %in% c('+','-','/','*'))
     return(sql_infix(call, name, variant))
   
-  if(name == '%in%' && typeof(call[[3]]) == 'language' && as.character(call[[3]][[1]]) == ':')
-    return(paste('CAST(', translate_sql(call[[2]], variant), ' AS INTEGER) BETWEEN', 
-                   translate_sql(call[[3]][[2]],variant), 'AND', translate_sql(call[[3]][[3]],variant)))
 
   if(name %in% c('(','{') )
     return(paste0('(',translate_sql(call[[2]], variant),')'))
@@ -446,7 +443,10 @@ translate_sql_lang = function(call, variant)
   
   # simple %in% : already done 
   if(name == ':')
-    stop('untranslatable') 
+  {
+    if(is.symbol(call[[2]]) || is.symbol(call[[3]])) stop('untranslatable') 
+    return(translate_sql(eval(call),variant=variant))
+  }
   
   if(name %in% c('nchar','str_length'))
     return(paste0("LENGTH(",translate_sql(call[[2]], variant),")"))

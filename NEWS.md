@@ -1,9 +1,9 @@
 
 # dexter 1.6.2
 
-* support for .data$ and .env$ pronouns in predicates
+* support for tidyverses .data and .env pronouns in predicates
 
-* Bugfix when person_id or booklet_id are numeric, the outputted values were altered in ability, plausible values and plausible scores. 
+* Bugfix when person_id or booklet_id are numeric, the outputted values were mangled in ability, plausible values and plausible scores. 
 
 # dexter 1.6.1
 

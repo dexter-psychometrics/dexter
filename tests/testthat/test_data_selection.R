@@ -336,7 +336,10 @@ test_that('sql translation',
   expect_equal(trans(a %in% b,'a','ansi'),  '"a" in (1,2)')
   
   # ranges
-  expect_equal(trans(a %in% b:10,vrs), "CAST( \"a\"  AS INTEGER) BETWEEN \"b\" AND 10")
+  expect_equal(tolower(trans(a %in% 5:10,vrs)), "\"a\" in (5,6,7,8,9,10)")
+  
+  b=7
+  expect_equal(tolower(trans(a %in% 5:.env$b,vrs)),"\"a\" in (5,6,7)")
   
   #casting
   expect_equal(trans(as.character(a),'a'), "CAST( \"a\" AS character )")
