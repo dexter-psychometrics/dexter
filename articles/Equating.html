@@ -111,7 +111,7 @@
                         <h4 data-toc-skip class="author">Timo Bechger,
 Jesse Koops and Ivailo Partchev</h4>
             
-            <h4 data-toc-skip class="date">2025-05-13</h4>
+            <h4 data-toc-skip class="date">2025-06-04</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/Equating.Rmd" class="external-link"><code>vignettes/Equating.Rmd</code></a></small>
       <div class="hidden name"><code>Equating.Rmd</code></div>
@@ -247,14 +247,14 @@ for verbal aggressiveness.</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">inner_join</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_testscores.html">get_testscores</a></span><span class="op">(</span><span class="va">db</span>, <span class="va">item_position</span> <span class="op">&gt;=</span> <span class="fl">15</span><span class="op">)</span>, by<span class="op">=</span><span class="st">'person_id'</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>ref_test<span class="op">=</span> <span class="st">'booklet_score.y'</span>, new_test <span class="op">=</span> <span class="st">'booklet_score.x'</span><span class="op">)</span></span>
 <span></span>
+<span><span class="va">ts_count</span> <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">ts</span>, <span class="va">new_test</span>,<span class="va">ref_test</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>p<span class="op">=</span><span class="fl">100</span><span class="op">*</span><span class="va">n</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">n</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">ts</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">new_test</span>, y <span class="op">=</span> <span class="va">ref_test</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_count</span><span class="op">(</span>show.legend <span class="op">=</span> <span class="cn">F</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">geom_hline</span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">10</span>, colour <span class="op">=</span> <span class="st">'green'</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">labs</span><span class="op">(</span>y <span class="op">=</span> <span class="st">'ref. test score'</span>, x <span class="op">=</span> <span class="st">'target test score'</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu">theme</span><span class="op">(</span>panel.background <span class="op">=</span> <span class="fu">element_blank</span><span class="op">(</span><span class="op">)</span>,</span>
-<span>        axis.line <span class="op">=</span> <span class="fu">element_line</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"black"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Equating_files/figure-html/unnamed-chunk-2-1.png" width="384" style="display: block; margin: auto;"></p>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ts_count</span><span class="op">$</span><span class="va">new_test</span>,<span class="va">ts_count</span><span class="op">$</span><span class="va">ref_test</span>,cex<span class="op">=</span><span class="va">ts_count</span><span class="op">$</span><span class="va">p</span>, pch<span class="op">=</span><span class="fl">20</span>,</span>
+<span>  ylab<span class="op">=</span> <span class="st">'reftest score'</span>, xlab <span class="op">=</span> <span class="st">'target test score'</span>,bty<span class="op">=</span><span class="st">'l'</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h<span class="op">=</span><span class="fl">10</span>, col<span class="op">=</span><span class="st">'green'</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Equating_files/figure-html/unnamed-chunk-2-1.png" width="480" style="display: block; margin: auto;"></p>
 <p>The proportion of respondents who pass the reference test gradually
 increases with the score on the new test; below, it is plotted in
 red:</p>
@@ -513,7 +513,7 @@ Lawrence Erlbaum Associates, Inc.
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer>
