@@ -691,7 +691,7 @@ plot.enorm = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci
 #' A plot method for the interaction model
 #'
 #' Plot the item-total regressions fit by the interaction (or Rasch) model. 
-#' Shows the Interaction model in a thicker (gray) line and the rasch model in a thinner (black) line. 
+#' Shows the Interaction model in a thicker (gray) line and the Rasch model in a thinner (black) line. 
 #'
 #'
 #' @param x An object produced by function \code{fit_inter}

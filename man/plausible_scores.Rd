@@ -23,7 +23,7 @@ plausible_scores(
 
 \item{parms}{An object returned by function \code{fit_enorm} and containing
 parameter estimates. If parms is given the function provides plausible scores conditional on the 
-item parameters. These are considered known. If \code{parms} is \code{NULL}, Bayesian parameters are calculated from the datasrc}
+item parameters. These are considered known. If \code{parms} is \code{NULL}, Bayesian parameters are calculated from the dataSrc}
 
 \item{predicate}{an expression to filter data. If missing, the function will use 
 all data in dataSrc}

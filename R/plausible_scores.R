@@ -11,7 +11,7 @@
 #' all data in dataSrc
 #' @param parms An object returned by function \code{fit_enorm} and containing
 #' parameter estimates. If parms is given the function provides plausible scores conditional on the 
-#' item parameters. These are considered known. If \code{parms} is \code{NULL}, Bayesian parameters are calculated from the datasrc
+#' item parameters. These are considered known. If \code{parms} is \code{NULL}, Bayesian parameters are calculated from the dataSrc
 #' @param parms_draw when the item parameters are estimated Bayesianly (see: \code{\link{fit_enorm}}), 
 #' parms_draw specifies whether to use a sample(a different item parameter draw for each plausible values draw) or the posterior mean
 #' of the item draws. Alternatively, it can be an integer specifying a specific draw. Ignored when parms is not estimated Bayesianly.

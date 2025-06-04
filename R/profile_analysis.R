@@ -80,7 +80,7 @@ profile_tables_ = function(items, a, b, design, domains, item_property)
 #' @param parms An object returned by \code{\link{fit_enorm}} or a data.frame of item parameters
 #' @param predicate An optional expression to subset data in dataSrc, if NULL all data is used
 #' @param item_property the name of the item property used to define the domains. If \code{dataSrc} is a dexter db then the
-#' item_property must match a known item property. If datasrc is a data.frame, item_property must be equal to
+#' item_property must match a known item property. If dataSrc is a data.frame, item_property must be equal to
 #'  one of its column names. For profile_tables item_property must match a column name in \code{domains}.
 #' @param design data.frame with columns item_id and optionally booklet_id
 #' @param domains data.frame with column item_id and a column with name equal to \code{item_property} 

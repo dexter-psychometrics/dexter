@@ -37,7 +37,7 @@ will be shown as dots. Default is FALSE.}
 }
 \description{
 Plot the item-total regressions fit by the interaction (or Rasch) model. 
-Shows the Interaction model in a thicker (gray) line and the rasch model in a thinner (black) line.
+Shows the Interaction model in a thicker (gray) line and the Rasch model in a thinner (black) line.
 }
 \details{
 Customization of title and subtitle can be done by using the arguments main and sub.

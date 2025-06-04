@@ -41,7 +41,7 @@ beta}
 Jeffreys prior; i.e., a prior proportional to the square root of test information.}
 
 \item{parms_draw}{When parms is Bayesian, parms_draw can be the index of the posterior sample of the item 
-parameters that will be used for generating abilities. If parms_draw='sample' ability estimates are estimated over all draws and averaged. Rubin's rule is used to combine the imputaiton variance and sampling variance. 
+parameters that will be used for generating abilities. If parms_draw='sample' ability estimates are estimated over all draws and averaged. Rubin's rule is used to combine the imputation variance and sampling variance. 
 If parms_draw='average', 
 the posterior mean of the item parameters is used.}
 

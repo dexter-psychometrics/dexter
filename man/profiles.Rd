@@ -21,7 +21,7 @@ profiles(
 \item{domains}{data.frame with column item_id and a column with name equal to \code{item_property}}
 
 \item{item_property}{the name of the item property used to define the domains. If \code{dataSrc} is a dexter db then the
-item_property must match a known item property. If datasrc is a data.frame, item_property must be equal to
+item_property must match a known item property. If dataSrc is a data.frame, item_property must be equal to
  one of its column names. For profile_tables item_property must match a column name in \code{domains}.}
 
 \item{design}{data.frame with columns item_id and optionally booklet_id}

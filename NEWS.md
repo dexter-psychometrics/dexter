@@ -255,7 +255,7 @@ item parameters
 
 * `ability_tables()` function added to generate score transformation tables 
   for arbitrary subsets of items. `ability()` and `ability_tables()` can now also 
-  take Jeffreys prior and variatons of the normal prior and can optionally 
+  take Jeffreys prior and variations of the normal prior and can optionally 
   output standard errors.
   
 * `plausible_scores()` function added to generate scores on arbitrary itemsets

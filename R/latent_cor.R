@@ -7,7 +7,7 @@
 #' @param dataSrc A connection to a dexter database or a data.frame with columns: person_id, item_id, item_score and 
 #' the item_property
 #' @param item_property The name of the item property used to define the domains. If \code{dataSrc} is a dexter db then the
-#' item_property must match a known item property. If datasrc is a data.frame, item_property must be equal to
+#' item_property must match a known item property. If dataSrc is a data.frame, item_property must be equal to
 #'  one of its column names.
 #' @param predicate An optional expression to subset data, if NULL all data is used
 #' @param nDraws Number of draws for plausible values
