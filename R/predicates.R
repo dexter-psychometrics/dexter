@@ -1,4 +1,15 @@
 
+
+stop_var_not_found = function(var)
+{
+  stop(errorCondition(sprintf("Variable '%s' not found", var),class='var-not-found-error'))
+}
+
+is_error_var_not_found = function(e)
+{
+  inherits(attr(e,'condition'),'var-not-found-error')
+}
+
 # attempt to translate a quoted predicate and an environment to an SQL 'WHERE' statement
 # also returns vars intersected with db and all_vars
 qtpredicate_to_sql = function(qtpredicate, db, env)
@@ -41,7 +52,9 @@ qtpredicate_to_sql = function(qtpredicate, db, env)
   } else
   {
     pred = try(partial_eval(qtpredicate, vars=dbvars, env=env), silent=TRUE)
-    # error is extremely unlikely
+    
+    if(is_error_var_not_found(pred)) stop_(pred)
+
     if(is.null(pred) || inherits(pred,'try-error'))
     {
       out$success = FALSE
@@ -61,10 +74,6 @@ qtpredicate_to_sql = function(qtpredicate, db, env)
   }
   out$db_vars = intersect(dbvars, out$all_vars)
 
-  for( v in setdiff(out$all_vars, out$db_vars))
-    if(!env_has(env, v, inherit=TRUE))
-      stop("object '", v, "' not found")
-  
   out
 }
 
@@ -132,6 +141,7 @@ eval_symbol = function(sbl, vars, env)
   
   if(name %in% vars)
     return(sbl)
+  
   # functions should possibly/probably be excluded here
   if (env_has(env, name, inherit = TRUE)) 
     return(eval(sbl, env))
@@ -141,8 +151,7 @@ eval_symbol = function(sbl, vars, env)
     message("All variable names in a project are lowercase, changed '", name, "' -> '", tolower(name),"'")
     return(as.symbol(tolower(name)))
   }
-  
-  sbl
+  stop_var_not_found(name)
 }
 
 
@@ -212,6 +221,17 @@ eval_lang = function(call, vars, env)
       return(eval_lang(call[[2]][[2]], vars=vars, env=env))
     }
   }
+  
+  # support .env and .data pronouns
+  if(name == '$')
+  {
+    if(as.character(call[[2]]) == '.env' ) return(eval(call[[3]], env))
+    if(as.character(call[[2]]) == '.data' )
+    {
+      return(eval_symbol(call[[3]], vars, env=empty_env()))
+    }
+  }
+  
     
   if(name %in% c("$", "[[", "["))
     return(eval(call, env))

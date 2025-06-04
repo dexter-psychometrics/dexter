@@ -128,10 +128,7 @@ db_get_responses = function(db, qtpredicate=NULL, columns=c('person_id','item_id
       stop('your database file appears to be broken, this can happen due to a copy error. For more information,', 
            'see: https://www.sqlite.org/faq.html#q21')
   }
-  #message('sql translation of the predicate failed')
-  #print(pred_sql)
-  #print(qtpredicate)
-  
+
   # translation to sql did not work  
 
   respData = dbGetQuery(db, 

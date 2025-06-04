@@ -317,17 +317,16 @@ pp_segments = function(maxA, maxB, psbl, col='lightgray',cex=0.6)
 #' @param col.diagonal color of the diagonal lines representing the testscores
 #' @param ... further graphical arguments to plot. Graphical parameters for the legend can be postfixed with \code{.legend}
 #' @details 
-#' Profile plots can be used to investigate whether two (or more) groups of respondents 
+#' Profile plots can be used to investigate whether typically two, but possibly more, groups of respondents 
 #' attain the same test score in the same way. The user must provide a  
-#' (meaningful) classification of the items in two non-overlapping subsets such that 
-#' the test score is the sum of the scores on the subsets. 
-#' The plot shows the probabilities to obtain 
-#' any combinations of subset scores with thin gray lines indicating the combinations 
-#' that give the same test score. The thick lines connect the most likely 
+#' meaningful classification of the items in two non-overlapping subsets such that 
+#' the test score is the sum of the score on the subsets. 
+#' The plot shows the expected scores on each subset of items given the test score, with diagonal lines indicating  
+#' the same test score. The colored lines connect the most likely 
 #' combination for each test score in each group.
 #' When applied to educational test data, the plots can be used to detect differences in the 
 #' relative difficulty of (sets of) items for respondents that belong to different 
-#' groups and are matched on the test score. This provides a content-driven way to 
+#' groups. This provides a content-driven way to 
 #' investigate differential item functioning. 
 #'
 #' @examples
@@ -691,7 +690,8 @@ plot.enorm = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci
 
 #' A plot method for the interaction model
 #'
-#' Plot the item-total regressions fit by the interaction (or Rasch) model
+#' Plot the item-total regressions fit by the interaction (or Rasch) model. 
+#' Shows the Interaction model in a thicker (gray) line and the rasch model in a thinner (black) line. 
 #'
 #'
 #' @param x An object produced by function \code{fit_inter}
