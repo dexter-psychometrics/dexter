@@ -36,6 +36,5 @@ Suggests:
     rmarkdown,
     latticeExtra,
     testthat,
-    ggplot2,
     Cairo
 VignetteBuilder: knitr

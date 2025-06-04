@@ -1147,7 +1147,11 @@ design_info = function(dataSrc, predicate = NULL)
     dataSrc = dataSrc$inputs$design
 
   if(inherits(dataSrc, 'data.frame'))
+  {
     colnames(dataSrc) = tolower(colnames(dataSrc))
+    if(!'item_score' %in% colnames(dataSrc))
+      dataSrc$item_score = 0L
+  }
   
   df_info = get_datatype_info(dataSrc, columns = c('booklet_id','item_id'))
   

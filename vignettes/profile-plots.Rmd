@@ -6,8 +6,10 @@ bibliography: dexter.bib
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Profile plots in dexter}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
 ---
 
 <style>
@@ -27,17 +29,28 @@ div.crop img{
 
 
 ```{r setup, include=FALSE}
+RcppArmadillo::armadillo_throttle_cores(1)
 library(knitr)
+library(dexter)
 opts_chunk$set(echo = FALSE, message=FALSE)
 
 if (requireNamespace("Cairo", quietly = TRUE)) 
 {
    opts_chunk$set(dev='CairoPNG')
 }
-RcppArmadillo::armadillo_throttle_cores(1)
 
-library(dexter)
-library(latticeExtra)
+if(requireNamespace("latticeExtra", quietly = TRUE)) 
+{
+  library(latticeExtra)
+} else
+{
+  cloud = function(...)
+  {
+    plot(0:1,0:1, type='n',axes=FALSE,xlab='',ylab='')  
+    text(.5,.5,'This plot requires\npackage LattixceExtra')
+  }
+}
+
 fq = c(10,12,30,20,40,24,15,18,14)
 fq=matrix(fq,3,3)
 attr(fq,"dimnames")=list(c(0,1,2),c(0,1,2))
@@ -51,8 +64,7 @@ reds = c("#972B2F","#A94C4F","#BD6F71","#D39A9B","#F7EFEF")
 The function `profile_plot` in package dexter produces plots like the following one based on the verbal aggression dataset:
 
 ```{r, figProf,  results="hide",fig.height=4,fig.width=4,fig.align='center'}
-# fig.align='center' does not work anymore when you specify any css styles
-# therefore the: display:block;margin: 0 auto;
+
 db = start_new_project(verbAggrRules, ":memory:", person_properties=list(gender="unknown"))
 add_booklet(db, verbAggrData, "agg")
 add_item_properties(db, verbAggrProperties)
