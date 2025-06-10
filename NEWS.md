@@ -3,7 +3,7 @@
 
 * support for tidyverses .data and .env pronouns in predicates
 
-* Bugfix when person_id or booklet_id are numeric, the outputted values were mangled in ability, plausible values and plausible scores. 
+* Bugfix when person_id or booklet_id are numeric, variable in output were mangled in ability, plausible values and plausible scores. 
 
 # dexter 1.6.1
 
@@ -15,7 +15,7 @@
 
 * `plot.enorm` now silently returns a single data.frame (with an added column 'item_id') instead of a list of data.frames when multiple items are plotted.
 
-* When plotting multiple items with `plot.enorm` they can optionally be arranged by mean squared difference between the data and the model prediction.
+* When plotting multiple items with `plot.enorm` they can optionally be sorted by mean squared difference between the data and the model prediction.
 
 # dexter 1.6.0
 

@@ -358,15 +358,18 @@ test_that('sql translation',
   # substr
   expect_equal(trans(x == substr(d,5,6),c('x','d')), '"x" = substr( "d" , 5 , 2 )')
   expect_equal(trans(x == substr(d,5,y),c('x','d','y')), '"x" = substr( "d" , 5 , (1+("y")-(5)) )')
+  expect_equal(trans(endsWith(mode,'o'),'mode'),"substr(\"mode\",1+length(\"mode\")-length('o'))='o'") 
   
   #unsure if we want to automatically unpack lists of length 1
   #expect_equal(trans(x == a['x'], 'x'),'"x" = 5')
   
-  # .data and .env
+  # .data and .env, quasi quotation
   a = 5L
   expect_equal(trans(a==.env$a),'5 = 5')
   expect_equal(trans(a==.env$a, vars='a'),'"a" = 5')
   expect_equal(trans(.data$a==.env$a, vars='a'),'"a" = 5')
+  
+  expect_equal(trans(.data$a==!!a,vars='a'),'"a" = 5')
   
   expect_error(trans(.data$a==.env$a),'not found')
 })    

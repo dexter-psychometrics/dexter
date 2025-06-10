@@ -4,10 +4,6 @@ is_db = function(db)
   inherits(db,'DBIConnection')
 }
 
-is_scored_db = function(db)
-{
-  !dbExists(db, 'SELECT 1 FROM dxScoring_rules WHERE CAST(item_score AS TEXT) <> response;')
-}
 
 dbRunScript = function(db, fn)
 {

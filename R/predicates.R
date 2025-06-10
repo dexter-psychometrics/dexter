@@ -184,10 +184,10 @@ non.nse.vars = function(e)
 
 eval_lang = function(call, vars, env)
 {
-  if(is.function(call[[1]]) || is.call(call[[1]]))
-  {
-    return(eval(call,env))
-  }
+  #if(is.function(call[[1]]) || is.call(call[[1]]))
+  #{
+  #  return(eval(call,env))
+  #}
 
   if(length(intersect(c('%like%','get'), all.names(call))) == 0 && 
      length(intersect(vars, non.nse.vars(call))) == 0)
@@ -269,26 +269,7 @@ partial_eval = function (e, vars = character(), env)
   e
 }
 
-check_function_call = function(call)
-{
-  f = sapply(formals(as.character(call[[1]])), is.symbol)
-  
-  if('...' %in% names(f))
-    return(NULL)
-    
-  arg_names = names(call)[2:length(call)]
-  stopifnot(length(call)-1<=length(f))
-  
-  if(is.null(arg_names))
-  {
-    if(length(call)-1<length(f))
-      stopifnot(all(!f[length(call):length(f)]))
-  } else
-  {
-    stopifnot(length(setdiff(arg_names,c(names(f),"")))==0) 
-    stopifnot(length(setdiff(names(f)[f], arg_names)) <= sum(arg_names==""))
-  }
-}
+
 
 get_arg = function(name, call)
 {
@@ -411,9 +392,7 @@ translate_sql_lang = function(call, variant)
     return(paste(' NOT (', translate_sql(call[[2]], variant),')'))
   }
   
-  if(is.function(call[[1]]))
-    check_function_call(call)
-  
+
   if(name == 'xor')
   {
     a = translate_sql(call[[2]], variant)
@@ -523,7 +502,7 @@ translate_sql_lang = function(call, variant)
                     "))=",translate_sql(call[[3]], variant)))
     if(name == 'endsWith')
       return(paste0("substr(",translate_sql(call[[2]], variant),
-                    ",length(",translate_sql(call[[2]], variant),")-length(",translate_sql(call[[3]], variant),
+                    ",1+length(",translate_sql(call[[2]], variant),")-length(",translate_sql(call[[3]], variant),
                     "))=",translate_sql(call[[3]], variant)))
     
     if(name=="paste")

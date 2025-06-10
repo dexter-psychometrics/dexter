@@ -157,34 +157,7 @@ df_format = function(df, datatype_info=NULL)
 is.date = function(x) inherits(x, "Date")
 is.time = function(x) inherits(x,'POSIXt')
 
-# add named column(s) to the end of a data.frame
-add_column = function(df, ...)
-{
-  dots = list(...)
-  if(is.null(names(dots)) || any(names(dots) == ''))
-    stop('arguments must be named')
-  
-  for(nm in names(dots))
-  {
-    vec = dots[[nm]]
-    if(NROW(df)==0)
-      vec = vec[0]
-    
-    stopifnot(length(vec)==1 || NROW(df) == length(vec))
-    df[[nm]] = vec
-  }
-  
-  df
-}
 
-bind_vertical = function(lst)
-{
-  mtx = any(sapply(lst, is.matrix))
-  if(mtx)
-    bind_rows(lst)
-  else
-    matrix(unlist(lst), ncol=1)
-}
 
 # x is a vector, str should include one %s to place the collapsed vector
 # example: str = "%s [is a/are] reserved variable name[s] in a dexter project"
@@ -427,14 +400,6 @@ check_df = function(x, columns=NULL, n_rows=NULL, name = deparse(substitute(x)),
   
 }
 
-check_parms = function(x, name = deparse(substitute(x)), nullable=FALSE)
-{
-  if(nullable && is.null(x))
-    return(NULL)
-  if(!(inherits(x,'enorm') || inherits(x,'prms')))
-    stop_(name,' must be an object of type `enorm`')
-}
-
 check_list = function(x, name = deparse(substitute(x)), nullable=FALSE)
 {
   if(nullable && is.null(x))
@@ -519,21 +484,4 @@ is_connected = function(design)
   mode(adj) = 'integer'
   
   all(ds_connected_groups(adj)==1)
-}
-
-## Regular Block-Diagnal Matrix from List of matrices
-# Courtesy of C.Ladroue
-blockMatrixDiagonal=function(...){  
-  matrixList =list(...)
-  if(is.list(matrixList[[1]])) matrixList = matrixList[[1]]
-  
-  dimensions = sapply(matrixList,FUN=function(x) dim(x)[1])
-  finalDimension = sum(dimensions)
-  finalMatrix = matrix(0,nrow=finalDimension,ncol=finalDimension)
-  index = 1
-  for(k in 1:length(dimensions)){
-    finalMatrix[index:(index+dimensions[k]-1),index:(index+dimensions[k]-1)] = matrixList[[k]]
-    index = index+dimensions[k]
-  }
-  finalMatrix
 }

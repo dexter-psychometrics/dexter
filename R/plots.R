@@ -572,8 +572,7 @@ plot.enorm = function(x, item_id=NULL, dataSrc=NULL, predicate=NULL, nbins=5, ci
     check_dataSrc(dataSrc)
     qtpredicate = eval(substitute(quote(predicate)))
     env = caller_env()
-    respData = get_resp_data(dataSrc, qtpredicate, env=env, retain_person_id=FALSE,
-      parms_check=filter(x$inputs$ssIS, .data$item_id %in% local(item_id)))
+    respData = get_resp_data(dataSrc, qtpredicate, env=env, retain_person_id=FALSE)
     
     if(length(setdiff(item_id, levels(respData$design$item_id)))>0)
     {
