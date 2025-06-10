@@ -83,8 +83,8 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.6.2" id="dexter-162">dexter 1.6.2<a class="anchor" aria-label="anchor" href="#dexter-162"></a></h2>
-<ul><li><p>support for .data$ and .env$ pronouns in predicates</p></li>
-<li><p>Bugfix when person_id or booklet_id are numeric, the outputted values were altered in ability, plausible values and plausible scores.</p></li>
+<ul><li><p>support for tidyverses .data and .env pronouns in predicates</p></li>
+<li><p>Bugfix when person_id or booklet_id are numeric, variable in output were mangled in ability, plausible values and plausible scores.</p></li>
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.6.1" id="dexter-161">dexter 1.6.1<small>2025-04-28</small><a class="anchor" aria-label="anchor" href="#dexter-161"></a></h2>
@@ -92,7 +92,7 @@
 <li><p>Bugfix for weird looking <code>distractor_plot</code> when not all booklet scores are observed.</p></li>
 <li><p>Names for person and item properties that caused an error because they clash with SQL syntax (like ‘group’) are now allowed.</p></li>
 <li><p><code>plot.enorm</code> now silently returns a single data.frame (with an added column ‘item_id’) instead of a list of data.frames when multiple items are plotted.</p></li>
-<li><p>When plotting multiple items with <code>plot.enorm</code> they can optionally be arranged by mean squared difference between the data and the model prediction.</p></li>
+<li><p>When plotting multiple items with <code>plot.enorm</code> they can optionally be sorted by mean squared difference between the data and the model prediction.</p></li>
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.6.0" id="dexter-160">dexter 1.6.0<small>2025-04-07</small><a class="anchor" aria-label="anchor" href="#dexter-160"></a></h2>
@@ -285,7 +285,7 @@
 </ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.6.0" id="dexter-060">dexter 0.6.0<small>2017-12-16</small><a class="anchor" aria-label="anchor" href="#dexter-060"></a></h2>
-<ul><li><p><code><a href="../reference/ability.html">ability_tables()</a></code> function added to generate score transformation tables for arbitrary subsets of items. <code><a href="../reference/ability.html">ability()</a></code> and <code><a href="../reference/ability.html">ability_tables()</a></code> can now also take Jeffreys prior and variatons of the normal prior and can optionally output standard errors.</p></li>
+<ul><li><p><code><a href="../reference/ability.html">ability_tables()</a></code> function added to generate score transformation tables for arbitrary subsets of items. <code><a href="../reference/ability.html">ability()</a></code> and <code><a href="../reference/ability.html">ability_tables()</a></code> can now also take Jeffreys prior and variations of the normal prior and can optionally output standard errors.</p></li>
 <li><p><code><a href="../reference/plausible_scores.html">plausible_scores()</a></code> function added to generate scores on arbitrary itemsets (or the entire bank).</p></li>
 <li><p>Updates to documentation.</p></li>
 </ul></div>
