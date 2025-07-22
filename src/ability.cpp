@@ -194,6 +194,8 @@ Rcpp::List theta_wmle(const arma::mat& b, const arma::ivec& a,
 	double xl, rts, fl, f, dx;
 	int *first_ptr, *last_ptr;
 	
+	bool conv_error;
+	
 	double E,I,J;
 	vec wmem(max_A+1);
 	
@@ -202,6 +204,7 @@ Rcpp::List theta_wmle(const arma::mat& b, const arma::ivec& a,
 	{
 		for(int bk=0; bk<nbk; bk++)
 		{
+			conv_error = false;
 			xl = 0;
 			rts = -1.3;
 			
@@ -216,6 +219,8 @@ Rcpp::List theta_wmle(const arma::mat& b, const arma::ivec& a,
 			{
 				for(int iter=0; iter<max_iter; iter++)
 				{
+					if(WLE && (xl > rts) != (fl > f))	conv_error = true;
+				
 					dx = (xl-rts) * (f-s)/(f-fl);
 					xl = rts;
 					fl = f;
@@ -223,9 +228,18 @@ Rcpp::List theta_wmle(const arma::mat& b, const arma::ivec& a,
 
 					f = Escore_bk<WLE>(rts, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], bk_max_A[bk], wmem);
 					
-					if(std::abs(dx) < acc)
+					if(std::abs(dx) < acc || conv_error)
 						break;
 				} 
+				if(conv_error)
+				{
+					for(int s=score_start; s<bk_maxs[bk]+score_end; s++)
+					{
+						theta.at(s+bk_cnscores[bk],draw) = NA_REAL;
+						se.at(s+bk_cnscores[bk],draw) = NA_REAL;
+					}
+					break;
+				}
 				theta.at(s+bk_cnscores[bk],draw) = rts;
 				
 				deriv_theta<false>(rts, b.col(draw), a, first_ptr, last_ptr, bk_nit[bk], bk_max_A[bk], wmem, E,I, J);

@@ -135,6 +135,10 @@ ability_tables = function(parms, design = NULL, method = c("MLE","EAP","WLE"), p
   if(method %in% c('MLE','WLE'))
   {
     est = theta_wmle_c(b,a,simple_parms$design$first0, simple_parms$design$last0, simple_parms$booklets$nit, (method=='WLE'), n_cores=n_cores)
+    if(method=='WLE' && any(is.na(est$theta)))
+    {
+      warning('WLE estimates do not converge for some booklets, all estimates for the affected booklets set to NA.')
+    }
     
   } else if(method == "EAP" && prior == "Jeffreys")
   {
