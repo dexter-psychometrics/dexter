@@ -14,7 +14,7 @@ importFrom(stats, "complete.cases", "cor", "sd", "weighted.mean", "as.formula", 
             "cov", "mahalanobis", "model.matrix", "pchisq","rchisq",
             "rgamma", "runif", "setNames", 'rnorm',"chisq.test",
            "smooth.spline", "coef", "lm", "predict", "dnorm", "qnorm",
-           "rbeta","rbinom","cov2cor", "rWishart", "as.dist", "hclust")
+           "rbeta","rbinom","cov2cor", "rWishart", "as.dist", "hclust","optim")
 importFrom(graphics, "plot", "axis", "image", "par", "lines", "hist",
            "text","legend","abline","segments","arrows","points", "rect","clip","strheight","strwidth")
 importFrom(grDevices, "colorRampPalette","col2rgb","rgb")
@@ -59,6 +59,8 @@ S3method(logLik,enorm)
 
 #latent_cor.R
 export(latent_cor)
+S3method(print,latent_cor)
+S3method(coef,latent_cor)
 
 #ability.R
 export(ability)

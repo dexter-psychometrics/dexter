@@ -114,10 +114,12 @@ fit_domains = function(dataSrc, item_property, predicate = NULL)
 
 
 print.inter = function(x, ...){
-  res = paste0('Parameters for the Rasch and Interaction Model', 
-               '\n\n# use plot() for plotting the Rasch and Interaction Model or coef() for retreiving the parameters\n')
-  cat(res)
-  invisible(res)
+  
+  p = 'Parameters for the Rasch and Interaction Model\n\nuse %s for plotting the Rasch and Interaction Model or %s for retrieving the parameters'
+  
+  cl_msg(p,c('plot.inter','coef.inter'))
+
+  invisible(x)
 }
 
 #' Extract interaction model parameters

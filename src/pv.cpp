@@ -394,14 +394,12 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 
 
 
-
-
-// [[Rcpp::export]]
-void PV_sve(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first, const arma::ivec& bk_last, 					
+template<bool complete>
+void PV_sve_tpl(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first, const arma::ivec& bk_last, 					
 			const arma::ivec& bcni,
 			const arma::ivec& booklet_id, const arma::ivec& booklet_score, const arma::vec& mu, const double sigma, 
 			const int max_cores,
-			arma::mat& pv_mat, const int pv_col_indx=0, const int niter=1)
+			arma::mat& pv_mat, const arma::ivec& missing_data, const int pv_col_indx=0, const int niter=1)
 {
 	const int np = pv_mat.n_rows;
 	const int maxA = max(a);
@@ -413,6 +411,7 @@ void PV_sve(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first,
 	
 	vec pv(pv_mat.colptr(pv_col_indx),np, false, true);
 	
+	const ivec data_offset = cumsum(missing_data);
 	
 #pragma omp parallel num_threads(max_cores)	
 	{
@@ -431,7 +430,17 @@ void PV_sve(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first,
 #pragma omp for		
 		for(int prs=0; prs<np; prs++)
 		{
-			bk = booklet_id[prs];
+			if(complete) bk = booklet_id[prs];
+			else
+			{
+				if(missing_data[prs] == 1)
+				{				
+					pv[prs] = prl_rnorm(lrng) * sigma + mu[prs];
+					continue;
+				}	
+				bk = booklet_id[prs-data_offset[prs]];
+			}
+			
 			for(int iter=0; iter<niter; iter++)
 			{
 				theta = prl_rnorm(lrng) * sigma + mu[prs];
@@ -453,12 +462,28 @@ void PV_sve(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first,
 						k++;
 					if(k>0) x += a[bk_first[i]+k-1];
 				}
+				if(complete) acc = std::exp((theta-pv[prs])*(booklet_score[prs]-x));				
+				else acc = std::exp((theta-pv[prs])*(booklet_score[prs-data_offset[prs]]-x));				
 				
-				acc = std::exp((theta-pv[prs])*(booklet_score[prs]-x));
 				if(prl_runif(lrng)<acc)
 					pv[prs] = theta;
 			}
 		}
 	}
+}
+
+
+// [[Rcpp::export]]
+void PV_sve_C(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first, const arma::ivec& bk_last, 					
+			const arma::ivec& bcni,
+			const arma::ivec& booklet_id, const arma::ivec& booklet_score, const arma::vec& mu, const double sigma, 
+			const int max_cores, arma::mat& pv_mat, const arma::ivec& missing_data,const int pv_col_indx=0, const int niter=1)
+{
+	if(all(missing_data==0))
+		PV_sve_tpl<true>(b, a, bk_first, bk_last, 					
+			bcni,booklet_id, booklet_score, mu, sigma, max_cores, pv_mat, missing_data,  pv_col_indx, niter);
+	else
+		PV_sve_tpl<false>(b, a, bk_first, bk_last, 					
+			bcni,booklet_id, booklet_score, mu, sigma, max_cores, pv_mat, missing_data,  pv_col_indx, niter);
 }
 

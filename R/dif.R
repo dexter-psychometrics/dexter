@@ -108,7 +108,24 @@ DIF = function(dataSrc, person_property, predicate=NULL)
   if(nrow(common_items) != nrow(models[[1]]$inputs$ssI) || nrow(common_items) != nrow(models[[2]]$inputs$ssI))
   {
     cat('\n')
-    message('Some items were excluded because they do not appear in both datasets and/or do not have the same score categories in both datasets.')
+    check_overlap = models[[1]]$inputs$ssIS |>
+      full_join(models[[2]]$inputs$ssIS, by=c('item_id','item_score') ,suffix=c('_1','_2')) |>
+      group_by(.data$item_id) |>
+      summarise(miss_cat = anyNA(.data$sufI_1) | anyNA(.data$sufI_2),
+                miss_itm = all(is.na(.data$sufI_1)) | all(is.na(.data$sufI_2))) |>
+      mutate(miss_cat = .data$miss_cat & !.data$miss_itm)
+      
+    if(any(check_overlap$miss_itm))
+      message('Some items were excluded because they do not appear in both datasets.')
+    
+    if(any(check_overlap$miss_cat))
+    {
+      message('items with differing score categories:')
+      print(as.character(check_overlap$item_id[check_overlap$miss_cat]))
+      warning('Some items were excluded because because they have different score categories in both datasets.')
+    }
+    
+    
     models = lapply(models, function(m){
       ii = m$inputs$ssIS |>
         filter(.data$item_score > 0L) |>

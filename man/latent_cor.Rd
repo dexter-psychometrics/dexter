@@ -10,7 +10,7 @@ latent_cor(
   predicate = NULL,
   nDraws = 500,
   hpd = 0.95,
-  use = "complete.obs"
+  use = c("complete.obs", "pairwise.complete.obs")
 )
 }
 \arguments{
@@ -25,23 +25,30 @@ item_property must match a known item property. If dataSrc is a data.frame, item
 
 \item{nDraws}{Number of draws for plausible values}
 
-\item{hpd}{width of Bayesian highest posterior density interval around the correlations, 
-value must be between 0 and 1.}
+\item{hpd}{deprecated, use the `coef` method to set the highest posterior density interval.}
 
-\item{use}{Only complete.obs at this time. Respondents who don't have a score for one or more scales are removed.}
+\item{use}{complete.obs uses only persons with answers on all domains. Pairwise.complete.obs uses all cases 
+for which there are responses in at least two domains.}
 }
 \value{
-List containing a estimated correlation matrix, the corresponding standard deviations, 
-and the lower and upper limits of the highest posterior density interval and the complete mcmc sample
+`latent_cor` object, which is a list containing an estimated (mean) correlation matrix, the corresponding standard deviations, 
+and the complete mcmc sample. Use the coef method to extract highest posterior density intervals around the estimated correlation matrix.
 }
 \description{
 Estimates correlations between latent traits using plausible values as described in Marsman, et al. (2022). 
 An item_property is used to distinguish the different scales.
 }
 \details{
-This function uses plausible values so results may differ slightly between calls.
+To compute latente correlations, a model is estimated for each subscale. If a design for any subscale is not connected this will result in an error.  
+
+Latent correlations are generated using a Bayesian approach. `Use` is `"pairwise.complete.obs"` works slightly different from 
+`cor` since complete matrices are imputed. Therefore individual correlation matrices in the mcmc sample are positive semi-definite even with the pairwise option 
+(assuming the matrix is not degenerate). However the mean of the mcmc sample need never be positive semidefinite.
 }
 \references{
 Marsman, M., Bechger, T. M., & Maris, G. K. (2022). Composition algorithms for conditional distributions. 
 In Essays on Contemporary Psychometrics (pp. 219-250). Cham: Springer International Publishing.
+}
+\seealso{
+\code{\link{coef.latent_cor}}
 }

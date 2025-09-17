@@ -218,9 +218,11 @@ equated_score = function(b,a,first,last, ref_theta)
 
 print.p2pass = function(x,...)
 {
-  cat(paste('Equating information for', length(x$est),
-              'booklets. Use `coef()` to extract the statistics or `plot()` to',
-              'plot the probability to pass, sensitivity/specificity or a ROC-curve.\n'))
+  cl_msg(paste('Equating information for', length(x$est),
+              'booklets. Use %s to extract the statistics or %s to',
+              'plot the probability to pass, sensitivity/specificity or a ROC-curve.'),
+    c('coef.p2pass','plot.p2pass'))
+
   invisible(x)
 }
 

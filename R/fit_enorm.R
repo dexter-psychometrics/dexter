@@ -108,16 +108,17 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
 print.prms = function(x,...) print.enorm(x,...)
 
 print.enorm = function(x, ...){
-  p = paste0( 'Parameters for the Extended Nominal Response Model\n\n',
-              'Method: ', x$inputs$method, ', ',
-              ifelse(x$inputs$method == 'CML',
-                     paste0('converged in ',x$est$n_iter, ' iterations'),
-                     paste0('number of Gibbs samples: ',nrow(x$est$beta))),
-              '\nitems: ', nrow(x$inputs$ssI), 
-              '\nresponses: ', sum(x$inputs$ssIS$sufI),'\n\n',
-              'Use coef() or coefficients() to extract the item parameters.\n')
   
-  cat(p)
+  conv = ifelse(x$inputs$method == 'CML', 
+    paste0('converged in ',x$est$n_iter, ' iterations'),
+    paste0('number of Gibbs samples: ',nrow(x$est$beta)))
+  
+  
+  p = sprintf('Parameters for the Extended Nominal Response Model\n\nMethod: %s, %s\nitems: %i\nresponses: %i\n\nUse %%s to extract the item parameters.\n',
+    x$inputs$method, conv, nrow(x$inputs$ssI),sum(x$inputs$ssIS$sufI))
+
+  cl_msg(p, 'coef.enorm')
+  
   invisible(x)
 }
 

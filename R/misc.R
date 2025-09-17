@@ -94,6 +94,7 @@ get_datatype_info = function(dataSrc, columns)
 }
 
 
+
 df_format = function(df, datatype_info=NULL)
 {
   if(getOption('dexter.use_tibble', FALSE))
@@ -135,11 +136,14 @@ df_format = function(df, datatype_info=NULL)
       df[[name]] = as.character(df[[name]])
       if(datatype_info[[name]]$type == 'integer')
       {
-        df[[name]] = as.integer(df[[name]])
+        int_col = suppressWarnings({as.integer(df[[name]])})
+        if(!anyNA(int_col))
+          df[[name]] = int_col
       } else if(datatype_info[[name]]$type == 'numeric')
       {
-        
-        df[[name]] = as.numeric(df[[name]])
+        db_col = suppressWarnings({as.numeric(df[[name]])})
+        if(!anyNA(db_col))
+          df[[name]] = db_col
       } 
     }
   }
@@ -176,6 +180,24 @@ format_plural = function(str, x, sep=', ', last_sep=' and ', qt="'")
   sprintf(str, paste(x,collapse=sep))
 }
 
+# with clickable links to functions
+cl_msg = function(s, func_names, mod = c('info','message'))
+{
+  mod = match.arg(mod)
+  if(requireNamespace('cli', quietly = TRUE))
+  {
+    # the cli warning is visually on a level with R message
+    f = list(info = cli::cli_alert_info, message = cli::cli_alert_warning)[[mod]]
+    a = as.list(sprintf('{.help [{.fun %s}](dexter::%s)}',sub('\\..+$','',func_names,perl=TRUE),func_names))
+    a$fmt = s
+    f(do.call(sprintf,a))
+  } else
+  {
+    f = list(info = cat, message = message)[[mod]]
+    f(sprintf(s,paste0('`',sub('\\..+$','',func_names,perl=TRUE),'`')))
+  }
+}
+
 
 # format string with named arguments
 
@@ -192,6 +214,8 @@ format_plural = function(str, x, sep=', ', last_sep=' and ', qt="'")
 #
 fstr = function(txt, arglist)
 {
+  arglist = arglist[sapply(arglist, length) >0]
+  
   if(length(txt) != 1 || length(arglist)==0 || is.null(txt) || !grepl('$',txt,fixed=TRUE)) 
     return(txt)
 
@@ -260,7 +284,7 @@ if.else = function(test, yes, no)
 #  basic argument type and attribute checks with error messages
 stop_ = function(...) stop(..., call. = FALSE)
 
-check_dataSrc = function(x)
+check_dataSrc = function(x, matrix_ok=TRUE)
 {
   force(x)
   if(inherits(x, 'dx_resp_data'))
@@ -268,6 +292,8 @@ check_dataSrc = function(x)
   
   if(is.matrix(x))
   {
+    if(!matrix_ok)  stop_("a matrix datasrc is not yet implemented for this function")
+    
     if(!mode(x) %in% c('numeric','integer'))
       stop_('dataSrc must be a matrix of positive numbers, a data.frame or a database connection')
     return(NULL)

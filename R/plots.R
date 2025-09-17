@@ -133,7 +133,7 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
 
   if('item_position' %in% colnames(respData$design))
   {
-    ipos = filter(respData$design, .data$item_id==!!item_id)
+    ipos = filter(respData$design, .data$item_id==.env$item_id)
   } else if(is_bkl_safe(dataSrc, qtpredicate, env) && is_db(dataSrc))
   {
     ipos = dbGetQuery(dataSrc, paste("SELECT booklet_id, item_position FROM dxbooklet_design WHERE item_id=", 
@@ -141,13 +141,13 @@ distractor_plot = function(dataSrc, item_id, predicate=NULL, legend=TRUE, curtai
   } else if(inherits(dataSrc,'data.frame') && 'item_position' %in% colnames(dataSrc))
   {
     ipos = dataSrc |>
-      filter(.data$item_id==!!item_id) |>
+      filter(.data$item_id==.env$item_id) |>
       distinct(.data$booklet_id,.keep_all=TRUE)
   } else
   {
-    ipos = filter(respData$design, .data$item_id==!!item_id)
+    ipos = filter(respData$design, .data$item_id==.env$item_id)
   }
-  ipos=select(ipos,any_of(c('booklet_id','item_position')))
+  ipos = select(ipos,any_of(c('booklet_id','item_position')))
   
   if(inherits(dataSrc,'data.frame'))
      respData$x = mutate(respData$x,response=coalesce(as.character(.data$response),'<NA>'))

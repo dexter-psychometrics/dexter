@@ -161,6 +161,13 @@ pv_chain = function(x, design, b, a, nPV,
   bind_cols(bind_rows(x), res$theta)
 }
 
+# missing_data as optional argument
+PV_sve = function(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, max_cores, pv_mat, 
+  missing_data=NULL, pv_col_indx = 0L, niter = 1L) 
+{
+  if(is.null(missing_data)) missing_data = 0L
+  PV_sve_C(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, max_cores, pv_mat, missing_data, pv_col_indx, niter)
+}
 
 
 # user interface ----------------------------------------------------------

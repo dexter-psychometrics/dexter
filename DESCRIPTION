@@ -1,7 +1,7 @@
 Package: dexter
 Type: Package
 Title: Data Management and Analysis of Tests
-Version: 1.6.3
+Version: 1.7.0
 Authors@R: c(
     person("Gunter","Maris", role="aut"),
     person("Timo","Bechger", role="aut"),
@@ -36,5 +36,6 @@ Suggests:
     rmarkdown,
     latticeExtra,
     testthat,
-    Cairo
+    Cairo,
+    cli
 VignetteBuilder: knitr

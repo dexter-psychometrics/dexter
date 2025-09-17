@@ -670,9 +670,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// PV_sve
-void PV_sve(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first, const arma::ivec& bk_last, const arma::ivec& bcni, const arma::ivec& booklet_id, const arma::ivec& booklet_score, const arma::vec& mu, const double sigma, const int max_cores, arma::mat& pv_mat, const int pv_col_indx, const int niter);
-RcppExport SEXP _dexter_PV_sve(SEXP bSEXP, SEXP aSEXP, SEXP bk_firstSEXP, SEXP bk_lastSEXP, SEXP bcniSEXP, SEXP booklet_idSEXP, SEXP booklet_scoreSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP max_coresSEXP, SEXP pv_matSEXP, SEXP pv_col_indxSEXP, SEXP niterSEXP) {
+// PV_sve_C
+void PV_sve_C(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first, const arma::ivec& bk_last, const arma::ivec& bcni, const arma::ivec& booklet_id, const arma::ivec& booklet_score, const arma::vec& mu, const double sigma, const int max_cores, arma::mat& pv_mat, const arma::ivec& missing_data, const int pv_col_indx, const int niter);
+RcppExport SEXP _dexter_PV_sve_C(SEXP bSEXP, SEXP aSEXP, SEXP bk_firstSEXP, SEXP bk_lastSEXP, SEXP bcniSEXP, SEXP booklet_idSEXP, SEXP booklet_scoreSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP max_coresSEXP, SEXP pv_matSEXP, SEXP missing_dataSEXP, SEXP pv_col_indxSEXP, SEXP niterSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
@@ -686,9 +686,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double >::type sigma(sigmaSEXP);
     Rcpp::traits::input_parameter< const int >::type max_cores(max_coresSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type pv_mat(pv_matSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type missing_data(missing_dataSEXP);
     Rcpp::traits::input_parameter< const int >::type pv_col_indx(pv_col_indxSEXP);
     Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
-    PV_sve(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, max_cores, pv_mat, pv_col_indx, niter);
+    PV_sve_C(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, max_cores, pv_mat, missing_data, pv_col_indx, niter);
     return R_NilValue;
 END_RCPP
 }
@@ -781,7 +782,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dexter_omp_ncores", (DL_FUNC) &_dexter_omp_ncores, 0},
     {"_dexter_pv_chain_normal", (DL_FUNC) &_dexter_pv_chain_normal, 19},
     {"_dexter_pv_chain_mix", (DL_FUNC) &_dexter_pv_chain_mix, 19},
-    {"_dexter_PV_sve", (DL_FUNC) &_dexter_PV_sve, 13},
+    {"_dexter_PV_sve_C", (DL_FUNC) &_dexter_PV_sve_C, 14},
     {"_dexter_sampleNRM_testC", (DL_FUNC) &_dexter_sampleNRM_testC, 5},
     {"_dexter_sampleNRM_itemC", (DL_FUNC) &_dexter_sampleNRM_itemC, 5},
     {"_dexter_sampleIMC", (DL_FUNC) &_dexter_sampleIMC, 6},

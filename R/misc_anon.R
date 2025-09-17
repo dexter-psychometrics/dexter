@@ -76,7 +76,7 @@ SSTable = function(b, a, first, last,setA, setB, cIM_score=NULL)
 # not safe for bimodal distributions
 hpdens = function(x, conf=0.95)
 {
-  conf = min(conf, 1-conf)
+  conf = 1-conf
   n = length(x)
   nn = round( n*conf )
   x = sort(x)

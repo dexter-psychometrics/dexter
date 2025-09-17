@@ -63,31 +63,6 @@ individual_differences = function(dataSrc, predicate = NULL)
   outpt
 }
 
-# MLE for mean score
-# theta_score_distribution = function(b,a,first,last,scoretab)
-# {
-#   max_score = sum(a[last])
-#   mean_score = weighted.mean(0:max_score,scoretab)
-# 
-#   first0 = as.integer(first-1L)
-#   last0 = as.integer(last-1L)
-#   b = matrix(b,ncol=1)
-#   
-#   theta = 0
-#   d  = deriv_theta_c(0,b,a,first0,last0)
-# 
-#   while(abs(mean_score-d$E)>1e-8)
-#   {
-#     E = d$E - mean_score
-#     # hadley's method
-#     theta = theta-(2*E*d$I)/(2*d$I^2 - E*d$J)
-#     d  = deriv_theta_c(theta,b,a,first0,last0)
-#   }
-# 
-#   return(theta)
-# }
-
-
 
 ## Get the score distribution of a booklet from fit_enorm
 #  based on a polynomial smoothing of the log-lambda's

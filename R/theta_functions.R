@@ -206,7 +206,7 @@ theta_function = function(parms, items=NULL, booklet=NULL, parms_draw=c('average
   
   out
 }
-
+# add a usage, maybe with deparse(substitute(y))
 print.inf_func = function(x,...) cat('Information function: I(theta)\n')
 print.exp_func = function(x,...) cat('Conditional expected score function: E(X_i|theta)\n')
 print.sim_func = function(x,...) cat('function to simulate item scores: (x_i1, ..., x_ip) ~ ENORM(theta)\n')

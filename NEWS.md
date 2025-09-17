@@ -1,4 +1,8 @@
 
+# dexter 1.7
+
+* `latent_cor` can now use pairwise complete cases and gains a print and coef method for the outputted object
+
 # dexter 1.6.2
 
 * support for tidyverses .data and .env pronouns in predicates
