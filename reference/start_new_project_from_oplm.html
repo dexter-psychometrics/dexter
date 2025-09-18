@@ -97,7 +97,7 @@
 <span>  person_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  missing_character <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">" "</span>, <span class="st">"9"</span><span class="op">)</span>,</span>
 <span>  use_discrim <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  format <span class="op">=</span> <span class="st">"compressed"</span></span>
+<span>  skip_invalid_booklets <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -145,8 +145,10 @@ default is to use both a space and a 9 as missing characters.</p></dd>
 discrimination parameters of the items</p></dd>
 
 
-<dt id="arg-format">format<a class="anchor" aria-label="anchor" href="#arg-format"></a></dt>
-<dd><p>not used, at the moment only the compressed format is supported.</p></dd>
+<dt id="arg-skip-invalid-booklets">skip_invalid_booklets<a class="anchor" aria-label="anchor" href="#arg-skip-invalid-booklets"></a></dt>
+<dd><p>whether to skip linesthat have a booklet number that is not listed in the .scr file. This supports
+an extremely poor but unfortunately common practice of excludign students by chaning their booklets ids or inserting random
+comments in the data file. If TRUE such lines will be skipped, if FALSE they will generate an error</p></dd>
 
 </dl></div>
     <div id="value">
