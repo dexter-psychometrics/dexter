@@ -241,12 +241,6 @@ get_sufStats_im = function(respData, check_sanity=TRUE)
 
 
 
-
-
-
-
-
-
 # ti = respData$x |>
 #   group_by(.data$booklet_id, .data$item_id) |>
 #   summarise(meanScore = mean(.data$item_score),
@@ -259,6 +253,7 @@ get_sufStats_im = function(respData, check_sanity=TRUE)
 #   group_by(.data$item_id) |>
 #   mutate(maxScore = max(.data$maxScore)) |>
 #   ungroup() 
+
 
 
 get_sufStats_tia = function(respData)
@@ -276,8 +271,12 @@ get_sufStats_tia = function(respData)
   # indexing in c, make first element empty
   frst_item = c(-10L, frst_item)
   
-  tia_C(respData$x$booklet_id, respData$x$booklet_score, respData$x$item_id, respData$x$item_score, 
-        nb, nit,
-        frst_item, respData$design$booklet_id, respData$design$item_id ) 
-
+  res = tia_C(respData$x$booklet_id, respData$x$booklet_score, respData$x$item_id, respData$x$item_score, 
+    nb, nit,
+    frst_item, respData$design$booklet_id, respData$design$item_id ) 
+  
+  class(res$booklets$booklet_id) = 'factor'
+  levels(res$booklets$booklet_id) = levels(res$items$booklet_id)
+  res
+  
 }

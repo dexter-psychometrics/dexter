@@ -137,7 +137,7 @@ sql_stop_ = function(e)
     colname = regmatches(msg,regexpr('[^.]+$',msg))
     stop_(sprintf('`%s` may not be <NA>',colname))
   }
-  stop_(e)
+  stop_(msg)
 }
 
 #to~do: for some reason data insertion in porstgres responses is extremely slow

@@ -9,7 +9,8 @@ tia_tables(
   predicate = NULL,
   type = c("raw", "averaged", "compared"),
   max_scores = c("observed", "theoretical"),
-  distractor = FALSE
+  distractor = FALSE,
+  omit_item_novar = TRUE
 )
 }
 \arguments{
@@ -24,9 +25,11 @@ correlations with the sum score (rit), and correlations with the rest score (rit
 shown in separate tables and compared across booklets}
 
 \item{max_scores}{use the observed maximum item score or the theoretical maximum item score 
-according to the scoring rules in the database to determine pvalues and maximum scores}
+according to the scoring rules in the database to determine pvalues and maximum scores for items and booklets}
 
 \item{distractor}{add a tia for distractors, only useful for selected response (MC) items}
+
+\item{omit_item_novar}{omit items without score variance from the computation of booklet statistics (they will still be included in the item statistics)}
 }
 \value{
 A list containing:

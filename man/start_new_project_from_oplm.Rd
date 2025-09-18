@@ -14,7 +14,7 @@ start_new_project_from_oplm(
   person_id = NULL,
   missing_character = c(" ", "9"),
   use_discrim = FALSE,
-  format = "compressed"
+  skip_invalid_booklets = FALSE
 )
 }
 \arguments{
@@ -40,7 +40,9 @@ default is to use both a space and a 9 as missing characters.}
 \item{use_discrim}{if TRUE, the scores for the responses will be multiplied by the
 discrimination parameters of the items}
 
-\item{format}{not used, at the moment only the compressed format is supported.}
+\item{skip_invalid_booklets}{whether to skip linesthat have a booklet number that is not listed in the .scr file. This supports 
+an extremely poor but unfortunately common practice of excludign students by chaning their booklets ids or inserting random 
+comments in the data file. If TRUE such lines will be skipped, if FALSE they will generate an error}
 }
 \value{
 a database connection object.

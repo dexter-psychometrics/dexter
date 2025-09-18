@@ -118,7 +118,7 @@ test_that('tia computations are correct',{
   
   rsp = mutate(rsp,item_score = if_else(item_id==item1,1L,item_score) )
   
-  expect_warning({tia_dx = tia_tables(rsp)},
+  expect_message({tia_dx = tia_tables(rsp)},
                  regexp = '^.+without score variation.+$')
   
   expect_true(all(filter(tia_dx$items,item_id==item1)$sd_score == 0))

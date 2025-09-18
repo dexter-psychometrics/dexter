@@ -3,6 +3,12 @@
 
 * `latent_cor` can now use pairwise complete cases and gains a print and coef method for the outputted object
 
+* `start_new_project_from_oplm` can handle the 'expanded' oplm format and can optionally skip invalid lines
+
+* `tia_tables` gets mean_booklet_score and sd_booklet_score in booklet output. 
+
+* `tia_tables` gains an optional argument whether to omit items withou score variation from the computation of booklet statistics 
+
 # dexter 1.6.2
 
 * support for tidyverses .data and .env pronouns in predicates

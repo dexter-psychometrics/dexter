@@ -1,5 +1,6 @@
 #include <RcppArmadillo.h>
 #include <stack>
+#include "shared.h"
 using namespace Rcpp;
 
 
@@ -1145,7 +1146,7 @@ IntegerVector score_tab_single(const IntegerVector& scores, const int max_score)
 // about 10-30 times faster than R (to~do: check for severly incomplete designs)
 
 // [[Rcpp::export]]
-DataFrame tia_C(const IntegerVector& booklet_id, const IntegerVector& booklet_score, const IntegerVector& item_id, const IntegerVector& item_score, const int nb, const int nit, 
+List tia_C(const IntegerVector& booklet_id, const IntegerVector& booklet_score, const IntegerVector& item_id, const IntegerVector& item_score, const int nb, const int nit, 
 				const IntegerVector& frst_item, const IntegerVector& ds_booklet_id, const IntegerVector& ds_item_id ) 
 {
 	
@@ -1209,10 +1210,27 @@ DataFrame tia_C(const IntegerVector& booklet_id, const IntegerVector& booklet_sc
 		}
 	}
 	
+	// booklet score
+	NumericVector tia_bk_sd_score(nb), tia_bk_mean_score(nb);
+	IntegerVector tia_bk_booklet_id(nb);
+	for(int bk=0;bk<nb;bk++)
+	{
+		double N = (double)(btally[bk+1]);
+		tia_bk_mean_score[bk] = bsum[bk+1]/N;
+		tia_bk_sd_score[bk] = std::sqrt((N/(N-1)) * (bsum2[bk+1]/N-SQR(tia_bk_mean_score[bk])));
+		tia_bk_booklet_id[bk] = bk+1;
+	}
 	
-	return DataFrame::create(Named("booklet_id") = ds_booklet_id, Named("item_id") = ds_item_id, Named("mean_score") = tia_mean, 
-							 Named("max_score") = tia_max, Named("sd_score") = tia_sd, Named("rit") = tia_rit, Named("rir") = tia_rir, 
-							 Named("n_persons") = tia_n);
+	
+	return List::create(
+		Named("booklets") = DataFrame::create(
+			Named("booklet_id") = tia_bk_booklet_id,
+			Named("mean_booklet_score") = tia_bk_mean_score, Named("sd_booklet_score") = tia_bk_sd_score, 
+			Named("n_persons") = std::vector<int>( btally.begin() + 1, btally.end() )),
+		
+		Named("items") = DataFrame::create(Named("booklet_id") = ds_booklet_id, Named("item_id") = ds_item_id, Named("mean_score") = tia_mean, 
+			Named("max_score") = tia_max, Named("sd_score") = tia_sd, Named("rit") = tia_rit, Named("rir") = tia_rir, 
+			Named("n_persons") = tia_n));
 }
 
 

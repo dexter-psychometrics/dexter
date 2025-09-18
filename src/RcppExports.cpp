@@ -354,7 +354,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // tia_C
-DataFrame tia_C(const IntegerVector& booklet_id, const IntegerVector& booklet_score, const IntegerVector& item_id, const IntegerVector& item_score, const int nb, const int nit, const IntegerVector& frst_item, const IntegerVector& ds_booklet_id, const IntegerVector& ds_item_id);
+List tia_C(const IntegerVector& booklet_id, const IntegerVector& booklet_score, const IntegerVector& item_id, const IntegerVector& item_score, const int nb, const int nit, const IntegerVector& frst_item, const IntegerVector& ds_booklet_id, const IntegerVector& ds_item_id);
 RcppExport SEXP _dexter_tia_C(SEXP booklet_idSEXP, SEXP booklet_scoreSEXP, SEXP item_idSEXP, SEXP item_scoreSEXP, SEXP nbSEXP, SEXP nitSEXP, SEXP frst_itemSEXP, SEXP ds_booklet_idSEXP, SEXP ds_item_idSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

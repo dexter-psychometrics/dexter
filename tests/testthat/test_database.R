@@ -123,6 +123,7 @@ test_that('adding person and item properties',
   
   expect_error({add_person_properties(db,tibble(a=1,b=2))},'person_id')
   
+
   expect_error({add_person_properties(db,tibble(person_id=1,a=1,b=2))},'already in use')
   
   # person "1" does not exist

@@ -18,7 +18,9 @@
 #' default is to use both a space and a 9 as missing characters.
 #' @param use_discrim if TRUE, the scores for the responses will be multiplied by the
 #' discrimination parameters of the items
-#' @param format not used, at the moment only the compressed format is supported.
+#' @param skip_invalid_booklets whether to skip linesthat have a booklet number that is not listed in the .scr file. This supports 
+#' an extremely poor but unfortunately common practice of excludign students by chaning their booklets ids or inserting random 
+#' comments in the data file. If TRUE such lines will be skipped, if FALSE they will generate an error
 #' @return a database connection object.
 #' 
 #' @details
@@ -46,11 +48,9 @@
 start_new_project_from_oplm = function(dbname, scr_path, dat_path, 
                                        booklet_position = NULL, responses_start = NULL, response_length = 1, 
                                        person_id = NULL, missing_character = c(' ','9'), use_discrim=FALSE,
-                                       format='compressed')
+                                       skip_invalid_booklets = FALSE)
 {
-  if(format != 'compressed') stop(paste('Only compressed format is supported at this time', 
-                                        'use the inexpand tool from oplm to compress your data'))
-  
+
   check_file(scr_path)
   check_file(dat_path)
   
@@ -143,36 +143,48 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
         break
       }
       cat('\rreading lines:', vp, '-', as.integer(vp + length(lines)-1))
-      bkl = as.integer(substr(lines, booklet_position[1], booklet_position[2]))
+      bkl = suppressWarnings({as.integer(substr(lines, booklet_position[1], booklet_position[2]))})
       
-      if(anyNA(bkl))
+      if(skip_invalid_booklets )
       {
-        cat('\n')
-        stop_(paste0("empty booklet id's at position (", paste0(booklet_position, collapse=', ' ),")"))
-      } else if(min(bkl) < 1 || max(bkl) > scr$nBook)
+        skip = is.na(bkl) | coalesce(bkl,0L) > scr$nBook
+        lines = lines[!skip]
+        bkl = bkl[!skip]
+      } else
       {
-        cat('\n')
-        stop_(format_plural("The following booklet_id['s] in data [is/are] not present in the .scr file:\n%s", setdiff(bkl, 1:scr$nBook)))
+        if(anyNA(bkl))
+        {
+          cat('\n')
+          stop_(paste0("empty booklet id's at position (", paste0(booklet_position, collapse=', ' ),")"))
+        } else if(min(bkl) < 1 || max(bkl) > scr$nBook)
+        {
+          cat('\n')
+          stop_(format_plural("The following booklet_id['s] in data [is/are] not present in the .scr file:\n%s", setdiff(bkl, 1:scr$nBook)))
+        }
       }
       
-      
-      rsp = rsplit(substring(lines, 
-                        responses_start, 
-                        responses_start + scr$nitBook[bkl] * response_length-1))
-      
-      if(any(sapply(rsp,length) < scr$nitBook[bkl]))
+      if(scr$expanded==0)
       {
-        lnbr = which(sapply(rsp,length) < scr$nitBook[bkl])
-        short_line = c(short_line, lnbr + vp - 1)
-        sapply(scr$nitBook[bkl[lnbr]] - sapply(rsp[lnbr], length), rep, x = ' ')
+        rsp = rsplit(substring(lines, 
+                          responses_start, 
+                          responses_start + scr$nitBook[bkl] * response_length-1))
         
-        rsp[lnbr] = mapply(c, 
-                           rsp[lnbr],  
-                           lapply(scr$nitBook[bkl[lnbr]] - sapply(rsp[lnbr], length), rep, x = ' '),
-                           SIMPLIFY = FALSE)
-        
-      }
-      
+        if(any(sapply(rsp,length) < scr$nitBook[bkl]))
+        {
+          lnbr = which(sapply(rsp,length) < scr$nitBook[bkl])
+          short_line = c(short_line, lnbr + vp - 1)
+          sapply(scr$nitBook[bkl[lnbr]] - sapply(rsp[lnbr], length), rep, x = ' ')
+          
+          rsp[lnbr] = mapply(c, 
+                             rsp[lnbr],  
+                             lapply(scr$nitBook[bkl[lnbr]] - sapply(rsp[lnbr], length), rep, x = ' '),
+                             SIMPLIFY = FALSE)
+        }
+      } else
+      {
+        rsp = rsplit(substring(lines, responses_start, responses_start + scr$nit-1L))
+        rsp = mapply(rsp,bkl,SIMPLIFY = FALSE, FUN=\(r,bk) r[scr$itemsBook[[bk]]])
+      } 
 
       bkl=as.character(bkl)
       

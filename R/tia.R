@@ -13,7 +13,8 @@
 #' correlations with the sum score (rit), and correlations with the rest score (rit) are 
 #' shown in separate tables and compared across booklets
 #' @param max_scores use the observed maximum item score or the theoretical maximum item score 
-#' according to the scoring rules in the database to determine pvalues and maximum scores
+#' according to the scoring rules in the database to determine pvalues and maximum scores for items and booklets
+#' @param omit_item_novar omit items without score variance from the computation of booklet statistics (they will still be included in the item statistics)
 #' @param distractor add a tia for distractors, only useful for selected response (MC) items
 #' @return A list containing:
 #' \item{booklets}{a data.frame of statistics at booklet level} 
@@ -22,7 +23,7 @@
 #' rvalue (pvalue for response) and rar (rest-alternative correlation)}
 #'
 tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compared'),
-                      max_scores = c('observed','theoretical'), distractor=FALSE) 
+                      max_scores = c('observed','theoretical'), distractor=FALSE, omit_item_novar = TRUE) 
 {
   type = match.arg(type)
   max_scores = match.arg(max_scores)
@@ -37,7 +38,8 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
   
   df_info = get_datatype_info(dataSrc, columns = c('booklet_id','item_id','response'))
   
-  items = get_sufStats_tia(respData) 
+  suf_tia = get_sufStats_tia(respData)
+  items =  suf_tia$items
   
   if(max_scores=='theoretical' && is_db(dataSrc))
   {
@@ -50,23 +52,28 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
 
   items$pvalue = coalesce(items$mean_score / items$max_score, 0)
   
-  if(anyNA(items$rit))
-    warning("Items without score variation have been removed from the test statistics")
+  if(omit_item_novar && anyNA(items$rit))
+    message("Items without score variation have been removed from the test statistics")
+  
   
   out$booklets = items |>
-    filter(complete.cases(.data$rit)) |>
+    mutate(incl = !is.na(.data$rit)) |>
+    filter(!omit_item_novar | .data$incl) |>
     group_by(.data$booklet_id) |> 
     summarise(n_items=n(),
-              alpha=.data$n_items/(.data$n_items-1)*(1-sum(.data$sd_score^2) / sum(.data$rit * .data$sd_score)^2 ),
-              mean_pvalue = mean(.data$pvalue),
-              mean_rit = mean(.data$rit),
-              mean_rir = mean(.data$rir),
-              max_booklet_score = sum(.data$max_score),
-              n_persons = max(.data$n_persons)) |>
+      nit_incl = sum(.data$incl),
+      alpha=(.data$nit_incl/(.data$nit_incl-1))*(1-sum(.data$sd_score[.data$incl]^2) / sum(.data$rit[.data$incl] * .data$sd_score[.data$incl])^2 ),
+      mean_pvalue = mean(.data$pvalue),
+      mean_rit = mean(.data$rit,na.rm=TRUE),
+      mean_rir = mean(.data$rir,na.rm=TRUE),
+      max_booklet_score = sum(.data$max_score)) |>
     ungroup() |>
+    inner_join(suf_tia$booklets,by='booklet_id') |>
+    select('booklet_id','n_items','alpha','mean_pvalue','mean_rit','mean_rir',
+      'mean_booklet_score','sd_booklet_score','max_booklet_score','n_persons') |>
     df_format(df_info)
   
-  
+
   # for presentation purposes, the sd of the item score should be divided by n-1
   # since that is the default in R.
   # Note that this happens AFTER alpha is computed and BEFORE any sd's are grouped over booklets
