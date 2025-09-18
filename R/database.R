@@ -121,7 +121,7 @@ dbValid_colnames = function(vec)
    gsub('^(?=\\d)','c',gsub('[^0-9a-z_]','_',tolower(vec)), perl=TRUE)
 }
 
-dbTransaction = function(db, expr, on_error = stop, on_error_rollback=TRUE)
+dbTransaction = function(db, expr, on_error = sql_stop_, on_error_rollback=TRUE)
 {
   if(is(db, 'SQLiteConnection')) dbExecute(db,'pragma foreign_keys=1;')
   dbBegin(db)
@@ -129,6 +129,16 @@ dbTransaction = function(db, expr, on_error = stop, on_error_rollback=TRUE)
   tryCatch(dbCommit(db), error=function(e){if(on_error_rollback) dbRollback(db); on_error(e);}, finally=NULL)
 }
 
+sql_stop_ = function(e)
+{
+  msg = trimws(as.character(e))
+  if(grepl('NOT NULL constraint failed',msg,fixed=TRUE))
+  {
+    colname = regmatches(msg,regexpr('[^.]+$',msg))
+    stop_(sprintf('`%s` may not be <NA>',colname))
+  }
+  stop_(e)
+}
 
 #to~do: for some reason data insertion in porstgres responses is extremely slow
 

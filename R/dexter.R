@@ -124,7 +124,7 @@ start_new_project = function(rules, db_name="dexter.db", person_properties = NUL
                           VALUES(:item_id, :response, :item_score);', 
 				        rules)
   },
-  on_error = function(e){dbDisconnect(db);stop(e)})
+  on_error = function(e){dbDisconnect(db);sql_stop_(e)})
 
   db
 }
