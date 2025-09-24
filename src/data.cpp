@@ -1143,7 +1143,7 @@ IntegerVector score_tab_single(const IntegerVector& scores, const int max_score)
 }
 
 
-// about 10-30 times faster than R (to~do: check for severly incomplete designs)
+// about 10-30 times faster than R
 
 // [[Rcpp::export]]
 List tia_C(const IntegerVector& booklet_id, const IntegerVector& booklet_score, const IntegerVector& item_id, const IntegerVector& item_score, const int nb, const int nit, 

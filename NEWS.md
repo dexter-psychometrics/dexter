@@ -7,7 +7,7 @@
 
 * `tia_tables` gets mean_booklet_score and sd_booklet_score in booklet output. 
 
-* `tia_tables` gains an optional argument whether to omit items withou score variation from the computation of booklet statistics 
+* `tia_tables` gains an optional argument `omit_item_novar` whether to omit items without score variation from the computation of booklet statistics 
 
 # dexter 1.6.2
 

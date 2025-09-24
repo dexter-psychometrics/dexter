@@ -30,7 +30,7 @@ Imports:
     methods,
     utils
 LinkingTo: Rcpp, RcppArmadillo (>= 0.12.6.6.0), dqrng, BH, sitmo
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Suggests:
     knitr,
     rmarkdown,
