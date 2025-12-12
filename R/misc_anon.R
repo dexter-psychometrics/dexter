@@ -270,6 +270,7 @@ weighted_quantile = function(x,w,probs)
 # variance of total sample by combining group variances
 combined_var = function(means,vars,n)
 {
+  vars[!is.finite(vars)] = 0
   if(length(vars)<=1L)
     return(vars)
   q = (n-1)*vars + n*means^2

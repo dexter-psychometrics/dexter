@@ -39,7 +39,7 @@ Estimates correlations between latent traits using plausible values as described
 An item_property is used to distinguish the different scales.
 }
 \details{
-To compute latente correlations, a model is estimated for each subscale. If a design for any subscale is not connected this will result in an error.  
+To compute latent correlations, a model is estimated for each subscale. If a design for any subscale is not connected this will result in an error.  
 
 Latent correlations are generated using a Bayesian approach. `Use` is `"pairwise.complete.obs"` works slightly different from 
 `cor` since complete matrices are imputed. Therefore individual correlation matrices in the mcmc sample are positive semi-definite even with the pairwise option 

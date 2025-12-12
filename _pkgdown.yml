@@ -6,6 +6,8 @@ template:
 home:
   strip_header: true
 
+llm-docs: false
+
 reference:
   - title: Database
     desc: >
