@@ -112,7 +112,7 @@ Dexter</h1>
                         <h4 data-toc-skip class="author">Timo
 Bechger</h4>
             
-            <h4 data-toc-skip class="date">2025-09-18</h4>
+            <h4 data-toc-skip class="date">2025-12-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/DIF_vignette.Rmd" class="external-link"><code>vignettes/DIF_vignette.Rmd</code></a></small>
       <div class="hidden name"><code>DIF_vignette.Rmd</code></div>
@@ -152,7 +152,7 @@ positions of the item categories in the two groups.</p>
 <h2 id="exploring-dif">Exploring DIF<a class="anchor" aria-label="anchor" href="#exploring-dif"></a>
 </h2>
 <p>Consider a plot of the ability scale in each of the two groups.
-<img src="DIF_vignette_files/figure-html/abscale-1.png" width="768" style="display: block; margin: auto;"></p>
+<img src="DIF_vignette_files/figure-html/abscale-1.png" class="r-plt" width="768" style="display: block; margin: auto;"></p>
 <p>The plot show the ability scale in each group and the location of the
 score categories of three of the items indicated by their labels. The
 ability scale is drawn without numbers because the origin is arbitrary
@@ -165,7 +165,7 @@ differences we see are due to chance. The simplest way to do this is to
 plot the output of the DIF function.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dif_gender</span><span class="op">)</span></span></code></pre></div>
-<p><img src="DIF_vignette_files/figure-html/plotdif-1.png" width="576" style="display: block; margin: auto;"></p>
+<p><img src="DIF_vignette_files/figure-html/plotdif-1.png" class="r-plt" width="576" style="display: block; margin: auto;"></p>
 <p>This produces an image plot of a matrix of differences between groups
 of the relative positions of each pair of item categories. The entries
 are standardized and can be interpreted as normally distributed test
@@ -192,7 +192,7 @@ interpretable. For example, we can sort on ‘want’ versus ‘do’:</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">mode</span>, <span class="va">item_id</span><span class="op">)</span></span>
 <span>  </span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dif_gender</span>, items<span class="op">=</span><span class="va">items</span><span class="op">$</span><span class="va">item_id</span><span class="op">)</span></span></code></pre></div>
-<p><img src="DIF_vignette_files/figure-html/sorting-1.png" width="576" style="display: block; margin: auto;"></p>
+<p><img src="DIF_vignette_files/figure-html/sorting-1.png" class="r-plt" width="576" style="display: block; margin: auto;"></p>
 <p>Now, we see that the DO-items among themselves keep their relative
 positions in the two groups.</p>
 </div>
@@ -224,7 +224,7 @@ Differential Item Pair Functioning.”</span> <em>Psychometrika</em> 80
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
       </footer>
