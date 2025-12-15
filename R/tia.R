@@ -14,7 +14,8 @@
 #' shown in separate tables and compared across booklets
 #' @param max_scores use the observed maximum item score or the theoretical maximum item score 
 #' according to the scoring rules in the database to determine pvalues and maximum scores for items and booklets
-#' @param omit_item_novar omit items without score variance from the computation of booklet statistics (they will still be included in the item statistics)
+#' @param omit_item_novar completely omit items without score variance from the computation of booklet statistics 
+#' (they will still be included in the item statistics)
 #' @param distractor add a tia for distractors, only useful for selected response (MC) items
 #' @return A list containing:
 #' \item{booklets}{a data.frame of statistics at booklet level} 
@@ -74,11 +75,11 @@ tia_tables = function(dataSrc, predicate = NULL, type=c('raw','averaged','compar
     df_format(df_info)
   
 
-  # for presentation purposes, the sd of the item score should be divided by n-1
+  # the sd of the item score should be divided by n-1
   # since that is the default in R.
   # Note that this happens AFTER alpha is computed and BEFORE any sd's are grouped over booklets
-  
-  items$sd_score = sqrt(items$n_persons/(items$n_persons-1)) * items$sd_score
+  w = which(items$sd_score>0)
+  items$sd_score[w] = sqrt(items$n_persons[w]/(items$n_persons[w]-1)) * items$sd_score[w]
   
   # different views of item statistics
   if(type=='raw')

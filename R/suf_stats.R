@@ -254,7 +254,7 @@ get_sufStats_im = function(respData, check_sanity=TRUE)
 #   mutate(maxScore = max(.data$maxScore)) |>
 #   ungroup() 
 
-
+# slight difference: this returns sample standard deviations, not pop like R does
 
 get_sufStats_tia = function(respData)
 {
@@ -277,6 +277,11 @@ get_sufStats_tia = function(respData)
   
   class(res$booklets$booklet_id) = 'factor'
   levels(res$booklets$booklet_id) = levels(res$items$booklet_id)
+  # these cna become NaN as well as NA
+  res$items$rit[!is.finite(res$items$rit)] = NA_real_
+  res$items$rir[!is.finite(res$items$rir)] = NA_real_
+  res$booklets$sd_booklet_score[!is.finite(res$booklets$sd_booklet_score)] = 0
+  
   res
   
 }

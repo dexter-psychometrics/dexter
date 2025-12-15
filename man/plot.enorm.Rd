@@ -73,7 +73,7 @@ plot(f, item_id="S1DoShout")
 # (it is also possible to show two lines in the same plot 
 # by specifying add=TRUE as an argument in the second plot)
 
-par(mfrow=c(1,2))
+oldpar = par(mfrow=c(1,2))
 
 plot(f,item_id="S1WantCurse",dataSrc=db, predicate = gender=='Male', 
   main='men - $item_id')
@@ -81,6 +81,7 @@ plot(f,item_id="S1WantCurse",dataSrc=db, predicate = gender=='Male',
 plot(f,items="S1WantCurse",dataSrc=db, predicate = gender=='Female', 
   main='women - $item_id')
 
+par(oldpar)
 close_project(db)
 \dontshow{ RcppArmadillo::armadillo_reset_cores()}
 

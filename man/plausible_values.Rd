@@ -68,7 +68,7 @@ f=fit_enorm(db)
 pv_M=plausible_values(db,f,(mode=="Do")&(gender=="Male"))
 pv_F=plausible_values(db,f,(mode=="Do")&(gender=="Female"))
 
-par(mfrow=c(1,2))
+oldpar = par(mfrow=c(1,2))
 
 plot(ecdf(pv_M$PV1), 
    main="Do: males versus females", xlab="Ability", col="red")
@@ -85,7 +85,7 @@ lines(ecdf(pv_F$PV1),col="green")
 legend(-2.2,0.9, c("female", "male") , 
    lty=1, col=c('green', 'red'), bty='n', cex=.75)
    
-   
+par(oldpar)    
 close_project(db)    
 
 \dontshow{ RcppArmadillo::armadillo_reset_cores()}

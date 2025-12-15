@@ -82,8 +82,8 @@ ifun = information(p, booklet="agg")
 
 pv = plausible_values(db,p)
 
-op = par(no.readonly=TRUE)
-par(mar = c(5,4,2,4))
+
+oldpar = par(mar = c(5,4,2,4))
 
 plot(ifun,from=-4,to=4, xlab='theta', ylab='test information')
 
@@ -93,7 +93,7 @@ plot(density(pv$PV1), col='green', axes=FALSE, xlab=NA, ylab=NA, main=NA)
 axis(side=4)
 mtext(side = 4, line = 2.5, 'population density (green)')
 
-par(op)
+par(oldpar)
 close_project(db)
 
 \dontshow{ RcppArmadillo::armadillo_reset_cores()}

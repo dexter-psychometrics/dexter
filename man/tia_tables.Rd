@@ -29,7 +29,8 @@ according to the scoring rules in the database to determine pvalues and maximum 
 
 \item{distractor}{add a tia for distractors, only useful for selected response (MC) items}
 
-\item{omit_item_novar}{omit items without score variance from the computation of booklet statistics (they will still be included in the item statistics)}
+\item{omit_item_novar}{completely omit items without score variance from the computation of booklet statistics 
+(they will still be included in the item statistics)}
 }
 \value{
 A list containing:
