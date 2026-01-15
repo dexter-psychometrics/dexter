@@ -119,7 +119,9 @@ item_property must match a known item property. If dataSrc is a data.frame, item
 
 
 <dt id="arg-design">design<a class="anchor" aria-label="anchor" href="#arg-design"></a></dt>
-<dd><p>data.frame with columns item_id and optionally booklet_id</p></dd>
+<dd><p>data.frame with columns item_id and booklet_id. You can use this to make profile_tables for any design.
+If <code>NULL</code>, profile_tables will use the design used to estimate <code>parms</code> if <code>parms</code> is an 'enorm' object,
+otherwise it will assume a single booklet containing all items in <code>parms</code></p></dd>
 
 
 <dt id="arg-datasrc">dataSrc<a class="anchor" aria-label="anchor" href="#arg-datasrc"></a></dt>
@@ -151,12 +153,12 @@ an arbitrarily named column containing an item property and optionally booklet_i
     <div id="details">
     <h2>Details</h2>
     <p>When using a unidimensional IRT Model like the extended nominal response model in
-dexter (see: <code><a href="fit_enorm.html">fit_enorm</a></code>), the model is as a rule to simple to catch all the relevant dimensions in a test.
+dexter (see: <code><a href="fit_enorm.html">fit_enorm</a></code>), the model is typically too simple to catch all the relevant dimensions in a test.
 Nevertheless, a simple model is quite useful in practice. Profile analysis can complement the model
-in this case by indicating how a test-taker, conditional on her/his test score,
+in this case by indicating how a test-taker, conditional on their test score,
 performs on a number of pre-specified domains, e.g. in case of a mathematics test
 the domains could be numbers, algebra and geometry or in case of a digital test the domains could be animated versus
- non-animated items. This can be done by comparing the achieved score on a domain with the expected score, given the test score.</p>
+ non-animated items. This can be done by comparing the achieved score on a domain with the expected domain score, given the test score.</p>
     </div>
     <div id="references">
     <h2>References</h2>

@@ -111,7 +111,7 @@
                         <h4 data-toc-skip class="author">Timo Bechger,
 Jesse Koops and Ivailo Partchev</h4>
             
-            <h4 data-toc-skip class="date">2025-12-15</h4>
+            <h4 data-toc-skip class="date">2026-01-15</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/Equating.Rmd" class="external-link"><code>vignettes/Equating.Rmd</code></a></small>
       <div class="hidden name"><code>Equating.Rmd</code></div>
@@ -203,7 +203,7 @@ resulting from all possible choices of such a threshold. The optimal
 choice would then be the one corresponding to the point on the curve
 that comes closest to the upper left corner (perfect prediction). An
 example ROC curve is shown on the left hand plot below.</p>
-<p><img src="Equating_files/figure-html/unnamed-chunk-1-1.png" class="r-plt" width="700"><img src="Equating_files/figure-html/unnamed-chunk-1-2.png" class="r-plt" width="700"></p>
+<p><img src="Equating_files/figure-html/unnamed-chunk-1-1.png" class="r-plt" alt="" width="700"><img src="Equating_files/figure-html/unnamed-chunk-1-2.png" class="r-plt" alt="" width="700"></p>
 <p>Before we explain in more detail, let us go back to our educational
 example. Let us assume for a moment that all students have taken both
 the old (reference) test and the new (target) test, and that the
@@ -254,7 +254,7 @@ for verbal aggressiveness.</p>
 <span>  ylab<span class="op">=</span> <span class="st">'reftest score'</span>, xlab <span class="op">=</span> <span class="st">'target test score'</span>,bty<span class="op">=</span><span class="st">'l'</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span>h<span class="op">=</span><span class="fl">10</span>, col<span class="op">=</span><span class="st">'green'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Equating_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" width="480" style="display: block; margin: auto;"></p>
+<p><img src="Equating_files/figure-html/unnamed-chunk-2-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
 <p>The proportion of respondents who pass the reference test gradually
 increases with the score on the new test; below, it is plotted in
 red:</p>
@@ -270,7 +270,7 @@ red:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">28</span>, <span class="va">prob_pass</span>, ylab<span class="op">=</span><span class="st">"Proportion passing the reference test"</span>, xlab<span class="op">=</span><span class="st">"New test score"</span>, </span>
 <span>     ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"o"</span>, col<span class="op">=</span><span class="st">"red"</span>,bty<span class="op">=</span><span class="st">'l'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">28</span>, <span class="va">tp</span>, type<span class="op">=</span><span class="st">"o"</span>, lty<span class="op">=</span><span class="fl">2</span>, col<span class="op">=</span><span class="st">"blue"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Equating_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" width="480" style="display: block; margin: auto;"></p>
+<p><img src="Equating_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
 <p>The blue dashed line is the percentage of true positives. Among other
 things, it shows that if the new pass-fail score is zero and everybody
 passes, about 15 percent will be qualified. If this is high enough we
@@ -290,7 +290,7 @@ test for each pass-fail score:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">28</span>, <span class="va">sensitivity</span>, ylab<span class="op">=</span><span class="st">"sensitivity/specificity"</span>, xlab<span class="op">=</span><span class="st">"new test score"</span>, </span>
 <span>     ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"o"</span>, col<span class="op">=</span><span class="st">"red"</span>,bty<span class="op">=</span><span class="st">'l'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">28</span>, <span class="va">specificity</span>, col<span class="op">=</span><span class="st">"green"</span>, type<span class="op">=</span><span class="st">"o"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Equating_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" width="480" style="display: block; margin: auto;"></p>
+<p><img src="Equating_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
 <p>If sensitivity and specificity are deemed equally important, the plot
 suggests 14 or 15 as appropriate pass-fail scores. Higher values would
 make the specificity go up (i.e., less false positives) at the expense
@@ -303,7 +303,7 @@ the trade-off between sensitivity and specificity with an ROC curve:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fl">1</span><span class="op">-</span><span class="va">specificity</span>, <span class="va">sensitivity</span>, col<span class="op">=</span><span class="st">"green"</span>, xlim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, ylim<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span><span class="op">)</span>, type<span class="op">=</span><span class="st">"l"</span>,bty<span class="op">=</span><span class="st">'l'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/text.html" class="external-link">text</a></span><span class="op">(</span><span class="fl">1</span><span class="op">-</span><span class="va">specificity</span>, <span class="va">sensitivity</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">:</span><span class="fl">28</span><span class="op">)</span>, cex<span class="op">=</span><span class="fl">0.7</span>, offset <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/abline.html" class="external-link">abline</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">1</span>,lty<span class="op">=</span><span class="fl">2</span>, col<span class="op">=</span><span class="st">"grey"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Equating_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" width="480" style="display: block; margin: auto;"></p>
+<p><img src="Equating_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="480" style="display: block; margin: auto;"></p>
 <p>Other packages and functions may produce prettier plots — but can
 they do it without complete data?</p>
 </div>
@@ -350,7 +350,7 @@ persons who pass the reference test. We show this as a plot.</p>
 <span>                         ref_items <span class="op">=</span> <span class="va">ref_items</span>, pass_fail <span class="op">=</span> <span class="fl">23</span>,</span>
 <span>                         target_booklets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>item_id<span class="op">=</span><span class="va">target_items</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pp</span>, what<span class="op">=</span><span class="st">"equating"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Equating_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" width="384" style="display: block; margin: auto;"></p>
+<p><img src="Equating_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="384" style="display: block; margin: auto;"></p>
 <p>Let the scores on the reference and new test be written,
 respectively, as
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>R</mi><mo>+</mo></msub><annotation encoding="application/x-tex">R_+</annotation></semantics></math>
@@ -389,7 +389,7 @@ we can calculate sensitivity and specificity and plot them for each
 possible pass-fail score on the target test:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pp</span>, what<span class="op">=</span><span class="st">'sens/spec'</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Equating_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" width="384" style="display: block; margin: auto;"></p>
+<p><img src="Equating_files/figure-html/unnamed-chunk-9-1.png" class="r-plt" alt="" width="384" style="display: block; margin: auto;"></p>
 <p>If sensitivity and specificity are equally important, the plot
 suggests 22 as a pass-fail score on the new test.</p>
 </div>
