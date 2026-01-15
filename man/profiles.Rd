@@ -24,7 +24,9 @@ profiles(
 item_property must match a known item property. If dataSrc is a data.frame, item_property must be equal to
  one of its column names. For profile_tables item_property must match a column name in \code{domains}.}
 
-\item{design}{data.frame with columns item_id and optionally booklet_id}
+\item{design}{data.frame with columns item_id and booklet_id. You can use this to make profile_tables for any design. 
+If \code{NULL}, profile_tables will use the design used to estimate \code{parms} if \code{parms} is an 'enorm' object, 
+otherwise it will assume a single booklet containing all items in \code{parms}}
 
 \item{dataSrc}{a connection to a dexter database or a data.frame with columns: person_id, item_id, item_score, 
 an arbitrarily named column containing an item property and optionally booklet_id}
@@ -47,12 +49,12 @@ Domains are specified as categories of items using item_properties.
 }
 \details{
 When using a unidimensional IRT Model like the extended nominal response model in 
-dexter (see: \code{\link{fit_enorm}}), the model is as a rule to simple to catch all the relevant dimensions in a test.
+dexter (see: \code{\link{fit_enorm}}), the model is typically too simple to catch all the relevant dimensions in a test.
 Nevertheless, a simple model is quite useful in practice. Profile analysis can complement the model
-in this case by indicating how a test-taker, conditional on her/his test score, 
+in this case by indicating how a test-taker, conditional on their test score, 
 performs on a number of pre-specified domains, e.g. in case of a mathematics test 
 the domains could be numbers, algebra and geometry or in case of a digital test the domains could be animated versus
- non-animated items. This can be done by comparing the achieved score on a domain with the expected score, given the test score.
+ non-animated items. This can be done by comparing the achieved score on a domain with the expected domain score, given the test score.
 }
 \references{
 Verhelst, N. D. (2012). Profile analysis: a closer look at the PISA 2000 reading data. 
