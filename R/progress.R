@@ -17,6 +17,7 @@ get_prog_bar = function(nsteps=NULL, retrieve_data=FALSE, prog_show = show_progr
 {
   caller = paste(as.character(sys.call(-1)[[1]]),collapse='_')
   type = match.arg(type)
+  
   if(is.null(global_prog$bar))
   {
     global_prog$bar = progress_bar(nsteps=nsteps, retrieve_data=retrieve_data,
@@ -42,7 +43,7 @@ progress_bar = setRefClass('prog_bar',
       {
         areas <<- areas[1]
         fill()
-        options(dplyr.show_progress = dplyr_prog)
+        options(dplyr.show_progress = if(length(dplyr_prog)==0) NULL else dplyr_prog)
         if(pshow) cat('\n')
         global_prog$bar = NULL
       } else if(!locked)
@@ -59,7 +60,8 @@ progress_bar = setRefClass('prog_bar',
                           retrieve_data=FALSE, prog_show = show_progress(), lock=FALSE)
     {
       pshow <<- prog_show
-      dplyr_prog <<- as.logical(options(dplyr.show_progress=FALSE))
+      dplyr_prog <<- as.logical(getOption('dplyr.show_progress'))
+      options(dplyr.show_progress = FALSE)
       data_step <<- as.logical(retrieve_data)
       locked <<- as.logical(lock)
       pcaller <<- as.character(caller)
@@ -67,6 +69,7 @@ progress_bar = setRefClass('prog_bar',
       determinate <<- match.arg(type) == 'determinate'
       areas <<-list()
       areas[[1]] <<- list(nsteps=nsteps, step=0L, caller=caller)
+
 
       if(pshow)
       {
