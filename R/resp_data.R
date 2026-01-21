@@ -694,6 +694,8 @@ intersection_rd = function(respData)
     respData$x$booklet_id = 1L
     class(respData$x$booklet_id) = "factor"
     attr(respData$x$booklet_id, 'levels') = "intersection"
+    respData$design$item_id = droplevels(respData$design$item_id)
+    respData$x$item_id = factor(respData$x$item_id , levels=levels(respData$design$item_id))
     
     respData$x$booklet_score = mutate_booklet_score(respData$x$person_id, respData$x$booklet_id, respData$x$item_score)
   }

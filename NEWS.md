@@ -1,3 +1,6 @@
+# dexter 1.7.1
+
+* updated for new dplyr version, no other changes
 
 # dexter 1.7
 
