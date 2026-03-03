@@ -209,11 +209,11 @@ get_sufStats_im = function(respData, check_sanity=TRUE)
   
   if(check_sanity)
   {
-    if(any(sufs$ssI$nCat<1))
+    if(any(sufs$ssI$nCat==0))
     {
       message('The following items have no score variation:')
       sufs$ssI |>
-        filter(.data$nCat<2) |>
+        filter(.data$nCat==0) |>
         pull(.data$item_id) |>
         as.character() |>
         print()

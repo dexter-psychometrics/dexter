@@ -301,6 +301,9 @@ pp_segments = function(maxA, maxB, psbl, col='lightgray',cex=0.6)
 
 #' Profile plot
 #'
+#' Compare how subgroups attain a test score with respect to an item property. 
+#' \strong{Note}: this function works for complete data (i.e. a single booklet/test form). If incomplete data is supplied, it will attempt to 
+#' make a profile plot only for those items that were administered to all respondents. 
 #'
 #' @param dataSrc a connection to a dexter database or a data.frame with columns: 
 #' person_id, item_id, item_score and the item_property and the covariate of interest.

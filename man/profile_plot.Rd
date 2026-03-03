@@ -41,7 +41,9 @@ the data better or at least as good as the Rasch model.}
 \item{...}{further graphical arguments to plot. Graphical parameters for the legend can be postfixed with \code{.legend}}
 }
 \description{
-Profile plot
+Compare how subgroups attain a test score with respect to an item property. 
+\strong{Note}: this function works for complete data (i.e. a single booklet/test form). If incomplete data is supplied, it will attempt to 
+make a profile plot only for those items that were administered to all respondents.
 }
 \details{
 Profile plots can be used to investigate whether typically two, but possibly more, groups of respondents 

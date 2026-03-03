@@ -1,4 +1,4 @@
-# dexter 1.7.1
+# dexter 1.7.2
 
 * updated for new dplyr version, no other changes
 
