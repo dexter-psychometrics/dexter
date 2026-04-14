@@ -70,17 +70,18 @@ public:
 		atm_interrupted = false;
 	}
 	
-	// NEVER call checkInterrupt outside of the main thread
-	void checkInterrupt() 
-	{
-		if(R_ToplevelExec(chkIntFn, NULL) == 0)	atm_interrupted = true; // the if is necessary
-	}
-	
 	bool interrupted()
 	{
 		return atm_interrupted.load();
 	}
 	
+	// NEVER call checkInterrupt outside of the main thread
+	void checkInterrupt() 
+	{
+		if(!interrupted()) // checking two times may cause crash?
+			if(R_ToplevelExec(chkIntFn, NULL) == 0)	atm_interrupted = true; // the if is necessary
+	}
+		
 	void tick(const bool main_thread, const int nticks = 1)
 	{
 		atm_tick += nticks;

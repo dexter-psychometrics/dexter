@@ -173,6 +173,16 @@ pscore = function(theta, b, a, first, last)
   exp(sweep(p,2,apply(p,2,logsumexp),`-`))
 }
 
+# lg: log elsym
+pscore_lgamma = function(theta, lg)
+{
+  score = 0:(length(lg)-1)
+  p = sapply(theta, function(tht) lg + score*tht)
+  
+  exp(sweep(p,2,apply(p,2,logsumexp),`-`))
+}
+
+
 
 rscore_item = function(theta,b,a,first,last)
 {

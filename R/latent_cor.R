@@ -12,7 +12,6 @@
 #'  one of its column names.
 #' @param predicate An optional expression to subset data, if NULL all data is used
 #' @param nDraws Number of draws for plausible values
-#' @param hpd deprecated, use the `coef` method to set the highest posterior density interval.
 #' @param use complete.obs uses only persons with answers on all domains. Pairwise.complete.obs uses all cases 
 #' for which there are responses in at least two domains.
 #' @return `latent_cor` object, which is a list containing an estimated (mean) correlation matrix, the corresponding standard deviations, 
@@ -30,21 +29,18 @@
 #' Marsman, M., Bechger, T. M., & Maris, G. K. (2022). Composition algorithms for conditional distributions. 
 #' In Essays on Contemporary Psychometrics (pp. 219-250). Cham: Springer International Publishing.
 #' 
-latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.95, use=c("complete.obs","pairwise.complete.obs"))
+latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, use=c("complete.obs","pairwise.complete.obs"))
 {
   
   check_dataSrc(dataSrc, matrix_ok=FALSE)
   check_num(nDraws, 'integer', .length=1, .min=1)
-  check_num(hpd,  .length=1, .min=1/nDraws,.max=1)
+
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
   
   use = match.arg(use)
-  if(!missing(hpd))
-    cl_msg('Argument `hpd` is deprecated, use %s to set a confidence envelope for the highest posterior density interval.', 
-      'coef.latent_cor', mod = 'message')
 
-
+  
   pb = get_prog_bar(nDraws, retrieve_data = is_db(dataSrc), lock=TRUE)
   on.exit({pb$close()})
   
@@ -55,7 +51,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   
   # merge_within_persons might also be user set. But TRUE will be the most useful in nearly all cases
   respData = get_resp_data(dataSrc, qtpredicate, env=env, extra_columns=item_property,
-    merge_within_persons=TRUE)
+                           merge_within_persons=TRUE)
   
   respData$x[[item_property]] = ffactor(as.character(respData$x[[item_property]]))
   ndomains = nlevels(respData$x[[item_property]])
@@ -72,12 +68,12 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
     filter(.data$n >= if(use=="complete.obs") ndomains else 2L) |>
     mutate(new_person_id = dense_rank(.data$person_id)) |>
     select('person_id','new_person_id')
-
+  
   np = nrow(persons)
   if(np == 0)
-      stop_("There are no persons that have scores for every subscale.")
-
-
+    stop_("There are no persons that have scores for every subscale.")
+  
+  
   respData = lapply(split(respData$x, respData$x[[item_property]]), get_resp_data)
   
   models = lapply(respData, function(x){try(fit_enorm(x), silent=TRUE)})
@@ -88,7 +84,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
     message('\nThe model could not be estimated for one or more item properties, reasons:')
     models[!sapply(models,inherits,what='try-error')] = 'OK'
     print(data.frame(item_property=names(models), 
-      result=gsub('^.+try\\(\\{ *:','',trimws(as.character(models)))))
+                     result=gsub('^.+try\\(\\{ *:','',trimws(as.character(models)))))
     stop_('Some models could not be estimated')
   }
   
@@ -139,7 +135,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   # make everything simple and zero indexed
   
   models = lapply(models, simplify_parms)
-
+  
   for(dom in 1:ndomains)
   {
     respData[[dom]]$x$booklet_id = as.integer(respData[[dom]]$x$booklet_id) - 1L
@@ -150,13 +146,12 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   
   mcmc = array(0, dim = c(length(which.keep), ndomains, ndomains))
   tel = 1
-  missing_data = if(use=='complete.obs') NULL else apply(pv,2,is.na) + 0L
-
+  missing_data = if(use=='complete.obs') matrix(0L,ncol=ncol(pv),nrow=1) else apply(pv,2,is.na) + 0L
+  
   #impute missing
   pv = mice(pv,acor) 
   max_cores = get_ncores(desired = 128L, maintain_free = 1L)
-
-
+  
   for (i in 1:nIter)
   {
     for (dom in 1:ndomains)
@@ -164,10 +159,11 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
       cons = condMoments(mu = prior$mu, sigma = prior$Sigma, index=dom, value=pv) 
       
       PV_sve(models[[dom]]$b, models[[dom]]$a, models[[dom]]$design$first0, models[[dom]]$design$last0,
-       models[[dom]]$bcni,
-       respData[[dom]]$x$booklet_id, respData[[dom]]$x$booklet_score, cons$mu, sqrt(cons$sigma),
-       max_cores=max_cores,
-       pv, missing_data = missing_data[,dom], pv_col_indx = dom-1L, niter=10L)
+             models[[dom]]$bcni,
+             respData[[dom]]$x$booklet_id, respData[[dom]]$x$booklet_score, cons$mu, sqrt(cons$sigma),
+             max_cores=max_cores,
+             pv, missing_data = missing_data[,dom], pv_col_indx = dom-1L, niter=10L)
+      
     }
 
     prior = update_MVNprior(pv,prior$Sigma)
@@ -179,10 +175,10 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
     pb$tick()
   }
   
-  hp = apply(mcmc,2:3,hpdens,conf=hpd)
+  hp = apply(mcmc,2:3,hpdens,conf=0.95)
   
   res = list(cor = apply(mcmc,2:3,mean), sd = apply(mcmc,2:3,sd),
-    hpd_l = hp[1,,], hpd_h = hp[2,,])
+             hpd_l = hp[1,,], hpd_h = hp[2,,])
   
   res = lapply(res, function(x){colnames(x) = rownames(x) = names(models); x})
   res$n_persons = np
@@ -191,6 +187,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, hpd=0.
   class(res) = append('latent_cor',class(res))
   res
 }
+
 
 print.latent_cor = function(x,...)
 {

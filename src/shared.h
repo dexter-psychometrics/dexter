@@ -22,6 +22,7 @@ arma::vec vec_init(const arma::vec& orig);
 
 arma::ivec ivec2_iter(const arma::ivec& v);
 
+double logsumexp(const arma::vec& v);
 
 #pragma omp declare reduction( + : arma::mat : omp_out += omp_in ) \
 initializer( omp_priv = mat_init(omp_orig) )

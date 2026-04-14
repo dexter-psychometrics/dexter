@@ -22,7 +22,7 @@ test_that('complete case works',{
   pass = get_testscores(db, behavior == 'Scold') |>
     mutate(pass=booklet_score>=7) |>
     select(person_id,pass) |>
-    inner_join(get_testscores(db)) |>
+    inner_join(get_testscores(db), by='person_id') |>
     group_by(booklet_score) |>
     summarise(mean_pass=mean(pass))
   

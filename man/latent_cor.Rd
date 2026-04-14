@@ -9,7 +9,6 @@ latent_cor(
   item_property,
   predicate = NULL,
   nDraws = 500,
-  hpd = 0.95,
   use = c("complete.obs", "pairwise.complete.obs")
 )
 }
@@ -24,8 +23,6 @@ item_property must match a known item property. If dataSrc is a data.frame, item
 \item{predicate}{An optional expression to subset data, if NULL all data is used}
 
 \item{nDraws}{Number of draws for plausible values}
-
-\item{hpd}{deprecated, use the `coef` method to set the highest posterior density interval.}
 
 \item{use}{complete.obs uses only persons with answers on all domains. Pairwise.complete.obs uses all cases 
 for which there are responses in at least two domains.}

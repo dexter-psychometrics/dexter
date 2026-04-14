@@ -135,3 +135,4 @@ S3method(coef,sts_par)
 #resp_data.R
 export(get_resp_data)
 export(get_resp_matrix)
+

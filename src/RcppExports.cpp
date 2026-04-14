@@ -612,8 +612,49 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// PV_sve
+void PV_sve(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first, const arma::ivec& bk_last, const arma::ivec& bcni, const arma::ivec& booklet_id, const arma::ivec& booklet_score, const arma::vec& mu, const double sigma, const int max_cores, arma::mat& pv_mat, const arma::ivec& missing_data, const int pv_col_indx, const int niter);
+RcppExport SEXP _dexter_PV_sve(SEXP bSEXP, SEXP aSEXP, SEXP bk_firstSEXP, SEXP bk_lastSEXP, SEXP bcniSEXP, SEXP booklet_idSEXP, SEXP booklet_scoreSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP max_coresSEXP, SEXP pv_matSEXP, SEXP missing_dataSEXP, SEXP pv_col_indxSEXP, SEXP niterSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type bk_first(bk_firstSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type bk_last(bk_lastSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type bcni(bcniSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type booklet_id(booklet_idSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type booklet_score(booklet_scoreSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< const double >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< const int >::type max_cores(max_coresSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type pv_mat(pv_matSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type missing_data(missing_dataSEXP);
+    Rcpp::traits::input_parameter< const int >::type pv_col_indx(pv_col_indxSEXP);
+    Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
+    PV_sve(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, max_cores, pv_mat, missing_data, pv_col_indx, niter);
+    return R_NilValue;
+END_RCPP
+}
+// pv_metro
+void pv_metro(const arma::vec& lg, const arma::ivec& booklet_maxscore, const arma::ivec& booklet_id, const arma::ivec& booklet_score, const arma::vec& prior_mu, const double prior_sigma, arma::vec& pv_res, const int max_cores, const int n_updates);
+RcppExport SEXP _dexter_pv_metro(SEXP lgSEXP, SEXP booklet_maxscoreSEXP, SEXP booklet_idSEXP, SEXP booklet_scoreSEXP, SEXP prior_muSEXP, SEXP prior_sigmaSEXP, SEXP pv_resSEXP, SEXP max_coresSEXP, SEXP n_updatesSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type lg(lgSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type booklet_maxscore(booklet_maxscoreSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type booklet_id(booklet_idSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type booklet_score(booklet_scoreSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type prior_mu(prior_muSEXP);
+    Rcpp::traits::input_parameter< const double >::type prior_sigma(prior_sigmaSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type pv_res(pv_resSEXP);
+    Rcpp::traits::input_parameter< const int >::type max_cores(max_coresSEXP);
+    Rcpp::traits::input_parameter< const int >::type n_updates(n_updatesSEXP);
+    pv_metro(lg, booklet_maxscore, booklet_id, booklet_score, prior_mu, prior_sigma, pv_res, max_cores, n_updates);
+    return R_NilValue;
+END_RCPP
+}
 // pv_chain_normal
-Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arma::ivec& A, const arma::ivec& first, const arma::ivec& last, const arma::ivec& bk_cnit, const arma::ivec& bk_max_a, const arma::ivec& const_scoretab, const arma::ivec& scoretab_bk, const arma::ivec& scoretab_pop, const arma::ivec& scoretab_nscores, const arma::ivec& scoretab_np, const arma::mat& mu_start, const arma::vec& sigma_start, const int npv, const arma::ivec progress_init, const int max_cores, const int warmup, const int step);
+Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arma::ivec& A, arma::ivec& first, arma::ivec& last, const arma::ivec& bk_cnit, const arma::ivec& bk_max_a, const arma::ivec& const_scoretab, const arma::ivec& scoretab_bk, const arma::ivec& scoretab_pop, const arma::ivec& scoretab_nscores, const arma::ivec& scoretab_np, const arma::mat& mu_start, const arma::vec& sigma_start, const int npv, const arma::ivec progress_init, const int max_cores, const int warmup, const int step);
 RcppExport SEXP _dexter_pv_chain_normal(SEXP bmatSEXP, SEXP aSEXP, SEXP ASEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP bk_cnitSEXP, SEXP bk_max_aSEXP, SEXP const_scoretabSEXP, SEXP scoretab_bkSEXP, SEXP scoretab_popSEXP, SEXP scoretab_nscoresSEXP, SEXP scoretab_npSEXP, SEXP mu_startSEXP, SEXP sigma_startSEXP, SEXP npvSEXP, SEXP progress_initSEXP, SEXP max_coresSEXP, SEXP warmupSEXP, SEXP stepSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -621,8 +662,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type bmat(bmatSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type A(ASEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
+    Rcpp::traits::input_parameter< arma::ivec& >::type first(firstSEXP);
+    Rcpp::traits::input_parameter< arma::ivec& >::type last(lastSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type bk_cnit(bk_cnitSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type bk_max_a(bk_max_aSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type const_scoretab(const_scoretabSEXP);
@@ -642,7 +683,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // pv_chain_mix
-Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::ivec& A, const arma::ivec& first, const arma::ivec& last, const arma::ivec& bk_cnit, const arma::ivec& bk_max_a, const arma::ivec& gscoretab, const arma::ivec& gscoretab_bk, const arma::ivec& gscoretab_nscores, const arma::ivec& gscoretab_np, const arma::mat& mu_start, const arma::mat& sigma_start, const arma::vec& p_start, const int npv, const arma::ivec progress_init, const int max_cores, const int warmup, const int step);
+Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::ivec& A, arma::ivec& first, arma::ivec& last, const arma::ivec& bk_cnit, const arma::ivec& bk_max_a, const arma::ivec& gscoretab, const arma::ivec& gscoretab_bk, const arma::ivec& gscoretab_nscores, const arma::ivec& gscoretab_np, const arma::mat& mu_start, const arma::mat& sigma_start, const arma::vec& p_start, const int npv, const arma::ivec progress_init, const int max_cores, const int warmup, const int step);
 RcppExport SEXP _dexter_pv_chain_mix(SEXP bmatSEXP, SEXP aSEXP, SEXP ASEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP bk_cnitSEXP, SEXP bk_max_aSEXP, SEXP gscoretabSEXP, SEXP gscoretab_bkSEXP, SEXP gscoretab_nscoresSEXP, SEXP gscoretab_npSEXP, SEXP mu_startSEXP, SEXP sigma_startSEXP, SEXP p_startSEXP, SEXP npvSEXP, SEXP progress_initSEXP, SEXP max_coresSEXP, SEXP warmupSEXP, SEXP stepSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -650,8 +691,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type bmat(bmatSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type A(ASEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
+    Rcpp::traits::input_parameter< arma::ivec& >::type first(firstSEXP);
+    Rcpp::traits::input_parameter< arma::ivec& >::type last(lastSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type bk_cnit(bk_cnitSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type bk_max_a(bk_max_aSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type gscoretab(gscoretabSEXP);
@@ -668,29 +709,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int >::type step(stepSEXP);
     rcpp_result_gen = Rcpp::wrap(pv_chain_mix(bmat, a, A, first, last, bk_cnit, bk_max_a, gscoretab, gscoretab_bk, gscoretab_nscores, gscoretab_np, mu_start, sigma_start, p_start, npv, progress_init, max_cores, warmup, step));
     return rcpp_result_gen;
-END_RCPP
-}
-// PV_sve_C
-void PV_sve_C(const arma::vec& b, const arma::ivec& a, const arma::ivec& bk_first, const arma::ivec& bk_last, const arma::ivec& bcni, const arma::ivec& booklet_id, const arma::ivec& booklet_score, const arma::vec& mu, const double sigma, const int max_cores, arma::mat& pv_mat, const arma::ivec& missing_data, const int pv_col_indx, const int niter);
-RcppExport SEXP _dexter_PV_sve_C(SEXP bSEXP, SEXP aSEXP, SEXP bk_firstSEXP, SEXP bk_lastSEXP, SEXP bcniSEXP, SEXP booklet_idSEXP, SEXP booklet_scoreSEXP, SEXP muSEXP, SEXP sigmaSEXP, SEXP max_coresSEXP, SEXP pv_matSEXP, SEXP missing_dataSEXP, SEXP pv_col_indxSEXP, SEXP niterSEXP) {
-BEGIN_RCPP
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type bk_first(bk_firstSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type bk_last(bk_lastSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type bcni(bcniSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type booklet_id(booklet_idSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type booklet_score(booklet_scoreSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< const double >::type sigma(sigmaSEXP);
-    Rcpp::traits::input_parameter< const int >::type max_cores(max_coresSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type pv_mat(pv_matSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type missing_data(missing_dataSEXP);
-    Rcpp::traits::input_parameter< const int >::type pv_col_indx(pv_col_indxSEXP);
-    Rcpp::traits::input_parameter< const int >::type niter(niterSEXP);
-    PV_sve_C(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, max_cores, pv_mat, missing_data, pv_col_indx, niter);
-    return R_NilValue;
 END_RCPP
 }
 // sampleNRM_testC
@@ -780,9 +798,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dexter_Hess_binom", (DL_FUNC) &_dexter_Hess_binom, 11},
     {"_dexter_calibrate_Bayes_chains", (DL_FUNC) &_dexter_calibrate_Bayes_chains, 24},
     {"_dexter_omp_ncores", (DL_FUNC) &_dexter_omp_ncores, 0},
+    {"_dexter_PV_sve", (DL_FUNC) &_dexter_PV_sve, 14},
+    {"_dexter_pv_metro", (DL_FUNC) &_dexter_pv_metro, 9},
     {"_dexter_pv_chain_normal", (DL_FUNC) &_dexter_pv_chain_normal, 19},
     {"_dexter_pv_chain_mix", (DL_FUNC) &_dexter_pv_chain_mix, 19},
-    {"_dexter_PV_sve_C", (DL_FUNC) &_dexter_PV_sve_C, 14},
     {"_dexter_sampleNRM_testC", (DL_FUNC) &_dexter_sampleNRM_testC, 5},
     {"_dexter_sampleNRM_itemC", (DL_FUNC) &_dexter_sampleNRM_itemC, 5},
     {"_dexter_sampleIMC", (DL_FUNC) &_dexter_sampleIMC, 6},

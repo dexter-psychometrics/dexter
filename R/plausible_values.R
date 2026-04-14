@@ -127,7 +127,7 @@ pv_chain = function(x, design, b, a, nPV,
     
     start_mu = matrix(rnorm(npop*gibbs_settings$nchains), ncol=gibbs_settings$nchains)
     start_sigma = runif(gibbs_settings$nchains,3,4)
-    
+
     res = pv_chain_normal(bmat = b, a = a, A = A, 
                           first = design$first_c, last = design$last_c, bk_cnit = design$bk_cnit, bk_max_a = design$bk_max_a,
                           const_scoretab = scoretab, scoretab_bk = scoretab_counts$booklet_c, scoretab_pop = scoretab_counts$pop_c,
@@ -135,7 +135,10 @@ pv_chain = function(x, design, b, a, nPV,
                           mu_start = start_mu, sigma_start = start_sigma, npv = as.integer(nPV), 
                           progress_init = pb$cpp_prog_init(), max_cores = gibbs_settings$ncores,
                           warmup = gibbs_settings$warm_up,  step = gibbs_settings$step)
+    #print(res$n_alt)
+
     
+
     #dimnames(res$prior_log) = list(var=c('mu','sigma','tau', sprintf("theta_%i",1:(nrow(res$prior_log)-3))),iter=NULL,chain=NULL)
   } else
   {
@@ -161,13 +164,6 @@ pv_chain = function(x, design, b, a, nPV,
   bind_cols(bind_rows(x), res$theta)
 }
 
-# missing_data as optional argument
-PV_sve = function(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, max_cores, pv_mat, 
-  missing_data=NULL, pv_col_indx = 0L, niter = 1L) 
-{
-  if(is.null(missing_data)) missing_data = 0L
-  PV_sve_C(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, max_cores, pv_mat, missing_data, pv_col_indx, niter)
-}
 
 
 # user interface ----------------------------------------------------------

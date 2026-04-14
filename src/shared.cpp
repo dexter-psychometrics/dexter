@@ -24,3 +24,10 @@ ivec ivec2_iter(const ivec& v)
 	out.tail(n) = cumsum(v);
 	return out;
 }
+
+
+double logsumexp(const vec& v)
+{
+	const double m = max(v);
+	return m + std::log(accu(exp(v-m)));
+}

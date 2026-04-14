@@ -345,13 +345,6 @@ Rcpp::List theta_jeap_c(const arma::vec& grid, const arma::mat& b, const arma::i
 
 // eap normal with a grid
 
-double logsumexp(const vec& v)
-{
-	const double m = max(v);
-	return m + std::log(accu(exp(v-m)));
-}
-
-
 // [[Rcpp::export]]
 Rcpp::List theta_eap_c(const arma::vec& grid, const arma::vec& weights, const arma::mat& b, const arma::ivec& a, arma::ivec& first, arma::ivec& last,  const arma::ivec& bk_nit, const int n_cores=1)
 {

@@ -157,16 +157,20 @@ omp_ncores <- function() {
     .Call(`_dexter_omp_ncores`)
 }
 
+PV_sve <- function(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, max_cores, pv_mat, missing_data, pv_col_indx = 0L, niter = 1L) {
+    invisible(.Call(`_dexter_PV_sve`, b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, max_cores, pv_mat, missing_data, pv_col_indx, niter))
+}
+
+pv_metro <- function(lg, booklet_maxscore, booklet_id, booklet_score, prior_mu, prior_sigma, pv_res, max_cores, n_updates = 10L) {
+    invisible(.Call(`_dexter_pv_metro`, lg, booklet_maxscore, booklet_id, booklet_score, prior_mu, prior_sigma, pv_res, max_cores, n_updates))
+}
+
 pv_chain_normal <- function(bmat, a, A, first, last, bk_cnit, bk_max_a, const_scoretab, scoretab_bk, scoretab_pop, scoretab_nscores, scoretab_np, mu_start, sigma_start, npv, progress_init, max_cores, warmup = 10L, step = 1L) {
     .Call(`_dexter_pv_chain_normal`, bmat, a, A, first, last, bk_cnit, bk_max_a, const_scoretab, scoretab_bk, scoretab_pop, scoretab_nscores, scoretab_np, mu_start, sigma_start, npv, progress_init, max_cores, warmup, step)
 }
 
 pv_chain_mix <- function(bmat, a, A, first, last, bk_cnit, bk_max_a, gscoretab, gscoretab_bk, gscoretab_nscores, gscoretab_np, mu_start, sigma_start, p_start, npv, progress_init, max_cores, warmup = 10L, step = 1L) {
     .Call(`_dexter_pv_chain_mix`, bmat, a, A, first, last, bk_cnit, bk_max_a, gscoretab, gscoretab_bk, gscoretab_nscores, gscoretab_np, mu_start, sigma_start, p_start, npv, progress_init, max_cores, warmup, step)
-}
-
-PV_sve_C <- function(b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, max_cores, pv_mat, missing_data, pv_col_indx = 0L, niter = 1L) {
-    invisible(.Call(`_dexter_PV_sve_C`, b, a, bk_first, bk_last, bcni, booklet_id, booklet_score, mu, sigma, max_cores, pv_mat, missing_data, pv_col_indx, niter))
 }
 
 sampleNRM_testC <- function(theta, b, a, first, last) {
