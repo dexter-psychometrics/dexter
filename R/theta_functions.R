@@ -184,6 +184,12 @@ theta_function = function(parms, items=NULL, booklet=NULL, parms_draw=c('average
     class(out) = append('sim_func',class(out))
   } else if(what=='pmf')
   {
+    # only pre compute this for non Bayesian case
+    lgamma = if(!multiple_b)
+    {
+      log(elsymC(b=drop(b),a=a,first = fl$first-1L, last = fl$last-1L))
+    }
+    
     out = function(theta)
     {
       check_num(theta)
@@ -197,7 +203,7 @@ theta_function = function(parms, items=NULL, booklet=NULL, parms_draw=c('average
           res[,,i] = t(pscore(theta,b=b[,i],a=a,first = fl$first, last = fl$last))
       } else
       {
-        res = t(pscore(theta,b=drop(b),a=a,first = fl$first, last = fl$last))
+        res = t(pscore_lgamma(theta,lgamma))
       }
       res
     }

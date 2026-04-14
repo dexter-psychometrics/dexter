@@ -1,5 +1,44 @@
 
 
+# Expected distribution given a vector theta
+# return matrix, ncol=length(theta), nrow=nscores
+pscore = function(theta, b, a, first, last)
+{
+  g = elsymC(b, a, first-1L, last-1L)
+  score = 0:(length(g)-1)
+  p = sapply(theta, function(tht) log(g) + score*tht)
+  
+  exp(sweep(p,2,apply(p,2,logsumexp),`-`))
+}
+
+# lg: log elsym
+pscore_lgamma = function(theta, lg)
+{
+  score = 0:(length(lg)-1)
+  p = sapply(theta, function(tht) lg + score*tht)
+  
+  exp(sweep(p,2,apply(p,2,logsumexp),`-`))
+}
+
+
+
+rscore_item = function(theta,b,a,first,last)
+{
+  first = as.integer(first-1L)
+  last = as.integer(last-1L)
+  a = as.integer(a)
+  sampleNRM_itemC(theta, b, a, first, last)
+}
+
+
+# MLE of theta for one score in one booklet which does not have to be an integer
+# b must be a vector or a matrix with the draws as columns
+ML_theta = function(score,b,a,first,last)
+{
+  if(!is.matrix(b)) b = matrix(b,ncol=1)
+  ML_theta_c(as.numeric(score), b, as.integer(a), as.integer(first-1L), as.integer(last-1L))
+}
+
 
 # @param setA, setB: two mutually exclusive subsets of items as indexes in first/last
 # @return         a score-by-score matrix of probabilities:
@@ -23,55 +62,6 @@ SSTable = function(b, a, first, last,setA, setB, cIM_score=NULL)
 }
 
 
-
-
-### Greatest Common Divisor via Euclid's algorithm
-# GCD2_ =function (n, m) 
-# {
-#   if (n == 0 && m == 0) 
-#     return(0)
-#   n = abs(n)
-#   m = abs(m)
-#   if (m > n) {
-#     t = n
-#     n = m
-#     m = t
-#   }
-#   while (m > 0) {
-#     t = n
-#     n = m
-#     m = t%%m
-#   }
-#   return(n)
-# }
-# 
-# 
-# GCD_ =function (x) 
-# {
-#   if (floor(x) != ceiling(x) || length(x) < 2) 
-#     stop("Argument 'x' must be an integer vector of length >= 2.")
-#   x = x[x != 0]
-#   n = length(x)
-#   if (n == 0) {
-#     g = 0
-#   }
-#   else if (n == 1) {
-#     g = x
-#   }
-#   else if (n == 2) {
-#     g = GCD2_(x[1], x[2])
-#   }
-#   else {
-#     g = GCD2_(x[1], x[2])
-#     for (i in 3:n) {
-#       g = GCD2_(g, x[i])
-#       if (g == 1) 
-#         break
-#     }
-#   }
-#   return(g)
-# }
-
 # highest posterior density interval
 # not safe for bimodal distributions
 hpdens = function(x, conf=0.95)
@@ -87,72 +77,6 @@ hpdens = function(x, conf=0.95)
 }
 
 
-
-# This function calculates overall and pointwise confidence envelopes 
-# for a curve based on replicates of the curve evaluated at a number of fixed points.
-# Based on theory by Davison, A.C. and Hinkley, D.V. (1997) Bootstrap Methods and Their Application. 
-# Cambridge University Press. Insprired by code from package boot.
-
-# mat is a matrix with nrow = nr of replications, ncol = nr of points
-# Example: test information for each of ncol ability values is calculated for nrow samples of 
-# item parameters from posterior.
-
-#TO~DO: protect against NA's
-# conf_env = function(mat, level = 0.95) 
-# {
-#   overall_found = TRUE
-#   emperr = function(rmat, p = 0.05, k = NULL) {
-#     R = nrow(rmat)
-#     if (is.null(k)) 
-#       k = p * (R + 1)/2
-#     else p = 2 * k/(R + 1)
-#     kf = function(x, k, R) 1 * ((min(x) <= k) | (max(x) >= 
-#                                                     R + 1L - k))
-#     c(k, p, sum(apply(rmat, 1L, kf, k, R))/(R + 1))
-#   }
-#   kfun = function(x, k1, k2) sort(x, partial = sort(c(k1, k2)))[c(k1, k2)]
-#   index = 1L:ncol(mat)
-#   if (length(index) < 2L) 
-#     stop("This function for curves")
-#   rmat = apply(mat, 2L, rank)
-#   R = nrow(mat)
-#   if (length(level) == 1L) 
-#     level = rep(level, 2L)
-#   k.pt = floor((R + 1) * (1 - level[1L])/2 + 1e-10)
-#   k.pt = c(k.pt, R + 1 - k.pt)
-#   err.pt = emperr(rmat, k = k.pt[1L])
-#   ov = emperr(rmat, k = 1)
-#   ee = err.pt
-#   al = 1 - level[2L]
-#   if (ov[3L] > al) 
-#     overall_found = FALSE
-#   else {
-#     continue = !(ee[3L] < al)
-#     while (continue) {
-#       kk = ov[1L] + round((ee[1L] - ov[1L]) * (al - ov[3L])/(ee[3L] - 
-#                                                                 ov[3L]))
-#       if (kk == ov[1L]) 
-#         kk = kk + 1
-#       else if (kk == ee[1L]) 
-#         kk = kk - 1
-#       temp = emperr(rmat, k = kk)
-#       if (temp[3L] > al) 
-#         ee = temp
-#       else ov = temp
-#       continue = !(ee[1L] == ov[1L] + 1)
-#     }
-#   }
-#   k.ov = c(ov[1L], R + 1 - ov[1L])
-#   err.ov = ov[-1L]
-#   out = apply(mat, 2L, kfun, k.pt, k.ov)
-#   if (overall_found){
-#     out = out[4:3, ]
-#   }else
-#   {
-#     out = out[1:2, ]
-#   }
-#   return(out)
-# }
 
 
 # equivalent to log(sum(exp(x)))
@@ -172,33 +96,6 @@ logsumexp = function(x)
 #   arrange(weights) |>
 #   as.list()
 # usethis::use_data(quadpoints, internal = TRUE)
-
-
-# geo_mean = function(x)
-# {
-#   return(exp(mean(log(x))))
-# }
-### round to geometric mean ###
-# Round positive numbers x to integers
-# such that the geometric mean equals approximately J
-# r2gm = function(x, J)
-# {
-#   G=geo_mean(x)
-#   out=NULL
-#   for (i in 1:length(x)) out = c(out,max(1,floor(0.5+(J*x[i]/G))))
-#   return(out)
-# }
-
-### Weights based on a rank-one approximation to the
-# Interaction model
-# c2weights = function(cIM)
-# {
-#   hh=kronecker(t(cIM),cIM,'+')
-#   gg=eigen(hh)
-#   out=abs(gg$vectors[,which.max(gg$values)])
-#   av_indx=which.min(abs(out-mean(out)))
-#   return(out/out[av_indx])
-# }
 
 
 all_trivial_scores = function(scores)
@@ -280,4 +177,150 @@ combined_var = function(means,vars,n)
 
 
 
+
+### Greatest Common Divisor via Euclid's algorithm
+# GCD2_ =function (n, m) 
+# {
+#   if (n == 0 && m == 0) 
+#     return(0)
+#   n = abs(n)
+#   m = abs(m)
+#   if (m > n) {
+#     t = n
+#     n = m
+#     m = t
+#   }
+#   while (m > 0) {
+#     t = n
+#     n = m
+#     m = t%%m
+#   }
+#   return(n)
+# }
+# 
+# 
+# GCD_ =function (x) 
+# {
+#   if (floor(x) != ceiling(x) || length(x) < 2) 
+#     stop("Argument 'x' must be an integer vector of length >= 2.")
+#   x = x[x != 0]
+#   n = length(x)
+#   if (n == 0) {
+#     g = 0
+#   }
+#   else if (n == 1) {
+#     g = x
+#   }
+#   else if (n == 2) {
+#     g = GCD2_(x[1], x[2])
+#   }
+#   else {
+#     g = GCD2_(x[1], x[2])
+#     for (i in 3:n) {
+#       g = GCD2_(g, x[i])
+#       if (g == 1) 
+#         break
+#     }
+#   }
+#   return(g)
+# }
+
+
+
+
+# geo_mean = function(x)
+# {
+#   return(exp(mean(log(x))))
+# }
+### round to geometric mean ###
+# Round positive numbers x to integers
+# such that the geometric mean equals approximately J
+# r2gm = function(x, J)
+# {
+#   G=geo_mean(x)
+#   out=NULL
+#   for (i in 1:length(x)) out = c(out,max(1,floor(0.5+(J*x[i]/G))))
+#   return(out)
+# }
+
+### Weights based on a rank-one approximation to the
+# Interaction model
+# c2weights = function(cIM)
+# {
+#   hh=kronecker(t(cIM),cIM,'+')
+#   gg=eigen(hh)
+#   out=abs(gg$vectors[,which.max(gg$values)])
+#   av_indx=which.min(abs(out-mean(out)))
+#   return(out/out[av_indx])
+# }
+
+
+
+
+
+# This function calculates overall and pointwise confidence envelopes 
+# for a curve based on replicates of the curve evaluated at a number of fixed points.
+# Based on theory by Davison, A.C. and Hinkley, D.V. (1997) Bootstrap Methods and Their Application. 
+# Cambridge University Press. Insprired by code from package boot.
+
+# mat is a matrix with nrow = nr of replications, ncol = nr of points
+# Example: test information for each of ncol ability values is calculated for nrow samples of 
+# item parameters from posterior.
+
+#TO~DO: protect against NA's
+# conf_env = function(mat, level = 0.95) 
+# {
+#   overall_found = TRUE
+#   emperr = function(rmat, p = 0.05, k = NULL) {
+#     R = nrow(rmat)
+#     if (is.null(k)) 
+#       k = p * (R + 1)/2
+#     else p = 2 * k/(R + 1)
+#     kf = function(x, k, R) 1 * ((min(x) <= k) | (max(x) >= 
+#                                                     R + 1L - k))
+#     c(k, p, sum(apply(rmat, 1L, kf, k, R))/(R + 1))
+#   }
+#   kfun = function(x, k1, k2) sort(x, partial = sort(c(k1, k2)))[c(k1, k2)]
+#   index = 1L:ncol(mat)
+#   if (length(index) < 2L) 
+#     stop("This function for curves")
+#   rmat = apply(mat, 2L, rank)
+#   R = nrow(mat)
+#   if (length(level) == 1L) 
+#     level = rep(level, 2L)
+#   k.pt = floor((R + 1) * (1 - level[1L])/2 + 1e-10)
+#   k.pt = c(k.pt, R + 1 - k.pt)
+#   err.pt = emperr(rmat, k = k.pt[1L])
+#   ov = emperr(rmat, k = 1)
+#   ee = err.pt
+#   al = 1 - level[2L]
+#   if (ov[3L] > al) 
+#     overall_found = FALSE
+#   else {
+#     continue = !(ee[3L] < al)
+#     while (continue) {
+#       kk = ov[1L] + round((ee[1L] - ov[1L]) * (al - ov[3L])/(ee[3L] - 
+#                                                                 ov[3L]))
+#       if (kk == ov[1L]) 
+#         kk = kk + 1
+#       else if (kk == ee[1L]) 
+#         kk = kk - 1
+#       temp = emperr(rmat, k = kk)
+#       if (temp[3L] > al) 
+#         ee = temp
+#       else ov = temp
+#       continue = !(ee[1L] == ov[1L] + 1)
+#     }
+#   }
+#   k.ov = c(ov[1L], R + 1 - ov[1L])
+#   err.ov = ov[-1L]
+#   out = apply(mat, 2L, kfun, k.pt, k.ov)
+#   if (overall_found){
+#     out = out[4:3, ]
+#   }else
+#   {
+#     out = out[1:2, ]
+#   }
+#   return(out)
+# }
 
