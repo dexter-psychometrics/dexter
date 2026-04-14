@@ -1,9 +1,33 @@
 # common utility functions
 
+#' Dexter: data analyses for educational and psychological tests.
+#' 
+#' Dexter provides a comprehensive solution for managing and analyzing educational test data.
+#' 
+#' The main features are:
+#' 
+#' \itemize{
+#' \item project databases providing a structure for storing data about persons, items, responses and booklets.
+#' \item methods to assess data quality using Classical test theory and plots.
+#' \item CML calibration of the extended nominal response model and interaction model.
+#' }
+#' 
+#' To learn more about dexter, start with the vignettes: `browseVignettes(package="dexter")`  
+#' 
+#' Dexter uses the following global options
+#' \itemize{
+#' \item `dexter.use_tibble` return tibbles instead of data.frames, defaults to FALSE
+#' \item `dexter.verbose` if FALSE, turn off all informative messages, defaults to TRUE
+#' \item `dexter.progress` show progress bars, defaults to TRUE in interactive sessions
+#' \item `dexter.max_cores` set a maximum number of cores that dexter will use, defaults to the minimum of `Sys.getenv("OMP_THREAD_LIMIT")` and
+#' `getOption("Ncpus")`, otherwise unlimited.
+#' }
+#' 
+"_PACKAGE"
 
 .onLoad = function(libname, pkgname) 
 {
-  dexter_options = list(dexter.use_tibble=FALSE, dexter.progress=TRUE)
+  dexter_options = list(dexter.use_tibble=FALSE, dexter.progress=TRUE, dexter.verbose=TRUE)
   
   to_set = setdiff(names(dexter_options), names(options()))
   if(length(to_set)>0)
@@ -181,20 +205,30 @@ format_plural = function(str, x, sep=', ', last_sep=' and ', qt="'")
 }
 
 # with clickable links to functions
-cl_msg = function(s, func_names, mod = c('info','message'))
+cl_msg = function(s, func_names=NULL, mod = c('info','message'), print_always = mod=='message')
 {
   mod = match.arg(mod)
-  if(requireNamespace('cli', quietly = TRUE))
+  if(!print_always && !getOption('dexter.verbose',TRUE)) return(invisible(NULL))
+  
+  # hate how cli looks with multiline output so do not use it anymore
+  if(!is.null(func_names) && requireNamespace('cli', quietly = TRUE))
   {
     # the cli warning is visually on a level with R message
     f = list(info = cli::cli_alert_info, message = cli::cli_alert_warning)[[mod]]
-    a = as.list(sprintf('{.help [{.fun %s}](dexter::%s)}',sub('\\..+$','',func_names,perl=TRUE),func_names))
-    a$fmt = s
-    f(do.call(sprintf,a))
+    if(!is.null(func_names))
+    {
+      a = as.list(sprintf('{.help [{.fun %s}](dexter::%s)}',sub('\\..+$','',func_names,perl=TRUE),func_names))
+      a$fmt = s
+      s = do.call(sprintf,a)
+    }
+    f(s)
   } else
   {
     f = list(info = cat, message = message)[[mod]]
-    f(sprintf(s,paste0('`',sub('\\..+$','',func_names,perl=TRUE),'`')))
+    if(!is.null(func_names))
+      s = sprintf(s,paste0('`',sub('\\..+$','',func_names,perl=TRUE),'`'))
+      
+    f(s)
   }
 }
 

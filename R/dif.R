@@ -107,7 +107,6 @@ DIF = function(dataSrc, person_property, predicate=NULL)
   
   if(nrow(common_items) != nrow(models[[1]]$inputs$ssI) || nrow(common_items) != nrow(models[[2]]$inputs$ssI))
   {
-    cat('\n')
     check_overlap = models[[1]]$inputs$ssIS |>
       full_join(models[[2]]$inputs$ssIS, by=c('item_id','item_score') ,suffix=c('_1','_2')) |>
       group_by(.data$item_id) |>
@@ -116,11 +115,11 @@ DIF = function(dataSrc, person_property, predicate=NULL)
       mutate(miss_cat = .data$miss_cat & !.data$miss_itm)
       
     if(any(check_overlap$miss_itm))
-      message('Some items were excluded because they do not appear in both datasets.')
+      cl_msg('Some items were excluded because they do not appear in both datasets.')
     
     if(any(check_overlap$miss_cat))
     {
-      message('items with differing score categories:')
+      cl_msg('items with differing score categories:',mod='message')
       print(as.character(check_overlap$item_id[check_overlap$miss_cat]))
       warning('Some items were excluded because because they have different score categories in both datasets.')
     }
@@ -204,9 +203,9 @@ plot.DIF_stats = function(x, items = NULL, itemsX = items, itemsY = items, clust
   
   if(length(setdiff(c(itemsX, itemsY), x$items$item_id)) > 0)
   {
-    cat('items not found in DIF object:\n')
+    cl_msg('items not found in DIF object:',mod='message')
     print(setdiff(c(itemsX, itemsY), x$items))
-    stop('some of the item_ids you specified are not present in the DIF object')
+    stop_('some of the item_ids you specified are not present in the DIF object')
   }
   
   if (cluster) 

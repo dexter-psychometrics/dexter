@@ -21,8 +21,7 @@ ffactor = function (x, levels=NULL, as_int=FALSE)
 
 stop_no_param = function(items)
 {
-  cat('\n')
-  message("no parameters for these items and/or scores")
+  cl_msg("no parameters for these items and/or scores", mod='message')
   print(items)
   stop("no parameters for some items and/or scores in your data", call.=FALSE) 
 }

@@ -53,7 +53,7 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
 
   check_file(scr_path)
   check_file(dat_path)
-  
+  verbose = getOption('dexter.verbose',TRUE)
   scr = readSCR(scr_path)
   scr$itemLabels = trimws(scr$itemLabels)
   
@@ -142,7 +142,7 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
       if ( length(lines) == 0 ) {
         break
       }
-      cat('\rreading lines:', vp, '-', as.integer(vp + length(lines)-1))
+      if(verbose) cat('\rreading lines:', vp, '-', as.integer(vp + length(lines)-1))
       bkl = suppressWarnings({as.integer(substr(lines, booklet_position[1], booklet_position[2]))})
       
       if(skip_invalid_booklets )
@@ -224,7 +224,7 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
       warning('Some lines are too short for the number of responses that are supposed to be present ',
               'according to the design', call.=FALSE)
     }
-    cat('\nvalidating constraints...\n')
+    if(verbose) cat('\nvalidating constraints...\n')
  }, on_error = function(e)
     {
       if(!finished) close(con)
@@ -239,9 +239,10 @@ start_new_project_from_oplm = function(dbname, scr_path, dat_path,
                                             EXCEPT SELECT item_id, response FROM dxscoring_rules;')
         if(nrow(unknown_responses) > 0)
         {
-          cat('\nThe following responses were found in the data but they are not defined in the .scr file or coded as missing responses.')
-          cat('Possible causes are that not all missing characters are correctly specified, your screen and dat files do not match ')
-          cat('or responses_start is incorrect.\n')
+          msg = paste('The following responses were found in the data but they are not defined in the .scr file or coded as missing responses.',
+                      'Possible causes are that not all missing characters are correctly specified, your screen and dat files do not match',
+                      'or responses_start is incorrect.')
+          cl_msg(msg, mod='message')
           unknown_responses = dbGetQuery(db, 'SELECT item_id, response, COUNT(*) AS tally FROM dxresponses GROUP BY item_id, response;') |>
             semi_join(unknown_responses, by=c('item_id','response'))
                   

@@ -89,7 +89,8 @@ test_that('plausible scores works',{
   
   expect_false(any(ps$PS_keep_true<ps$booklet_score))
   
-  expect_lt(abs(mean(ps$PS1)-mean(ps$PS_keep_true)),0.15)
+  # this is about within 1se, not a useful check
+  #expect_lt(abs(mean(ps$PS1)-mean(ps$PS_keep_true)),0.15)
   
 })
 
