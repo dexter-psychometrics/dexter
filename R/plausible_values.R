@@ -135,6 +135,7 @@ pv_chain = function(x, design, b, a, nPV,
                           mu_start = start_mu, sigma_start = start_sigma, npv = as.integer(nPV), 
                           progress_init = pb$cpp_prog_init(), max_cores = gibbs_settings$ncores,
                           warmup = gibbs_settings$warm_up,  step = gibbs_settings$step)
+    #cat('\n')
     #print(res$n_alt)
 
     

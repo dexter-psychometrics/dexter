@@ -215,9 +215,9 @@ Same algorithm as for individual pv's, now using a scoretab and a common prior
 -  starting value is a draw from the eap
 */
 
-arma::vec pvmetro_stab(int* scoretab, const arma::vec& lg, const double prior_mu, const double prior_sigma, dqrng::xoshiro256plus& lrng, const int n_updates=50)
+arma::vec pvmetro_stab(int* scoretab, const arma::vec& lg, const double prior_mu, const double prior_sigma, dqrng::xoshiro256plus& lrng, const int n_updates=20)
 {
-	const int max_score = lg.n_elem-1, ngrid=100;
+	const int max_score = lg.n_elem-1, ngrid=50;
 	
 	int np = 0;
 	for(int score=0; score <= max_score; score++) np += *(scoretab + score);
@@ -343,6 +343,7 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 		bstep = std::max(1u, bmat.n_cols/chain_iter);
 	}
 	
+	
 	int n_alt=0;
 #pragma omp parallel num_threads(max_cores)
 	{	
@@ -440,12 +441,14 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 							scoretab[y]--;
 							np--;
 						}
-						if(cntr++ > 5000) // fail rejection sampling at >5000 consecutive draws without any new pv
+						if(cntr++ > 5000) 
 						{
-							if(np_prev == np)
+							if(np_prev == np)// fail rejection sampling 
 							{
 								pv_add = draw_unlikely_pvs(log_gamma(bk), first.memptr() + item_start, last.memptr() + item_start, item_end - item_start, b, a, 
-																scoretab.memptr() + scoretab_start, scoretab_nscores[bk], pmu, sigma, lrng);
+																scoretab.memptr() + scoretab_start, scoretab_nscores[tab], pmu, sigma, lrng);
+																
+
 								n_alt += pv_add.n_elem;
 								y = scoretab_start;
 								for(int i=0; i < pv_add.n_elem; i++)
