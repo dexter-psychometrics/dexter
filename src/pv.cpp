@@ -280,22 +280,32 @@ arma::vec pvmetro_stab(int* scoretab, const arma::vec& lg, const double prior_mu
 /*
 Fill remaining scoretab when rejection algorithm becomes too inefficient
 -  computes and overwrites log_gamma if not previously computed
+
+lg[0] is set to -1 to invalidate
 */
 
-arma::vec draw_unlikely_pvs(arma::vec& lg, int *first, int *last, const int nit, const vec& b, const ivec& a, 
+arma::vec draw_unlikely_pvs(arma::vec& lg, arma::vec& gw, int *first, int *last, const int nit, const vec& b, const ivec& a, 
 					int* scoretab, const int n_scores, const double prior_mu, const double prior_sigma, dqrng::xoshiro256plus& lrng)
 {
-	if(lg.n_elem == 0)
+	if(lg.n_elem == 0 || lg[0] < 0)
 	{
-		//lg = vec(n_scores);
-		lg.set_size(n_scores);
-		vec gw(n_scores);
+		if(lg.n_elem == 0)
+			lg.set_size(n_scores);
+
 		elsym(b, a, first, last, nit, lg, gw, -1);
 		lg = log(lg);
 	}
 	return pvmetro_stab(scoretab, lg, prior_mu, prior_sigma, lrng);
 }
 
+// invalidate without resizing
+void invalidate_lg(arma::field<vec>& log_gamma)
+{
+	const int nbk = log_gamma.n_slices;
+	for(int bk=0; bk < nbk; bk++) 
+		if(log_gamma(bk).n_elem > 0)
+			log_gamma(bk)[0] = -1;
+}
 
 
 /* 
@@ -363,6 +373,7 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 		p[0]=1;
 		
 		field<vec> log_gamma(bk_max_a.n_elem);
+		vec gw(max(scoretab_nscores));
 
 		dqrng::xoshiro256plus lrng(rng);      		
 		lrng.long_jump(thread + 1);			
@@ -390,7 +401,7 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 				mu = priors.theta;
 				sigma = priors.sigma;	
 				b = bmat.col(bcol);
-				if(bstep>0) for(int bk=0; bk < log_gamma.n_elem; bk++) log_gamma(bk).reset(); // clear cache of log gamma
+				if(bstep>0) invalidate_lg(log_gamma);
 				cntr = 0;
 				
 				for(int tab=0; tab < ntab; tab++)
@@ -445,7 +456,7 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 						{
 							if(np_prev == np)// fail rejection sampling 
 							{
-								pv_add = draw_unlikely_pvs(log_gamma(bk), first.memptr() + item_start, last.memptr() + item_start, item_end - item_start, b, a, 
+								pv_add = draw_unlikely_pvs(log_gamma(bk), gw, first.memptr() + item_start, last.memptr() + item_start, item_end - item_start, b, a, 
 																scoretab.memptr() + scoretab_start, scoretab_nscores[tab], pmu, sigma, lrng);
 																
 
@@ -525,6 +536,7 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 			
 		vec b(bmat.n_rows), expat(bk_max_a.max()+1, fill::zeros), p(bk_max_a.max()+1, fill::zeros), pv_add;
 		field<vec> log_gamma(bk_max_a.n_elem);
+		vec gw(max(gscoretab_nscores));
 	
 		int x,y,k, pvcol, prs, cntr, np, np_prev, bcol;
 		double u, atheta;
@@ -563,7 +575,7 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 				cscoretab.col(0) = cscoretab.col(1) - scoretab.col(1);
 				
 				b = bmat.col(bcol);
-				if(bstep > 0) for(int bk=0; bk < log_gamma.n_elem; bk++) log_gamma(bk).reset(); // clear cache of log gamma
+				if(bstep > 0) invalidate_lg(log_gamma);
 				cntr = 0;
 				for(int prior_num=0; prior_num <=1; prior_num++)
 				{
@@ -618,7 +630,7 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 							{
 								if(np_prev == np)
 								{
-									pv_add = draw_unlikely_pvs(log_gamma(bk), first.memptr() + item_start, last.memptr() + item_start, item_end - item_start, b, a, 
+									pv_add = draw_unlikely_pvs(log_gamma(bk), gw, first.memptr() + item_start, last.memptr() + item_start, item_end - item_start, b, a, 
 																scoretab.colptr(prior_num) + scoretab_start, gscoretab_nscores[tab], mu, sigma, lrng);
 	
 									y = scoretab_start;

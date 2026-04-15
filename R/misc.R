@@ -16,11 +16,11 @@
 #' 
 #' Dexter uses the following global options
 #' \itemize{
-#' \item `dexter.use_tibble` return tibbles instead of data.frames, defaults to FALSE
-#' \item `dexter.verbose` if FALSE, turn off all informative messages, defaults to TRUE
-#' \item `dexter.progress` show progress bars, defaults to TRUE in interactive sessions
-#' \item `dexter.max_cores` set a maximum number of cores that dexter will use, defaults to the minimum of `Sys.getenv("OMP_THREAD_LIMIT")` and
-#' `getOption("Ncpus")`, otherwise unlimited.
+#' \item \code{dexter.use_tibble} return tibbles instead of data.frames, defaults to FALSE
+#' \item \code{dexter.verbose} if FALSE, turn off all informative messages, defaults to TRUE
+#' \item \code{dexter.progress} show progress bars, defaults to TRUE in interactive sessions
+#' \item \code{dexter.max_cores} set a maximum number of cores that dexter will use, defaults to the minimum of \code{Sys.getenv("OMP_THREAD_LIMIT")} and
+#' \code{getOption("Ncpus")}, otherwise unlimited.
 #' }
 #' 
 "_PACKAGE"
@@ -55,7 +55,14 @@ get_ncores = function(desired=256L, maintain_free=0L)
     as.integer(min(desired, 2L))
   } else
   {
-    n_cores = omp_ncores()
+    n_cores = NA_integer_
+    if(requireNamespace('parallel', quietly = TRUE)) 
+      n_cores = parallel::detectCores(logical=FALSE)
+
+    if(coalesce(n_cores,1L) < 2) 
+      n_cores = omp_ncores()
+    
+    n_cores = n_cores - maintain_free
     
     user_maximum = if(!is.null(getOption('dexter.max_cores'))){
       getOption('dexter.max_cores')
@@ -64,9 +71,7 @@ get_ncores = function(desired=256L, maintain_free=0L)
       min_not_NA(as.integer(Sys.getenv("OMP_THREAD_LIMIT")), getOption("Ncpus"))
     }
     
-    if(is.na(user_maximum))
-      user_maximum = n_cores - maintain_free
-    
+
     available = min(c(n_cores, user_maximum), 
                     na.rm=TRUE)
     

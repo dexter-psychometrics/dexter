@@ -9,19 +9,13 @@ pv_gibbs_settings = function(nPV,
 {
   prior_dist = match.arg(prior_dist)
 
-  if(prior_dist == 'mixture')
-  {
-    warm_up = coalesce(warm_up, 150L)
-  } else
-  {
-    warm_up = coalesce(warm_up, if.else(parms_sample, 20L, 11L))
-  }
+  warm_up = coalesce(warm_up, if.else(prior_dist == 'mixture', 150L, 11L))
   
   step = coalesce(step, if.else(parms_sample, 5L, 1L)) 
   
-  ncores = get_ncores(desired = min(32,nPV), maintain_free = 1L)
-  
   # at least 2 chains, regardless of available cores, sorry mac users
+  # chain per core, max 32
+  ncores = get_ncores(desired = min(32,nPV), maintain_free = 1L)
   nchains = as.integer(max(min(nPV,2L), ncores))
   
   min_b_samples = 1L
@@ -126,7 +120,7 @@ pv_chain = function(x, design, b, a, nPV,
     npop = max(scoretab_counts$pop_c) + 1L
     
     start_mu = matrix(rnorm(npop*gibbs_settings$nchains), ncol=gibbs_settings$nchains)
-    start_sigma = runif(gibbs_settings$nchains,3,4)
+    start_sigma = runif(gibbs_settings$nchains,3,4) 
 
     res = pv_chain_normal(bmat = b, a = a, A = A, 
                           first = design$first_c, last = design$last_c, bk_cnit = design$bk_cnit, bk_max_a = design$bk_max_a,
@@ -137,9 +131,6 @@ pv_chain = function(x, design, b, a, nPV,
                           warmup = gibbs_settings$warm_up,  step = gibbs_settings$step)
     #cat('\n')
     #print(res$n_alt)
-
-    
-
     #dimnames(res$prior_log) = list(var=c('mu','sigma','tau', sprintf("theta_%i",1:(nrow(res$prior_log)-3))),iter=NULL,chain=NULL)
   } else
   {
