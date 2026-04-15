@@ -18,8 +18,9 @@ utils::globalVariables(".")
 #' Values are used as default (missing) values. The datatype will also be inferred from the values.
 #' Known person_properties will be automatically imported when adding response data with \code{\link{add_booklet}}. 
 #' @return a database connection object.
-#' @details This package only works with closed items (e.g. likert, MC or possibly short answer)
-#' it does not score any open items.
+#' @details 
+#' 
+#'  
 #' The first step to creating a project is to import an exhaustive list of all items and
 #' all admissible responses, along with the score that any of the latter will be given.
 #' Responses may be integers or strings but they will always be treated as strings.
@@ -27,6 +28,9 @@ utils::globalVariables(".")
 #' When inputting data, all responses not specified in the rules can optionally be treated as
 #' missing and ultimately scored 0, but it is good style to include the missing
 #' responses in the list. NA values will be treated as the string "NA"'.
+#' 
+#' The Scoring rules are primarily useful for multiple choice or short open items.
+#' For essay items and the like it is usually best to make the response equal to the score.
 #'
 #' @examples
 #'\donttest{
@@ -42,7 +46,12 @@ start_new_project = function(rules, db_name="dexter.db", person_properties = NUL
   check_list(person_properties, nullable=TRUE)
   
   if(!is.null(person_properties))
-      dbCheck_reserved_colnames(names(person_properties))
+  {
+    if(length(names(person_properties)) ==0 || anyDuplicated(tolower(names(person_properties))))
+      stop_("Person properties must be uniquely named (case is ignored)")
+    names(person_properties) = tolower(names(person_properties))
+  }
+      
 
   rules = rules[, c("item_id", "response", "item_score")]
   rules$response = as.character(rules$response)
@@ -702,7 +711,7 @@ add_response_data = function(db, data, design=NULL, missing_value = 'NA', auto_a
 #' @param item_properties A data frame containing a column item_id (matching item_id's already defined in the project)
 #'  and 1 or more other columns with item properties (e.g. item_type, subject)
 #' @param default_values a list where the names are item_properties and the values are defaults.
-#' The defaults will be used wherever the item property is unknown.
+#' The defaults will be used whenever the item property is unknown.
 #' @return nothing
 #' @details When entering response data in the form of a rectangular person x item
 #' table, it is easy to provide person properties but practically impossible
@@ -730,68 +739,8 @@ add_item_properties = function(db, item_properties=NULL, default_values=NULL) {
   check_df(item_properties, 'item_id', nullable=TRUE)
   check_list(default_values, nullable=TRUE)
   
-  # for convenience we include the item_id as a property
-  existing_item_properties = dbListFields(db, 'dxitems') 
-  
-  dbTransaction(db, 
-  {
-    if(!is.null(default_values))
-    {
-      names(default_values) = dbValid_colnames(names(default_values))
-      
-      new_prop_names = setdiff(names(default_values), existing_item_properties)
-      dbCheck_existing_colnames(db,new_prop_names)
-      
-      for(prop_name in new_prop_names)
-      {
-        dbExecute(db, 
-                  paste0("ALTER TABLE dxitems ADD COLUMN ",
-                         prop_name, 
-                         sql_col_def(default_values[[prop_name]], TRUE, db),';'))
-      }
-      cl_msg(paste(length(new_prop_names),'new item_properties defined\n'))
-      existing_item_properties = c(existing_item_properties, new_prop_names)
-    }
-    if(!is.null(item_properties))
-    {
-      colnames(item_properties) = dbValid_colnames(colnames(item_properties))
-      
-      item_properties = item_properties |>
-        mutate(item_id = as.character(.data$item_id)) |>
-        mutate_if(is.factor, as.character) 
-      
-      if(inherits(db,'SQLiteConnection'))
-      {
-        item_properties = item_properties |>
-          mutate_if(is.date, format, "%Y-%m-%d") |>
-          mutate_if(is.time, format, "%Y-%m-%d %H:%M:%S")
-      }
-
-      if(!('item_id' %in% colnames(item_properties)))
-        stop_('item_properties needs to have a column item_id')
-      
-      new_prop_names = setdiff(colnames(item_properties), existing_item_properties)
-      dbCheck_existing_colnames(db,new_prop_names)
-      
-      for(prop_name in new_prop_names)
-      {
-        dbExecute(db, 
-                paste0("ALTER TABLE dxitems ADD COLUMN ", 
-                       sql_quote(prop_name,'"'), 
-                       sql_data_type(pull(item_properties, prop_name)),";"))
-      }
-      pnames = names(item_properties)[names(item_properties)!='item_id']
-      
-      n = dbExecute_param(db,
-            paste0('UPDATE dxitems SET ',paste0(sql_quote(pnames,'"'),'=:',pnames,collapse=', '),
-                      ' WHERE item_id=:item_id;'),
-            item_properties)
-      cl_msg(paste(length(pnames), 'item properties for', n, 'items added or updated\n'))
-    }
-  })
+  add_properties(db, item_properties, default_values, 'items')
 }
-
-
 
 #' Add person properties to a project
 #'
@@ -804,7 +753,7 @@ add_item_properties = function(db, item_properties=NULL, default_values=NULL) {
 #' @param person_properties A data frame containing a column person_id and 1 or more other columns with 
 #' person properties (e.g. education_type, birthdate)
 #' @param default_values a list where the names are person_properties and the values are defaults.
-#' The defaults will be used wherever the person property is unknown.
+#' The defaults will be used whenever the person property is unknown.
 #' 
 #' @details
 #' Due to limitations in the sqlite database backend that we use, the default values for a person property 
@@ -817,60 +766,79 @@ add_person_properties = function(db, person_properties = NULL, default_values = 
   check_df(person_properties, 'person_id', nullable=TRUE)
   check_list(default_values, nullable=TRUE)
   
+  add_properties(db, person_properties, default_values, 'persons')
+}
+
+# maybe message if name is lowercased?
+add_properties = function(db, prop, default_values, type=c('items','persons'))
+{
+  type = match.arg(type)
+  type_singular = sub('s$','',type)
+  idcol = sprintf('%s_id',type_singular)
+  
+  tbl = paste0('dx',type)
+  existing_prop = dbListFields(db, tbl) 
+  
   dbTransaction(db, 
-  { 
-    existing_props = dbListFields(db, 'dxpersons')
-    
+  {
     if(!is.null(default_values))
     {
-      names(default_values) = dbValid_colnames(names(default_values))
-      default_values = default_values[!names(default_values ) %in% existing_props] 
+      names(default_values) = tolower(names(default_values))
+      if(length(names(default_values))==0 || anyDuplicated(names(default_values)))
+        stop_("default values must be uniquely named (case is ignored)")
       
-      dbCheck_existing_colnames(db, names(default_values))
-  
-      for(prop_name in names(default_values))
+      new_prop_names = setdiff(names(default_values), existing_prop)
+      dbCheck_existing_colnames(db, new_prop_names)
+      
+      for(prop_name in new_prop_names)
       {
-        dbExecute(db, paste0("ALTER TABLE dxpersons ADD COLUMN ",prop_name, sql_col_def(default_values[[prop_name]], TRUE, db),';'))
+        dbExecute(db,
+          sprintf("ALTER TABLE %s ADD COLUMN %s %s;",tbl, sql_quote(prop_name,'"'),
+                  sql_col_def(default_values[[prop_name]], TRUE, db)))
       }
-      cl_msg(paste(length(setdiff(names(default_values), existing_props)),"new person_properties defined\n"))
-      existing_props = c(existing_props, names(default_values))
+      cl_msg(sprintf('%i new %s_properties defined', length(new_prop_names),type_singular))
+      existing_prop = c(existing_prop, new_prop_names)
     }
-    
-    if(!is.null(person_properties))
+    if(!is.null(prop))
     {
-      person_properties$person_id = as.character(person_properties$person_id)
-      colnames(person_properties) = dbValid_colnames(colnames(person_properties))
-
-      new_props = setdiff(colnames(person_properties), existing_props)
-      dbCheck_existing_colnames(db, new_props)
+      if(anyDuplicated(tolower(colnames(prop))))
+        stop_("Properties must be uniquely named (case is ignored)")
+      
+      colnames(prop) = tolower(colnames(prop))
+      prop[[idcol]] = as.character(prop[[idcol]])
+      prop = mutate_if(prop,is.factor, as.character)
       
       if(inherits(db,'SQLiteConnection'))
       {
-        person_properties = person_properties |>
+        prop = prop |>
           mutate_if(is.date, format, "%Y-%m-%d") |>
           mutate_if(is.time, format, "%Y-%m-%d %H:%M:%S")
       }
+
       
+      new_prop_names = setdiff(colnames(prop), existing_prop)
+      dbCheck_existing_colnames(db,new_prop_names)
       
-      lapply(new_props, function(prop_name)
+      for(prop_name in new_prop_names)
       {
-        dbExecute(db, paste0("ALTER TABLE dxpersons ADD COLUMN ",
-                             sql_quote(prop_name,'"'), 
-                             sql_col_def(pull(person_properties, prop_name), FALSE, db),';'))
-      })
+        dbExecute(db, 
+          sprintf("ALTER TABLE %s ADD COLUMN %s %s ;",
+                  tbl, sql_quote(prop_name,'"'), sql_data_type(prop[[prop_name]])))
+      }
+      pnames = colnames(prop)[colnames(prop) != idcol]
+      safe_names = paste0('zz__',seq_along(pnames))
+      names(pnames) = safe_names
+      prop = rename(prop, all_of(pnames))
       
-      pnm = setdiff(colnames(person_properties),'person_id')
-      
-      n = dbExecute_param(db, 
-                    paste('UPDATE dxpersons SET', paste0(sql_quote(pnm,'"'), '=:', pnm, collapse = ','),
-                              'WHERE person_id=:person_id;'),
-                    person_properties)
-      
-      cl_msg(paste(ncol(person_properties) - 1, 'person properties for', n, 'persons added or updated\n'))
+      n = dbExecute_param(db,
+            sprintf('UPDATE %s SET %s WHERE %s=:%s;', 
+                    tbl,paste0(sql_quote(pnames,'"'),'=:',safe_names,collapse=', '),idcol,idcol),
+            prop)
+
+      cl_msg(paste(length(pnames), type_singular, 'properties for', n, type,'added or updated'))
     }
   })
 }
-
 
 
 

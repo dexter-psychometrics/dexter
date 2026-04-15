@@ -1,3 +1,11 @@
+# dexter 1.8.0
+
+* special characters in item/person property names are now allowed (but older versions of dexter will not be able to use them). 
+  Property names are still converted to lowercase.
+  
+* plausible values no longer stalls on extremely unlikely scores, making it much faster in many cases.
+
+
 # dexter 1.7.2
 
 * updated for new dplyr version, no other changes

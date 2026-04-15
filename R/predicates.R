@@ -533,7 +533,8 @@ translate_sql = function(e, variant) # variant = c('ansi','sqlite','postgresql')
   
   # symbol quote dependent on db seems not necessary, although sqlite supports `
   if(type == 'symbol')
-    return(paste0('"',as.character(e),'"'))  
+    return(sql_quote(as.character(e),'"'))
+    #return(paste0('"',as.character(e),'"'))  
   
   if(type == 'language')
     return(translate_sql_lang(e, variant))

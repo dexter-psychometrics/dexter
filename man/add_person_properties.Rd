@@ -14,7 +14,7 @@ or \code{open_project}}
 person properties (e.g. education_type, birthdate)}
 
 \item{default_values}{a list where the names are person_properties and the values are defaults.
-The defaults will be used wherever the person property is unknown.}
+The defaults will be used whenever the person property is unknown.}
 }
 \value{
 nothing

@@ -14,7 +14,7 @@ or \code{open_project}}
 and 1 or more other columns with item properties (e.g. item_type, subject)}
 
 \item{default_values}{a list where the names are item_properties and the values are defaults.
-The defaults will be used wherever the item property is unknown.}
+The defaults will be used whenever the item property is unknown.}
 }
 \value{
 nothing

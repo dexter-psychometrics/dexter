@@ -27,8 +27,6 @@ a database connection object.
 Imports a complete set of scoring rules and starts a new project (database)
 }
 \details{
-This package only works with closed items (e.g. likert, MC or possibly short answer)
-it does not score any open items.
 The first step to creating a project is to import an exhaustive list of all items and
 all admissible responses, along with the score that any of the latter will be given.
 Responses may be integers or strings but they will always be treated as strings.
@@ -36,6 +34,9 @@ Scores must be integers, and the minimum score for an item must be 0.
 When inputting data, all responses not specified in the rules can optionally be treated as
 missing and ultimately scored 0, but it is good style to include the missing
 responses in the list. NA values will be treated as the string "NA"'.
+
+The Scoring rules are primarily useful for multiple choice or short open items.
+For essay items and the like it is usually best to make the response equal to the score.
 }
 \examples{
 \donttest{

@@ -73,12 +73,10 @@ project_CreateTables = function(db, person_properties=NULL)
   
   if (!is.null(person_properties))
   {
-    # do some cleaning to make sure these are acceptable column names
-    names(person_properties) = dbValid_colnames(names(person_properties))
     person_properties[['person_id']] = NULL
     for(col in names(person_properties))
     {
-      dbExecute(db, paste0("ALTER TABLE dxpersons ADD COLUMN ",col,sql_col_def(person_properties[[col]],is.default=TRUE),';'))
+      dbExecute(db, paste0("ALTER TABLE dxpersons ADD COLUMN ",sql_quote(col,'"'),sql_col_def(person_properties[[col]],is.default=TRUE),';'))
     }
   }
 }
@@ -116,10 +114,9 @@ sql_col_def = function(value, is.default=FALSE, db=NULL)
 }
 
 
-dbValid_colnames = function(vec)
-{
-   gsub('^(?=\\d)','c',gsub('[^0-9a-z_]','_',tolower(vec)), perl=TRUE)
-}
+#dbValid_colnames = function(vec) gsub('^(?=\\d)','c',gsub('[^0-9a-z_]','_',tolower(vec)), perl=TRUE)
+dbValid_colnames = function(vec) tolower(vec)
+
 
 dbTransaction = function(db, expr, on_error = sql_stop_, on_error_rollback=TRUE)
 {
