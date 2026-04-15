@@ -78,7 +78,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Dexter: data analyses for educational and psychological tests.</h1>
-    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/R/dexter.R" class="external-link"><code>R/dexter.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/R/misc.R" class="external-link"><code>R/misc.R</code></a></small>
     <div class="hidden name"><code>dexter-package.Rd</code></div>
     </div>
 
@@ -94,10 +94,11 @@
 <li><p>methods to assess data quality using Classical test theory and plots.</p></li>
 <li><p>CML calibration of the extended nominal response model and interaction model.</p></li>
 </ul><p>To learn more about dexter, start with the vignettes: `browseVignettes(package="dexter")`</p>
-<p>Dexter uses the following global options</p><ul><li><p>`dexter.use_tibble` return tibbles instead of data.frames, defaults to FALSE</p></li>
-<li><p>`dexter.progress` show progress bars, defaults to TRUE in interactive sessions</p></li>
-<li><p>`dexter.max_cores` set a maximum number of cores that dexter will use, defaults to the minimum of `Sys.getenv("OMP_THREAD_LIMIT")` and
-`getOption("Ncpus")`, otherwise unlimited.</p></li>
+<p>Dexter uses the following global options</p><ul><li><p><code>dexter.use_tibble</code> return tibbles instead of data.frames, defaults to FALSE</p></li>
+<li><p><code>dexter.verbose</code> if FALSE, turn off all informative messages, defaults to TRUE</p></li>
+<li><p><code>dexter.progress</code> show progress bars, defaults to TRUE in interactive sessions</p></li>
+<li><p><code>dexter.max_cores</code> set a maximum number of cores that dexter will use, defaults to the minimum of <code>Sys.getenv("OMP_THREAD_LIMIT")</code> and
+<code>getOption("Ncpus")</code>, otherwise unlimited.</p></li>
 </ul></div>
     <div id="see-also">
     <h2>See also</h2>
