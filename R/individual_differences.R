@@ -50,7 +50,7 @@ individual_differences = function(dataSrc, predicate = NULL)
 
   theta.est = ML_theta(weighted.mean(parms$inputs$scoretab$booklet_score,parms$inputs$scoretab$N),
                        b,a,first,last)
-  #theta.est = theta_score_distribution(b,a,first,last,observed)
+
   expected = pscore(theta.est,b,a,first,last)[,1,drop=TRUE]
   chi = chisq.test(x=observed,p=expected,simulate.p.value = TRUE)
   

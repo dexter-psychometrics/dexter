@@ -7,7 +7,7 @@ CREATE TABLE dxItems(
 CREATE TABLE dxScoring_rules(
 	item_id VARCHAR(100) NOT NULL,
 	response VARCHAR(100) NOT NULL,
-	item_score INTEGER NOT NULL, 
+	item_score INTEGER NOT NULL CHECK(item_score >=0), 
 	
 	PRIMARY KEY (item_id, response),
 	FOREIGN KEY (item_id) REFERENCES dxItems(item_id) ON UPDATE CASCADE ON DELETE CASCADE

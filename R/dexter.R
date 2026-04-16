@@ -63,6 +63,9 @@ start_new_project = function(rules, db_name="dexter.db", person_properties = NUL
   
   rules$item_score = as.integer(rules$item_score)
   
+  if(any( rules$item_score < 0))
+    stop_('item_score must be >= 0 ')
+  
   if(any(is.na(rules$item_id)) || any(is.na(rules$item_score)))
     stop_("The item_id and item_score columns may not contain NA values")
   
@@ -268,6 +271,9 @@ touch_rules = function(db, rules)
     stop_('only integer scores are allowed')
   
   rules$item_score = as.integer(rules$item_score)
+  
+  if(any( rules$item_score < 0))
+    stop_('item_score must be >= 0 ')
   
   # check if same options are supplied multiple times, this is the only check not done in conjunction
   # with the existing rules so it has to be gotten out of the way
@@ -835,7 +841,7 @@ add_properties = function(db, prop, default_values, type=c('items','persons'))
                     tbl,paste0(sql_quote(pnames,'"'),'=:',safe_names,collapse=', '),idcol,idcol),
             prop)
 
-      cl_msg(paste(length(pnames), type_singular, 'properties for', n, type,'added or updated'))
+      cl_msg(paste(length(pnames), type_singular, 'properties for', n, type,'added or updated.\n'))
     }
   })
 }
