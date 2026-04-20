@@ -94,6 +94,7 @@
 <span>  covariates <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nPV <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  parms_draw <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"sample"</span>, <span class="st">"average"</span><span class="op">)</span>,</span>
+<span>  link_error <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  prior_dist <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"normal"</span>, <span class="st">"mixture"</span><span class="op">)</span>,</span>
 <span>  merge_within_persons <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -109,7 +110,7 @@
 
 <dt id="arg-parms">parms<a class="anchor" aria-label="anchor" href="#arg-parms"></a></dt>
 <dd><p>An object returned by function <code>fit_enorm</code> containing parameter estimates or a data.frame with columns item_id, item_score and,
-beta. If parms are provided, item parameters are considered known. If parms is NULL, they will be estimated Bayesianly.</p></dd>
+beta. If parms are provided, item parameters are considered known, see @details. If parms is NULL, they will be estimated Bayesianly.</p></dd>
 
 
 <dt id="arg-predicate">predicate<a class="anchor" aria-label="anchor" href="#arg-predicate"></a></dt>
@@ -133,6 +134,11 @@ parms_draw specifies whether to use a sample (a different item parameter draw fo
 of the item draws. Alternatively, it can be an integer specifying a specific draw. It is ignored when parms is not estimated Bayesianly.</p></dd>
 
 
+<dt id="arg-link-error">link_error<a class="anchor" aria-label="anchor" href="#arg-link-error"></a></dt>
+<dd><p>only for cml, whether to use the maximum likelihood estimates or random draws based on the covariance matrix,
+thus including estimation/linking error in the pv draws.</p></dd>
+
+
 <dt id="arg-prior-dist">prior_dist<a class="anchor" aria-label="anchor" href="#arg-prior-dist"></a></dt>
 <dd><p>use a normal prior for the plausible values or a mixture of two normals.
 A mixture is only possible when there are no covariates.</p></dd>
@@ -150,8 +156,9 @@ named PV1...PVn.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>When the item parameters are estimated using <code>fit_enorm(..., method='Bayes')</code> and parms_draw = 'sample', the uncertainty
-of the item parameters estimates is taken into account when drawing multiple plausible values.</p>
+    <p>When the item parameters are estimated using <code>fit_enorm(..., method='Bayes')</code> and parms_draw = 'sample',
+or when they are estimated with CML and <code>lin_error=TRUE</code> the uncertainty
+of the item parameter estimates is taken into account when drawing multiple plausible values. To use these options, parms must be an object of type enorm and not a data.frame.</p>
 <p>In there are covariates, the prior distribution is a hierarchical normal with equal variances across groups. When there is only
 one group this becomes a regular normal distribution. When there are no covariates and prior_dist = "mixture", the prior is a mixture
 distribution of two normal distributions which gives a little more flexibility than a normal prior.</p>
