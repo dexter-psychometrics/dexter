@@ -61,7 +61,7 @@ arma::imat sampleNRM_itemC(const arma::vec& theta, const arma::vec& b, const arm
 	vec p(maxA+3);
 	vec lookup(maxA+1);
   
-	imat score(m, nit);  
+	imat score(m, nit, fill::zeros);  
   
 	lookup[0] = 1;
 	p[0] = 1;

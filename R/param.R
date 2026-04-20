@@ -8,7 +8,7 @@
 # the default 'sample' returns the complete matrix, i.e. the sample is the census in the original order
 # any subsequent 'sampling' must be done in the caller function itself
 
-simplify_parms = function(parms, design=NULL, draw = c('sample','average'), by_chain=FALSE)
+simplify_parms = function(parms, design=NULL, draw = c('sample','average'), by_chain=FALSE, cml_draws=-1)
 {
   check_df(design, 'item_id', nullable=TRUE)
   chain_index = NULL
@@ -49,8 +49,20 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'), by_c
   {
     method = parms$inputs$method
     a = parms$inputs$ssIS$item_score
+    
     if(method=="CML"){
-      b = parms$est$b
+      if(cml_draws <= 1)
+      {
+        b = parms$est$b
+      } else
+      {
+        beta = rmvnorm(cml_draws, mu=parms$est$beta, sigma = parms$est$acov.beta )
+
+        b = t(apply(beta,1,\(beta) beta2b(a, beta, 
+                                        parms$inputs$ssI$first, parms$inputs$ssI$last)))
+
+      }
+      
     } else if(is.numeric(draw)) 
     {
       if(draw>nrow(parms$est$b)) 

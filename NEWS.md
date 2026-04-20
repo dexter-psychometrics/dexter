@@ -1,9 +1,12 @@
 # dexter 1.8.0
 
-* special characters in item/person property names are now allowed (but older versions of dexter will not be able to use them). 
-  Property names are still converted to lowercase.
+* plausible_values/plausible_scores has gained an argument link_error, 
+  allowing for inclusion of estimation/linking error in CML item parameters
+
+* plausible_values/plausible_scores no longer stalls on extremely unlikely scores, making it much faster in many cases.
+
+* special characters in item/person property names are now allowed. They are still converted to lowercase.
   
-* plausible values no longer stalls on extremely unlikely scores, making it much faster in many cases.
 
 
 # dexter 1.7.2

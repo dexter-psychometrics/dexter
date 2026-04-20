@@ -408,6 +408,7 @@ nearPD = function (x,  eig.tol = 1e-06, conv.tol = 1e-07, posd.tol = 1e-08, maxi
 
 rmvnorm = function(n, mu, sigma)
 {
+  # this is _not_ faster in armadillo
   ev = eigen(sigma, symmetric = TRUE)
   R = t(ev$vectors %*% (t(ev$vectors) * sqrt(pmax(ev$values, 0))))
   res = matrix(rnorm(n * ncol(sigma)), nrow = n, byrow = TRUE) %*% R

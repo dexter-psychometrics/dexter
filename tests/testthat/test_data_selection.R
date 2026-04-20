@@ -378,8 +378,7 @@ test_that('sql translation',
 test_that('variable names cross sql',
 {
 
-  # variable names are lowercase in sql and do not support special characters such as a dot
-  # We make no effort to support dots and such but we do make an effort to support case mismatch
+  # variable names are lowercase in sql and we make an effort to support case mismatch
   
   # If a variable does not exist in the db and does not exist in the environment 
   # but it does exists in the db with another case, it should work.

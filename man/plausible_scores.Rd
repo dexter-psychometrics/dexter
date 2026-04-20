@@ -10,6 +10,7 @@ plausible_scores(
   predicate = NULL,
   items = NULL,
   parms_draw = c("sample", "average"),
+  link_error = FALSE,
   covariates = NULL,
   nPS = 1,
   prior_dist = c("normal", "mixture"),
@@ -34,6 +35,9 @@ all items occurring in \code{dataSrc} are used.}
 \item{parms_draw}{when the item parameters are estimated Bayesianly (see: \code{\link{fit_enorm}}), 
 parms_draw specifies whether to use a sample(a different item parameter draw for each plausible values draw) or the posterior mean
 of the item draws. Alternatively, it can be an integer specifying a specific draw. Ignored when parms is not estimated Bayesianly.}
+
+\item{link_error}{only for cml, whether to use the maximum likelihood estimates or random draws based on the covariance matrix, 
+thus including estimation/linking error in the pv draws.}
 
 \item{covariates}{name or a vector of names of the variables to group the population, used to update the prior.
 A covariate must be a discrete person covariate that indicates nominal categories, e.g. gender or school

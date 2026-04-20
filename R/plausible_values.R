@@ -168,7 +168,7 @@ pv_chain = function(x, design, b, a, nPV,
 #'
 #' @param dataSrc a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score
 #' @param parms An object returned by function \code{fit_enorm} containing parameter estimates or a data.frame with columns item_id, item_score and, 
-#' beta. If parms are provided, item parameters are considered known. If parms is NULL, they will be estimated Bayesianly.
+#' beta. If parms are provided, item parameters are considered known, see @details. If parms is NULL, they will be estimated Bayesianly.
 #' @param predicate an expression to filter data. If missing, the function will use 
 #' all data in dataSrc
 #' @param covariates name or a vector of names of the variables to group the populations used to improve the prior.
@@ -178,6 +178,8 @@ pv_chain = function(x, design, b, a, nPV,
 #' @param parms_draw when the item parameters are estimated with method "Bayes" (see: \code{\link{fit_enorm}}), 
 #' parms_draw specifies whether to use a sample (a different item parameter draw for each plausible values draw) or the posterior mean
 #' of the item draws. Alternatively, it can be an integer specifying a specific draw. It is ignored when parms is not estimated Bayesianly.
+#' @param link_error only for cml, whether to use the maximum likelihood estimates or random draws based on the covariance matrix, 
+#' thus including estimation/linking error in the pv draws.
 #' @param prior_dist use a normal prior for the plausible values or a mixture of two normals. 
 #' A mixture is only possible when there are no covariates.
 #' @param merge_within_persons If a person took multiple booklets, this indicates
@@ -187,8 +189,9 @@ pv_chain = function(x, design, b, a, nPV,
 #' 
 #' @details
 #' 
-#' When the item parameters are estimated using \code{fit_enorm(..., method='Bayes')} and parms_draw = 'sample', the uncertainty 
-#' of the item parameters estimates is taken into account when drawing multiple plausible values. 
+#' When the item parameters are estimated using \code{fit_enorm(..., method='Bayes')} and parms_draw = 'sample', 
+#' or when they are estimated with CML and \code{lin_error=TRUE} the uncertainty 
+#' of the item parameter estimates is taken into account when drawing multiple plausible values. To use these options, parms must be an object of type enorm and not a data.frame.
 #' 
 #' In there are covariates, the prior distribution is a hierarchical normal with equal variances across groups. When there is only
 #' one group this becomes a regular normal distribution. When there are no covariates and prior_dist = "mixture", the prior is a mixture
@@ -235,27 +238,30 @@ pv_chain = function(x, design, b, a, nPV,
 #' 
 plausible_values = function(dataSrc, parms=NULL, predicate=NULL, covariates=NULL, 
                              nPV=1, 
-                             parms_draw = c('sample','average'), 
+                             parms_draw = c('sample','average'),
+                             link_error = FALSE,
                              prior_dist = c("normal", "mixture"),
                              merge_within_persons = FALSE)
 {
   qtpredicate = eval(substitute(quote(predicate)))
   env = caller_env()
   prior_dist = match.arg(prior_dist)
+
   check_dataSrc(dataSrc)
   check_num(nPV, .length=1, .min=1)
   
   df_info = get_datatype_info(dataSrc, columns = c('booklet_id','person_id',covariates))
   
   plausible_values_(dataSrc, parms, qtpredicate=qtpredicate, covariates=covariates, nPV=nPV, 
-                     parms_draw = parms_draw, env=env,prior_dist = prior_dist ,
+                     parms_draw=parms_draw, link_error = link_error, env=env,prior_dist = prior_dist ,
                      merge_within_persons=merge_within_persons)$pv |>
     df_format(df_info)
 }
 
 
 plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=NULL, 
-                              nPV=1, parms_draw = c('sample','average'), 
+                              nPV=1, parms_draw = c('sample','average'),
+                              link_error = FALSE,
                               env=NULL, prior_dist = c("normal", "mixture"),
                               merge_within_persons = FALSE)
 {
@@ -264,6 +270,7 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
   if(is.numeric(parms_draw)) parms_draw = as.integer(parms_draw)
   else parms_draw = match.arg(parms_draw)
   
+
   prior_dist = match.arg(prior_dist)
   
   if(!is.null(covariates) && prior_dist == "mixture")
@@ -273,10 +280,12 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
   }
   
 
-  pb = get_prog_bar(nsteps=if(is.null(parms)) 120 else 100, 
+  pb = get_prog_bar(nsteps=if(is.null(parms) || link_error) 120 else 100, 
                     retrieve_data = is_db(dataSrc))
   on.exit({pb$close()})
   
+
+  cml_n_draws = 1
   if(is.null(parms)) 
   {
     nrm_draws = 1000L
@@ -287,10 +296,10 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
                              merge_within_persons=merge_within_persons)
     pb$new_area(20)
     parms = fit_enorm_(respData, method = 'Bayes', nDraws = nrm_draws) 
+    pb$new_area(100)
     
     respData = get_resp_data(respData, summarised=TRUE, extra_columns=covariates, 
                              protect_x=!is_db(dataSrc))
-    pb$new_area(100)
     
   } else
   {
@@ -300,6 +309,8 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
     } else
     {
       pcheck = parms$inputs$ssIS[,c('item_id','item_score')]
+      if(link_error)
+        cml_n_draws = pv_gibbs_settings(nPV, parms_sample=TRUE, prior_dist = prior_dist)$min_b_samples
     }
     
     respData = get_resp_data(dataSrc, qtpredicate, summarised=TRUE, 
@@ -307,8 +318,11 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
                              parms_check=pcheck,
                              merge_within_persons=merge_within_persons)
   }
-  
-  parms = simplify_parms(parms, draw=parms_draw)
+ 
+
+ 
+  parms = simplify_parms(parms, draw=parms_draw, cml_draws = cml_n_draws)
+
   
   gibbs_settings = pv_gibbs_settings(nPV, 
                                      parms_sample = !(is.null(dim(parms$b)) || nrow(parms$b)==1), 

@@ -15,6 +15,8 @@
 #' @param parms_draw when the item parameters are estimated Bayesianly (see: \code{\link{fit_enorm}}), 
 #' parms_draw specifies whether to use a sample(a different item parameter draw for each plausible values draw) or the posterior mean
 #' of the item draws. Alternatively, it can be an integer specifying a specific draw. Ignored when parms is not estimated Bayesianly.
+#' @param link_error only for cml, whether to use the maximum likelihood estimates or random draws based on the covariance matrix, 
+#' thus including estimation/linking error in the pv draws.
 #' @param items vector of item_id's, this specifies the itemset to generate the testscores for. If \code{items} is \code{NULL} 
 #' all items occurring in \code{dataSrc} are used.
 #' @param covariates name or a vector of names of the variables to group the population, used to update the prior.
@@ -32,6 +34,7 @@
 #' named PS1...PSn.
 #'  
 plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, parms_draw = c('sample','average'),
+                            link_error=FALSE,
                             covariates=NULL, nPS=1, prior_dist = c("normal", "mixture"),
                             keep.observed=TRUE, by_item=FALSE, merge_within_persons=FALSE)  
 {
@@ -80,7 +83,7 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
   
   # generate plausible values and params
   res = plausible_values_(respData, parms=parms, covariates=covariates, 
-                          nPV=nPS, parms_draw = parms_draw, 
+                          nPV=nPS, parms_draw = parms_draw, link_error=link_error,
                           prior_dist = prior_dist)
   
   parms = res$parms

@@ -11,6 +11,7 @@ plausible_values(
   covariates = NULL,
   nPV = 1,
   parms_draw = c("sample", "average"),
+  link_error = FALSE,
   prior_dist = c("normal", "mixture"),
   merge_within_persons = FALSE
 )
@@ -19,7 +20,7 @@ plausible_values(
 \item{dataSrc}{a connection to a dexter database, a matrix, or a data.frame with columns: person_id, item_id, item_score}
 
 \item{parms}{An object returned by function \code{fit_enorm} containing parameter estimates or a data.frame with columns item_id, item_score and, 
-beta. If parms are provided, item parameters are considered known. If parms is NULL, they will be estimated Bayesianly.}
+beta. If parms are provided, item parameters are considered known, see @details. If parms is NULL, they will be estimated Bayesianly.}
 
 \item{predicate}{an expression to filter data. If missing, the function will use 
 all data in dataSrc}
@@ -33,6 +34,9 @@ If dataSrc is a data.frame, it must contain the covariate.}
 \item{parms_draw}{when the item parameters are estimated with method "Bayes" (see: \code{\link{fit_enorm}}), 
 parms_draw specifies whether to use a sample (a different item parameter draw for each plausible values draw) or the posterior mean
 of the item draws. Alternatively, it can be an integer specifying a specific draw. It is ignored when parms is not estimated Bayesianly.}
+
+\item{link_error}{only for cml, whether to use the maximum likelihood estimates or random draws based on the covariance matrix, 
+thus including estimation/linking error in the pv draws.}
 
 \item{prior_dist}{use a normal prior for the plausible values or a mixture of two normals. 
 A mixture is only possible when there are no covariates.}
@@ -48,8 +52,9 @@ named PV1...PVn.
 Draws plausible values based on test scores
 }
 \details{
-When the item parameters are estimated using \code{fit_enorm(..., method='Bayes')} and parms_draw = 'sample', the uncertainty 
-of the item parameters estimates is taken into account when drawing multiple plausible values. 
+When the item parameters are estimated using \code{fit_enorm(..., method='Bayes')} and parms_draw = 'sample', 
+or when they are estimated with CML and \code{lin_error=TRUE} the uncertainty 
+of the item parameter estimates is taken into account when drawing multiple plausible values. To use these options, parms must be an object of type enorm and not a data.frame.
 
 In there are covariates, the prior distribution is a hierarchical normal with equal variances across groups. When there is only
 one group this becomes a regular normal distribution. When there are no covariates and prior_dist = "mixture", the prior is a mixture
