@@ -173,12 +173,12 @@ pv_chain_mix <- function(bmat, a, A, first, last, bk_cnit, bk_max_a, gscoretab, 
     .Call(`_dexter_pv_chain_mix`, bmat, a, A, first, last, bk_cnit, bk_max_a, gscoretab, gscoretab_bk, gscoretab_nscores, gscoretab_np, mu_start, sigma_start, p_start, npv, progress_init, max_cores, warmup, step)
 }
 
-sampleNRM_testC <- function(theta, b, a, first, last) {
-    .Call(`_dexter_sampleNRM_testC`, theta, b, a, first, last)
+impute_NRM_C <- function(pv, b, a, first, last, person_id, item_first, item_score, by_item, max_cores) {
+    .Call(`_dexter_impute_NRM_C`, pv, b, a, first, last, person_id, item_first, item_score, by_item, max_cores)
 }
 
-sampleNRM_itemC <- function(theta, b, a, first, last) {
-    .Call(`_dexter_sampleNRM_itemC`, theta, b, a, first, last)
+sample_NRM_C <- function(theta, b, a, first, last, by_item, max_cores) {
+    .Call(`_dexter_sample_NRM_C`, theta, b, a, first, last, by_item, max_cores)
 }
 
 sampleIMC <- function(bIM, cIM, a, first, last, scoretab) {

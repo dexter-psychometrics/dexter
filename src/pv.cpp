@@ -343,6 +343,7 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 	const ivec cscoretab = cumsum(const_scoretab); // not for iteration, so no zero added at the front	
 	
 	mat theta(N, std::max(nchains,npv)); 
+	ivec b_index(std::max(nchains,npv), fill::ones);
 	
 	cube prior_log(mu_start.n_rows+3, (step*npv)/nchains + warmup + 1, nchains);
 	
@@ -478,9 +479,14 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 				
 				prior_log.slice(chain).col(iter) = priors.as_vec();
 				priors.update(lrng, theta.col(pvcol), scoretab_pop, scoretab_np, scoretab_cnp);
+				if(iter >= warmup && (iter - warmup) % step == 0)
+				{ 
+					if(bstep > 0) b_index[pvcol] = bcol + 1;
+					pvcol++;	
+				}
 				bcol += bstep;
 				if(bcol >= bmat.n_cols) bcol = chain;
-				if(iter >= warmup && (iter - warmup) % step == 0) pvcol++;		
+					
 				pb.tick(thread == 0);	
 			}
 		}
@@ -490,7 +496,7 @@ Rcpp::List pv_chain_normal(const arma::mat& bmat, const arma::ivec& a, const arm
 	{ 
 		Rcpp::stop("user interrupt");
 	}
-	return Rcpp::List::create(Named("theta") = theta, Named("prior_log") = prior_log, Named("n_alt_pv") = n_alt);
+	return Rcpp::List::create(Named("theta") = theta, Named("prior_log") = prior_log, Named("n_alt_pv") = n_alt, Named("b_index") = b_index);
 }
 
 // mixture prior
@@ -514,6 +520,7 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 	dqrng::normal_distribution prl_rnorm(0, 1);
 	
 	mat theta(N, std::max(nchains,npv)); 
+	ivec b_index(std::max(nchains,npv), fill::ones);
 	
 	cube prior_log(5, (step*npv)/nchains + warmup + 1, nchains);
 	
@@ -651,9 +658,15 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 				}	
 				prior_log.slice(chain).col(iter) = priors.as_vec();
 				priors.upd_normal(lrng, theta.col(pvcol));
+								
+				
+				if(iter >= warmup && (iter - warmup) % step == 0)
+				{
+					if(bstep > 0) b_index[pvcol] = bcol + 1;
+					pvcol++;		
+				}
 				bcol += bstep;
 				if(bcol >= bmat.n_cols) bcol = chain;
-				if(iter >= warmup && (iter - warmup) % step == 0) pvcol++;		
 				pb.tick(thread == 0);
 				if(thread==0) pb.checkInterrupt(); 
 			}
@@ -699,5 +712,5 @@ Rcpp::List pv_chain_mix(const arma::mat& bmat, const arma::ivec& a, const arma::
 		}
 	}
 	
-	return Rcpp::List::create(Named("theta") = theta, Named("prior_log") = prior_log);
+	return Rcpp::List::create(Named("theta") = theta, Named("prior_log") = prior_log, Named("b_index") = b_index);
 }

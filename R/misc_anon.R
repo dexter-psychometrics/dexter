@@ -20,14 +20,34 @@ pscore_lgamma = function(theta, lg)
   exp(sweep(p,2,apply(p,2,logsumexp),`-`))
 }
 
-
-
-rscore_item = function(theta,b,a,first,last)
+# sample scores under the enorm
+# existing scores$person_id needs to be -1 terminated
+sample_scores = function(theta, b, a, first0, last0, 
+                         by_item, item_long,
+                         existing_scores = list(person_id=-1L, item_first = -1L, item_score=-1L))
 {
-  first = as.integer(first-1L)
-  last = as.integer(last-1L)
-  a = as.integer(a)
-  sampleNRM_itemC(theta, b, a, first, last)
+  multicol = coalesce(ncol(theta),1L) > 1
+  multib = coalesce(ncol(b),1L) > 1
+  
+  if(multicol && multib)  stopifnot(ncol(theta) == ncol(b))
+  
+  if(existing_scores$person_id[1] < 0 && !multicol && !(by_item && item_long))
+  {
+    max_cores = get_ncores(desired = min(32L,as.integer(length(theta)/1000)), maintain_free = 1L)
+    
+    sample_NRM_C(drop(theta), drop(b), a, 
+                 first=first0, last=last0, by_item=by_item, max_cores = max_cores)
+  } else
+  {
+    if(by_item && !item_long) stop('not implemented')
+    
+    max_cores = get_ncores(desired = min(32L,ncol(theta)), maintain_free = 1L)
+    
+    impute_NRM_C(as.matrix(theta), as.matrix(b), a, first=first0, last=last0, 
+                person_id = existing_scores$person_id, item_first=existing_scores$item_first,
+                item_score = existing_scores$item_score,
+                by_item=by_item, max_cores = max_cores)
+  }
 }
 
 

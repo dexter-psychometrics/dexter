@@ -153,7 +153,8 @@ pv_chain = function(x, design, b, a, nPV,
   
   colnames(res$theta) = sprintf("PV%i",1:ncol(res$theta))
   
-  bind_cols(bind_rows(x), res$theta)
+  list(pv = bind_cols(bind_rows(x), res$theta) |>  select(-any_of('pop')), 
+       b_index=res$b_index)
 }
 
 
@@ -356,19 +357,18 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
                               inner_join(parms$items, by='item_id') |> 
                               arrange(.data$booklet_id, .data$first))
   
-  
-  y = pv_chain(select(respData$x, 'booklet_id', 'person_id', 'booklet_score', any_of(c(pop = 'pop__'))),
+  res = pv_chain(select(respData$x, 'booklet_id', 'person_id', 'booklet_score', any_of(c(pop = 'pop__'))),
                design, parms$b, parms$a, nPV=nPV, prior_dist=prior_dist,
-               gibbs_settings=gibbs_settings) |>
-    select(-any_of('pop'))
-  
-  
+               gibbs_settings=gibbs_settings)
+   
   if(!is.null(covariates))
   {
     # added unique so that booklet_id can be used as a covariate
-    y = inner_join(respData$x[,unique(c('booklet_id','person_id',covariates))], y, 
+    res$pv = inner_join(respData$x[,unique(c('booklet_id','person_id',covariates))], res$pv, 
                    by=c('booklet_id','person_id') )
   }
-
-  list(pv=y,parms=parms)
+  if(!all(res$b_index==1))
+    parms$b = parms$b[res$b_index,]
+  
+  list(pv=res$pv, parms=parms)
 }

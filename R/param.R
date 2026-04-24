@@ -57,10 +57,11 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'), by_c
       } else
       {
         beta = rmvnorm(cml_draws, mu=parms$est$beta, sigma = parms$est$acov.beta )
+        
+        # I think we should  renormalize (in case no fixed)
+        if(!any(parms$est$acov.beta==0)) beta = apply(beta,2,\(x) x - mean(x))
 
-        b = t(apply(beta,1,\(beta) beta2b(a, beta, 
-                                        parms$inputs$ssI$first, parms$inputs$ssI$last)))
-
+        b = t(apply(beta,1,\(beta) beta2b(a, beta, parms$inputs$ssI$first, parms$inputs$ssI$last)))
       }
       
     } else if(is.numeric(draw)) 

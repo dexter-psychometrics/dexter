@@ -711,24 +711,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// sampleNRM_testC
-arma::ivec sampleNRM_testC(const arma::vec& theta, const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last);
-RcppExport SEXP _dexter_sampleNRM_testC(SEXP thetaSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP) {
+// impute_NRM_C
+arma::imat impute_NRM_C(const arma::mat& pv, const arma::mat& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const arma::ivec& person_id, const arma::ivec& item_first, const arma::ivec& item_score, const bool by_item, const int max_cores);
+RcppExport SEXP _dexter_impute_NRM_C(SEXP pvSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP person_idSEXP, SEXP item_firstSEXP, SEXP item_scoreSEXP, SEXP by_itemSEXP, SEXP max_coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type theta(thetaSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type pv(pvSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type b(bSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
-    rcpp_result_gen = Rcpp::wrap(sampleNRM_testC(theta, b, a, first, last));
+    Rcpp::traits::input_parameter< const arma::ivec& >::type person_id(person_idSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type item_first(item_firstSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type item_score(item_scoreSEXP);
+    Rcpp::traits::input_parameter< const bool >::type by_item(by_itemSEXP);
+    Rcpp::traits::input_parameter< const int >::type max_cores(max_coresSEXP);
+    rcpp_result_gen = Rcpp::wrap(impute_NRM_C(pv, b, a, first, last, person_id, item_first, item_score, by_item, max_cores));
     return rcpp_result_gen;
 END_RCPP
 }
-// sampleNRM_itemC
-arma::imat sampleNRM_itemC(const arma::vec& theta, const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last);
-RcppExport SEXP _dexter_sampleNRM_itemC(SEXP thetaSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP) {
+// sample_NRM_C
+arma::imat sample_NRM_C(const arma::vec& theta, const arma::vec& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const bool by_item, const int max_cores);
+RcppExport SEXP _dexter_sample_NRM_C(SEXP thetaSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP by_itemSEXP, SEXP max_coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -737,7 +742,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
-    rcpp_result_gen = Rcpp::wrap(sampleNRM_itemC(theta, b, a, first, last));
+    Rcpp::traits::input_parameter< const bool >::type by_item(by_itemSEXP);
+    Rcpp::traits::input_parameter< const int >::type max_cores(max_coresSEXP);
+    rcpp_result_gen = Rcpp::wrap(sample_NRM_C(theta, b, a, first, last, by_item, max_cores));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -802,8 +809,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dexter_pv_metro", (DL_FUNC) &_dexter_pv_metro, 9},
     {"_dexter_pv_chain_normal", (DL_FUNC) &_dexter_pv_chain_normal, 19},
     {"_dexter_pv_chain_mix", (DL_FUNC) &_dexter_pv_chain_mix, 19},
-    {"_dexter_sampleNRM_testC", (DL_FUNC) &_dexter_sampleNRM_testC, 5},
-    {"_dexter_sampleNRM_itemC", (DL_FUNC) &_dexter_sampleNRM_itemC, 5},
+    {"_dexter_impute_NRM_C", (DL_FUNC) &_dexter_impute_NRM_C, 10},
+    {"_dexter_sample_NRM_C", (DL_FUNC) &_dexter_sample_NRM_C, 7},
     {"_dexter_sampleIMC", (DL_FUNC) &_dexter_sampleIMC, 6},
     {NULL, NULL, 0}
 };
