@@ -31,7 +31,7 @@ test_that('basic plausible scores checks',{
   ps = plausible_scores(r,f,items=get_items(db),nPS=2,by_item=TRUE) |>
     inner_join(get_responses(db), by=c('item_id','person_id'))
   
-  w=which(ps$item_id=='S2DoScold')
+  w = (ps$item_id=='S2DoScold')
   expect_true(all(ps$item_score[!w] == ps$PS1[!w]) && all(ps$item_score[!w] == ps$PS2[!w]), 
               label='by_item keep observed works')
   
