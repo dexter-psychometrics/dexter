@@ -176,6 +176,6 @@ Rcpp::List calibrate_Bayes_chains(const arma::ivec& a, const arma::ivec& first, 
 		}
 	}	
 	
-	return Rcpp::List::create(Rcpp::Named("b") = out_b.t(), Rcpp::Named("lambda") = out_bklambda.t(), Named("chain_start") = chain_start);
+	return Rcpp::List::create(Rcpp::Named("b") = out_b, Rcpp::Named("lambda") = out_bklambda, Named("chain_start") = chain_start);
 }
 

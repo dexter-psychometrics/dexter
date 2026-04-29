@@ -66,15 +66,13 @@ pv_chain = function(x, design, b, a, nPV,
                      A=a, prior_dist = c("normal", "mixture"))
 {
   prior_dist = match.arg(prior_dist)
-  parms_sample = !(is.null(dim(b)) || nrow(b)==1)
+  parms_sample = !(is.null(dim(b)) || ncol(b)==1)
 
   pb = get_prog_bar()
   on.exit({pb$close()})
 
   if(parms_sample)
   {
-    b = t(b)
-
     if(gibbs_settings$min_b_samples > ncol(b)) 
     {
       message(sprintf('For optimal sampling from the posterior with nPV=%i and prior_dist="%s" you should use at least %i draws in `fit-enorm`',
@@ -120,7 +118,7 @@ pv_chain = function(x, design, b, a, nPV,
     npop = max(scoretab_counts$pop_c) + 1L
     
     start_mu = matrix(rnorm(npop*gibbs_settings$nchains), ncol=gibbs_settings$nchains)
-    start_sigma = runif(gibbs_settings$nchains,3,4) 
+    start_sigma = runif(gibbs_settings$nchains,2,3) 
 
     res = pv_chain_normal(bmat = b, a = a, A = A, 
                           first = design$first_c, last = design$last_c, bk_cnit = design$bk_cnit, bk_max_a = design$bk_max_a,
@@ -131,7 +129,7 @@ pv_chain = function(x, design, b, a, nPV,
                           warmup = gibbs_settings$warm_up,  step = gibbs_settings$step)
     #cat('\n')
     #print(res$n_alt)
-    #dimnames(res$prior_log) = list(var=c('mu','sigma','tau', sprintf("theta_%i",1:(nrow(res$prior_log)-3))),iter=NULL,chain=NULL)
+    dimnames(res$prior_log) = list(var=c('mu','sigma','tau', sprintf("theta_%i",1:(nrow(res$prior_log)-3))),iter=NULL,chain=NULL)
   } else
   {
     start_p = runif(gibbs_settings$nchains, .4, .6)
@@ -146,7 +144,7 @@ pv_chain = function(x, design, b, a, nPV,
                        progress_init = pb$cpp_prog_init(), max_cores = gibbs_settings$ncores,
                        warmup = gibbs_settings$warm_up,  step = gibbs_settings$step)
     
-    #dimnames(res$prior_log) = list(var=c('p','mu_1','mu_2','sigma_1','sigma_2'),iter=NULL,chain=NULL)
+    dimnames(res$prior_log) = list(var=c('p','mu_1','mu_2','sigma_1','sigma_2'),iter=NULL,chain=NULL)
   }
   # for testing only  
   #assign("prior_log", res$prior_log, envir = .GlobalEnv)
@@ -320,15 +318,12 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
                              merge_within_persons=merge_within_persons)
   }
  
-
- 
   parms = simplify_parms(parms, draw=parms_draw, cml_draws = cml_n_draws)
 
   
   gibbs_settings = pv_gibbs_settings(nPV, 
-                                     parms_sample = !(is.null(dim(parms$b)) || nrow(parms$b)==1), 
+                                     parms_sample = !(is.null(dim(parms$b)) || ncol(parms$b)==1), 
                                      prior_dist = prior_dist)
-  
   
   if(!is.null(covariates))
   {
@@ -368,7 +363,7 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
                    by=c('booklet_id','person_id') )
   }
   if(!all(res$b_index==1))
-    parms$b = parms$b[res$b_index,]
+    parms$b = parms$b[,res$b_index]
   
   list(pv=res$pv, parms=parms)
 }

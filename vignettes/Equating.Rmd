@@ -182,7 +182,7 @@ text(1-specificity, sensitivity, as.character(0:28), cex=0.7, offset = 0)
 abline(0,1,lty=2, col="grey")
 ```
 
-Other packages and functions may produce prettier plots --- but can they do it without complete data?
+Other packages and functions may produce prettier plots --- but can they do it with incomplete data?
 
 ```{r, include=FALSE}
 close_project(db)

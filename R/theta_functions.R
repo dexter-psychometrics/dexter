@@ -120,10 +120,9 @@ theta_function = function(parms, items=NULL, booklet=NULL, parms_draw=c('average
   } else fl = parms$items
   a = parms$a
   b = parms$b
-  multiple_b=is.matrix(b) && nrow(b)>1 && ncol(b)>1
+  multiple_b = is.matrix(b) && nrow(b)>1 && ncol(b)>1
   if(multiple_b)
   {
-    b=t(b)
     n_cores = get_ncores(min(ncol(b),20),1L)
   }  else
   { 

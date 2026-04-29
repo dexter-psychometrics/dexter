@@ -87,6 +87,8 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
   } else if(method=="Bayes")
   {
     result = calibrate_Bayes(ss, nIter=nDraws, fixed_params=fixed_params)
+    # since 1.8.0
+    result$draw_as_col = TRUE
   } 
   
   est_mle = theta_wmle_c(b=matrix(if.else(method=="Bayes",colMeans(result$b), result$b),ncol=1),
@@ -94,8 +96,8 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
                      first=ss$design$first-1L, last = ss$design$last-1L,bk_nit = ss$booklet$nit, WLE=FALSE, n_cores=1L)
 
   mle = tibble(booklet_id=ss$booklet$booklet_id[est_mle$booklet], 
-         booklet_score=drop(est_mle$booklet_score),
-         theta=drop(est_mle$theta)) |>
+    booklet_score=drop(est_mle$booklet_score),
+    theta=drop(est_mle$theta)) |>
     filter(is.finite(.data$theta))
   
   ss$method = method
@@ -111,7 +113,7 @@ print.enorm = function(x, ...){
   
   conv = ifelse(x$inputs$method == 'CML', 
     paste0('converged in ',x$est$n_iter, ' iterations'),
-    paste0('number of Gibbs samples: ',nrow(x$est$beta)))
+    paste0('number of Gibbs samples: ',ncol(x$est$beta)))
   
   
   p = sprintf('Parameters for the Extended Nominal Response Model\n\nMethod: %s, %s\nitems: %i\nresponses: %i\n\nUse %%s to extract the item parameters.\n',
@@ -191,11 +193,11 @@ coef.enorm = function(object, hpd = 0.95, what=c('items','var','posterior'), ...
       if(hpd <= 0 ||  hpd >= 1)
         stop('hpd must be between 0 and 1')
       
-      hh = t(apply(x$est$beta,2,hpdens, conf=hpd))
+      hh = t(apply(x$est$beta,1,hpdens, conf=hpd))
       atab=data.frame(item_id = x$inputs$ssIS$item_id,
                       a = x$inputs$ssIS$item_score,
-                      mb = colMeans(x$est$beta),
-                      sdb = apply(x$est$beta, 2, sd),
+                      mb = rowMeans(x$est$beta),
+                      sdb = apply(x$est$beta, 1, sd),
                       hpdl = hh[,1], hpdr=hh[,2],stringsAsFactors=FALSE)
       colnames(atab)=c("item_id" ,"item_score", "mean_beta", "SD_beta", 
                        sprintf("%i_hpd_b_left", round(100 * hpd)),
@@ -214,20 +216,25 @@ coef.enorm = function(object, hpd = 0.95, what=c('items','var','posterior'), ...
   {
     if(x$inputs$method!="Bayes")
       stop('The posterior of item parameters is only available for Bayesian estimation')
-    m=x$est$beta
-    colnames(m) = paste(x$inputs$ssIS$item_id, x$inputs$ssIS$item_score)
+    m = x$est$beta
+    rownames(m) = paste(x$inputs$ssIS$item_id, x$inputs$ssIS$item_score)
     return(m)
   }
 }
 
+#' @rdname coef.enorm
+vcov.enorm = function(object, ...)
+{
+  coef(object, what='var')
+}
 
 # returns log likelihood, or vector of log likelihoods if bayes
 logL = function(parms, mean_gibbs=FALSE)
 {
   a = parms$inputs$ssIS$item_score
   b = parms$est$b
-  if(is.matrix(b) && mean_gibbs)
-    b=colMeans(b)
+  if(is.matrix(b)  && mean_gibbs)
+    b=rowMeans(b)
   
   scoretab = split(parms$inputs$scoretab,parms$inputs$scoretab$booklet_id,drop=FALSE)
   design = split(parms$inputs$design, parms$inputs$design$booklet_id, drop=TRUE)
@@ -254,7 +261,7 @@ logL = function(parms, mean_gibbs=FALSE)
   }
   if(is.matrix(b))
   {
-    apply(b,1, llb)
+    apply(b,2, llb)
   } else
   {
     llb(b)
@@ -588,10 +595,10 @@ calibrate_Bayes = function(ss,  nIter, fixed_params=NULL,
   
   report = toOPLM(ss$ssIS$item_score, out$b, ss$ssI$first, ss$ssI$last, H=NULL,method='Bayes',fixed_b=fixed_b)
 
-  colnames(out$lambda) = paste(ss$scoretab$booklet_id, ss$scoretab$booklet_score, sep='-')
-  
+  rownames(out$lambda) = paste(ss$scoretab$booklet_id, ss$scoretab$booklet_score, sep='-')
+
   return(list(a=ss$ssIS$item_score, b=report$b_renorm, 
-              lambda=out$lambda, beta=report$beta,gibbs_b=out$b,
+              lambda=out$lambda, beta=report$beta,
               chain_start=out$chain_start,
               priors=list(eta=prior_eta, rho=prior_rho, nu=prior_nu))) 
 }

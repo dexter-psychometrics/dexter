@@ -98,8 +98,8 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
   # some common summary statistics for the reference items
   if (ref_parms$method == "Bayes")
   {
-    n_bayes = nrow(ref_parms$b)
-    # can do always use all bayes iterations?
+    n_bayes = ncol(ref_parms$b)
+
     if(n_bayes < nDraws)
     {
       warning('nDraws set to ', n_bayes, '. See the help page for details')
@@ -107,7 +107,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
     }
     iter_set = round(seq(1, n_bayes, n_bayes/nDraws))
     iter_set  = iter_set + (n_bayes - iter_set[nDraws])
-    ref_theta = ML_theta(pass_fail, t(ref_parms$b[iter_set,]),ref_parms$a,ref_parms$design$first, ref_parms$design$last)
+    ref_theta = ML_theta(pass_fail, ref_parms$b[,iter_set],ref_parms$a, ref_parms$design$first, ref_parms$design$last)
     
   } else
   {
@@ -142,20 +142,20 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
       tel = 1
       # start values
       spv = drop(theta_eap_c(quadpoints$nodes * new_sigma + new_mu, quadpoints$weights,
-                        matrix(colMeans(target_parms$b),ncol=1),target_parms$a,
+                        matrix(rowMeans(target_parms$b),ncol=1),target_parms$a,
                         dsg$first0, dsg$last0, nrow(dsg))$theta)
 
       for(iter in iter_set)
       {
-        eq_score[tel] = equated_score(target_parms$b[iter,],target_parms$a, dsg$first, dsg$last, ref_theta[tel])
+        eq_score[tel] = equated_score(target_parms$b[,iter],target_parms$a, dsg$first, dsg$last, ref_theta[tel])
         
-        lgamma = log(elsymC(target_parms$b[iter,],target_parms$a, dsg$first0, dsg$last0))
+        lgamma = log(elsymC(target_parms$b[,iter],target_parms$a, dsg$first0, dsg$last0))
         
         pv_metro(lgamma, max_score, booklet_id=booklet_ids, booklet_score = scores,
                     prior_mu=cmu, prior_sigma=new_sigma,
                     pv_res=spv, max_cores=max_cores, n_updates=20L)
         
-        prf = pscore(spv, ref_parms$b[iter,],ref_parms$a,ref_parms$design$first,ref_parms$design$last)
+        prf = pscore(spv, ref_parms$b[,iter],ref_parms$a,ref_parms$design$first,ref_parms$design$last)
         probs[,tel] = apply(prf, 2, function(x) sum(x[ref_range]))
         tel=tel+1
         pb$tick()

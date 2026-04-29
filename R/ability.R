@@ -128,7 +128,7 @@ ability_tables = function(parms, design = NULL, method = c("MLE","EAP","WLE"), p
     n_cores=1
   } else
   {
-    b = t(b) # column per draw instead of row
+    # b = t(b) # column per draw, since 1.8 this is already the case
     n_cores = get_ncores(min(20,ncol(b)),1)
   }
   

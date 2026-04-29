@@ -323,18 +323,7 @@ r_score_IM = function(m, scores)
   if(inherits(m,'data.frame'))
   {
     stop('input `m` must be of class "inter"')
-    # this does not yet work
-    # if('beta_IM' %in% colnames(m) && !'beta' %in% colnames(m))
-    #   m$beta = m$beta_IM
-    # m = arrange(m,.data$item_id, .data$item_score)
-    # prms = simplify_parms(m)
-    # 
-    # a = prms$a
-    # bIM = prms$b
-    # first = prms$items$first
-    # last = prms$items$last
-    # cIM = m$sigma
-    
+
   } else if(inherits(m,'inter'))
   {
     first = m$inputs$ssI$first
