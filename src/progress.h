@@ -5,55 +5,16 @@
 #include <RcppArmadillo.h>
 
 
-// see https://stat.ethz.ch/pipermail/r-devel/2011-April/060702.html
-static void chkIntFn(void *dummy) {
-  R_CheckUserInterrupt();
-}
-
 class progress
 {
 private:
 	int step, step_before_sub, sub_nsteps, sub_length, nsteps, w, sub_step,p,l;
 	std::string fmt;
 public:	
-	progress(const int nsteps_, const arma::ivec& settings)
-	{
-		step_before_sub = settings(0);
-		sub_nsteps = nsteps_;
-		sub_length = settings(2);
-		nsteps = settings(3);
-		w = settings(4);
-		sub_step=0;
-		p=0;
-		l=0;
-		step=0;
-		if(w>0)
-			fmt = std::string("\r|%-") + std::to_string(w) + std::string("s| %3i%%");	
-	}
-	
-	void draw_perc()
-	{
-		if(w>0)
-		{
-			int old = l+p;
-			step = std::min(step, nsteps);
-			double part = ((double)step)/nsteps;
-			p = (int)(100*part);
-			l = (int)(w*part);
-			if(old != l+p)
-			{
-				Rprintf(fmt.c_str(), std::string(l,'=').c_str(), p);
-			}
-		}		
-	}
-	
-	void tick(const int nticks = 1)
-	{
-		sub_step = sub_step + nticks;
-		double sub_prog = std::min(sub_step/((double)sub_nsteps),1.0);
-		step = step_before_sub + (int)(1e-6 +  sub_prog * sub_length);
-		draw_perc();
-	}
+	progress(const int nsteps_, const arma::ivec& settings);	
+	void draw_perc();	
+	void tick(const int nticks = 1);
+
 };	
 
 class progress_prl : progress
@@ -63,35 +24,14 @@ private:
 	std::atomic<bool> atm_interrupted;
 public:
 	
-	progress_prl(const int nsteps_, const arma::ivec& settings)
-		: progress(nsteps_ , settings)
-	{
-		atm_tick = 0;
-		atm_interrupted = false;
-	}
+	progress_prl(const int nsteps_, const arma::ivec& settings);
 	
-	bool interrupted()
-	{
-		return atm_interrupted.load();
-	}
+	bool interrupted();
 	
 	// NEVER call checkInterrupt outside of the main thread
-	void checkInterrupt() 
-	{
-		if(!interrupted()) // checking two times may cause crash?
-			if(R_ToplevelExec(chkIntFn, NULL) == 0)	atm_interrupted = true; // the if is necessary
-	}
-		
-	void tick(const bool main_thread, const int nticks = 1)
-	{
-		atm_tick += nticks;
-		if(main_thread)
-		{
-			progress::tick(atm_tick.load());
-			checkInterrupt();
-			atm_tick = 0;
-		}		
-	}	
+	void checkInterrupt(); 
+	// also calls checkinterrupt if main_thread==true	
+	void tick(const bool main_thread, const int nticks = 1);
 };
 	
 #endif

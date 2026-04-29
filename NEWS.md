@@ -1,12 +1,13 @@
 # dexter 1.8.0
 
 * plausible_values/plausible_scores has gained an argument link_error, 
-  allowing for inclusion of estimation/linking error in CML item parameters
+  to include estimation/linking error in CML item parameters
 
 * plausible_values/plausible_scores no longer stalls on extremely unlikely scores, making it much faster in many cases.
 
-* special characters in item/person property names are now allowed. They are still converted to lowercase.
+* special characters in item/person property names in project databases are now allowed, however they are still converted to lowercase.
   
+* Bugfix: manual interruption of long running computations no longer causes a crash. 
 
 
 # dexter 1.7.2
