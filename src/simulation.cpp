@@ -24,7 +24,7 @@ person_id contains 0 based indexes of pv, terminated by -1 (person_id can theref
 */
 template <bool by_item>
 arma::imat impute_NRM_tpl(const arma::mat& pv, const arma::mat& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last,
-							 const arma::ivec& person_id, const arma::ivec& item_first, const arma::ivec& item_score,
+							 const arma::ivec& person_index, const arma::ivec& item_first, const arma::ivec& item_score,
 							const int max_cores)
 {
 	const bool multiple_b = b.n_cols>1;
@@ -61,7 +61,7 @@ arma::imat impute_NRM_tpl(const arma::mat& pv, const arma::mat& b, const arma::i
 		indx_obs = 0;
 		for(int prs=0; prs < np; prs++)
 		{
-			any_obs = (prs == person_id[indx_obs]);
+			any_obs = (prs == person_index[indx_obs]);
 
 			for(int i=1;i<=maxA;i++){ expat[i] = std::exp(i*pv.at(prs, pvcol));}
 			
@@ -71,7 +71,7 @@ arma::imat impute_NRM_tpl(const arma::mat& pv, const arma::mat& b, const arma::i
 				{
 					if(by_item) score.at(out_indx++, pvcol) = item_score[indx_obs++];
 					else score.at(prs, pvcol) += item_score[indx_obs++];
-					any_obs = (prs == person_id[indx_obs]);
+					any_obs = (prs == person_index[indx_obs]);
 					continue;
 				}
 				
@@ -83,7 +83,7 @@ arma::imat impute_NRM_tpl(const arma::mat& pv, const arma::mat& b, const arma::i
 				}
 				u = p[k-1] * runif(lrng);
 				k = 0;
-				while (u>p[k]) {k++;}
+				while (u>p[k]) k++;
 				if(k>0)
 				{
 					if (by_item) score.at(out_indx, pvcol) = a[first[i]+k-1];
@@ -100,17 +100,17 @@ arma::imat impute_NRM_tpl(const arma::mat& pv, const arma::mat& b, const arma::i
 
 //[[Rcpp::export]]
 arma::imat impute_NRM_C(const arma::mat& pv, const arma::mat& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last,
-							 const arma::ivec& person_id, const arma::ivec& item_first, const arma::ivec& item_score,
+							 const arma::ivec& person_index, const arma::ivec& item_first, const arma::ivec& item_score,
 							const bool by_item, const int max_cores)
 {
 	if(by_item)
 	{
 		return impute_NRM_tpl<true>(pv,b, a, first, last,	
-										person_id, item_first, item_score, max_cores);
+										person_index, item_first, item_score, max_cores);
 	} else
 	{
 		return impute_NRM_tpl<false>(pv,b, a, first, last,	
-										person_id, item_first, item_score, max_cores);
+										person_index, item_first, item_score, max_cores);
 	}
 }
 

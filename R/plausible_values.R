@@ -277,6 +277,10 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
     message('A mixture prior cannot be used together with covariates, setting `prior_dist = "normal"`')
     prior_dist = 'normal'
   }
+  if(inherits(parms,'data.frame') && link_error)
+  {
+    message('link_error acnnot be used with a data.frame of parameters, setting `link_error = FALSE`')
+  }
   
 
   pb = get_prog_bar(nsteps=if(is.null(parms) || link_error) 120 else 100, 

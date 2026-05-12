@@ -21,17 +21,20 @@ pscore_lgamma = function(theta, lg)
 }
 
 # sample scores under the enorm
-# existing scores$person_id needs to be -1 terminated
+# existing scores contains columns person_index (0-indexed), item_first (refers to first0 to indicate an item), item_score
 sample_scores = function(theta, b, a, first0, last0, 
                          by_item, item_long,
-                         existing_scores = list(person_id=-1L, item_first = -1L, item_score=-1L))
+                         existing_scores = NULL)
 {
   multicol = coalesce(ncol(theta),1L) > 1
   multib = coalesce(ncol(b),1L) > 1
   
   if(multicol && multib)  stopifnot(ncol(theta) == ncol(b))
   
-  if(existing_scores$person_id[1] < 0 && !multicol && !(by_item && item_long))
+  existing_scores = bind_rows(existing_scores, 
+                              tibble(person_index=-1L,item_first=-1L,item_score=-1L))
+  
+  if(existing_scores$person_index[1] < 0 && !multicol && !(by_item && item_long))
   {
     max_cores = get_ncores(desired = min(32L,as.integer(length(theta)/1000)), maintain_free = 1L)
     
@@ -44,7 +47,8 @@ sample_scores = function(theta, b, a, first0, last0,
     max_cores = get_ncores(desired = min(32L,ncol(theta)), maintain_free = 1L)
     
     impute_NRM_C(as.matrix(theta), as.matrix(b), a, first=first0, last=last0, 
-                person_id = existing_scores$person_id, item_first=existing_scores$item_first,
+                person_index = existing_scores$person_index, 
+                item_first = existing_scores$item_first,
                 item_score = existing_scores$item_score,
                 by_item=by_item, max_cores = max_cores)
   }

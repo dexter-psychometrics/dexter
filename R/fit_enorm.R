@@ -207,16 +207,23 @@ coef.enorm = function(object, hpd = 0.95, what=c('items','var','posterior'), ...
     return(df_format(atab))
   } else if(what=='var')
   {
-    if(x$inputs$method!="CML")
-      stop('Variance-covariance matrix is only available for CML estimation')
-    m = x$est$acov.beta
+    #if(x$inputs$method!="CML")
+    #  stop('Variance-covariance matrix is only available for CML estimation')
+    if(x$inputs$method=="CML")
+      m = x$est$acov.beta
+    else
+      m = var(t(x$est$beta))
     colnames(m) = rownames(m) = paste(x$inputs$ssIS$item_id, x$inputs$ssIS$item_score)
     return(m)
   } else if(what=='posterior')
   {
-    if(x$inputs$method!="Bayes")
-      stop('The posterior of item parameters is only available for Bayesian estimation')
-    m = x$est$beta
+    #if(x$inputs$method!="Bayes")
+    #  stop('The posterior of item parameters is only available for Bayesian estimation')
+    if(x$inputs$method == "Bayes")
+      m = x$est$beta
+    else # to do: experimental, 1000 draws hardcoded
+      m = t(rmvnorm(1000, mu=object$est$beta, sigma = object$est$acov.beta ))
+    
     rownames(m) = paste(x$inputs$ssIS$item_id, x$inputs$ssIS$item_score)
     return(m)
   }

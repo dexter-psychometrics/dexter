@@ -93,24 +93,21 @@ plausible_scores = function(dataSrc, parms=NULL, predicate=NULL, items=NULL, par
     filter(.data$item_id %in% items) |>
     select('item_id','first0','last0')
   
-  if(keep.observed)
+  existing_scores = if(keep.observed)
   {
-    # unfortunately cannot get around a sort
-    xist = respData$x |>
+    # the sort is necessary
+    respData$x |>
       inner_join(select(fl,'item_id','first0'), by='item_id') |>
-      inner_join(tibble(person_id = pv$person_id, booklet_id=pv$booklet_id, pv_indx=0:(nrow(pv)-1L)), 
+      inner_join(tibble(person_id = pv$person_id, booklet_id=pv$booklet_id, person_index=0:(nrow(pv)-1L)), 
                  by=c('booklet_id', 'person_id')) |>
-      select(person_id = 'pv_indx',item_first = 'first0','item_score') |>
-      arrange(.data$person_id, .data$item_first)
+      select('person_index',item_first = 'first0','item_score') |>
+      arrange(.data$person_index, .data$item_first)
     
-  } else
-  {
-    xist = tibble(person_id=-1L,item_first=-1L,item_score=-1L)
-  }
+  } 
 
   ps = sample_scores(theta= as.matrix(select(pv,matches('^PV\\d+$'))), parms$b, parms$a, fl$first0, fl$last0, 
                            by_item = by_item, item_long=TRUE,
-                           existing_scores = xist)
+                           existing_scores = existing_scores)
   
   colnames(ps) = paste0('PS',1:ncol(ps))
   

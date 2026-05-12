@@ -712,8 +712,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // impute_NRM_C
-arma::imat impute_NRM_C(const arma::mat& pv, const arma::mat& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const arma::ivec& person_id, const arma::ivec& item_first, const arma::ivec& item_score, const bool by_item, const int max_cores);
-RcppExport SEXP _dexter_impute_NRM_C(SEXP pvSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP person_idSEXP, SEXP item_firstSEXP, SEXP item_scoreSEXP, SEXP by_itemSEXP, SEXP max_coresSEXP) {
+arma::imat impute_NRM_C(const arma::mat& pv, const arma::mat& b, const arma::ivec& a, const arma::ivec& first, const arma::ivec& last, const arma::ivec& person_index, const arma::ivec& item_first, const arma::ivec& item_score, const bool by_item, const int max_cores);
+RcppExport SEXP _dexter_impute_NRM_C(SEXP pvSEXP, SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP person_indexSEXP, SEXP item_firstSEXP, SEXP item_scoreSEXP, SEXP by_itemSEXP, SEXP max_coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -722,12 +722,12 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::ivec& >::type a(aSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type first(firstSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type last(lastSEXP);
-    Rcpp::traits::input_parameter< const arma::ivec& >::type person_id(person_idSEXP);
+    Rcpp::traits::input_parameter< const arma::ivec& >::type person_index(person_indexSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type item_first(item_firstSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type item_score(item_scoreSEXP);
     Rcpp::traits::input_parameter< const bool >::type by_item(by_itemSEXP);
     Rcpp::traits::input_parameter< const int >::type max_cores(max_coresSEXP);
-    rcpp_result_gen = Rcpp::wrap(impute_NRM_C(pv, b, a, first, last, person_id, item_first, item_score, by_item, max_cores));
+    rcpp_result_gen = Rcpp::wrap(impute_NRM_C(pv, b, a, first, last, person_index, item_first, item_score, by_item, max_cores));
     return rcpp_result_gen;
 END_RCPP
 }

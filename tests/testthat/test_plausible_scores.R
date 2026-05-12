@@ -59,7 +59,7 @@ test_that('plausible scores works',{
   
   f = fit_enorm(responses)
 
-  ps_b2 = plausible_scores(responses, parms = f, items = filter(design, booklet_id == 'b2') )
+  ps_b2 = plausible_scores(responses, parms = f, items = sample(items$item_id,25) )
   
   sc_b2 = persons |>
     mutate(booklet_id = 'b2') |>
@@ -76,7 +76,7 @@ test_that('plausible scores works',{
               info=paste('expected correlation test_score and PS>0.65, found:',cor(sc_b2$PS1, sc_b2$test_score)))
   
   
-  # keep.observed should work
+  # keep.observed should work, this is with keep.observed=TRUE and for all items by default
   ps = plausible_scores(responses) |> 
     rename(PS_keep_true = 'PS1') |>
     inner_join(plausible_scores(responses, keep.observed = FALSE), by= c('person_id','booklet_id')) |>
