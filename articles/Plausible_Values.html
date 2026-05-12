@@ -111,7 +111,7 @@
                         <h4 data-toc-skip class="author">Timo Bechger,
 Jesse Koops and Ivailo Partchev</h4>
             
-            <h4 data-toc-skip class="date">2026-04-29</h4>
+            <h4 data-toc-skip class="date">2026-05-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/Plausible_Values.Rmd" class="external-link"><code>vignettes/Plausible_Values.Rmd</code></a></small>
       <div class="hidden name"><code>Plausible_Values.Rmd</code></div>
@@ -126,8 +126,8 @@ img{ border:none;}
 <p>Plausible values are random samples from the posterior distribution
 of ability. Dexter produces plausible values using a straightforward
 rejection algorithm which was suggested by <span class="citation">Rubin
-(1984)</span>, described and improved by <span class="citation">Maarten
-Marsman et al. (2017)</span>, and applied in the SurveyLang project (<a href="http://www.surveylang.org/" class="external-link uri">http://www.surveylang.org/</a>).</p>
+(1984)</span>, described and improved by <span class="citation">Marsman
+et al. (2017)</span>, and applied in the SurveyLang project (<a href="http://www.surveylang.org/" class="external-link uri">http://www.surveylang.org/</a>).</p>
 <p>To see how the algorithm works, one should note that the posterior of
 ability can be defined as the collection of all values of ability that
 might have generated the observations. This simple observation suggests
@@ -145,7 +145,7 @@ the following algorithm would produce one plausible value
 for a respondent with a test score
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mo>+</mo></msub><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">x_+=10</annotation></semantics></math>.</p>
 <p style="background-color:#f7f7f7;line-height:1.5;padding:1em;">
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mo>+</mo></msub><mo>:=</mo><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">y_+:=-1</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi>𝐰</mi><mi>𝐡</mi><mi>𝐢</mi><mi>𝐥</mi><mi>𝐞</mi></mrow><mspace width="0.222em"></mspace><msub><mi>x</mi><mo>+</mo></msub><mo>≠</mo><msub><mi>y</mi><mo>+</mo></msub><mspace width="0.222em"></mspace><mrow><mi>𝐝</mi><mi>𝐨</mi></mrow><mo>:</mo></mrow><annotation encoding="application/x-tex">\mathbf{while}\ x_+ \neq y_+\ \mathbf{do}:</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="1.0em"></mspace><msub><mi>y</mi><mo>+</mo></msub><mo>:=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\quad y_+:=0</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="1.0em"></mspace><mrow><mi>𝐝</mi><mi>𝐫</mi><mi>𝐚</mi><mi>𝐰</mi></mrow><mspace width="0.222em"></mspace><mi>θ</mi><mo>∼</mo><mi>𝒩</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\quad \mathbf{draw}\ \theta \sim \mathcal{N}(0,1)</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="1.0em"></mspace><mrow><mi>𝐟</mi><mi>𝐨</mi><mi>𝐫</mi></mrow><mspace width="0.222em"></mspace><mi>i</mi><mspace width="0.222em"></mspace><mrow><mi>𝐢</mi><mi>𝐧</mi></mrow><mspace width="0.222em"></mspace><mn>1</mn><mo>:</mo><mi>l</mi><mi>e</mi><mi>n</mi><mi>g</mi><mi>t</mi><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝛅</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>:</mo></mrow><annotation encoding="application/x-tex">\quad \mathbf{for}\ i \ \mathbf{in}\ 1:length(\mathbf{\delta}):</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="2.0em"></mspace><mrow><mi>𝐝</mi><mi>𝐫</mi><mi>𝐚</mi><mi>𝐰</mi></mrow><mspace width="0.222em"></mspace><mi>u</mi><mo>∼</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>i</mi><mi>s</mi><mi>t</mi><mi>i</mi><mi>c</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\qquad \mathbf{draw}\ u \sim logistic(0,1)</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="2.0em"></mspace><mrow><mi>𝐢</mi><mi>𝐟</mi></mrow><mspace width="0.222em"></mspace><mi>u</mi><mo>≤</mo><mi>θ</mi><mo>−</mo><msub><mi>δ</mi><mi>i</mi></msub><mo>:</mo></mrow><annotation encoding="application/x-tex">\qquad \mathbf{if}\ u \le \theta-\delta_i:</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="2.0em"></mspace><mspace width="1.0em"></mspace><msub><mi>y</mi><mo>+</mo></msub><mo>:=</mo><msub><mi>y</mi><mo>+</mo></msub><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\qquad \quad y_+ := y_+ + 1</annotation></semantics></math></p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mo>+</mo></msub><mo>:=</mo><mi>−</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">y_+:=-1</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi>𝐰</mi><mi>𝐡</mi><mi>𝐢</mi><mi>𝐥</mi><mi>𝐞</mi></mrow><mspace width="0.222em"></mspace><msub><mi>x</mi><mo>+</mo></msub><mo>≠</mo><msub><mi>y</mi><mo>+</mo></msub><mspace width="0.222em"></mspace><mrow><mi>𝐝</mi><mi>𝐨</mi></mrow><mo>:</mo></mrow><annotation encoding="application/x-tex">\mathbf{while}\ x_+ \neq y_+\ \mathbf{do}:</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="1.0em"></mspace><msub><mi>y</mi><mo>+</mo></msub><mo>:=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\quad y_+:=0</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="1.0em"></mspace><mrow><mi>𝐝</mi><mi>𝐫</mi><mi>𝐚</mi><mi>𝐰</mi></mrow><mspace width="0.222em"></mspace><mi>θ</mi><mo>∼</mo><mi>𝒩</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\quad \mathbf{draw}\ \theta \sim \mathcal{N}(0,1)</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="1.0em"></mspace><mrow><mi>𝐟</mi><mi>𝐨</mi><mi>𝐫</mi></mrow><mspace width="0.222em"></mspace><mi>i</mi><mspace width="0.222em"></mspace><mrow><mi>𝐢</mi><mi>𝐧</mi></mrow><mspace width="0.222em"></mspace><mn>1</mn><mo>:</mo><mi>l</mi><mi>e</mi><mi>n</mi><mi>g</mi><mi>t</mi><mi>h</mi><mo stretchy="false" form="prefix">(</mo><mi>𝛅</mi><mo stretchy="false" form="postfix">)</mo><mo>:</mo></mrow><annotation encoding="application/x-tex">\quad \mathbf{for}\ i \ \mathbf{in}\ 1:length(\mathbf{\delta}):</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="2.0em"></mspace><mrow><mi>𝐝</mi><mi>𝐫</mi><mi>𝐚</mi><mi>𝐰</mi></mrow><mspace width="0.222em"></mspace><mi>u</mi><mo>∼</mo><mi>l</mi><mi>o</mi><mi>g</mi><mi>i</mi><mi>s</mi><mi>t</mi><mi>i</mi><mi>c</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\qquad \mathbf{draw}\ u \sim logistic(0,1)</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="2.0em"></mspace><mrow><mi>𝐢</mi><mi>𝐟</mi></mrow><mspace width="0.222em"></mspace><mi>u</mi><mo>≤</mo><mi>θ</mi><mo>−</mo><msub><mi>δ</mi><mi>i</mi></msub><mo>:</mo></mrow><annotation encoding="application/x-tex">\qquad \mathbf{if}\ u \le \theta-\delta_i:</annotation></semantics></math><br><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mspace width="2.0em"></mspace><mspace width="1.0em"></mspace><msub><mi>y</mi><mo>+</mo></msub><mo>:=</mo><msub><mi>y</mi><mo>+</mo></msub><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\qquad \quad y_+ := y_+ + 1</annotation></semantics></math></p>
 <p>The algorithm used by dexter is equivalent to the above in the
 dichotomous case but it can handle polytomous items as well. The
 user-level function is called <code>plausible_values</code>, and takes
@@ -210,7 +210,7 @@ above.</p>
 sooner, if the prior is specified correctly, or later, if it is not. The
 price that we had to pay in this example was merely administer a longer
 test. For a more detailed discussion of this valuable property we refer
-to <span class="citation">M. Marsman et al. (2016)</span>.</p>
+to <span class="citation">Marsman et al. (2016)</span>.</p>
 <p>Observe that the gray bands are not wide, suggesting little
 uncertainty in determining the ECDF of ability. It may be more realistic
 to take the uncertainty in the item parameters into account. To do this,
@@ -311,15 +311,14 @@ now include the group-membership in the model.</p>
 <span><span class="fu">sim_PV4</span><span class="op">(</span><span class="va">theta</span>, <span class="va">delta</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">]</span>,<span class="va">grp</span><span class="op">)</span></span>
 <span><span class="fu">sim_PV4</span><span class="op">(</span><span class="va">theta</span>, <span class="va">delta</span>,<span class="va">grp</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Plausible_Values_files/figure-html/make_pv4-1.png" class="r-plt" alt="" width="672" style="display: block; margin: auto;"></p>
-<p>This illustrates what the theory, in <span class="citation">M.
-Marsman et al. (2016)</span>, tells us: The more the prior resembles the
-true distribution, the faster (i.e., with fewer items) the distribution
-of the plausible values converges to the true distribution of
-ability.</p>
+<p>This illustrates what the theory, in <span class="citation">Marsman
+et al. (2016)</span>, tells us: The more the prior resembles the true
+distribution, the faster (i.e., with fewer items) the distribution of
+the plausible values converges to the true distribution of ability.</p>
 <div class="section level3 unnumbered">
 <h3 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h3>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-marsman2017turning" class="csl-entry">
 Marsman, Maarten, Gunter Maris, Timo Bechger, and Cees Glas. 2017.
 <span>“Turning Simulation into Estimation: Generalized Exchange

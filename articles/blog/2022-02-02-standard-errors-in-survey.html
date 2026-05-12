@@ -198,7 +198,7 @@ deviation is estimated as
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><msup><mi>v</mi><mn>2</mn></msup><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{v^2}</annotation></semantics></math>
 multiplied by the square of the first derivative of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msqrt><mi>x</mi></msqrt><annotation encoding="application/x-tex">\sqrt{x}</annotation></semantics></math>,
-i.e.~<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>2</mn><msqrt><mi>x</mi></msqrt><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">1/(2\sqrt{x})</annotation></semantics></math>,
+i.e.~<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mn>2</mn><msqrt><mi>x</mi></msqrt><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">1/(2\sqrt{x})</annotation></semantics></math>,
 at
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><msup><mi>s</mi><mn>2</mn></msup><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{s^2}</annotation></semantics></math>.
 In other words, the standard error for
@@ -223,9 +223,9 @@ containing just the rows and columns that have to do with
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><msubsup><mi>s</mi><mi>y</mi><mn>2</mn></msubsup><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat{s^2_{y}}</annotation></semantics></math>.
 Then, the standard error of the correlation will be estimated as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>J</mi><mi>′</mi><mi>M</mi><mi>J</mi></mrow><annotation encoding="application/x-tex">J'MJ</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>J</mi><mo>′</mo></msup><mi>M</mi><mi>J</mi></mrow><annotation encoding="application/x-tex">J'MJ</annotation></semantics></math>,
 where</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>J</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mfrac><mrow><mi>∂</mi><mover><mi>r</mi><mo accent="true">̂</mo></mover></mrow><mrow><mi>∂</mi><mover><msub><mi>s</mi><mrow><mi>x</mi><mi>y</mi></mrow></msub><mo accent="true">̂</mo></mover></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mfrac><mrow><mi>∂</mi><mover><mi>r</mi><mo accent="true">̂</mo></mover></mrow><mrow><mi>∂</mi><mover><msubsup><mi>s</mi><mi>x</mi><mn>2</mn></msubsup><mo accent="true">̂</mo></mover></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mfrac><mrow><mi>∂</mi><mover><mi>r</mi><mo accent="true">̂</mo></mover></mrow><mrow><mi>∂</mi><mover><msubsup><mi>s</mi><mi>y</mi><mn>2</mn></msubsup><mo accent="true">̂</mo></mover></mrow></mfrac></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mfrac><mn>1</mn><msqrt><mrow><mover><msubsup><mi>s</mi><mi>x</mi><mn>2</mn></msubsup><mo accent="true">̂</mo></mover><mover><msubsup><mi>s</mi><mi>y</mi><mn>2</mn></msubsup><mo accent="true">̂</mo></mover></mrow></msqrt></mfrac></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mo>−</mo><mfrac><mover><msub><mi>s</mi><mrow><mi>x</mi><mi>y</mi></mrow></msub><mo accent="true">̂</mo></mover><mrow><mn>2</mn><msup><mover><msubsup><mi>s</mi><mi>x</mi><mn>2</mn></msubsup><mo accent="true">̂</mo></mover><mrow><mn>3</mn><mi>/</mi><mn>2</mn></mrow></msup><msqrt><mover><msubsup><mi>s</mi><mi>y</mi><mn>2</mn></msubsup><mo accent="true">̂</mo></mover></msqrt></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mo>−</mo><mfrac><mover><msub><mi>s</mi><mrow><mi>x</mi><mi>y</mi></mrow></msub><mo accent="true">̂</mo></mover><mrow><mn>2</mn><msqrt><mover><msubsup><mi>s</mi><mi>x</mi><mn>2</mn></msubsup><mo accent="true">̂</mo></mover></msqrt><msup><mover><msubsup><mi>s</mi><mi>y</mi><mn>2</mn></msubsup><mo accent="true">̂</mo></mover><mrow><mn>3</mn><mi>/</mi><mn>2</mn></mrow></msup></mrow></mfrac></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex"> 
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>J</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mfrac><mrow><mi>∂</mi><mover><mi>r</mi><mo accent="true">̂</mo></mover></mrow><mrow><mi>∂</mi><mover><msub><mi>s</mi><mrow><mi>x</mi><mi>y</mi></mrow></msub><mo accent="true">̂</mo></mover></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mfrac><mrow><mi>∂</mi><mover><mi>r</mi><mo accent="true">̂</mo></mover></mrow><mrow><mi>∂</mi><mover><msubsup><mi>s</mi><mi>x</mi><mn>2</mn></msubsup><mo accent="true">̂</mo></mover></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mfrac><mrow><mi>∂</mi><mover><mi>r</mi><mo accent="true">̂</mo></mover></mrow><mrow><mi>∂</mi><mover><msubsup><mi>s</mi><mi>y</mi><mn>2</mn></msubsup><mo accent="true">̂</mo></mover></mrow></mfrac></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mfrac><mn>1</mn><msqrt><mrow><mover><msubsup><mi>s</mi><mi>x</mi><mn>2</mn></msubsup><mo accent="true">̂</mo></mover><mover><msubsup><mi>s</mi><mi>y</mi><mn>2</mn></msubsup><mo accent="true">̂</mo></mover></mrow></msqrt></mfrac></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mfrac><mover><msub><mi>s</mi><mrow><mi>x</mi><mi>y</mi></mrow></msub><mo accent="true">̂</mo></mover><mrow><mn>2</mn><msup><mover><msubsup><mi>s</mi><mi>x</mi><mn>2</mn></msubsup><mo accent="true">̂</mo></mover><mrow><mn>3</mn><mi>/</mi><mn>2</mn></mrow></msup><msqrt><mover><msubsup><mi>s</mi><mi>y</mi><mn>2</mn></msubsup><mo accent="true">̂</mo></mover></msqrt></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mi>−</mi><mfrac><mover><msub><mi>s</mi><mrow><mi>x</mi><mi>y</mi></mrow></msub><mo accent="true">̂</mo></mover><mrow><mn>2</mn><msqrt><mover><msubsup><mi>s</mi><mi>x</mi><mn>2</mn></msubsup><mo accent="true">̂</mo></mover></msqrt><msup><mover><msubsup><mi>s</mi><mi>y</mi><mn>2</mn></msubsup><mo accent="true">̂</mo></mover><mrow><mn>3</mn><mi>/</mi><mn>2</mn></mrow></msup></mrow></mfrac></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex"> 
 J = \left( 
 \begin{array}{c}   
 \displaystyle{\frac{ \partial \hat{r} } { \partial \hat{s_{xy}} }}\\ 
@@ -292,7 +292,7 @@ shows the standard errors similarly arranged:</p>
 <div class="section level2 unnumbered">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-srvyr" class="csl-entry">
 Freedman Ellis, Greg, and Ben Schneider. 2021. <em>Srvyr: ’Dplyr’-Like
 Syntax for Summary Statistics of Survey Data</em>. <a href="https://CRAN.R-project.org/package=srvyr" class="external-link">https://CRAN.R-project.org/package=srvyr</a>.
@@ -306,8 +306,8 @@ Lumley, Thomas. 2004. <span>“Analysis of Complex Survey Samples.”</span>
 <em>Journal of Statistical Software</em> 9 (1): 1–19.
 </div>
 <div id="ref-lumley" class="csl-entry">
-———. 2010. <em>Complex Surveys: A Guide to Analysis Using r: A Guide to
-Analysis Using r</em>. John Wiley; Sons.
+Lumley, Thomas. 2010. <em>Complex Surveys: A Guide to Analysis Using r:
+A Guide to Analysis Using r</em>. John Wiley; Sons.
 </div>
 <div id="ref-MarsmanPV" class="csl-entry">
 Marsman, M., G. Maris, T. M. Bechger, and C. A. W. Glas. 2016.
@@ -316,8 +316,7 @@ values?</span>”</span> <em>Psychometrika</em>, 1–16.
 </div>
 <div id="ref-R" class="csl-entry">
 R Development Core Team. 2005. <em>R: A Language and Environment for
-Statistical Computing</em>. Vienna, Austria: R Foundation for
-Statistical Computing. <a href="https://www.R-project.org" class="external-link">https://www.R-project.org</a>.
+Statistical Computing</em>. R Foundation for Statistical Computing. <a href="https://www.R-project.org" class="external-link">https://www.R-project.org</a>.
 </div>
 </div>
 </div>

@@ -111,7 +111,7 @@
                         <h4 data-toc-skip class="author">Timo Bechger,
 Jesse Koops and Ivailo Partchev</h4>
             
-            <h4 data-toc-skip class="date">2026-04-29</h4>
+            <h4 data-toc-skip class="date">2026-05-12</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/dexter-psychometrics/dexter/blob/master/vignettes/Equating.Rmd" class="external-link"><code>vignettes/Equating.Rmd</code></a></small>
       <div class="hidden name"><code>Equating.Rmd</code></div>
@@ -359,7 +359,7 @@ and
 and let
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐱</mi><annotation encoding="application/x-tex">\mathbf{x}</annotation></semantics></math>
 denote the available data. We calculate
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo>,</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(R_+ \geq c|N_+ = s, \mathbf{x})</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo>,</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(R_+ \geq c|N_+ = s, \mathbf{x})</annotation></semantics></math>,
 the probability that a person with a score of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
 on the target test will pass. Simply stated, we calculate this
@@ -382,7 +382,7 @@ informative.</p>
 <h2 id="sensitivity-and-specificity">Sensitivity and specificity<a class="anchor" aria-label="anchor" href="#sensitivity-and-specificity"></a>
 </h2>
 <p>Having the probability to pass and the proportion of respondents,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(N_+ = s)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(N_+ = s)</annotation></semantics></math>,
 for all possible scores
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>,
 we can calculate sensitivity and specificity and plot them for each
@@ -418,7 +418,7 @@ welcome.</p>
 <p>Let us consider how we determine the probability to pass the
 reference test given a score
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi></mrow><annotation encoding="application/x-tex">N_+=s</annotation></semantics></math>
-on the target test. This probability can be defined as:<br><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo>,</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mo>∫</mo><mrow><mi>𝐛</mi><mo>,</mo><mi>θ</mi></mrow></msub><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="false" form="prefix">|</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="false" form="prefix">|</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>d</mi><mi>𝐛</mi><mi>d</mi><mi>θ</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">
+on the target test. This probability can be defined as:<br><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo>,</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mo>∫</mo><mrow><mi>𝐛</mi><mo>,</mo><mi>θ</mi></mrow></msub><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="false" form="postfix">)</mo><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo stretchy="false" form="prefix">|</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="false" form="postfix">)</mo><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="false" form="prefix">|</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo><mi>d</mi><mi>𝐛</mi><mi>d</mi><mi>θ</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">
 P(R_+ \geq c|N_+ = s, \mathbf{x})
       = \int_{\mathbf{b},\theta} 
              P(R_+ \geq c|\theta,\mathbf{b}) 
@@ -435,39 +435,39 @@ denotes ability and
 is the vector of item parameters. The integrand has three parts:</p>
 <ul>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="false" form="prefix">|</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(\mathbf{b}|\mathbf{x})</annotation></semantics></math>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="false" form="prefix">|</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">f(\mathbf{b}|\mathbf{x})</annotation></semantics></math>:
 The posterior of the item parameters, given all data
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐱</mi><annotation encoding="application/x-tex">\mathbf{x}</annotation></semantics></math>.</li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="false" form="prefix">|</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(\theta|N_+ = s, \mathbf{b})</annotation></semantics></math>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo stretchy="false" form="prefix">|</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">f(\theta|N_+ = s, \mathbf{b})</annotation></semantics></math>:
 The posterior of ability given the score on the new test.</li>
 <li>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(R_+ \geq c|\theta,\mathbf{b})</annotation></semantics></math>:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(R_+ \geq c|\theta,\mathbf{b})</annotation></semantics></math>:
 The probability to pass given ability equal to
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munder><mo>∑</mo><mrow><mi>s</mi><mo>≥</mo><mi>c</mi></mrow></munder><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munder><mo>∑</mo><mrow><mi>s</mi><mo>≥</mo><mi>c</mi></mrow></munder><mfrac><mrow><msub><mi>γ</mi><mi>s</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow><msup><mi>e</mi><mrow><mi>s</mi><mi>θ</mi></mrow></msup></mrow><mrow><munder><mo>∑</mo><mi>h</mi></munder><msub><mi>γ</mi><mi>h</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow><msup><mi>e</mi><mrow><mi>h</mi><mi>θ</mi></mrow></msup></mrow></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><munder><mo>∑</mo><mrow><mi>s</mi><mo>≥</mo><mi>c</mi></mrow></munder><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>𝐛</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><munder><mo>∑</mo><mrow><mi>s</mi><mo>≥</mo><mi>c</mi></mrow></munder><mfrac><mrow><msub><mi>γ</mi><mi>s</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="false" form="postfix">)</mo><msup><mi>e</mi><mrow><mi>s</mi><mi>θ</mi></mrow></msup></mrow><mrow><munder><mo>∑</mo><mi>h</mi></munder><msub><mi>γ</mi><mi>h</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="false" form="postfix">)</mo><msup><mi>e</mi><mrow><mi>h</mi><mi>θ</mi></mrow></msup></mrow></mfrac><mo>,</mo></mrow><annotation encoding="application/x-tex">
 P(R_+ \geq c|\theta,\mathbf{b}) 
 = \sum_{s \geq c} P(R_+ = s |\theta, \mathbf{b}) 
 = \sum_{s \geq c} \frac{\gamma_s(\mathbf{b}) e^{s \theta}}
                      {\sum_h \gamma_h(\mathbf{b}) e^{h \theta}},
 </annotation></semantics></math> with
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mi>s</mi></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\gamma_s(\mathbf{b})</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mi>s</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\gamma_s(\mathbf{b})</annotation></semantics></math>
 the elementary symmetric function of order s.</li>
 </ul>
 <p>To calculate a Monte-Carlo estimate, repeat:</p>
 <ul>
 <li>sample item parameters
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>𝐛</mi><mo>*</mo></msup><mo>∼</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="false" form="prefix">|</mo><mi>𝐱</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathbf{b}^* \sim f(\mathbf{b}|\mathbf{x})</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>𝐛</mi><mo>*</mo></msup><mo>∼</mo><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>𝐛</mi><mo stretchy="false" form="prefix">|</mo><mi>𝐱</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathbf{b}^* \sim f(\mathbf{b}|\mathbf{x})</annotation></semantics></math>
 </li>
 <li>sample a plausible value
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>θ</mi><mo>*</mo></msup><mo>∼</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="false" form="prefix">|</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo>,</mo><msup><mi>𝐛</mi><mo>*</mo></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\theta^* \sim f(\theta|N_+ = s, \mathbf{b}^*)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>θ</mi><mo>*</mo></msup><mo>∼</mo><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo stretchy="false" form="prefix">|</mo><msub><mi>N</mi><mo>+</mo></msub><mo>=</mo><mi>s</mi><mo>,</mo><msup><mi>𝐛</mi><mo>*</mo></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\theta^* \sim f(\theta|N_+ = s, \mathbf{b}^*)</annotation></semantics></math>
 </li>
 <li>calculate
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><msup><mi>θ</mi><mo>*</mo></msup><mo>,</mo><msup><mi>𝐛</mi><mo>*</mo></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(R_+ \geq c|\theta^*,\mathbf{b}^*)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><msup><mi>θ</mi><mo>*</mo></msup><mo>,</mo><msup><mi>𝐛</mi><mo>*</mo></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(R_+ \geq c|\theta^*,\mathbf{b}^*)</annotation></semantics></math>
 </li>
 </ul>
 <p>We do this as often as we can afford (currently, a thousand times),
 and we take the average as an estimate of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><msup><mi>θ</mi><mo>*</mo></msup><mo>,</mo><msup><mi>𝐛</mi><mo>*</mo></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(R_+ \geq c|\theta^*,\mathbf{b}^*)</annotation></semantics></math>.</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>R</mi><mo>+</mo></msub><mo>≥</mo><mi>c</mi><mo stretchy="false" form="prefix">|</mo><msup><mi>θ</mi><mo>*</mo></msup><mo>,</mo><msup><mi>𝐛</mi><mo>*</mo></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(R_+ \geq c|\theta^*,\mathbf{b}^*)</annotation></semantics></math>.</p>
 <p>Sensitivity and specificity are calculated from the score
 distribution on the new-test and the probability to pass. The following
 code shows how:</p>
@@ -483,7 +483,7 @@ code shows how:</p>
 <div class="section level2 unnumbered">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-BolsinovaMaris2016" class="csl-entry">
 Bolsinova, Maria, and Gunter Maris. 2016. <span>“Can IRT Solve the
 Missing Data Problem in Test Equating?”</span> <em>Frontiers in
@@ -491,8 +491,8 @@ Psychology</em> 6: 1956. <a href="https://doi.org/10.3389/fpsyg.2015.01956" clas
 </div>
 <div id="ref-Swets96" class="csl-entry">
 Swets, John A. 1996. <em>Signal Detection Theory and ROC Analysis in
-Psychology and Diagnostics: Collected Papers.</em> Hillsdale, NJ:
-Lawrence Erlbaum Associates, Inc.
+Psychology and Diagnostics: Collected Papers.</em> Lawrence Erlbaum
+Associates, Inc.
 </div>
 </div>
 </div>

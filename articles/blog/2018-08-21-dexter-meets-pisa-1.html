@@ -222,13 +222,13 @@ scores in a <code>rules</code> object. We pass that to the
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">data_scored</span><span class="op">)</span></span></code></pre></div>
 <p>At some later stage, we will discuss a <em>market basket
-approach</em> to the definition and estimation of competence <span class="citation">(Mislevy 1998; Zwitser, Glaser, and Maris 2017)</span>.
-For our purposes, the market basket is the subset of items that is
-administered in <em>every</em> country (though not to every student, as
-we have a multi-booklet design within each country). We are not dealing
-with the market basket approach now, but we will compute an item
-property, ‘item belongs / does not belong to the basket’, and we will
-add it to the data base for later use:</p>
+approach</em> to the definition and estimation of competence <span class="citation">(Mislevy 1998; Zwitser et al. 2017)</span>. For our
+purposes, the market basket is the subset of items that is administered
+in <em>every</em> country (though not to every student, as we have a
+multi-booklet design within each country). We are not dealing with the
+market basket approach now, but we will compute an item property, ‘item
+belongs / does not belong to the basket’, and we will add it to the data
+base for later use:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">item_by_cnt</span> <span class="op">=</span> <span class="fu"><a href="../../reference/get_responses.html">get_responses</a></span><span class="op">(</span><span class="va">db</span>, columns<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'item_id'</span>, <span class="st">'cnt'</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/distinct.html" class="external-link">distinct</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -267,14 +267,14 @@ easier.</p>
 </h2>
 <p>The IRT model in <strong>dexter</strong> is not exactly the same as
 the one used in the original PISA study of 2012. PISA used the Mixed
-Coefficients Multinomial Logit Model (<span class="citation">Adams,
-Wilson, and Wang (1997)</span>), which is a multidimensional model fit
-by marginal maximum likelihood (MML). The extended nominal response
-model (ENORM) in <strong>dexter</strong> is a unidimensional model fit
-by conditional maximum likelihood (CML). Still, there is an essential
-structural similarity: both models default to the Rasch model for the
-dichotomous items, and to the partial credit model (PCM) items for the
-polytomous items.</p>
+Coefficients Multinomial Logit Model (<span class="citation">Adams et
+al. (1997)</span>), which is a multidimensional model fit by marginal
+maximum likelihood (MML). The extended nominal response model (ENORM) in
+<strong>dexter</strong> is a unidimensional model fit by conditional
+maximum likelihood (CML). Still, there is an essential structural
+similarity: both models default to the Rasch model for the dichotomous
+items, and to the partial credit model (PCM) items for the polytomous
+items.</p>
 <p>CML estimation tends to be fast:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span><span class="op">{</span><span class="va">item_parms</span> <span class="op">=</span> <span class="fu"><a href="../../reference/fit_enorm.html">fit_enorm</a></span><span class="op">(</span><span class="va">db</span><span class="op">)</span><span class="op">}</span><span class="op">)</span></span></code></pre></div>
@@ -286,24 +286,24 @@ polytomous items.</p>
 </h2>
 <p>Plausible values (PV) are random draws from the posterior
 distribution of a person’s ability, given the item parameters and the
-person’s responses (<span class="citation">Maarten Marsman
-(2014)</span>). Nowadays, they are the standard method of ability
-estimation when studying populations (when testing individuals in a high
-stakes exam, we typically use the expectation of the posterior rather
-than a random draw).</p>
+person’s responses (<span class="citation">Marsman (2014)</span>).
+Nowadays, they are the standard method of ability estimation when
+studying populations (when testing individuals in a high stakes exam, we
+typically use the expectation of the posterior rather than a random
+draw).</p>
 <p>The plausible values in the original PISA study are drawn with a
 prior distribution that reflects a large number of background variables
 measured on the person. We don’t do this. A wonderful property of PV
 values is that they eventually reproduce the true ability distribution,
-even when the prior is misspecified (<span class="citation">M. Marsman
-et al. (2016)</span>). Using the wrong prior comes with a penalty: one
-must pay with more data, meaning more items. When the functional form of
-the posterior resembles the functional form of the prior, this is a sign
+even when the prior is misspecified (<span class="citation">Marsman et
+al. (2016)</span>). Using the wrong prior comes with a penalty: one must
+pay with more data, meaning more items. When the functional form of the
+posterior resembles the functional form of the prior, this is a sign
 that convergence is near.</p>
 <p>The algorithm used in <strong>dexter</strong> is based on composition
 (sample a proposal value, simulate data from it, accept if the simulated
 sum score matches the observed one), and uses recycling for higher speed
-(rejected values are saved for some other persons). See <span class="citation">Maarten Marsman (2014)</span> for details.</p>
+(rejected values are saved for some other persons). See <span class="citation">Marsman (2014)</span> for details.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pv</span> <span class="op">=</span> <span class="fu"><a href="../../reference/plausible_values.html">plausible_values</a></span><span class="op">(</span><span class="va">db</span>, parms<span class="op">=</span><span class="va">item_parms</span>, nPV<span class="op">=</span><span class="fl">5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pv</span><span class="op">)</span></span></code></pre></div>
@@ -453,7 +453,7 @@ discussion that will be taken up in the next posts.</p>
 <div class="section level2 unnumbered">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-AdamsWilsonWang97" class="csl-entry">
 Adams, R. J., M. Wilson, and W. Wang. 1997. <span>“The Multidimensional
 Random Coefficients Multinomial Logit Model.”</span> <em>Applied
@@ -461,7 +461,7 @@ Psychological Measurement</em> 21 (1): 1–23.
 </div>
 <div id="ref-Koohafkan2014" class="csl-entry">
 Koohafkan, Michael. 2014. <span>“Downloading, Extracting and Reading
-Files in r.”</span> 2014. <a href="https://hydroecology.net/downloading-extracting-and-reading-files-in-r/" class="external-link">https://hydroecology.net/downloading-extracting-and-reading-files-in-r/</a>.
+Files in r.”</span> <a href="https://hydroecology.net/downloading-extracting-and-reading-files-in-r/" class="external-link">https://hydroecology.net/downloading-extracting-and-reading-files-in-r/</a>.
 </div>
 <div id="ref-survey" class="csl-entry">
 Lumley, Thomas. 2004. <span>“Analysis of Complex Survey Samples.”</span>
@@ -469,8 +469,7 @@ Lumley, Thomas. 2004. <span>“Analysis of Complex Survey Samples.”</span>
 </div>
 <div id="ref-MM" class="csl-entry">
 Marsman, Maarten. 2014. <span>“Plausible Values in Statistical
-Inference.”</span> PhD thesis, Enschede, the Netherlands: University of
-Twente.
+Inference.”</span> PhD thesis, University of Twente.
 </div>
 <div id="ref-MarsmanPV" class="csl-entry">
 Marsman, M., G. Maris, T. M. Bechger, and C. A. W. Glas. 2016.

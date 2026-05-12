@@ -172,10 +172,10 @@ feel that it is related to K-means: one specifies the desired number of
 clusters, and the algorithm optimizes within-cluster variance.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">biclustermd</span><span class="op">)</span></span></code></pre></div>
-<p><strong>seriation</strong> (<span class="citation">Hahsler, Buchta,
-and Hornik (2024)</span>) Provides solutions to the problem of optimally
-ordering a data set, for a variety of data formats. The vignette is
-worth reading (<span class="citation">(<strong>seriation-paper?</strong>)</span>).</p>
+<p><strong>seriation</strong> (<span class="citation">Hahsler et al.
+(2024)</span>) Provides solutions to the problem of optimally ordering a
+data set, for a variety of data formats. The vignette is worth reading
+(<span class="citation">(<strong>seriation-paper?</strong>)</span>).</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mhahsler/seriation" class="external-link">seriation</a></span><span class="op">)</span></span></code></pre></div>
 <p>I have written a number of fairly trivial functions using these
@@ -415,12 +415,11 @@ mainly as a way to order the display in a meaningful way. This is valid,
 widely used, and falls under the more general problem of
 <em>seriation</em>: “to arrange all objects in a set in a linear order
 given available data and some loss or merit function in order to reveal
-structural information” (<span class="citation">Hahsler, Hornik, and
-Buchta (2008)</span>). The R package <strong>seriation</strong> (<span class="citation">Hahsler, Buchta, and Hornik (2024)</span>) provides a
-rich array of techniques to sequence data in various formats, and the
-default method for our case is “PCA”. In what follows, we shall be
-applying principal components analysis to the principal components of
-our data!</p>
+structural information” (<span class="citation">Hahsler et al.
+(2008)</span>). The R package <strong>seriation</strong> (<span class="citation">Hahsler et al. (2024)</span>) provides a rich array of
+techniques to sequence data in various formats, and the default method
+for our case is “PCA”. In what follows, we shall be applying principal
+components analysis to the principal components of our data!</p>
 <div class="section level4">
 <h4 id="the-first-component">The first component<a class="anchor" aria-label="anchor" href="#the-first-component"></a>
 </h4>
@@ -466,11 +465,10 @@ are highly specialised applications where the number of variables
 typically exceeds the number of observations, and where enormous
 interest may lie with a tiny dense cluster that might hold the key to
 the genetic origin of some horrible condition. A good overview is
-provided by <span class="citation">Castanho, Aidos, and Madeira
-(2024)</span>. From there we see that biclustering is not immune to the
-problem with ordinary clustering I mentioned before: too many different
-algorithms, too little guidance on how to choose the most appropriate
-one.</p>
+provided by <span class="citation">Castanho et al. (2024)</span>. From
+there we see that biclustering is not immune to the problem with
+ordinary clustering I mentioned before: too many different algorithms,
+too little guidance on how to choose the most appropriate one.</p>
 <p>We already did some kind of biclustering with the clustered heatmaps.
 For further illustration, I have selected the biclustermd package (<span class="citation">Reisner (2021)</span>). It produced results that seem
 closer to what we need in our example, supports only one clustering
@@ -533,7 +531,7 @@ way between different methods is reassuring.</p>
 <div class="section level2 unnumbered">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-borg2007modern" class="csl-entry">
 Borg, I., and P. J. F. Groenen. 2007. <em>Modern Multidimensional
 Scaling: Theory and Applications</em>. Springer Series in Statistics.
@@ -555,7 +553,7 @@ Bilbao, Spain. <a href="http://www.multivariatestatistics.org" class="external-l
 </div>
 <div id="ref-ComplexHeatmap" class="csl-entry">
 Gu, Zuguang. 2022. <span>“Complex Heatmap Visualization.”</span>
-<em>iMeta</em>. <a href="https://doi.org/10.1002/imt2.43" class="external-link">https://doi.org/10.1002/imt2.43</a>.
+<em>iMeta</em>, ahead of print. <a href="https://doi.org/10.1002/imt2.43" class="external-link">https://doi.org/10.1002/imt2.43</a>.
 </div>
 <div id="ref-seriation" class="csl-entry">
 Hahsler, Michael, Christian Buchta, and Kurt Hornik. 2024.

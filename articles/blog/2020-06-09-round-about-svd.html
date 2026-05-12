@@ -432,9 +432,9 @@ and
 and a diagonal matrix,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>𝐃</mi><mrow><mi>r</mi><mo>×</mo><mi>r</mi></mrow></msub><annotation encoding="application/x-tex">\mathbf{D}_{r\times r}</annotation></semantics></math>,
 in the following way:
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐗</mi><mo>=</mo><mi>𝐔</mi><mi>𝐃</mi><mi>𝐕</mi><mi>′</mi></mrow><annotation encoding="application/x-tex">\mathbf{X}=\mathbf{U}\mathbf{D}\mathbf{V}'</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐗</mi><mo>=</mo><mi>𝐔</mi><mi>𝐃</mi><msup><mi>𝐕</mi><mo>′</mo></msup></mrow><annotation encoding="application/x-tex">\mathbf{X}=\mathbf{U}\mathbf{D}\mathbf{V}'</annotation></semantics></math>.
 Orthonormal means
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi>𝐔</mi><mi mathvariant="bold">′</mi><mi>𝐔</mi></mrow><mo>=</mo><mrow><mi>𝐕</mi><mi mathvariant="bold">′</mi><mi>𝐕</mi></mrow><mo>=</mo><mi>𝐈</mi></mrow><annotation encoding="application/x-tex">\mathbf{U'U}=\mathbf{V'V}=\mathbf{I}</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><msup><mi>𝐔</mi><mo mathvariant="bold">′</mo></msup><mi>𝐔</mi></mrow><mo>=</mo><mrow><msup><mi>𝐕</mi><mo mathvariant="bold">′</mo></msup><mi>𝐕</mi></mrow><mo>=</mo><mi>𝐈</mi></mrow><annotation encoding="application/x-tex">\mathbf{U'U}=\mathbf{V'V}=\mathbf{I}</annotation></semantics></math>,
 implying that the columns of both
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐔</mi><annotation encoding="application/x-tex">\mathbf{U}</annotation></semantics></math>
 and
@@ -443,7 +443,7 @@ are mutually independent or perpendicular, depending on whether you ask
 a statistician or a geometrician, and the sum-of-squares for each of
 their columns is 1.</p>
 <p>We can choose any
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>&lt;</mo><mi>r</mi><mo>≤</mo><mo>min</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo>,</mo><mi>m</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">0&lt;r\leq\min(n,m)</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>&lt;</mo><mi>r</mi><mo>≤</mo><mrow><mi mathvariant="normal">min</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>n</mi><mo>,</mo><mi>m</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">0&lt;r\leq\min(n,m)</annotation></semantics></math>.
 It is standard practice to arrange the three matrices such that the
 diagonal elements of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐃</mi><annotation encoding="application/x-tex">\mathbf{D}</annotation></semantics></math>
@@ -459,7 +459,7 @@ is less than
 Whatever admissible
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>
 we choose, the product,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐔</mi><mi>𝐃</mi><mi>𝐕</mi><mi>′</mi></mrow><annotation encoding="application/x-tex">\mathbf{U}\mathbf{D}\mathbf{V}'</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐔</mi><mi>𝐃</mi><msup><mi>𝐕</mi><mo>′</mo></msup></mrow><annotation encoding="application/x-tex">\mathbf{U}\mathbf{D}\mathbf{V}'</annotation></semantics></math>,
 provides the best possible approximation to
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf X</annotation></semantics></math>
 in the least-squares sense, as compared to any other
@@ -482,7 +482,7 @@ is just as useful in, say, image processing as it is in data
 analysis.</p>
 <p>Let us take a closer look at how the original matrix is reconstructed
 and approximated:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐗</mi><mo>=</mo><mi>𝐔</mi><mi>𝐃</mi><mi>𝐕</mi><mi>′</mi><mo>=</mo><msub><mi>d</mi><mn>11</mn></msub><msub><mi>𝐮</mi><mn>1</mn></msub><msub><mi>𝐯</mi><mn>1</mn></msub><mi>′</mi><mo>+</mo><msub><mi>d</mi><mn>22</mn></msub><msub><mi>𝐮</mi><mn>2</mn></msub><msub><mi>𝐯</mi><mn>2</mn></msub><mi>′</mi><mo>+</mo><mi>…</mi><mo>+</mo><msub><mi>d</mi><mrow><mi>r</mi><mi>r</mi></mrow></msub><msub><mi>𝐮</mi><mi>r</mi></msub><msub><mi>𝐯</mi><mi>r</mi></msub><mi>′</mi></mrow><annotation encoding="application/x-tex">\mathbf{X}=\mathbf{U}\mathbf{D}\mathbf{V}'=d_{11}\mathbf{u}_{1}\mathbf{v}_1'+d_{22}\mathbf{u}_2\mathbf{v}_2'+\ldots +d_{rr}\mathbf{u}_r\mathbf{v}_r'</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐗</mi><mo>=</mo><mi>𝐔</mi><mi>𝐃</mi><msup><mi>𝐕</mi><mo>′</mo></msup><mo>=</mo><msub><mi>d</mi><mn>11</mn></msub><msub><mi>𝐮</mi><mn>1</mn></msub><msubsup><mi>𝐯</mi><mn>1</mn><mo>′</mo></msubsup><mo>+</mo><msub><mi>d</mi><mn>22</mn></msub><msub><mi>𝐮</mi><mn>2</mn></msub><msubsup><mi>𝐯</mi><mn>2</mn><mo>′</mo></msubsup><mo>+</mo><mi>…</mi><mo>+</mo><msub><mi>d</mi><mrow><mi>r</mi><mi>r</mi></mrow></msub><msub><mi>𝐮</mi><mi>r</mi></msub><msubsup><mi>𝐯</mi><mi>r</mi><mo>′</mo></msubsup></mrow><annotation encoding="application/x-tex">\mathbf{X}=\mathbf{U}\mathbf{D}\mathbf{V}'=d_{11}\mathbf{u}_{1}\mathbf{v}_1'+d_{22}\mathbf{u}_2\mathbf{v}_2'+\ldots +d_{rr}\mathbf{u}_r\mathbf{v}_r'</annotation></semantics></math></p>
 <p>Note that this is probably not matrix multiplication the way you
 studied it at school. The matrix product,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐂</mi><mo>=</mo><mrow><mi>𝐀</mi><mi>𝐁</mi></mrow></mrow><annotation encoding="application/x-tex">\mathbf C=\mathbf{AB}</annotation></semantics></math>,
@@ -511,10 +511,10 @@ values in decreasing magnitude, successive components contribute less
 and less to the sum. The
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>×</mo><mi>m</mi></mrow><annotation encoding="application/x-tex">n\times m</annotation></semantics></math>
 matrix,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mn>11</mn></msub><msub><mi>𝐮</mi><mn>1</mn></msub><msub><mi>𝐯</mi><mn>1</mn></msub><mi>′</mi></mrow><annotation encoding="application/x-tex">d_{11}\mathbf{u}_{1}\mathbf{v}_1'</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mn>11</mn></msub><msub><mi>𝐮</mi><mn>1</mn></msub><msubsup><mi>𝐯</mi><mn>1</mn><mo>′</mo></msubsup></mrow><annotation encoding="application/x-tex">d_{11}\mathbf{u}_{1}\mathbf{v}_1'</annotation></semantics></math>,
 is the best rank 1 approximation to
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐗</mi><annotation encoding="application/x-tex">\mathbf X</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mn>11</mn></msub><msub><mi>𝐮</mi><mn>1</mn></msub><msub><mi>𝐯</mi><mn>1</mn></msub><mi>′</mi><mo>+</mo><msub><mi>d</mi><mn>22</mn></msub><msub><mi>𝐮</mi><mn>2</mn></msub><msub><mi>𝐯</mi><mn>2</mn></msub><mi>′</mi></mrow><annotation encoding="application/x-tex">d_{11}\mathbf{u}_{1}\mathbf{v}_1'+d_{22}\mathbf{u}_2\mathbf{v}_2'</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mn>11</mn></msub><msub><mi>𝐮</mi><mn>1</mn></msub><msubsup><mi>𝐯</mi><mn>1</mn><mo>′</mo></msubsup><mo>+</mo><msub><mi>d</mi><mn>22</mn></msub><msub><mi>𝐮</mi><mn>2</mn></msub><msubsup><mi>𝐯</mi><mn>2</mn><mo>′</mo></msubsup></mrow><annotation encoding="application/x-tex">d_{11}\mathbf{u}_{1}\mathbf{v}_1'+d_{22}\mathbf{u}_2\mathbf{v}_2'</annotation></semantics></math>
 is the best rank 2 approximation, and so on: as we add more and more
 components, our approximation gradually improves.</p>
 <p>Let us visualize the decomposition – reconstruction process. Below we
@@ -574,7 +574,7 @@ want to do the same with SVD, column-centering the data matrix is
 imperative because this is how a covariance matrix is defined: no
 centering, no covariance.</p>
 <p>By the way, the PCA I did is equivalent to an eigendecomposition of
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>𝐘</mi><mi mathvariant="bold">′</mi><mi>𝐘</mi></mrow><annotation encoding="application/x-tex">\mathbf{Y'Y}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>𝐘</mi><mo mathvariant="bold">′</mo></msup><mi>𝐘</mi></mrow><annotation encoding="application/x-tex">\mathbf{Y'Y}</annotation></semantics></math>
 with
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>𝐘</mi><annotation encoding="application/x-tex">\mathbf Y</annotation></semantics></math>
 the column-centered version of

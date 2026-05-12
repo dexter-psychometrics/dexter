@@ -311,10 +311,9 @@ problem that may occur in 2PL estimation, namely getting stuck at a
 local maximum of the likelihood rather than a global maximum.</p>
 <p>The long answer demands slightly more explanation and introduction.
 In a 2PL marginal model the usual method of estimation is the
-Expectation Maximization <span class="citation">(EM; Dempster, Laird,
-and Rubin 1977)</span> algorithm. This is a general recipe for
-maximizing an intractable likelihood function. It consists of two
-steps:</p>
+Expectation Maximization <span class="citation">(EM; Dempster et al.
+1977)</span> algorithm. This is a general recipe for maximizing an
+intractable likelihood function. It consists of two steps:</p>
 <ol style="list-style-type: decimal">
 <li><p><em>Expectation step</em>. We define a function <em>Q</em> as the
 expected value of the log likelihood as a function of new estimates of
@@ -324,9 +323,9 @@ data.</p></li>
 <li><p><em>Maximization step</em>. We find the parameters for the items
 and population(s) that maximize <em>Q</em>.</p></li>
 </ol>
-<p>And repeat until some stopping criterium is reached. <span class="citation">Dempster, Laird, and Rubin (1977)</span> proved that
-this algorithm is guaranteed to improve the likelihood in each step and
-so will eventually converge to the optimal solution, although at an
+<p>And repeat until some stopping criterium is reached. <span class="citation">Dempster et al. (1977)</span> proved that this
+algorithm is guaranteed to improve the likelihood in each step and so
+will eventually converge to the optimal solution, although at an
 increasingly slower pace in each iteration.</p>
 <p>Unless, of course, something goes wrong.</p>
 <p>The issue we’re currently dealing with is probably related to the
@@ -441,7 +440,7 @@ reasons, see e.g. <a href="2020-01-15-my-more-or-less-coherent-views-on-model-f
 <div class="section level3">
 <h3 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h3>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-bfgs1" class="csl-entry">
 Broyden, C. G. 1970. <span>“The Convergence of a Class of Double-Rank
 Minimization Algorithms 1. General Considerations.”</span>
@@ -462,8 +461,8 @@ Likelihood from Incomplete Data via the EM Algorithm.”</span>
 </div>
 <div id="ref-Dennis1983NumericalMF" class="csl-entry">
 Dennis, John E., and Bobby Schnabel. 1983. <span>“Numerical Methods for
-Unconstrained Optimization and Nonlinear Equations.”</span> In
-<em>Prentice Hall Series in Computational Mathematics</em>.
+Unconstrained Optimization and Nonlinear Equations.”</span> <em>Prentice
+Hall Series in Computational Mathematics</em>.
 </div>
 <div id="ref-bfgs2" class="csl-entry">
 Fletcher, R. 1970. <span>“A New Approach to Variable Metric
@@ -485,7 +484,7 @@ Function Minimization.”</span> <em>Mathematics of Computation</em> 24
 </div>
 <div id="ref-tufte86" class="csl-entry">
 Tufte, Edward R. 1986. <em>The Visual Display of Quantitative
-Information</em>. USA: Graphics Press.
+Information</em>. Graphics Press.
 </div>
 </div>
 </div>

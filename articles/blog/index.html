@@ -641,7 +641,7 @@ over an assumed distribution of ability. The likelihood for a response
 vector
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
 for a single person is defined as:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>∫</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>ω</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo stretchy="false" form="prefix">|</mo><mi>ϕ</mi><mo>,</mo><mi>Y</mi><mo stretchy="true" form="postfix">)</mo></mrow><mi>d</mi><mi>θ</mi></mrow><annotation encoding="application/x-tex">
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo>∫</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>ω</mi><mo stretchy="false" form="postfix">)</mo><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo stretchy="false" form="prefix">|</mo><mi>ϕ</mi><mo>,</mo><mi>Y</mi><mo stretchy="false" form="postfix">)</mo><mi>d</mi><mi>θ</mi></mrow><annotation encoding="application/x-tex">
 P(x) = \int P(x|\theta, \omega)f(\theta|\phi,Y)d\theta
 </annotation></semantics></math></p>
 <p><a href="2022-03-31-dexterMML">read more…</a></p>
@@ -662,7 +662,7 @@ large-scale national and international assessments for which
 to discuss at length the facilities for simulating item response data
 with <strong>dexter</strong>. Of course they are there, since simulation
 plays a vital role in our approach to generating plausible values and
-modelling in general – see <span class="citation">Maarten Marsman et al.
+modelling in general – see <span class="citation">Marsman et al.
 (2017)</span>. But they are somewhat hidden among several ‘functions of
 theta’ – anyway, here is the overdue introduction to data simulation
 with <strong>dexter</strong>. Simulating IRT data for a single booklet
@@ -697,8 +697,8 @@ Pearson correlation, and their standard errors. Packages like
 the estimates, not the standard errors. Consider an object,
 <code>est</code>, containing <code>survey</code> estimates for the
 variances of three variables. The variables happen to be plausible
-values <span class="citation">(M. Marsman et al. 2016)</span> from a
-large educational survey, and the estimates have been produced by a
+values <span class="citation">(Marsman et al. 2016)</span> from a large
+educational survey, and the estimates have been produced by a
 replication method (BRR, see <span class="citation">Lumley
 (2010)</span>, Ch.2.3). Note that I could have had any variables instead
 of plausible values (remember petal length? sepal width?), and that we
@@ -774,22 +774,22 @@ birthday a couple of days ago. As a tiny tribute, I offer a lecture I
 gave a couple of months ago to a bunch of students. They had moderate
 exposure to statistics, and I have edited it somewhat hastily, so the
 level is not particularly uniform — sorry, folks.</em> The RaschSampler
-<span class="citation">(Verhelst, Hatzinger, and Mair 2007)</span> is an
-R package that allows the user to test a vast array of statistical
-hypotheses about the Rasch model. It is also a good example of how the
-statistical testing of hypotheses works, especially in its nonparametric
-variety. The theory behind the RaschSampler seems to go back to Georg
-Rasch himself. In a nutshell: Since the row sums and the column sums in
-a 0/1 matrix are sufficient statistics for the person parameters and the
-item parameters in the Rasch model, correspondingly, then any other
-matrix having the same marginal sums will be just as compatible with the
-Rasch model in terms of measurement. If we compute a statistic of
-interest on all matrices having the same marginal sums as our observed
-matrix, then we can place the statistic for the observed matrix in the
-distribution of all statistics. The statistic itself can be anything: if
-you compute the matrix of tetrachoric correlations between all items,
-divide its seventh eigenvalue by the first, take the log and multiply it
-by Boltzmann’s constant, it would still work (now, try and derive the
+<span class="citation">(Verhelst et al. 2007)</span> is an R package
+that allows the user to test a vast array of statistical hypotheses
+about the Rasch model. It is also a good example of how the statistical
+testing of hypotheses works, especially in its nonparametric variety.
+The theory behind the RaschSampler seems to go back to Georg Rasch
+himself. In a nutshell: Since the row sums and the column sums in a 0/1
+matrix are sufficient statistics for the person parameters and the item
+parameters in the Rasch model, correspondingly, then any other matrix
+having the same marginal sums will be just as compatible with the Rasch
+model in terms of measurement. If we compute a statistic of interest on
+all matrices having the same marginal sums as our observed matrix, then
+we can place the statistic for the observed matrix in the distribution
+of all statistics. The statistic itself can be anything: if you compute
+the matrix of tetrachoric correlations between all items, divide its
+seventh eigenvalue by the first, take the log and multiply it by
+Boltzmann’s constant, it would still work (now, try and derive the
 asymptotic distribution of this statistic). Of course, we would like to
 use sensible statistics — <span class="citation">Ponocny (2001)</span>
 gives many useful examples. And we wouldn’t like to work with
@@ -836,14 +836,14 @@ exist a myriad of models, as the overview in <span class="citation">Boeck and Je
 type of model to both responses and response times, <span class="citation">Partchev and De Boeck (2012)</span> have chosen to
 split the latter at the median, either person- or item-wise. Second,
 item responses increasingly get scored by machine learning algorithms
-(e.g. <span class="citation">Settles, T. LaFlair, and Hagiwara
-(2020)</span>), whose output is typically a class membership
-probability. If classification is to be into two classes, the boundary
-is usually drawn at 0.5. One of the questions we ask ourselves in this
-blog is whether there can be a better way. Within more traditional
-testing, there have been attempts to avoid modeling guessing behavior
-with <em>ad hoc</em> models by asking test takers about their perceived
-certainty that the chosen response is correct (<span class="citation">Finetti (1965)</span>, <span class="citation">Dirkzwager (2003)</span>). These approaches also lead
+(e.g. <span class="citation">Settles et al. (2020)</span>), whose output
+is typically a class membership probability. If classification is to be
+into two classes, the boundary is usually drawn at 0.5. One of the
+questions we ask ourselves in this blog is whether there can be a better
+way. Within more traditional testing, there have been attempts to avoid
+modeling guessing behavior with <em>ad hoc</em> models by asking test
+takers about their perceived certainty that the chosen response is
+correct (<span class="citation">Finetti (1965)</span>, <span class="citation">Dirkzwager (2003)</span>). These approaches also lead
 to responses that can be considered as continuous.
 </p>
 <p><a href="2020-12-22-analysing-continuous-responses-with-dexter">read
@@ -1133,33 +1133,33 @@ item information function (IIF) at
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>θ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\theta_0</annotation></semantics></math>.
 When the IRT model is the Rasch model, the item response function (IRF)
 is
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>b</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>b</mi><mo>−</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">P(X=1|\theta,b)=\frac{1}{1+\exp(b-\theta)}</annotation></semantics></math>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>b</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>b</mi><mo>−</mo><mi>θ</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">P(X=1|\theta,b)=\frac{1}{1+\exp(b-\theta)}</annotation></semantics></math>
 where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>b</mi><annotation encoding="application/x-tex">b</annotation></semantics></math>
 is the item difficulty, and the IIF can be computed as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>b</mi><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">[</mo><mn>1</mn><mo>−</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>b</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">P(X=1|\theta,b)[1-P(X=1|\theta,b)]</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>b</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">[</mo><mn>1</mn><mo>−</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>b</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">P(X=1|\theta,b)[1-P(X=1|\theta,b)]</annotation></semantics></math>.
 For all items, this function reaches a maximum of 0.25, encountered
 exactly where
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi><mo>=</mo><mi>b</mi></mrow><annotation encoding="application/x-tex">\theta=b</annotation></semantics></math>
 and
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>b</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">P(X=1|\theta,b)=0.5</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>b</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">P(X=1|\theta,b)=0.5</annotation></semantics></math>.
 So picking the item with the maximum IIF is the same as picking the item
 for which a person of ability of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>θ</mi><mn>0</mn></msub><annotation encoding="application/x-tex">\theta_0</annotation></semantics></math>
 has a probability of 0.5 to produce the correct answer. If we use the
 two-parameter logistic (2PL) model instead, the IRF is
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>a</mi><mo>,</mo><mi>b</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">[</mo><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>b</mi><mo>−</mo><mi>θ</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">P(X=1|\theta,a,b)=\frac{1}{1+\exp[a(b-\theta)]}</annotation></semantics></math>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>a</mi><mo>,</mo><mi>b</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">[</mo><mi>a</mi><mo stretchy="false" form="prefix">(</mo><mi>b</mi><mo>−</mo><mi>θ</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">]</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">P(X=1|\theta,a,b)=\frac{1}{1+\exp[a(b-\theta)]}</annotation></semantics></math>
 where the new parameter
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
 is called the discrimination parameter, and the IIF can be computed as
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>a</mi><mn>2</mn></msup><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>a</mi><mo>,</mo><mi>b</mi><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">[</mo><mn>1</mn><mo>−</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>X</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>a</mi><mo>,</mo><mi>b</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">a^2P(X=1|\theta,a,b)[1-P(X=1|\theta,a,b)]</annotation></semantics></math>.
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>a</mi><mn>2</mn></msup><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>a</mi><mo>,</mo><mi>b</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">[</mo><mn>1</mn><mo>−</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="prefix">|</mo><mi>θ</mi><mo>,</mo><mi>a</mi><mo>,</mo><mi>b</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">a^2P(X=1|\theta,a,b)[1-P(X=1|\theta,a,b)]</annotation></semantics></math>.
 Note that while the contribution of the product,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>P</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(1-P)</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>P</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(1-P)</annotation></semantics></math>,
 remains bounded between 0 and 0.25, the influence of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>a</mi><mn>2</mn></msup><annotation encoding="application/x-tex">a^2</annotation></semantics></math>
 can become quite large – for example, if
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>=</mo><mn>5</mn></mrow><annotation encoding="application/x-tex">a=5</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>P</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(1-P)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><mi>P</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(1-P)</annotation></semantics></math>
 gets multiplied by 25, ten times the maximum value under the Rasch
 model. Selecting such an informative item gives us the happy feeling
 that our error of measurement will decrease a lot, but what happens to
@@ -1527,18 +1527,18 @@ predicts that, given an item and its difficulty parameter,
 the probability of a correct response is a logistic function of ability,
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>,
 namely,
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo>;</mo><mi>β</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo>−</mo><mi>β</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mn>1</mn><mo>+</mo><mo>exp</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo>−</mo><mi>β</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">P(\theta;\beta)=\frac{\exp(\theta-\beta)}{1+\exp(\theta-\beta)}.</annotation></semantics></math>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo>;</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mrow><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo>−</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mn>1</mn><mo>+</mo><mrow><mi mathvariant="normal">exp</mi><mo>⁡</mo></mrow><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo>−</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">P(\theta;\beta)=\frac{\exp(\theta-\beta)}{1+\exp(\theta-\beta)}.</annotation></semantics></math>
 The information function for the same item happens to be
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo>;</mo><mi>β</mi><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">[</mo><mn>1</mn><mo>−</mo><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo>;</mo><mi>β</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">P(\theta;\beta)[1-P(\theta;\beta)]</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo>;</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">[</mo><mn>1</mn><mo>−</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo>;</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">P(\theta;\beta)[1-P(\theta;\beta)]</annotation></semantics></math>,
 so it is, again, a function of
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>.
 Below we show the item response curve (IRF) for the item, i.e., the
 function
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo>;</mo><mi>β</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P(\theta;\beta)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo>;</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(\theta;\beta)</annotation></semantics></math>
 along with the corresponding item information function (IIF), shown in
 red. When
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>θ</mi><mo>=</mo><mi>β</mi></mrow><annotation encoding="application/x-tex">\theta=\beta</annotation></semantics></math>,
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>θ</mi><mo>;</mo><mi>β</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">P(\theta;\beta)=0.5</annotation></semantics></math>;
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo>;</mo><mi>β</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">P(\theta;\beta)=0.5</annotation></semantics></math>;
 this is also the point where the IIF peaks, and the maximum is of course
 equal to 0.25. <img src="figure/unnamed-chunk-1-1.png" alt="plot of chunk unnamed-chunk-1"></p>
 <p><a href="2018-11-05-test-and-item-information-functions-in-dexter">read
@@ -1631,24 +1631,23 @@ Ivailo Partchev, Robert Zwitser
 <p>
 In this part, we show how to use <strong>dexter</strong> to apply the
 market basket approach <span class="citation">(Mislevy 1998)</span> to
-the mathematics domain in PISA 2012, following the logic in <span class="citation">R. J. Zwitser, Glaser, and Maris (2017)</span>. Once we
-have read in the data and created the <strong>dexter</strong> database,
-as shown <a href="2018-08-21-dexter-meets-pisa-1">here</a>, this takes
-only several lines of code. Still, the article will be a bit longer as
-the market basket approach deserves some attention on its own. The
-market basket approach has been borrowed from economics – more
-precisely, from the study of inflation and purchasing power. To confuse
-matters further, the machine learning field has appropriated the term to
-denote something completely different – we can ignore this except that
-their version is the more likely to show up on top in a Google search. A
-market basket contains a mix of goods and services in given proportions
-that, by social consensus, mirrors the prevalent consumption patterns;
-the cost of obtaining it, in money or work time, can be compared across
-countries or over time. The idea is simple but the implementation is not
-trivial. In comparisons over time, the contents of the basket cannot
-remain constant forever. In the 1970s, your teenager vitally needed a
-cassette recorder, today it is a smartphone. The commodity that you buy
-– domestic peace – is the same, but the physical carrier has changed. In
+the mathematics domain in PISA 2012, following the logic in <span class="citation">Zwitser et al. (2017)</span>. Once we have read in the
+data and created the <strong>dexter</strong> database, as shown <a href="2018-08-21-dexter-meets-pisa-1">here</a>, this takes only several
+lines of code. Still, the article will be a bit longer as the market
+basket approach deserves some attention on its own. The market basket
+approach has been borrowed from economics – more precisely, from the
+study of inflation and purchasing power. To confuse matters further, the
+machine learning field has appropriated the term to denote something
+completely different – we can ignore this except that their version is
+the more likely to show up on top in a Google search. A market basket
+contains a mix of goods and services in given proportions that, by
+social consensus, mirrors the prevalent consumption patterns; the cost
+of obtaining it, in money or work time, can be compared across countries
+or over time. The idea is simple but the implementation is not trivial.
+In comparisons over time, the contents of the basket cannot remain
+constant forever. In the 1970s, your teenager vitally needed a cassette
+recorder, today it is a smartphone. The commodity that you buy –
+domestic peace – is the same, but the physical carrier has changed. In
 comparisons across countries or social groups, one may ask: whose
 basket? For example, the basket of older people contains mostly food and
 health care; minimal changes in the prices of these may be barely
@@ -1757,7 +1756,7 @@ item-total regressions drawn by Thurstone in 1925 to the graphs used
 routinely at ETS. He also provides examples (drawn from <span class="citation">Livingston and Dorans (2004)</span>) of items that are
 too easy, too difficult, or simply not appropriate for a given group of
 examinees. Let us also mention the computer program TestGraf98 (<span class="citation">Ramsay (2000)</span>) whose functionality has been
-reproduced in the R package, <strong>KernelSmoothIRT</strong> (<span class="citation">Mazza, Punzo, and McGuire (2014)</span>).
+reproduced in the R package, <strong>KernelSmoothIRT</strong> (<span class="citation">Mazza et al. (2014)</span>).
 </p>
 <p><a href="2018-08-07-distractor-plots-in-dexter">read more…</a></p>
 </div>
@@ -1778,7 +1777,7 @@ importing and managing test data, assessing and improving the quality of
 data through basic test and item analysis, and fitting an IRT model, all
 adapted to the peculiarities of MST designs. It is currently the only
 package that offers the possibility to calibrate item parameters from
-MST using Conditional Maximum Likelihood (CML) estimation <span class="citation">(R. Zwitser and Maris 2015)</span>.
+MST using Conditional Maximum Likelihood (CML) estimation <span class="citation">(Zwitser and Maris 2015)</span>.
 <strong>dexterMST</strong> will accept designs with any number of stages
 and modules, including combinations of linear and MST. The only
 limitation is that routing rules must be score-based and known before
@@ -1803,8 +1802,7 @@ first stage of a MST, all respondents take a <em>routing test</em>. In
 subsequent stages, the modules they are given depend on their success in
 previous modules: test takers with high scores are given more difficult
 modules, and those with low scores are given easier ones – see e.g.,
-<span class="citation">Zenisky, Hambleton, and Luecht (2009)</span>,
-<span class="citation">Hendrickson (2007)</span>, or <span class="citation">Yan, Lewis, and Davier (2014)</span>.
+<span class="citation">Zenisky et al. (2009)</span>, <span class="citation">Hendrickson (2007)</span>, or <span class="citation">Yan et al. (2014)</span>.
 </p>
 <p><a href="2018-07-13-dextermst">read more…</a></p>
 </div>
@@ -1989,7 +1987,7 @@ Netherlands, with subsidy from the Dutch Ministry of Education, Culture,
 and Science. Timo Bechger •
 </p>
 <p><a href="2017-12-13-hello">read more…</a></p>
-<div id="refs" class="references csl-bib-body hanging-indent" entry-spacing="0">
+<div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-BechgerMarisDIF" class="csl-entry">
 Bechger, Timo M., and Gunter Maris. 2015. <span>“A Statistical Test for
 Differential Item Pair Functioning.”</span> <em>Psychometrika</em> 80
@@ -2036,10 +2034,10 @@ Freedman Ellis, Greg, and Ben Schneider. 2021. <em>Srvyr: ’Dplyr’-Like
 Syntax for Summary Statistics of Survey Data</em>. <a href="https://CRAN.R-project.org/package=srvyr" class="external-link">https://CRAN.R-project.org/package=srvyr</a>.
 </div>
 <div id="ref-IM" class="csl-entry">
-Haberman, Shelby J. 2007. <span>“The Interaction Model.”</span> In
-<em>Multivariate and Mixture Distribution Rasch Models: Extensions and
-Applications</em>, edited by M. von Davier and C. H. Carstensen, 201–16.
-New York: Springer.
+Haberman, Shelby J. 2007. <span>“The Interaction Model.”</span> Chap. 13
+in <em>Multivariate and Mixture Distribution Rasch Models: Extensions
+and Applications</em>, edited by M. von Davier and C. H. Carstensen.
+Springer.
 </div>
 <div id="ref-hendrickson2007ncme" class="csl-entry">
 Hendrickson, Amy. 2007. <span>“An NCME Instructional Module on
@@ -2065,8 +2063,8 @@ Lumley, Thomas. 2004. <span>“Analysis of Complex Survey Samples.”</span>
 <em>Journal of Statistical Software</em> 9 (1): 1–19.
 </div>
 <div id="ref-lumley" class="csl-entry">
-———. 2010. <em>Complex Surveys: A Guide to Analysis Using r: A Guide to
-Analysis Using r</em>. John Wiley; Sons.
+Lumley, Thomas. 2010. <em>Complex Surveys: A Guide to Analysis Using r:
+A Guide to Analysis Using r</em>. John Wiley; Sons.
 </div>
 <div id="ref-dexter" class="csl-entry">
 Maris, Gunter, Timo Bechger, Jesse Koops, and Ivailo Partchev. 2018.
@@ -2096,10 +2094,10 @@ Measurement</em> 11 (1): 49–63.
 </div>
 <div id="ref-Moses2017" class="csl-entry">
 Moses, Tim. 2017. <span>“A Review of Developments and Applications in
-Item Analysis.”</span> In <em>Advancing Human Assessment: The
+Item Analysis.”</span> Chap. 2 in <em>Advancing Human Assessment: The
 Methodological, Psychological and Policy Contributions of
-<span>ETS</span></em>, edited by M. von Davier and C. H. Carstensen,
-19–46. New York: Springer.
+<span>ETS</span></em>, edited by M. von Davier and C. H. Carstensen.
+Springer.
 </div>
 <div id="ref-OECD2014" class="csl-entry">
 OECD. 2014. <span>“<span>PISA 2012: Technical Report</span>.”</span> <a href="http://www.oecd.org/pisa/pisaproducts/pisa2012technicalreport.htm" class="external-link">http://www.oecd.org/pisa/pisaproducts/pisa2012technicalreport.htm</a>.
@@ -2115,8 +2113,7 @@ Ponocny, Ivo. 2001. <span>“Nonparametric Goodness-of-Fit Tests for the
 </div>
 <div id="ref-R" class="csl-entry">
 R Development Core Team. 2005. <em>R: A Language and Environment for
-Statistical Computing</em>. Vienna, Austria: R Foundation for
-Statistical Computing. <a href="https://www.R-project.org" class="external-link">https://www.R-project.org</a>.
+Statistical Computing</em>. R Foundation for Statistical Computing. <a href="https://www.R-project.org" class="external-link">https://www.R-project.org</a>.
 </div>
 <div id="ref-TestGraf" class="csl-entry">
 Ramsay, J. O. 2000. <em><span>TestGraf</span>: A Program for the
@@ -2152,7 +2149,7 @@ Chapman &amp; Hall</em>.
 <div id="ref-zenisky2009" class="csl-entry">
 Zenisky, April, Ronald K Hambleton, and Richard M Luecht. 2009.
 <span>“Multistage Testing: Issues, Designs, and Research.”</span> In
-<em>Elements of Adaptive Testing</em>, 355–72. Springer.
+<em>Elements of Adaptive Testing</em>. Springer.
 </div>
 <div id="ref-ZwitserMaris2015" class="csl-entry">
 Zwitser, R., and G. Maris. 2015. <span>“Conditional Statistical
