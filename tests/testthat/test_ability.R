@@ -34,11 +34,10 @@ test_that('verbAgg abilities', {
   expect_lt(
     ability_tables(f) |>
       filter(is.finite(theta)) |>
-      mutate(error = abs(booklet_score - es(theta))) |>
-      pull(error) |>
-      mean(),
-    0.00001,
-    label = "ability_tables mle on average estimated to within .00001 of test_score")
+      summarise(error = max(abs(booklet_score - es(theta)))) |>
+      pull(error),
+    1e-8,
+    label = "ability_tables mle estimated to within 1e-8 of test_score")
   
   
   nscores = get_rules(db) |>
@@ -71,7 +70,7 @@ test_that('ability WLE compared to Norman theta', {
   load(test_path('testdata/theta.RData'))
   # test against theta-unweighted
 
-    a = ability_tables(item_param, design=design[sample(nrow(design)),], method='WLE')
+  a = ability_tables(item_param, design=design[sample(nrow(design)),], method='WLE')
   
   tst = inner_join(a,os_theta, by=c('booklet_id','booklet_score'))
   

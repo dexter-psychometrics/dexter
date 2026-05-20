@@ -41,6 +41,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Jesse Koops \email{jesse.koops@cito.nl}
   \item Gunter Maris
   \item Timo Bechger
   \item Ivailo Partchev

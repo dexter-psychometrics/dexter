@@ -55,6 +55,7 @@ fit_enorm = function(dataSrc, predicate = NULL, fixed_params = NULL, method=c("C
   qtpredicate = eval(substitute(quote(predicate)))
   env = rlang::caller_env()
   check_dataSrc(dataSrc)
+  check_param(fixed_params, nullable=TRUE)
 
   fit_enorm_(dataSrc, qtpredicate = qtpredicate, fixed_params = fixed_params,
              method=method, nDraws=nDraws, env=env, merge_within_persons=merge_within_persons)
@@ -101,7 +102,7 @@ fit_enorm_ = function(dataSrc, qtpredicate = NULL, fixed_params = NULL, method=c
     filter(is.finite(.data$theta))
   
   ss$method = method
-  output = list(est=result, inputs=ss,abl_tables = list(mle = mle))
+  output = list(est=result, inputs=ss, abl_tables = list(mle = mle), cache = new.env(parent = emptyenv()))
   
   class(output) = append('enorm', class(output)) 
   output
@@ -136,7 +137,8 @@ coef.prms = function(object, hpd = 0.95, what=c('items','var','posterior'), ...)
 #' @param hpd width of Bayesian highest posterior density interval around mean_beta, 
 #'  value must be between 0 and 1, default is 0.95 
 #' @param what which coefficients to return. Defaults to \code{items} (the item parameters). Can also be \code{var} for the 
-#' variance-covariance matrix (CML only) or \code{posterior} for all draws of the item parameters (Bayes only)  
+#' variance-covariance matrix  or \code{posterior} for random draws of the item parameters
+#' @param n_draws for CML parameters, the number of random draws when \code{what='posterior'}, for Bayesian item parameters this is ignored (all available draws are returned)
 #' @param ... further arguments to coef are ignored
 #'  
 #' @return 
@@ -153,7 +155,7 @@ coef.prms = function(object, hpd = 0.95, what=c('items','var','posterior'), ...)
 #' @details
 #' 
 #' The parametrisation of IRT models is far from uniform and depends on the author. Dexter uses the following parametrisation for the 
-#' extended Nominal Response Model (NRM):
+#' extended Nominal Response Model (eNRM):
 #' 
 #' \deqn{
 #' P(X=a_j|\beta,\theta) = \frac{\exp\left(a_j\theta-\sum_{g=1}^{j}\beta_g(a_g-a_{g-1})\right)}{1+\sum_h \exp\left(a_h\theta-\sum_{g=1}^{h}\beta_g(a_g-a_{g-1})\right)}
@@ -164,11 +166,11 @@ coef.prms = function(object, hpd = 0.95, what=c('items','var','posterior'), ...)
 #' For dichotomous items with \eqn{a_1=1} (i.e. the only possible scores are 0 and 1)
 #' this formula simplifies to the standard Rasch model: \eqn{P(x=1|\beta,\theta)=\frac{\exp(\theta-\beta)}{1+\exp(\theta-\beta)}}. For polytomous items, 
 #' when all scores are equal to the categories (i.e. \eqn{a_j=j} for all \eqn{j}) 
-#' the NRM is equal to the Partial Credit Model, although with a different parametrisation than is commonly used. 
-#' For dichotomous items and for all polytomous items where \eqn{a_j-a_{j-1}} is constant, the formulation is equal to the OPLM.
+#' the NRM is equal to the Partial Credit Model, although with a different parametrisation than is often used. 
+#' For dichotomous items and for all polytomous items where \eqn{a_j-a_{j-1}} is constant, the model and parametrisation is also equal to the OPLM.
 #' 
 #' 
-coef.enorm = function(object, hpd = 0.95, what=c('items','var','posterior'), ...)
+coef.enorm = function(object, hpd = 0.95, what=c('items','var','posterior'), n_draws=1000, ...)
 {
   x = object
   what = match.arg(what)
@@ -193,11 +195,11 @@ coef.enorm = function(object, hpd = 0.95, what=c('items','var','posterior'), ...
       if(hpd <= 0 ||  hpd >= 1)
         stop('hpd must be between 0 and 1')
       
-      hh = t(apply(x$est$beta,1,hpdens, conf=hpd))
-      atab=data.frame(item_id = x$inputs$ssIS$item_id,
+      hh = t(apply(x$est$beta,'items',hpdens, conf=hpd))
+      atab = data.frame(item_id = x$inputs$ssIS$item_id,
                       a = x$inputs$ssIS$item_score,
                       mb = rowMeans(x$est$beta),
-                      sdb = apply(x$est$beta, 1, sd),
+                      sdb = apply(x$est$beta, 'items', sd),
                       hpdl = hh[,1], hpdr=hh[,2],stringsAsFactors=FALSE)
       colnames(atab)=c("item_id" ,"item_score", "mean_beta", "SD_beta", 
                        sprintf("%i_hpd_b_left", round(100 * hpd)),
@@ -217,12 +219,15 @@ coef.enorm = function(object, hpd = 0.95, what=c('items','var','posterior'), ...
     return(m)
   } else if(what=='posterior')
   {
-    #if(x$inputs$method!="Bayes")
-    #  stop('The posterior of item parameters is only available for Bayesian estimation')
     if(x$inputs$method == "Bayes")
       m = x$est$beta
-    else # to do: experimental, 1000 draws hardcoded
-      m = t(rmvnorm(1000, mu=object$est$beta, sigma = object$est$acov.beta ))
+    else 
+    {
+      if(is.null(object$cache$R_beta)) object$cache$R_beta = get_sigma_decomp(object$est$acov.beta)
+      
+      m = t(rmvnorm(n_draws,mu=object$est$beta, sigma = object$est$acov.beta, R = object$cache$R_beta))
+    }
+      
     
     rownames(m) = paste(x$inputs$ssIS$item_id, x$inputs$ssIS$item_score)
     return(m)
@@ -268,7 +273,7 @@ logL = function(parms, mean_gibbs=FALSE)
   }
   if(is.matrix(b))
   {
-    apply(b,2, llb)
+    apply(b,'draws', llb)
   } else
   {
     llb(b)
@@ -597,7 +602,8 @@ calibrate_Bayes = function(ss,  nIter, fixed_params=NULL,
                                  as.integer(nIter), pb$cpp_prog_init(), ncores,
                                  prior_eta, prior_rho, prior_nu)
 
-
+  dimnames(out$b) = list(items = paste(ss$ssIS$item_id, ss$ssIS$item_score), 
+                         draws=NULL)
   
   
   report = toOPLM(ss$ssIS$item_score, out$b, ss$ssI$first, ss$ssI$last, H=NULL,method='Bayes',fixed_b=fixed_b)

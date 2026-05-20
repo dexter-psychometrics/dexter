@@ -101,7 +101,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, use=c(
   
   pb$tick(2*ndomains)
   
-  pv = matrix(NA_real_,np,ndomains)
+  pv = matrix(NA_real_,np,ndomains, dimnames=list(persons=NULL,draws=NULL))
   
   reliab = rep(0,ndomains)
   sd_pv = rep(0,ndomains)
@@ -128,7 +128,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, use=c(
       acor[j,i] = acor[i,j]
     }
   }
-  # reverse attenuation if result is invalid
+  # rollback attenuation if result is invalid
   if(any(abs(acor)>1))
     acor = raw_cor
   
@@ -146,7 +146,7 @@ latent_cor = function(dataSrc, item_property, predicate=NULL, nDraws=500, use=c(
   
   mcmc = array(0, dim = c(length(which.keep), ndomains, ndomains))
   tel = 1
-  missing_data = if(use=='complete.obs') matrix(0L,ncol=ncol(pv),nrow=1) else apply(pv,2,is.na) + 0L
+  missing_data = if(use=='complete.obs') matrix(0L,ncol=ncol(pv),nrow=1) else apply(pv,'draws',is.na) + 0L
   
   #impute missing
   pv = mice(pv,acor) 
@@ -405,14 +405,3 @@ nearPD = function (x,  eig.tol = 1e-06, conv.tol = 1e-07, posd.tol = 1e-08, maxi
   X
 }
 
-
-rmvnorm = function(n, mu, sigma)
-{
-  # this is _not_ faster in armadillo
-  ev = eigen(sigma, symmetric = TRUE)
-  R = t(ev$vectors %*% (t(ev$vectors) * sqrt(pmax(ev$values, 0))))
-  res = matrix(rnorm(n * ncol(sigma)), nrow = n, byrow = TRUE) %*% R
-  res = sweep(res, 2, mu, "+")
-  colnames(res) = names(mu)
-  res
-}

@@ -30,7 +30,6 @@ Imports:
     methods,
     utils
 LinkingTo: Rcpp, RcppArmadillo (>= 0.12.6.6.0), dqrng, BH
-RoxygenNote: 7.3.3
 Suggests:
     knitr,
     rmarkdown,
@@ -40,3 +39,4 @@ Suggests:
     cli,
     parallel
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0

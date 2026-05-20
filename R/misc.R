@@ -1,4 +1,3 @@
-# common utility functions
 
 #' Dexter: data analyses for educational and psychological tests.
 #' 

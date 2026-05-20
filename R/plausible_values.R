@@ -279,7 +279,7 @@ plausible_values_ = function(dataSrc, parms=NULL, qtpredicate=NULL, covariates=N
   }
   if(inherits(parms,'data.frame') && link_error)
   {
-    message('link_error acnnot be used with a data.frame of parameters, setting `link_error = FALSE`')
+    message('link_error cannot be used with a data.frame of parameters, setting `link_error = FALSE`')
   }
   
 

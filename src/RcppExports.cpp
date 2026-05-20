@@ -43,8 +43,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // theta_wmle_c
-Rcpp::List theta_wmle_c(const arma::mat& b, const arma::ivec& a, arma::ivec& first, arma::ivec& last, const arma::ivec& bk_nit, const bool WLE, const int n_cores);
-RcppExport SEXP _dexter_theta_wmle_c(SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP bk_nitSEXP, SEXP WLESEXP, SEXP n_coresSEXP) {
+Rcpp::List theta_wmle_c(const arma::mat& b, const arma::ivec& a, arma::ivec& first, arma::ivec& last, const arma::ivec& bk_nit, const bool WLE, const bool theta_combined, const int n_cores);
+RcppExport SEXP _dexter_theta_wmle_c(SEXP bSEXP, SEXP aSEXP, SEXP firstSEXP, SEXP lastSEXP, SEXP bk_nitSEXP, SEXP WLESEXP, SEXP theta_combinedSEXP, SEXP n_coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -54,8 +54,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::ivec& >::type last(lastSEXP);
     Rcpp::traits::input_parameter< const arma::ivec& >::type bk_nit(bk_nitSEXP);
     Rcpp::traits::input_parameter< const bool >::type WLE(WLESEXP);
+    Rcpp::traits::input_parameter< const bool >::type theta_combined(theta_combinedSEXP);
     Rcpp::traits::input_parameter< const int >::type n_cores(n_coresSEXP);
-    rcpp_result_gen = Rcpp::wrap(theta_wmle_c(b, a, first, last, bk_nit, WLE, n_cores));
+    rcpp_result_gen = Rcpp::wrap(theta_wmle_c(b, a, first, last, bk_nit, WLE, theta_combined, n_cores));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -768,7 +769,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_dexter_ML_theta_c", (DL_FUNC) &_dexter_ML_theta_c, 5},
     {"_dexter_deriv_theta_c", (DL_FUNC) &_dexter_deriv_theta_c, 6},
-    {"_dexter_theta_wmle_c", (DL_FUNC) &_dexter_theta_wmle_c, 7},
+    {"_dexter_theta_wmle_c", (DL_FUNC) &_dexter_theta_wmle_c, 8},
     {"_dexter_theta_jeap_c", (DL_FUNC) &_dexter_theta_jeap_c, 7},
     {"_dexter_theta_eap_c", (DL_FUNC) &_dexter_theta_eap_c, 8},
     {"_dexter_weighted_binning", (DL_FUNC) &_dexter_weighted_binning, 2},

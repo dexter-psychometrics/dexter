@@ -9,8 +9,8 @@ deriv_theta_c <- function(theta, b, a, first, last, n_cores = 1L) {
     .Call(`_dexter_deriv_theta_c`, theta, b, a, first, last, n_cores)
 }
 
-theta_wmle_c <- function(b, a, first, last, bk_nit, WLE, n_cores = 1L) {
-    .Call(`_dexter_theta_wmle_c`, b, a, first, last, bk_nit, WLE, n_cores)
+theta_wmle_c <- function(b, a, first, last, bk_nit, WLE, theta_combined = TRUE, n_cores = 1L) {
+    .Call(`_dexter_theta_wmle_c`, b, a, first, last, bk_nit, WLE, theta_combined, n_cores)
 }
 
 theta_jeap_c <- function(grid, b, a, first, last, bk_nit, n_cores = 1L) {

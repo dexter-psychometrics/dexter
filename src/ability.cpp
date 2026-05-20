@@ -119,7 +119,7 @@ double Escore_bk(const double theta, const vec& b, const ivec& a, int* first,  i
 }
 
 
-Rcpp::List theta_output(mat& theta, mat& se, const ivec& bk_maxs, const ivec& bk_start, const int nbk, const bool add_inf=false)
+Rcpp::List theta_output(mat& theta, mat& se, const ivec& bk_maxs, const ivec& bk_start, const int nbk, const bool add_inf=false, const bool theta_combined=true)
 {
 	const int ndraws=theta.n_cols, nscores=theta.n_rows;
 	
@@ -134,7 +134,7 @@ Rcpp::List theta_output(mat& theta, mat& se, const ivec& bk_maxs, const ivec& bk
 		}
 	}
 	
-	if(ndraws>1)
+	if(ndraws>1 && theta_combined)
 	{
 		se.col(0) = sqrt(ndraws/(ndraws-1) * var(theta,0,1) + mean(square(se),1));		
 		theta.col(0) = mean(theta,1);		
@@ -144,20 +144,23 @@ Rcpp::List theta_output(mat& theta, mat& se, const ivec& bk_maxs, const ivec& bk
 	{
 		for(int bk=0; bk<nbk; bk++)
 		{
-			theta.at(bk_start[bk]) = -1 * datum::inf;
-			theta.at(bk_start[bk] + bk_maxs[bk],0) = datum::inf;
-			se.at(bk_start[bk],0) = NA_REAL;
-			se.at(bk_start[bk] + bk_maxs[bk], 0) = NA_REAL;
+			theta.row(bk_start[bk]).fill(-1 * datum::inf);
+			theta.row(bk_start[bk] + bk_maxs[bk]).fill(datum::inf);
+			se.row(bk_start[bk]).fill(NA_REAL);
+			se.row(bk_start[bk] + bk_maxs[bk]).fill(NA_REAL);
 		}
 	}
-	return Rcpp::List::create(Named("booklet") = booklet, Named("booklet_score") = scores, Named("theta") = theta.col(0), Named("se") = se.col(0));
+	if(theta_combined)
+		return Rcpp::List::create(Named("booklet") = booklet, Named("booklet_score") = scores, Named("theta") = theta.col(0), Named("se") = se.col(0));
+	else
+		return Rcpp::List::create(Named("booklet") = booklet, Named("booklet_score") = scores, Named("theta") = theta, Named("se") = se);
 }
 
 
 template<bool WLE>
 Rcpp::List theta_wmle(const arma::mat& b, const arma::ivec& a, 
 						arma::ivec& first, arma::ivec& last,
-						const arma::ivec& bk_nit, const int n_cores=1)
+						const arma::ivec& bk_nit, const bool theta_combined, const int n_cores=1)
 {
 	const int max_iter = 200;
 	const double acc = 1e-8;
@@ -256,19 +259,20 @@ Rcpp::List theta_wmle(const arma::mat& b, const arma::ivec& a,
 	}
 }
 
-	return theta_output(theta, se, bk_maxs, bk_cnscores, nbk, !WLE);
+	return theta_output(theta, se, bk_maxs, bk_cnscores, nbk, !WLE, theta_combined);
 }
 
 // [[Rcpp::export]]
 Rcpp::List theta_wmle_c(const arma::mat& b, const arma::ivec& a, 
 						arma::ivec& first, arma::ivec& last,
 						const arma::ivec& bk_nit, const bool WLE,
+						const bool theta_combined=true,
 						const int n_cores=1)
 {
 	if(WLE)
-		return theta_wmle<true>(b, a, first, last, bk_nit, n_cores);
+		return theta_wmle<true>(b, a, first, last, bk_nit, theta_combined, n_cores);
 	else
-		return theta_wmle<false>(b, a, first, last, bk_nit, n_cores);
+		return theta_wmle<false>(b, a, first, last, bk_nit, theta_combined, n_cores);
 }
 
 

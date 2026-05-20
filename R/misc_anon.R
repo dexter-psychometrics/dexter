@@ -1,23 +1,46 @@
 
 
+rmvnorm = function(n, mu, sigma, R=NULL)
+{
+  if(is.null(R)) R = get_sigma_decomp(sigma)
+  res = matrix(rnorm(n * ncol(sigma)), nrow = n, byrow = TRUE) %*% R
+  res = sweep(res, 2, mu, "+")
+  colnames(res) = names(mu)
+  res
+}
+
+get_sigma_decomp = function(sigma)
+{
+  ev = eigen(sigma, symmetric = TRUE)
+  t(ev$vectors %*% (t(ev$vectors) * sqrt(pmax(ev$values, 0))))
+}
+
+
 # Expected distribution given a vector theta
 # return matrix, ncol=length(theta), nrow=nscores
 pscore = function(theta, b, a, first, last)
 {
-  g = elsymC(b, a, first-1L, last-1L)
-  score = 0:(length(g)-1)
-  p = sapply(theta, function(tht) log(g) + score*tht)
-  
-  exp(sweep(p,2,apply(p,2,logsumexp),`-`))
+  pscore_lgamma(theta, log(elsymC(b, a, first-1L, last-1L)))
 }
 
 # lg: log elsym
+# returns matrix, rows reflect the score range, columns are theta
 pscore_lgamma = function(theta, lg)
 {
   score = 0:(length(lg)-1)
   p = sapply(theta, function(tht) lg + score*tht)
   
-  exp(sweep(p,2,apply(p,2,logsumexp),`-`))
+  dimnames(p) = list('score'=NULL,'theta'=NULL)
+  
+  p = exp(sweep(p,'theta',apply(p,'theta',logsumexp),`-`))
+  
+  if(!all(is.finite(theta)))
+  {
+    p[,!is.finite(theta) & theta>0] = rep(0:1, c(nrow(p)-1,1))
+    p[,!is.finite(theta) & theta<0] = rep(1:0, c(1,nrow(p)-1))
+  }
+  
+  p
 }
 
 # sample scores under the enorm

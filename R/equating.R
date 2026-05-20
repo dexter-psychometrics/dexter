@@ -156,7 +156,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
                     pv_res=spv, max_cores=max_cores, n_updates=20L)
         
         prf = pscore(spv, ref_parms$b[,iter],ref_parms$a,ref_parms$design$first,ref_parms$design$last)
-        probs[,tel] = apply(prf, 2, function(x) sum(x[ref_range]))
+        probs[,tel] = apply(prf, 'theta', function(x) sum(x[ref_range]))
         tel=tel+1
         pb$tick()
       }
@@ -179,7 +179,7 @@ probability_to_pass = function(dataSrc, parms, ref_items, pass_fail, predicate =
                     pv_res=spv, max_cores=max_cores, n_updates=20L)
         
         prf = pscore_lgamma(spv, lgamma_ref)
-        probs[,iter] = apply(prf, 2, function(x) sum(x[ref_range]))
+        probs[,iter] = apply(prf, 'theta', function(x) sum(x[ref_range]))
         pb$tick()
       }
     }

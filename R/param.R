@@ -66,11 +66,14 @@ simplify_parms = function(parms, design=NULL, draw = c('sample','average'), by_c
         b = parms$est$b
       } else
       {
-        beta = t(rmvnorm(cml_draws, mu=parms$est$beta, sigma = parms$est$acov.beta ))
-        
-        if(!any(diag(parms$est$acov.beta)==0)) beta = apply(beta,2,\(x) x - mean(x))
+        if(is.null(parms$cache$R_beta)) parms$cache$R_beta = get_sigma_decomp(parms$est$acov.beta)
+          
+        beta = t(rmvnorm(cml_draws, mu=parms$est$beta, sigma = parms$est$acov.beta, R = parms$cache$R_beta))
+        dimnames(beta) = list('items'=NULL,'draws'=NULL)
+        # if no fixed parameters, normalize
+        if(!any(diag(parms$est$acov.beta)==0)) beta = apply(beta,'draws',\(x) x - mean(x))
 
-        b = apply(beta,2,\(beta) beta2b(a, beta, parms$inputs$ssI$first, parms$inputs$ssI$last))
+        b = apply(beta,'draws',\(beta) beta2b(a, beta, parms$inputs$ssI$first, parms$inputs$ssI$last))
       }
       
     } else if(is.numeric(draw)) 
@@ -210,10 +213,38 @@ fixed_param2df = function(fixed_params, design)
 }
 
 
+check_param = function(parms, nullable=TRUE, name = deparse(substitute(parms)))
+{
+  if(is.null(parms) && nullable) return(NULL)
+  if(inherits(parms,c('prms','enorm'))) return(NULL)
+  if(!inherits(parms,'data.frame')) stop_(paste(name, 'must be an `enorm` object or a data.frame', if.else(nullable, 'or NULL','')))
+  
+  colnames(parms) = tolower(colnames(parms))
+  diff_par = intersect(colnames(parms), c('b','beta','eta','delta'))
+  if(length(diff_par) == 0)
+    stop_('parameters must contain a difficulty parameter beta')
+  
+  check_df(parms, columns=c('item_id','item_score'), name=name)
+  
+  if(any(parms$item_score %% 1 > 0))
+    stop_("column 'item_score' must be integer valued")
+  
+  if(n_distinct(parms$item_id, parms$item_score) < nrow(parms))
+    stop_('multiple parameters supplied for the same item and score')
+  
+  if(any(parms$item_score <= 0))
+    stop_("Items scores of 0 or less are not supported")
+  
+  if(diff_par == 'b' && any(parms[['b']] <= 0))
+    stop("A 'b' parameter cannot be negative, perhaps you meant to include a 'beta' parameter?")
+
+}
+
 
 transform.df.parms = function(parms.df, out.format = c('b','beta','eta'))
 {
   out.format = match.arg(out.format)
+  check_param(parms.df)
   colnames(parms.df) = tolower(colnames(parms.df))
   parms.df = ungroup(parms.df)
   
@@ -221,30 +252,11 @@ transform.df.parms = function(parms.df, out.format = c('b','beta','eta'))
     parms.df = rename(parms.df, beta = 'delta')
   in.format = intersect(colnames(parms.df), c('b','beta','eta'))
   
-  if(length(in.format) == 0)
-    stop('parameters must contain  one of: b, beta, eta')
-  
   if(length(in.format)>1)
   {
     in.format = in.format[1]
     message(paste0("Using '",in.format,"' as input parameter"))
   }
-  
-  if(!all(c('item_id','item_score') %in% colnames(parms.df)))
-    stop('parameters must contain the columns: item_id, item_score')
-  
-  if(any(parms.df$item_score%%1 > 0))
-    stop("column 'item_score' must be integer valued")
-  
-  if(n_distinct(parms.df$item_id, parms.df$item_score) < nrow(parms.df))
-    stop('multiple parameters supplied for the same item and score')
-  
-  
-  if(any(parms.df$item_score <= 0))
-    stop("Items scores of 0 or less are not supported")
-  
-  if(in.format == 'b' && any(parms.df$b <= 0))
-    stop("A 'b' parameter cannot be negative, perhaps you meant to include a 'beta' parameter?")
   
   parms.df$item_id = as.character(parms.df$item_id)
   parms.df$item_score = as.integer(parms.df$item_score)
@@ -340,7 +352,7 @@ makeD = function(a,first,last)
 # copied from previous dexter version, just removed the part that removes the 0 cat
 toOPLM = function(a, b, first, last, H=NULL, fixed_b=NULL, method=c('CML','Bayes'))
 {
-  b_rn = b
+  b_renorm = b
   a_org = a
 
   logb = log(b)
@@ -368,7 +380,7 @@ toOPLM = function(a, b, first, last, H=NULL, fixed_b=NULL, method=c('CML','Bayes
       if (is.null(fixed_b))
       {
         mean_beta = mean(beta[,draw])
-        b_rn[,draw] = b_rn[,draw]*exp(mean_beta*a_org)
+        b_renorm[,draw] = b_renorm[,draw]*exp(mean_beta*a_org)
         beta[,draw] = beta[,draw] - mean_beta ## mean center
       }
     }
@@ -379,7 +391,7 @@ toOPLM = function(a, b, first, last, H=NULL, fixed_b=NULL, method=c('CML','Bayes
     if (is.null(fixed_b))
     {
       beta = DD%*%logb
-      b_rn = b_rn*exp(mean(beta)*a_org) # re-normalize b such that it corresponds to beta
+      b_renorm = b_renorm*exp(mean(beta)*a_org) # re-normalize b such that it corresponds to beta
       k  = length(b)
       CC = matrix(-1/k,k,k)
       diag(CC)=(k-1)/k
@@ -400,7 +412,7 @@ toOPLM = function(a, b, first, last, H=NULL, fixed_b=NULL, method=c('CML','Bayes
       }
     }
   }  
-  return(list(beta=beta, cov.beta=cov.beta, a=a, b_renorm = b_rn, first=first, last=last))
+  return(list(beta=beta, cov.beta=cov.beta, a=a, b_renorm = b_renorm, first=first, last=last))
 }
 
 
