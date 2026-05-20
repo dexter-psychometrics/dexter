@@ -88,7 +88,16 @@
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'enorm'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">object</span>, hpd <span class="op">=</span> <span class="fl">0.95</span>, what <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"items"</span>, <span class="st">"var"</span>, <span class="st">"posterior"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span></span>
+<span>  <span class="va">object</span>,</span>
+<span>  hpd <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  what <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"items"</span>, <span class="st">"var"</span>, <span class="st">"posterior"</span><span class="op">)</span>,</span>
+<span>  n_draws <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'enorm'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -106,7 +115,11 @@ value must be between 0 and 1, default is 0.95</p></dd>
 
 <dt id="arg-what">what<a class="anchor" aria-label="anchor" href="#arg-what"></a></dt>
 <dd><p>which coefficients to return. Defaults to <code>items</code> (the item parameters). Can also be <code>var</code> for the
-variance-covariance matrix (CML only) or <code>posterior</code> for all draws of the item parameters (Bayes only)</p></dd>
+variance-covariance matrix  or <code>posterior</code> for random draws of the item parameters</p></dd>
+
+
+<dt id="arg-n-draws">n_draws<a class="anchor" aria-label="anchor" href="#arg-n-draws"></a></dt>
+<dd><p>for CML parameters, the number of random draws when <code>what='posterior'</code>, for Bayesian item parameters this is ignored (all available draws are returned)</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -129,7 +142,7 @@ respectively.</p>
     <div id="details">
     <h2>Details</h2>
     <p>The parametrisation of IRT models is far from uniform and depends on the author. Dexter uses the following parametrisation for the
-extended Nominal Response Model (NRM):</p>
+extended Nominal Response Model (eNRM):</p>
 <p>$$
 P(X=a_j|\beta,\theta) = \frac{\exp\left(a_j\theta-\sum_{g=1}^{j}\beta_g(a_g-a_{g-1})\right)}{1+\sum_h \exp\left(a_h\theta-\sum_{g=1}^{h}\beta_g(a_g-a_{g-1})\right)}
 $$</p>
@@ -137,8 +150,8 @@ $$</p>
 <p>For dichotomous items with \(a_1=1\) (i.e. the only possible scores are 0 and 1)
 this formula simplifies to the standard Rasch model: \(P(x=1|\beta,\theta)=\frac{\exp(\theta-\beta)}{1+\exp(\theta-\beta)}\). For polytomous items,
 when all scores are equal to the categories (i.e. \(a_j=j\) for all \(j\))
-the NRM is equal to the Partial Credit Model, although with a different parametrisation than is commonly used.
-For dichotomous items and for all polytomous items where \(a_j-a_{j-1}\) is constant, the formulation is equal to the OPLM.</p>
+the NRM is equal to the Partial Credit Model, although with a different parametrisation than is often used.
+For dichotomous items and for all polytomous items where \(a_j-a_{j-1}\) is constant, the model and parametrisation is also equal to the OPLM.</p>
     </div>
 
   </div>
