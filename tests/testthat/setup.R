@@ -1,6 +1,7 @@
 
 
 library(dplyr)
+library(tidyr)
 
 
 verbAggCopy = function(pth = test_path('testdata/verbAggression.db'))
@@ -13,6 +14,7 @@ verbAggCopy = function(pth = test_path('testdata/verbAggression.db'))
   close_project(db)
   return(con)
 }
+
 
 df_join_equal = function(..., join_by, tol_double=1e-10)
 {
