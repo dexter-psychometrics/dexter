@@ -1,5 +1,6 @@
 
-fixes a crash in a special circumstance
+in response to email form Prof Brian Ripley requesting to 
 
-kind regards,
-Jesse
+Please correct before 2026-08-07 to safely retain your package on CRAN
+
+My apologies for the mistake
